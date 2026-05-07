@@ -1,0 +1,576 @@
+{
+  "units": [
+    {
+      "name": "Piece",
+      "abbreviation": "pc"
+    },
+    {
+      "name": "Set",
+      "abbreviation": "set"
+    },
+    {
+      "name": "Pair",
+      "abbreviation": "pair"
+    },
+    {
+      "name": "Liter",
+      "abbreviation": "L"
+    },
+    {
+      "name": "Bottle",
+      "abbreviation": "btl"
+    },
+    {
+      "name": "Can",
+      "abbreviation": "can"
+    }
+  ],
+  "categories": [
+    {
+      "name": "Lubricants",
+      "description": "Engine oils and lubrication products."
+    },
+    {
+      "name": "Fluids",
+      "description": "Service fluids such as brake fluid, coolant, and ATF."
+    },
+    {
+      "name": "Filters",
+      "description": "Oil, air, and cabin filters."
+    },
+    {
+      "name": "Brake System",
+      "description": "Brake pads, shoes, and related parts."
+    },
+    {
+      "name": "Ignition",
+      "description": "Spark plugs and ignition service parts."
+    },
+    {
+      "name": "Electrical",
+      "description": "Batteries and electrical service parts."
+    },
+    {
+      "name": "Wiper System",
+      "description": "Wiper blades and related consumables."
+    },
+    {
+      "name": "Consumables",
+      "description": "Workshop-use consumables for routine services."
+    }
+  ],
+  "brands": [
+    {
+      "name": "Motul",
+      "description": "Lubricants and fluids."
+    },
+    {
+      "name": "Shell",
+      "description": "Lubricants and service fluids."
+    },
+    {
+      "name": "Castrol",
+      "description": "Lubricants and transmission fluids."
+    },
+    {
+      "name": "Toyota Genuine Parts",
+      "description": "OEM parts and fluids."
+    },
+    {
+      "name": "VIC",
+      "description": "Filtration products."
+    },
+    {
+      "name": "Bosch",
+      "description": "Brake, filter, and electrical parts."
+    },
+    {
+      "name": "Denso",
+      "description": "Filters and service parts."
+    },
+    {
+      "name": "NGK",
+      "description": "Ignition products."
+    },
+    {
+      "name": "Brembo",
+      "description": "Brake components."
+    },
+    {
+      "name": "Amaron",
+      "description": "Automotive batteries."
+    }
+  ],
+  "suppliers": [
+    {
+      "supplier_name": "Starter Lubricants Supplier",
+      "contact_person": "Catalog Seed",
+      "contact_number": null,
+      "email": null,
+      "address": null,
+      "payment_terms": "COD",
+      "notes": "Seeded starter supplier for lubricants and fluids."
+    },
+    {
+      "supplier_name": "Starter Parts Supplier",
+      "contact_person": "Catalog Seed",
+      "contact_number": null,
+      "email": null,
+      "address": null,
+      "payment_terms": "COD",
+      "notes": "Seeded starter supplier for filters and brake parts."
+    },
+    {
+      "supplier_name": "Starter Electrical Supplier",
+      "contact_person": "Catalog Seed",
+      "contact_number": null,
+      "email": null,
+      "address": null,
+      "payment_terms": "COD",
+      "notes": "Seeded starter supplier for batteries and electrical items."
+    }
+  ],
+  "services": [
+    {
+      "name": "PMS - Oil Change",
+      "category": "Preventive Maintenance",
+      "description": "Basic oil change labor with quick visual inspection.",
+      "labor_price": 350,
+      "estimated_duration_minutes": 30
+    },
+    {
+      "name": "PMS - Oil Change and Filter Replacement",
+      "category": "Preventive Maintenance",
+      "description": "Oil and oil filter replacement labor.",
+      "labor_price": 550,
+      "estimated_duration_minutes": 45
+    },
+    {
+      "name": "Air Filter Replacement",
+      "category": "Preventive Maintenance",
+      "description": "Labor for replacing the engine air filter.",
+      "labor_price": 180,
+      "estimated_duration_minutes": 20
+    },
+    {
+      "name": "Cabin Filter Replacement",
+      "category": "Preventive Maintenance",
+      "description": "Labor for replacing the cabin air filter.",
+      "labor_price": 220,
+      "estimated_duration_minutes": 25
+    },
+    {
+      "name": "Spark Plug Replacement",
+      "category": "Engine and Ignition",
+      "description": "Labor for replacing spark plugs.",
+      "labor_price": 480,
+      "estimated_duration_minutes": 45
+    },
+    {
+      "name": "Engine Tune-Up",
+      "category": "Engine and Ignition",
+      "description": "Basic tune-up and performance check labor.",
+      "labor_price": 950,
+      "estimated_duration_minutes": 90
+    },
+    {
+      "name": "Brake Cleaning and Adjustment",
+      "category": "Brake Service",
+      "description": "Brake cleaning, inspection, and adjustment labor.",
+      "labor_price": 550,
+      "estimated_duration_minutes": 45
+    },
+    {
+      "name": "Front Brake Pad Replacement",
+      "category": "Brake Service",
+      "description": "Labor for replacing front brake pads.",
+      "labor_price": 850,
+      "estimated_duration_minutes": 60
+    },
+    {
+      "name": "Rear Brake Shoe Replacement",
+      "category": "Brake Service",
+      "description": "Labor for replacing rear brake shoes.",
+      "labor_price": 950,
+      "estimated_duration_minutes": 75
+    },
+    {
+      "name": "Brake Fluid Flush",
+      "category": "Fluid Service",
+      "description": "Brake fluid bleeding and replacement labor.",
+      "labor_price": 650,
+      "estimated_duration_minutes": 50
+    },
+    {
+      "name": "Coolant Flush",
+      "category": "Fluid Service",
+      "description": "Drain, flush, and refill radiator coolant labor.",
+      "labor_price": 850,
+      "estimated_duration_minutes": 60
+    },
+    {
+      "name": "Automatic Transmission Fluid Replacement",
+      "category": "Fluid Service",
+      "description": "ATF replacement labor.",
+      "labor_price": 950,
+      "estimated_duration_minutes": 70
+    },
+    {
+      "name": "CVT Fluid Replacement",
+      "category": "Fluid Service",
+      "description": "CVT fluid replacement labor.",
+      "labor_price": 1050,
+      "estimated_duration_minutes": 75
+    },
+    {
+      "name": "Wheel Alignment",
+      "category": "Tire and Wheel",
+      "description": "Four-wheel alignment service labor.",
+      "labor_price": 850,
+      "estimated_duration_minutes": 60
+    },
+    {
+      "name": "Wheel Balancing",
+      "category": "Tire and Wheel",
+      "description": "Wheel balancing labor for a standard passenger vehicle set.",
+      "labor_price": 650,
+      "estimated_duration_minutes": 45
+    },
+    {
+      "name": "Tire Rotation",
+      "category": "Tire and Wheel",
+      "description": "Cross rotation of all four tires.",
+      "labor_price": 350,
+      "estimated_duration_minutes": 30
+    },
+    {
+      "name": "Battery Health Check",
+      "category": "Electrical",
+      "description": "Battery and charging system check.",
+      "labor_price": 180,
+      "estimated_duration_minutes": 20
+    },
+    {
+      "name": "Aircon Cleaning",
+      "category": "Air Conditioning",
+      "description": "Basic evaporator and cabin air path cleaning labor.",
+      "labor_price": 1500,
+      "estimated_duration_minutes": 120
+    },
+    {
+      "name": "Underchassis Inspection",
+      "category": "Inspection",
+      "description": "Routine underchassis inspection and report.",
+      "labor_price": 250,
+      "estimated_duration_minutes": 20
+    }
+  ],
+  "products": [
+    {
+      "name": "Motul 8100 5W-30 Full Synthetic Engine Oil",
+      "sku": "SEED-LUBE-001",
+      "category": "Lubricants",
+      "brand": "Motul",
+      "supplier": "Starter Lubricants Supplier",
+      "unit": "Liter",
+      "part_number": "MOT-8100-5W30-L",
+      "oem_number": null,
+      "description": "Per-liter full synthetic engine oil for gasoline engines.",
+      "product_type": "fluid",
+      "cost_price": 420,
+      "selling_price": 560,
+      "reorder_level": 0,
+      "warranty_duration_days": null,
+      "shelf_location": "LUBE-A1"
+    },
+    {
+      "name": "Shell Helix HX7 10W-40 Semi-Synthetic Engine Oil",
+      "sku": "SEED-LUBE-002",
+      "category": "Lubricants",
+      "brand": "Shell",
+      "supplier": "Starter Lubricants Supplier",
+      "unit": "Liter",
+      "part_number": "SHELL-HX7-10W40-L",
+      "oem_number": null,
+      "description": "Per-liter semi-synthetic engine oil for daily-use vehicles.",
+      "product_type": "fluid",
+      "cost_price": 300,
+      "selling_price": 420,
+      "reorder_level": 0,
+      "warranty_duration_days": null,
+      "shelf_location": "LUBE-A2"
+    },
+    {
+      "name": "Shell Rimula R4X 15W-40 Diesel Engine Oil",
+      "sku": "SEED-LUBE-003",
+      "category": "Lubricants",
+      "brand": "Shell",
+      "supplier": "Starter Lubricants Supplier",
+      "unit": "Liter",
+      "part_number": "RIMULA-R4X-15W40-L",
+      "oem_number": null,
+      "description": "Per-liter diesel engine oil for light commercial vehicles.",
+      "product_type": "fluid",
+      "cost_price": 260,
+      "selling_price": 360,
+      "reorder_level": 0,
+      "warranty_duration_days": null,
+      "shelf_location": "LUBE-A3"
+    },
+    {
+      "name": "Castrol ATF Dexron III",
+      "sku": "SEED-FLUID-001",
+      "category": "Fluids",
+      "brand": "Castrol",
+      "supplier": "Starter Lubricants Supplier",
+      "unit": "Liter",
+      "part_number": "CASTROL-ATF-D3-L",
+      "oem_number": null,
+      "description": "Automatic transmission fluid sold per liter.",
+      "product_type": "fluid",
+      "cost_price": 240,
+      "selling_price": 350,
+      "reorder_level": 0,
+      "warranty_duration_days": null,
+      "shelf_location": "FLUID-B1"
+    },
+    {
+      "name": "Toyota CVT Fluid FE",
+      "sku": "SEED-FLUID-002",
+      "category": "Fluids",
+      "brand": "Toyota Genuine Parts",
+      "supplier": "Starter Lubricants Supplier",
+      "unit": "Liter",
+      "part_number": "TOYOTA-CVT-FE-L",
+      "oem_number": null,
+      "description": "CVT transmission fluid sold per liter.",
+      "product_type": "fluid",
+      "cost_price": 380,
+      "selling_price": 520,
+      "reorder_level": 0,
+      "warranty_duration_days": null,
+      "shelf_location": "FLUID-B2"
+    },
+    {
+      "name": "Bosch Brake Fluid DOT 3",
+      "sku": "SEED-FLUID-003",
+      "category": "Fluids",
+      "brand": "Bosch",
+      "supplier": "Starter Lubricants Supplier",
+      "unit": "Bottle",
+      "part_number": "BOSCH-DOT3-450ML",
+      "oem_number": null,
+      "description": "Brake fluid bottle for routine brake service.",
+      "product_type": "fluid",
+      "cost_price": 110,
+      "selling_price": 180,
+      "reorder_level": 0,
+      "warranty_duration_days": null,
+      "shelf_location": "FLUID-B3"
+    },
+    {
+      "name": "Toyota Super Long Life Coolant Premix",
+      "sku": "SEED-FLUID-004",
+      "category": "Fluids",
+      "brand": "Toyota Genuine Parts",
+      "supplier": "Starter Lubricants Supplier",
+      "unit": "Liter",
+      "part_number": "TOYOTA-SLLC-L",
+      "oem_number": null,
+      "description": "Premixed radiator coolant sold per liter.",
+      "product_type": "fluid",
+      "cost_price": 130,
+      "selling_price": 220,
+      "reorder_level": 0,
+      "warranty_duration_days": null,
+      "shelf_location": "FLUID-B4"
+    },
+    {
+      "name": "Castrol 80W-90 Gear Oil",
+      "sku": "SEED-FLUID-005",
+      "category": "Fluids",
+      "brand": "Castrol",
+      "supplier": "Starter Lubricants Supplier",
+      "unit": "Liter",
+      "part_number": "CASTROL-80W90-L",
+      "oem_number": null,
+      "description": "Manual transmission and differential gear oil.",
+      "product_type": "fluid",
+      "cost_price": 190,
+      "selling_price": 290,
+      "reorder_level": 0,
+      "warranty_duration_days": null,
+      "shelf_location": "FLUID-B5"
+    },
+    {
+      "name": "VIC Oil Filter",
+      "sku": "SEED-FILTER-001",
+      "category": "Filters",
+      "brand": "VIC",
+      "supplier": "Starter Parts Supplier",
+      "unit": "Piece",
+      "part_number": "VIC-OF-001",
+      "oem_number": null,
+      "description": "Generic starter oil filter item.",
+      "product_type": "part",
+      "cost_price": 120,
+      "selling_price": 220,
+      "reorder_level": 0,
+      "warranty_duration_days": null,
+      "shelf_location": "FILT-C1"
+    },
+    {
+      "name": "Denso Engine Air Filter",
+      "sku": "SEED-FILTER-002",
+      "category": "Filters",
+      "brand": "Denso",
+      "supplier": "Starter Parts Supplier",
+      "unit": "Piece",
+      "part_number": "DENSO-AF-001",
+      "oem_number": null,
+      "description": "Generic starter engine air filter item.",
+      "product_type": "part",
+      "cost_price": 180,
+      "selling_price": 320,
+      "reorder_level": 0,
+      "warranty_duration_days": null,
+      "shelf_location": "FILT-C2"
+    },
+    {
+      "name": "Denso Cabin Air Filter",
+      "sku": "SEED-FILTER-003",
+      "category": "Filters",
+      "brand": "Denso",
+      "supplier": "Starter Parts Supplier",
+      "unit": "Piece",
+      "part_number": "DENSO-CAF-001",
+      "oem_number": null,
+      "description": "Generic starter cabin air filter item.",
+      "product_type": "part",
+      "cost_price": 220,
+      "selling_price": 380,
+      "reorder_level": 0,
+      "warranty_duration_days": null,
+      "shelf_location": "FILT-C3"
+    },
+    {
+      "name": "NGK Spark Plug",
+      "sku": "SEED-IGN-001",
+      "category": "Ignition",
+      "brand": "NGK",
+      "supplier": "Starter Parts Supplier",
+      "unit": "Piece",
+      "part_number": "NGK-SP-001",
+      "oem_number": null,
+      "description": "Standard spark plug starter item.",
+      "product_type": "part",
+      "cost_price": 110,
+      "selling_price": 180,
+      "reorder_level": 0,
+      "warranty_duration_days": null,
+      "shelf_location": "IGN-D1"
+    },
+    {
+      "name": "Brembo Front Brake Pad Set",
+      "sku": "SEED-BRAKE-001",
+      "category": "Brake System",
+      "brand": "Brembo",
+      "supplier": "Starter Parts Supplier",
+      "unit": "Set",
+      "part_number": "BREMBO-FBP-001",
+      "oem_number": null,
+      "description": "Starter front brake pad set item.",
+      "product_type": "part",
+      "cost_price": 950,
+      "selling_price": 1600,
+      "reorder_level": 0,
+      "warranty_duration_days": null,
+      "shelf_location": "BRAKE-E1"
+    },
+    {
+      "name": "Brembo Rear Brake Shoe Set",
+      "sku": "SEED-BRAKE-002",
+      "category": "Brake System",
+      "brand": "Brembo",
+      "supplier": "Starter Parts Supplier",
+      "unit": "Set",
+      "part_number": "BREMBO-RBS-001",
+      "oem_number": null,
+      "description": "Starter rear brake shoe set item.",
+      "product_type": "part",
+      "cost_price": 850,
+      "selling_price": 1450,
+      "reorder_level": 0,
+      "warranty_duration_days": null,
+      "shelf_location": "BRAKE-E2"
+    },
+    {
+      "name": "Bosch Wiper Blade 18in",
+      "sku": "SEED-WIPER-001",
+      "category": "Wiper System",
+      "brand": "Bosch",
+      "supplier": "Starter Parts Supplier",
+      "unit": "Piece",
+      "part_number": "BOSCH-WB18",
+      "oem_number": null,
+      "description": "18-inch wiper blade.",
+      "product_type": "part",
+      "cost_price": 180,
+      "selling_price": 280,
+      "reorder_level": 0,
+      "warranty_duration_days": null,
+      "shelf_location": "WIPER-F1"
+    },
+    {
+      "name": "Bosch Wiper Blade 20in",
+      "sku": "SEED-WIPER-002",
+      "category": "Wiper System",
+      "brand": "Bosch",
+      "supplier": "Starter Parts Supplier",
+      "unit": "Piece",
+      "part_number": "BOSCH-WB20",
+      "oem_number": null,
+      "description": "20-inch wiper blade.",
+      "product_type": "part",
+      "cost_price": 190,
+      "selling_price": 290,
+      "reorder_level": 0,
+      "warranty_duration_days": null,
+      "shelf_location": "WIPER-F2"
+    },
+    {
+      "name": "Amaron Battery 2SM",
+      "sku": "SEED-ELEC-001",
+      "category": "Electrical",
+      "brand": "Amaron",
+      "supplier": "Starter Electrical Supplier",
+      "unit": "Piece",
+      "part_number": "AMARON-2SM",
+      "oem_number": null,
+      "description": "Starter maintenance-free battery item.",
+      "product_type": "part",
+      "cost_price": 3800,
+      "selling_price": 5200,
+      "reorder_level": 0,
+      "warranty_duration_days": 180,
+      "shelf_location": "ELEC-G1"
+    },
+    {
+      "name": "Engine Flush Additive",
+      "sku": "SEED-CONS-001",
+      "category": "Consumables",
+      "brand": "Bosch",
+      "supplier": "Starter Lubricants Supplier",
+      "unit": "Can",
+      "part_number": "ENG-FLUSH-001",
+      "oem_number": null,
+      "description": "Engine flush additive used during oil-change service.",
+      "product_type": "consumable",
+      "cost_price": 150,
+      "selling_price": 250,
+      "reorder_level": 0,
+      "warranty_duration_days": null,
+      "shelf_location": "CONS-H1"
+    }
+  ]
+}

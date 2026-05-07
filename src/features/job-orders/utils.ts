@@ -1,0 +1,195 @@
+import type {
+  JobOrderDetail,
+  JobOrderItemDetail,
+  JobOrderItemInventoryTracking,
+  JobOrderPartUsageEntry,
+  JobOrderStatus,
+} from "@/features/job-orders/types";
+
+const FINAL_MECHANIC_LOCKED_STATUSES: JobOrderStatus[] = [
+  "completed",
+  "ready_for_billing",
+  "paid",
+  "released",
+  "cancelled",
+];
+
+const FINAL_ITEM_LOCKED_STATUSES: JobOrderStatus[] = [
+  "completed",
+  "ready_for_billing",
+  "paid",
+  "released",
+  "cancelled",
+];
+
+const DETAIL_LOCKED_STATUSES: JobOrderStatus[] = ["released", "cancelled"];
+
+export function formatJobOrderStatus(status: JobOrderStatus) {
+  return status.replaceAll("_", " ");
+}
+
+export function getAllowedJobOrderStatusTransitions(status: JobOrderStatus): JobOrderStatus[] {
+  switch (status) {
+    case "pending":
+      return ["in_progress", "cancelled"];
+    case "in_progress":
+      return ["waiting_for_parts", "waiting_for_customer_approval", "completed", "cancelled"];
+    case "waiting_for_parts":
+      return ["in_progress", "waiting_for_customer_approval", "cancelled"];
+    case "waiting_for_customer_approval":
+      return ["in_progress", "waiting_for_parts", "cancelled"];
+    case "completed":
+      return ["ready_for_billing"];
+    default:
+      return [];
+  }
+}
+
+export function canEditJobOrderDetails(status: JobOrderStatus) {
+  return !DETAIL_LOCKED_STATUSES.includes(status);
+}
+
+export function canAssignMechanics(status: JobOrderStatus) {
+  return !FINAL_MECHANIC_LOCKED_STATUSES.includes(status);
+}
+
+export function canAddAdditionalItems(status: JobOrderStatus) {
+  return !FINAL_ITEM_LOCKED_STATUSES.includes(status);
+}
+
+export function canResolveAdditionalItems(status: JobOrderStatus) {
+  return !FINAL_ITEM_LOCKED_STATUSES.includes(status);
+}
+
+export function canGenerateJobOrderInvoice(status: JobOrderStatus, invoiceId: string | null) {
+  return status === "ready_for_billing" && invoiceId === null;
+}
+
+export function canReleaseJobOrderVehicle(params: {
+  status: JobOrderStatus;
+  invoiceId: string | null;
+  invoiceStatus: "unpaid" | "partially_paid" | "paid" | "cancelled" | null;
+  releasedAt: string | null;
+}) {
+  return (
+    params.invoiceId !== null &&
+    params.invoiceStatus !== "cancelled" &&
+    params.status !== "released" &&
+    params.releasedAt === null
+  );
+}
+
+export function calculateJobOrderBillableTotal(items: JobOrderItemDetail[]) {
+  return roundCurrency(
+    items
+      .filter((item) => item.approvalStatus === "not_required" || item.approvalStatus === "approved")
+      .reduce((sum, item) => sum + item.total, 0),
+  );
+}
+
+export function calculateJobOrderPendingApprovalCount(items: JobOrderItemDetail[]) {
+  return items.filter((item) => item.isAdditional && item.approvalStatus === "pending").length;
+}
+
+export function calculateJobOrderPendingApprovalTotal(items: JobOrderItemDetail[]) {
+  return roundCurrency(
+    items
+      .filter((item) => item.isAdditional && item.approvalStatus === "pending")
+      .reduce((sum, item) => sum + item.total, 0),
+  );
+}
+
+export function calculateJobOrderRejectedAdditionalTotal(items: JobOrderItemDetail[]) {
+  return roundCurrency(
+    items
+      .filter((item) => item.isAdditional && item.approvalStatus === "rejected")
+      .reduce((sum, item) => sum + item.total, 0),
+  );
+}
+
+export function mapJobOrderDetailCapabilities(detail: Omit<JobOrderDetail, keyof ReturnType<typeof buildJobOrderDetailCapabilities>>) {
+  return {
+    ...detail,
+    ...buildJobOrderDetailCapabilities({
+      status: detail.status,
+      invoiceId: detail.invoiceId,
+      invoiceStatus: detail.invoiceStatus,
+      releasedAt: detail.releasedAt,
+    }),
+  };
+}
+
+export function toNumeric(value: string) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+export function buildJobOrderItemInventoryTracking(params: {
+  plannedQuantity: number;
+  hasStockRecord: boolean;
+  quantityOnHand: number | null;
+  availableQuantity: number | null;
+  reorderLevel: number | null;
+  shelfLocation: string | null;
+  usageHistory: JobOrderPartUsageEntry[];
+}): JobOrderItemInventoryTracking {
+  const usedQuantity = roundQuantity(
+    params.usageHistory
+      .filter((entry) => entry.usageType === "use")
+      .reduce((sum, entry) => sum + entry.quantity, 0),
+  );
+  const returnedQuantity = roundQuantity(
+    params.usageHistory
+      .filter((entry) => entry.usageType === "return")
+      .reduce((sum, entry) => sum + entry.quantity, 0),
+  );
+  const netUsedQuantity = roundQuantity(usedQuantity - returnedQuantity);
+  const remainingUsageQuantity = roundQuantity(Math.max(params.plannedQuantity - netUsedQuantity, 0));
+
+  return {
+    hasStockRecord: params.hasStockRecord,
+    quantityOnHand: params.quantityOnHand,
+    availableQuantity: params.availableQuantity,
+    reorderLevel: params.reorderLevel,
+    shelfLocation: params.shelfLocation,
+    isLowStock:
+      params.availableQuantity !== null &&
+      params.reorderLevel !== null &&
+      params.availableQuantity <= params.reorderLevel,
+    usedQuantity,
+    returnedQuantity,
+    netUsedQuantity,
+    remainingUsageQuantity,
+    usageHistory: params.usageHistory,
+  };
+}
+
+function buildJobOrderDetailCapabilities(params: {
+  status: JobOrderStatus;
+  invoiceId: string | null;
+  invoiceStatus: "unpaid" | "partially_paid" | "paid" | "cancelled" | null;
+  releasedAt: string | null;
+}) {
+  return {
+    canEditDetails: canEditJobOrderDetails(params.status),
+    canAssignMechanics: canAssignMechanics(params.status),
+    canAddAdditionalItems: canAddAdditionalItems(params.status),
+    canResolveAdditionalItems: canResolveAdditionalItems(params.status),
+    canGenerateInvoice: canGenerateJobOrderInvoice(params.status, params.invoiceId),
+    canReleaseVehicle: canReleaseJobOrderVehicle({
+      status: params.status,
+      invoiceId: params.invoiceId,
+      invoiceStatus: params.invoiceStatus,
+      releasedAt: params.releasedAt,
+    }),
+    availableNextStatuses: getAllowedJobOrderStatusTransitions(params.status),
+  };
+}
+
+function roundCurrency(value: number) {
+  return Number(value.toFixed(2));
+}
+
+function roundQuantity(value: number) {
+  return Number(value.toFixed(4));
+}

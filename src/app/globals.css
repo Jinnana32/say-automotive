@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 23% 97%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 220 79% 46%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 18% 95%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 220 18% 95%;
+    --muted-foreground: 215 14% 44%;
+    --accent: 214 42% 95%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --info: 200 92% 42%;
+    --info-foreground: 0 0% 100%;
+    --border: 220 18% 89%;
+    --input: 220 18% 89%;
+    --ring: 220 79% 46%;
+    --radius: 0.875rem;
+    --font-sans: var(--font-space-grotesk), "Segoe UI", sans-serif;
+    --font-display: var(--font-barlow-condensed), "Segoe UI", sans-serif;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply scroll-smooth;
+    color-scheme: light;
+  }
+
+  body {
+    @apply min-h-screen bg-background font-sans text-foreground antialiased;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.16);
+  }
+}
+
+@layer utilities {
+  .surface-subtle {
+    background-color: hsl(var(--muted) / 0.55);
+  }
+
+  .surface-card {
+    background-color: hsl(var(--card));
+    border-color: hsl(var(--border) / 0.9);
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.04),
+      0 10px 24px rgba(15, 23, 42, 0.03);
+  }
+
+  .table-grid {
+    background-image: linear-gradient(
+      to bottom,
+      transparent calc(100% - 1px),
+      hsl(var(--border) / 0.55) 0
+    );
+    background-size: 100% 52px;
+  }
+}
