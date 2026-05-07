@@ -32,7 +32,7 @@ import {
   setJobOrderItemApprovalAction,
 } from '@/features/job-orders/actions/job-order-actions';
 import { AssignMechanicForm } from '@/features/job-orders/components/assign-mechanic-form';
-import { JobOrderAdditionalItemForm } from '@/features/job-orders/components/job-order-additional-item-form';
+import { JobOrderAdditionalItemDialog } from '@/features/job-orders/components/job-order-additional-item-dialog';
 import { JobOrderDetailsForm } from '@/features/job-orders/components/job-order-details-form';
 import { JobOrderPartsUsagePanel } from '@/features/job-orders/components/job-order-parts-usage-panel';
 import {
@@ -347,6 +347,17 @@ export function JobOrderDetailPage({
             <SectionCard
               title="Job order items"
               description="Quoted lines and additional charges are easier to review here before billing."
+              action={
+                jobOrder.canAddAdditionalItems ? (
+                  <JobOrderAdditionalItemDialog
+                    jobOrderId={jobOrder.id}
+                    options={{
+                      products: formOptions.products,
+                      services: formOptions.services,
+                    }}
+                  />
+                ) : null
+              }
               contentClassName="p-0"
             >
               <div className="overflow-x-auto">
@@ -469,16 +480,6 @@ export function JobOrderDetailPage({
                 </Table>
               </div>
             </SectionCard>
-
-            {jobOrder.canAddAdditionalItems ? (
-              <JobOrderAdditionalItemForm
-                jobOrderId={jobOrder.id}
-                options={{
-                  products: formOptions.products,
-                  services: formOptions.services,
-                }}
-              />
-            ) : null}
           </div>
         </TabsContent>
 
