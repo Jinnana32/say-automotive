@@ -4,8 +4,10 @@ import { useActionState, useState } from "react";
 
 import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { NativeSelect } from "@/components/ui/native-select";
+import { JobOrderStatusBadge } from "@/features/job-orders/components/job-order-status-badge";
 import { updateJobOrderStatusAction } from "@/features/job-orders/actions/job-order-actions";
 import type { JobOrderStatus } from "@/features/job-orders/types";
 import { formatJobOrderStatus } from "@/features/job-orders/utils";
@@ -15,57 +17,57 @@ export function JobOrderStatusForm({
   jobOrderId,
   currentStatus,
   availableNextStatuses,
+  closeDialog,
 }: {
   jobOrderId: string;
   currentStatus: JobOrderStatus;
   availableNextStatuses: JobOrderStatus[];
+  closeDialog: () => void;
 }) {
   const [state, formAction] = useActionState(updateJobOrderStatusAction, INITIAL_FORM_ACTION_STATE);
   const [nextStatus, setNextStatus] = useState<JobOrderStatus | "">(availableNextStatuses[0] ?? "");
 
   return (
-    <Card className="border-border/70 shadow-sm">
-      <CardHeader>
-        <CardTitle>Status transition</CardTitle>
-        <CardDescription>
-          Move the job order through the operational workflow with explicit guarded transitions.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {availableNextStatuses.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No operational transitions are available from <span className="font-medium">{formatJobOrderStatus(currentStatus)}</span>.
-          </p>
-        ) : (
-          <form action={formAction} className="space-y-4">
-            <input type="hidden" name="jobOrderId" value={jobOrderId} />
+    <form action={formAction} className="space-y-5">
+      <input type="hidden" name="jobOrderId" value={jobOrderId} />
 
-            <FormStatusMessage message={state.message} />
+      <div className="rounded-2xl border border-border/70 bg-muted/20 px-4 py-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          Current status
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <JobOrderStatusBadge status={currentStatus} />
+          <span className="text-sm text-muted-foreground">
+            {formatJobOrderStatus(currentStatus)}
+          </span>
+        </div>
+      </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="nextStatus">Next status</Label>
-              <select
-                id="nextStatus"
-                name="nextStatus"
-                value={nextStatus}
-                onChange={(event) => setNextStatus(event.target.value as JobOrderStatus)}
-                className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                {availableNextStatuses.map((status) => (
-                  <option key={status} value={status}>
-                    {formatJobOrderStatus(status)}
-                  </option>
-                ))}
-              </select>
-              <FieldError errors={state.fieldErrors} name="nextStatus" />
-            </div>
+      <FormStatusMessage message={state.message} />
 
-            <div className="flex justify-end">
-              <SubmitButton>Update status</SubmitButton>
-            </div>
-          </form>
-        )}
-      </CardContent>
-    </Card>
+      <div className="space-y-2">
+        <Label htmlFor={`nextStatus-${jobOrderId}`}>Next status</Label>
+        <NativeSelect
+          id={`nextStatus-${jobOrderId}`}
+          name="nextStatus"
+          value={nextStatus}
+          onChange={(event) => setNextStatus(event.target.value as JobOrderStatus)}
+        >
+          {availableNextStatuses.map((status) => (
+            <option key={status} value={status}>
+              {formatJobOrderStatus(status)}
+            </option>
+          ))}
+        </NativeSelect>
+        <FieldError errors={state.fieldErrors} name="nextStatus" />
+      </div>
+
+      <div className="flex flex-wrap justify-end gap-3">
+        <Button type="button" variant="outline" onClick={closeDialog}>
+          Cancel
+        </Button>
+        <SubmitButton pendingLabel="Updating...">Update status</SubmitButton>
+      </div>
+    </form>
   );
 }
