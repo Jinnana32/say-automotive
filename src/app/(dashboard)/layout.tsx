@@ -18,8 +18,10 @@ export default async function DashboardLayout({
 }>) {
   const context = await requireAuthenticatedStaff();
   const navigationItems = DASHBOARD_NAV_ITEMS.filter((item) =>
-    context.capabilities.includes(item.capability),
-  ).map(({ capability: _capability, ...item }) => item);
+    (item.requiredCapabilities ?? [item.capability]).every((capability) =>
+      context.capabilities.includes(capability),
+    ),
+  ).map(({ capability: _capability, requiredCapabilities: _requiredCapabilities, ...item }) => item);
 
   return (
     <AppShell

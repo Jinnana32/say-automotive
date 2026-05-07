@@ -11,6 +11,7 @@ export type NavigationGroup =
 
 export type NavigationIconName =
   | "dashboard"
+  | "quick-access"
   | "customers"
   | "vehicles"
   | "quotations"
@@ -32,8 +33,11 @@ export const DASHBOARD_NAV_ITEMS: ReadonlyArray<{
   label: string;
   description: string;
   capability: AppCapability;
+  requiredCapabilities?: readonly AppCapability[];
   group: NavigationGroup;
   iconName: NavigationIconName;
+  showInSidebar?: boolean;
+  showAsMobileShortcut?: boolean;
 }> = [
   {
     href: "/dashboard",
@@ -42,6 +46,17 @@ export const DASHBOARD_NAV_ITEMS: ReadonlyArray<{
     capability: "dashboard:view",
     group: "Overview",
     iconName: "dashboard",
+  },
+  {
+    href: "/quick-access",
+    label: "Quick Access",
+    description: "Fast lookup for returning customers and vehicles.",
+    capability: "vehicles:read",
+    requiredCapabilities: ["vehicles:read", "customers:read"],
+    group: "Overview",
+    iconName: "quick-access",
+    showInSidebar: false,
+    showAsMobileShortcut: true,
   },
   {
     href: "/customers",

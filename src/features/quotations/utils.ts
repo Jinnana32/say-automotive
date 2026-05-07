@@ -1,4 +1,5 @@
-import type { QuotationFormItem } from "@/features/quotations/types";
+import type { CustomerOption } from "@/features/customers/types";
+import type { QuotationFormItem, QuotationVehicleOption } from "@/features/quotations/types";
 
 export function createQuotationItem(
   initial?: Partial<QuotationFormItem>,
@@ -34,6 +35,33 @@ export function calculateQuotationGrandTotal(params: {
 export function toNumeric(value: string) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+export function resolveQuotationCreateFlowSelection(params: {
+  requestedCustomerId?: string;
+  requestedVehicleId?: string;
+  customers: CustomerOption[];
+  vehicles: QuotationVehicleOption[];
+}) {
+  const matchedVehicle = params.requestedVehicleId
+    ? params.vehicles.find((vehicle) => vehicle.id === params.requestedVehicleId) ?? null
+    : null;
+
+  if (matchedVehicle) {
+    return {
+      customerId: matchedVehicle.customerId,
+      vehicleId: matchedVehicle.id,
+    };
+  }
+
+  const hasRequestedCustomer = params.requestedCustomerId
+    ? params.customers.some((customer) => customer.id === params.requestedCustomerId)
+    : false;
+
+  return {
+    customerId: hasRequestedCustomer ? params.requestedCustomerId ?? "" : "",
+    vehicleId: "",
+  };
 }
 
 function roundCurrency(value: number) {

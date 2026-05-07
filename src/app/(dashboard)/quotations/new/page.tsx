@@ -1,12 +1,31 @@
 import { PageHeader } from "@/components/shared/page-header";
 import { QuotationCreateFlow } from "@/features/quotations/components/quotation-create-flow";
 import { getQuotationCreateFlowOptions } from "@/features/quotations/queries/quotation-queries";
-import { createQuotationItem } from "@/features/quotations/utils";
+import {
+  createQuotationItem,
+  resolveQuotationCreateFlowSelection,
+} from "@/features/quotations/utils";
 
 export const dynamic = "force-dynamic";
 
-export default async function NewQuotationPage() {
+type NewQuotationPageProps = {
+  searchParams: Promise<{
+    customerId?: string;
+    vehicleId?: string;
+  }>;
+};
+
+export default async function NewQuotationPage({
+  searchParams,
+}: NewQuotationPageProps) {
+  const { customerId, vehicleId } = await searchParams;
   const options = await getQuotationCreateFlowOptions();
+  const selection = resolveQuotationCreateFlowSelection({
+    requestedCustomerId: customerId,
+    requestedVehicleId: vehicleId,
+    customers: options.customers,
+    vehicles: options.vehicles,
+  });
 
   return (
     <div className="space-y-6">
@@ -17,8 +36,8 @@ export default async function NewQuotationPage() {
       <QuotationCreateFlow
         options={options}
         initialValues={{
-          customerId: "",
-          vehicleId: "",
+          customerId: selection.customerId,
+          vehicleId: selection.vehicleId,
           inspectionNotes: "",
           status: "draft",
           discount: "0",
