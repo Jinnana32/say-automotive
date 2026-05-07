@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
+// TODO: Add type for searchParams
 type GetQuotePageProps = {
   searchParams: Promise<{
     submitted?: string;
