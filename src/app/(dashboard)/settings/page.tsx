@@ -62,6 +62,9 @@ export default async function SettingsPage() {
         action={
           <div className="flex flex-wrap gap-2">
             <Button asChild size="sm" variant="outline">
+              <Link href="/settings/timekeeping">Timekeeping calendar</Link>
+            </Button>
+            <Button asChild size="sm" variant="outline">
               <Link href="/settings/vehicle-lookups">Vehicle lookups</Link>
             </Button>
             <Button asChild size="sm" variant="outline">

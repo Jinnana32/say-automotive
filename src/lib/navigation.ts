@@ -25,6 +25,7 @@ export type NavigationIconName =
   | "pos"
   | "staff"
   | "attendance"
+  | "payroll"
   | "reports"
   | "settings";
 
@@ -161,6 +162,14 @@ export const DASHBOARD_NAV_ITEMS: ReadonlyArray<{
     capability: "attendance:read",
     group: "People",
     iconName: "attendance",
+  },
+  {
+    href: "/payroll",
+    label: "Payroll",
+    description: "Compensation setup and payroll periods.",
+    capability: "payroll:read",
+    group: "People",
+    iconName: "payroll",
   },
   {
     href: "/reports",

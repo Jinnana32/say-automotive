@@ -1,0 +1,284 @@
+import { DateTime } from "luxon";
+
+import { countScheduledWorkdays } from "@/features/attendance/utils";
+import type { StaffScheduleSummary } from "@/features/attendance/types";
+import { formatDate, getBusinessNow } from "@/lib/dates";
+import type {
+  CompensationProfileFormValues,
+  CompensationProfileSummary,
+  PayBasis,
+  PayrollAttendanceSourceRecord,
+  PayrollFormActionState,
+  PayrollPageFilters,
+  PayrollPeriodFormValues,
+  PayrollPeriodStaffSummary,
+  PayrollPeriodStatus,
+  PayrollStaffReadinessStatus,
+} from "@/features/payroll/types";
+
+export const PAY_BASIS_OPTIONS: Array<{
+  value: PayBasis;
+  label: string;
+}> = [
+  { value: "monthly", label: "Monthly" },
+  { value: "daily", label: "Daily" },
+  { value: "hourly", label: "Hourly" },
+];
+
+export const PAYROLL_PERIOD_STATUS_OPTIONS: Array<{
+  value: PayrollPeriodStatus;
+  label: string;
+}> = [
+  { value: "draft", label: "Draft" },
+  { value: "processing", label: "Processing" },
+  { value: "finalized", label: "Finalized" },
+];
+
+export const INITIAL_PAYROLL_FORM_ACTION_STATE: PayrollFormActionState = {
+  status: "idle",
+};
+
+export function resolvePayrollPageFilters(params: {
+  staffSearch?: string;
+  periodStatus?: string;
+}): PayrollPageFilters {
+  return {
+    staffSearch: params.staffSearch?.trim() ?? "",
+    periodStatus: isPayrollPeriodStatus(params.periodStatus) ? params.periodStatus : "",
+  };
+}
+
+export function formatPayBasisLabel(payBasis: PayBasis) {
+  switch (payBasis) {
+    case "monthly":
+      return "Monthly";
+    case "daily":
+      return "Daily";
+    case "hourly":
+      return "Hourly";
+  }
+}
+
+export function formatPayrollPeriodStatusLabel(status: PayrollPeriodStatus) {
+  switch (status) {
+    case "draft":
+      return "Draft";
+    case "processing":
+      return "Processing";
+    case "finalized":
+      return "Finalized";
+  }
+}
+
+export function getPayrollPeriodStatusTone(status: PayrollPeriodStatus) {
+  switch (status) {
+    case "draft":
+      return "neutral";
+    case "processing":
+      return "warning";
+    case "finalized":
+      return "success";
+  }
+}
+
+export function formatPayrollCoverage(periodStartDate: string, periodEndDate: string) {
+  return `${formatDate(periodStartDate)} to ${formatDate(periodEndDate)}`;
+}
+
+export function formatWorkedDuration(totalMinutes: number) {
+  if (totalMinutes <= 0) {
+    return "0h";
+  }
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+}
+
+export function formatPayrollReadinessLabel(status: PayrollStaffReadinessStatus) {
+  switch (status) {
+    case "ready":
+      return "Ready";
+    case "missing_schedule":
+      return "Missing schedule";
+    case "missing_compensation":
+      return "Missing compensation";
+    case "missing_attendance":
+      return "Missing attendance";
+    case "needs_dtr_completion":
+      return "Needs DTR completion";
+    case "configured_no_activity":
+      return "Configured";
+    case "not_configured":
+      return "Not configured";
+  }
+}
+
+export function getPayrollReadinessTone(status: PayrollStaffReadinessStatus) {
+  switch (status) {
+    case "ready":
+      return "success";
+    case "configured_no_activity":
+      return "info";
+    case "missing_schedule":
+    case "missing_compensation":
+    case "missing_attendance":
+    case "needs_dtr_completion":
+      return "warning";
+    case "not_configured":
+      return "neutral";
+  }
+}
+
+export function buildCompensationProfileFormValues(
+  staffId: string,
+  profile: CompensationProfileSummary | null,
+): CompensationProfileFormValues {
+  return {
+    staffId,
+    payBasis: profile?.payBasis ?? "daily",
+    baseRate: profile ? profile.baseRate.toFixed(2) : "",
+    overtimeRate: profile?.overtimeRate ? profile.overtimeRate.toFixed(2) : "",
+    allowancePerPeriod: profile ? profile.allowancePerPeriod.toFixed(2) : "0.00",
+    effectiveStartDate: profile?.effectiveStartDate ?? getBusinessNow().toFormat("yyyy-LL-dd"),
+    notes: profile?.notes ?? "",
+  };
+}
+
+export function buildDefaultPayrollPeriodFormValues(): PayrollPeriodFormValues {
+  const now = getBusinessNow();
+  const startOfMonth = now.startOf("month").toFormat("yyyy-LL-dd");
+  const endOfMonth = now.endOf("month").toFormat("yyyy-LL-dd");
+  const monthLabel = now.toFormat("LLLL yyyy");
+
+  return {
+    label: `Payroll ${monthLabel}`,
+    periodStartDate: startOfMonth,
+    periodEndDate: endOfMonth,
+    payoutDate: endOfMonth,
+    notes: "",
+  };
+}
+
+export function summarizePayrollAttendance(records: PayrollAttendanceSourceRecord[]) {
+  return records.reduce(
+    (summary, record) => {
+      summary.recordedDays += 1;
+
+      if (record.approvedAt) {
+        summary.approvedCount += 1;
+      } else {
+        summary.pendingApprovalCount += 1;
+      }
+
+      if (record.status === "present") {
+        summary.presentCount += 1;
+      }
+
+      if (record.status === "late") {
+        summary.lateCount += 1;
+      }
+
+      if (record.status === "half_day") {
+        summary.halfDayCount += 1;
+      }
+
+      if (record.status === "absent") {
+        summary.absentCount += 1;
+      }
+
+      if (record.timeIn && !record.timeOut) {
+        summary.missingTimeoutCount += 1;
+      }
+
+      if (record.timeIn && record.timeOut) {
+        const timeIn = DateTime.fromISO(record.timeIn, { zone: "utc" });
+        const timeOut = DateTime.fromISO(record.timeOut, { zone: "utc" });
+
+        if (timeIn.isValid && timeOut.isValid && timeOut > timeIn) {
+          summary.workedMinutes += Math.round(timeOut.diff(timeIn, "minutes").minutes);
+        }
+      }
+
+      return summary;
+    },
+    {
+      recordedDays: 0,
+      presentCount: 0,
+      lateCount: 0,
+      halfDayCount: 0,
+      absentCount: 0,
+      missingTimeoutCount: 0,
+      approvedCount: 0,
+      pendingApprovalCount: 0,
+      workedMinutes: 0,
+    },
+  );
+}
+
+export function resolvePayrollReadinessStatus({
+  hasCompensationProfile,
+  hasSchedule,
+  expectedWorkdayCount,
+  hadAttendanceActivity,
+  missingAttendanceDayCount,
+  missingTimeoutCount,
+}: {
+  hasCompensationProfile: boolean;
+  hasSchedule: boolean;
+  expectedWorkdayCount: number;
+  hadAttendanceActivity: boolean;
+  missingAttendanceDayCount: number;
+  missingTimeoutCount: number;
+}): PayrollStaffReadinessStatus {
+  if (missingTimeoutCount > 0) {
+    return "needs_dtr_completion";
+  }
+
+  if (hadAttendanceActivity && !hasCompensationProfile) {
+    return "missing_compensation";
+  }
+
+  if (hasCompensationProfile && !hasSchedule) {
+    return "missing_schedule";
+  }
+
+  if (missingAttendanceDayCount > 0) {
+    return "missing_attendance";
+  }
+
+  if (!hasCompensationProfile) {
+    return "not_configured";
+  }
+
+  if (expectedWorkdayCount === 0 && !hadAttendanceActivity) {
+    return "configured_no_activity";
+  }
+
+  return "ready";
+}
+
+export function isBlockedPayrollStaffSummary(summary: Pick<
+  PayrollPeriodStaffSummary,
+  "readinessStatus"
+>) {
+  return (
+    summary.readinessStatus === "missing_compensation" ||
+    summary.readinessStatus === "missing_schedule" ||
+    summary.readinessStatus === "missing_attendance" ||
+    summary.readinessStatus === "needs_dtr_completion"
+  );
+}
+
+export function computeScheduledWorkdayCountForPeriod(
+  schedule: StaffScheduleSummary | null,
+  periodStartDate: string,
+  periodEndDate: string,
+) {
+  return countScheduledWorkdays(schedule, periodStartDate, periodEndDate);
+}
+
+function isPayrollPeriodStatus(value: string | undefined): value is PayrollPeriodStatus {
+  return PAYROLL_PERIOD_STATUS_OPTIONS.some((option) => option.value === value);
+}

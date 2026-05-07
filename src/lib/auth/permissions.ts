@@ -30,6 +30,8 @@ export type AppCapability =
   | "staff:write"
   | "attendance:read"
   | "attendance:write"
+  | "payroll:read"
+  | "payroll:write"
   | "reports:read"
   | "settings:read"
   | "settings:write";
@@ -62,6 +64,8 @@ const ALL_CAPABILITIES: readonly AppCapability[] = [
   "staff:write",
   "attendance:read",
   "attendance:write",
+  "payroll:read",
+  "payroll:write",
   "reports:read",
   "settings:read",
   "settings:write",

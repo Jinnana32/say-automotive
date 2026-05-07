@@ -34,7 +34,12 @@ export async function getSettingsPageData(): Promise<SettingsPageData> {
     supabase
       .from("audit_logs")
       .select("id, action, entity_type, created_at")
-      .in("entity_type", ["business_settings", "document_sequence"])
+      .in("entity_type", [
+        "business_settings",
+        "document_sequence",
+        "branch_holiday",
+        "staff_leave_entry",
+      ])
       .order("created_at", { ascending: false })
       .limit(10),
   ]);

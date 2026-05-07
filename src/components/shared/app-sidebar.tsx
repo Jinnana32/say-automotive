@@ -16,6 +16,7 @@ import {
   ShoppingCart,
   ShieldCheck,
   ScanSearch,
+  HandCoins,
   Truck,
   Users,
   UserSquare2,
@@ -45,6 +46,7 @@ const ICONS: Record<NavigationIconName, React.ComponentType<{ className?: string
   pos: ShoppingCart,
   staff: UserSquare2,
   attendance: Clock3,
+  payroll: HandCoins,
   reports: BarChart3,
   settings: Settings2,
 };

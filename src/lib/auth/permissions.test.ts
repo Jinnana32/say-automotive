@@ -21,4 +21,8 @@ describe("hasCapability", () => {
     expect(hasCapability("inventory_staff", "inventory:write")).toBe(true);
     expect(hasCapability("inventory_staff", "invoices:read")).toBe(false);
   });
+
+  it("keeps service advisors out of payroll access", () => {
+    expect(hasCapability("service_advisor", "payroll:read")).toBe(false);
+  });
 });

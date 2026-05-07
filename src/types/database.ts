@@ -18,6 +18,8 @@ export type Database = {
           time_out: string | null;
           status: Database["public"]["Enums"]["attendance_status"];
           notes: string | null;
+          approved_by_staff_id: string | null;
+          approved_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -29,6 +31,8 @@ export type Database = {
           time_out?: string | null;
           status: Database["public"]["Enums"]["attendance_status"];
           notes?: string | null;
+          approved_by_staff_id?: string | null;
+          approved_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -36,6 +40,63 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "attendance_staff_id_fkey";
+            columns: ["staff_id"];
+            isOneToOne: false;
+            referencedRelation: "staff";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "attendance_approved_by_staff_id_fkey";
+            columns: ["approved_by_staff_id"];
+            isOneToOne: false;
+            referencedRelation: "staff";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      attendance_adjustments: {
+        Row: {
+          id: string;
+          attendance_id: string;
+          staff_id: string;
+          attendance_date: string;
+          action: string;
+          previous_data: Json | null;
+          next_data: Json | null;
+          reason: string | null;
+          changed_by_staff_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          attendance_id: string;
+          staff_id: string;
+          attendance_date: string;
+          action: string;
+          previous_data?: Json | null;
+          next_data?: Json | null;
+          reason?: string | null;
+          changed_by_staff_id?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["attendance_adjustments"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "attendance_adjustments_attendance_id_fkey";
+            columns: ["attendance_id"];
+            isOneToOne: false;
+            referencedRelation: "attendance";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "attendance_adjustments_changed_by_staff_id_fkey";
+            columns: ["changed_by_staff_id"];
+            isOneToOne: false;
+            referencedRelation: "staff";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "attendance_adjustments_staff_id_fkey";
             columns: ["staff_id"];
             isOneToOne: false;
             referencedRelation: "staff";
@@ -88,6 +149,38 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["branches"]["Insert"]>;
         Relationships: [];
+      };
+      branch_holidays: {
+        Row: {
+          id: string;
+          branch_id: string;
+          holiday_date: string;
+          label: string;
+          holiday_kind: string;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          branch_id: string;
+          holiday_date: string;
+          label: string;
+          holiday_kind: string;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["branch_holidays"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "branch_holidays_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       brands: {
         Row: {
@@ -632,6 +725,62 @@ export type Database = {
           },
         ];
       };
+      payroll_periods: {
+        Row: {
+          id: string;
+          branch_id: string;
+          label: string;
+          period_start_date: string;
+          period_end_date: string;
+          payout_date: string;
+          status: Database["public"]["Enums"]["payroll_period_status"];
+          notes: string | null;
+          created_by_staff_id: string | null;
+          finalized_by_staff_id: string | null;
+          finalized_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          branch_id: string;
+          label: string;
+          period_start_date: string;
+          period_end_date: string;
+          payout_date: string;
+          status?: Database["public"]["Enums"]["payroll_period_status"];
+          notes?: string | null;
+          created_by_staff_id?: string | null;
+          finalized_by_staff_id?: string | null;
+          finalized_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["payroll_periods"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "payroll_periods_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "payroll_periods_created_by_staff_id_fkey";
+            columns: ["created_by_staff_id"];
+            isOneToOne: false;
+            referencedRelation: "staff";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "payroll_periods_finalized_by_staff_id_fkey";
+            columns: ["finalized_by_staff_id"];
+            isOneToOne: false;
+            referencedRelation: "staff";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       product_categories: {
         Row: {
           id: string;
@@ -987,6 +1136,42 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["services"]["Insert"]>;
         Relationships: [];
       };
+      staff_compensation_profiles: {
+        Row: {
+          id: string;
+          staff_id: string;
+          pay_basis: Database["public"]["Enums"]["pay_basis"];
+          base_rate: number;
+          overtime_rate: number | null;
+          allowance_per_period: number;
+          effective_start_date: string;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          staff_id: string;
+          pay_basis: Database["public"]["Enums"]["pay_basis"];
+          base_rate: number;
+          overtime_rate?: number | null;
+          allowance_per_period?: number;
+          effective_start_date: string;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["staff_compensation_profiles"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "staff_compensation_profiles_staff_id_fkey";
+            columns: ["staff_id"];
+            isOneToOne: true;
+            referencedRelation: "staff";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       staff: {
         Row: {
           id: string;
@@ -1026,6 +1211,93 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["staff"]["Insert"]>;
         Relationships: [];
+      };
+      staff_leave_entries: {
+        Row: {
+          id: string;
+          branch_id: string;
+          staff_id: string;
+          start_date: string;
+          end_date: string;
+          leave_type: string;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          branch_id: string;
+          staff_id: string;
+          start_date: string;
+          end_date: string;
+          leave_type: string;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["staff_leave_entries"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "staff_leave_entries_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "staff_leave_entries_staff_id_fkey";
+            columns: ["staff_id"];
+            isOneToOne: false;
+            referencedRelation: "staff";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      staff_schedules: {
+        Row: {
+          id: string;
+          staff_id: string;
+          shift_start_time: string;
+          shift_end_time: string;
+          grace_minutes: number;
+          monday_is_workday: boolean;
+          tuesday_is_workday: boolean;
+          wednesday_is_workday: boolean;
+          thursday_is_workday: boolean;
+          friday_is_workday: boolean;
+          saturday_is_workday: boolean;
+          sunday_is_workday: boolean;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          staff_id: string;
+          shift_start_time: string;
+          shift_end_time: string;
+          grace_minutes?: number;
+          monday_is_workday?: boolean;
+          tuesday_is_workday?: boolean;
+          wednesday_is_workday?: boolean;
+          thursday_is_workday?: boolean;
+          friday_is_workday?: boolean;
+          saturday_is_workday?: boolean;
+          sunday_is_workday?: boolean;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["staff_schedules"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "staff_schedules_staff_id_fkey";
+            columns: ["staff_id"];
+            isOneToOne: true;
+            referencedRelation: "staff";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       stock_movements: {
         Row: {
@@ -1354,8 +1626,10 @@ export type Database = {
         | "released"
         | "cancelled";
       line_item_type: "product" | "service" | "labor";
+      pay_basis: "monthly" | "daily" | "hourly";
       part_usage_type: "use" | "return";
       payment_method: "cash" | "gcash" | "card" | "bank_transfer" | "check";
+      payroll_period_status: "draft" | "processing" | "finalized";
       product_type: "part" | "fluid" | "consumable" | "accessory" | "tool";
       quotation_status: "draft" | "pending_approval" | "approved" | "rejected" | "expired";
       record_status: "active" | "inactive";
