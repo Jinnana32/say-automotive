@@ -9,6 +9,16 @@ export type JobOrderStatus =
   | "released"
   | "cancelled";
 
+export const JOB_ORDER_DETAIL_TABS = [
+  "overview",
+  "billing",
+  "work-items",
+  "parts-usage",
+  "mechanics",
+] as const;
+
+export type JobOrderDetailTab = (typeof JOB_ORDER_DETAIL_TABS)[number];
+
 export type JobOrderItemType = "product" | "service" | "labor";
 export type JobOrderApprovalStatus = "not_required" | "pending" | "approved" | "rejected";
 export type JobOrderUsageStatus = "planned" | "used" | "returned" | "cancelled";

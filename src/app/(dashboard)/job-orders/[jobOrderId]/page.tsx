@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { JobOrderDetailPage } from "@/features/job-orders/components/job-order-detail-page";
 import { getJobOrderById, getJobOrderFormOptions } from "@/features/job-orders/queries/job-order-queries";
+import { resolveJobOrderDetailTab } from "@/features/job-orders/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -9,10 +10,14 @@ type JobOrderDetailRouteProps = {
   params: Promise<{
     jobOrderId: string;
   }>;
+  searchParams: Promise<{
+    tab?: string;
+  }>;
 };
 
-export default async function JobOrderDetailRoute({ params }: JobOrderDetailRouteProps) {
+export default async function JobOrderDetailRoute({ params, searchParams }: JobOrderDetailRouteProps) {
   const { jobOrderId } = await params;
+  const { tab } = await searchParams;
   const [jobOrder, formOptions] = await Promise.all([
     getJobOrderById(jobOrderId),
     getJobOrderFormOptions(),
@@ -32,6 +37,7 @@ export default async function JobOrderDetailRoute({ params }: JobOrderDetailRout
       jobOrder={jobOrder}
       formOptions={formOptions}
       availableMechanics={availableMechanics}
+      activeTab={resolveJobOrderDetailTab(tab)}
     />
   );
 }

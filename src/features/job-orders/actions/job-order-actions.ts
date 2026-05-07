@@ -16,7 +16,7 @@ import {
   parseMechanicAssignmentFormData,
   parseOptionalNumeric,
 } from "@/features/job-orders/schemas/job-order-forms";
-import { toNumeric } from "@/features/job-orders/utils";
+import { resolveJobOrderDetailTab, toNumeric } from "@/features/job-orders/utils";
 import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
 import { INITIAL_FORM_ACTION_STATE, toFormActionState, type FormActionState } from "@/lib/forms";
 
@@ -123,6 +123,7 @@ export async function addJobOrderItemAction(
   }
 
   const values = parsed.data;
+  const redirectTab = resolveJobOrderDetailTab(readOptionalValue(formData, "redirectTab"));
   const { supabase } = await getAuthorizedSupabaseServerClient("job_orders:write");
   const { error } = await supabase.rpc("add_job_order_item", {
     p_job_order_id: values.jobOrderId,
@@ -142,7 +143,7 @@ export async function addJobOrderItemAction(
   }
 
   revalidateJobOrderPaths(values.jobOrderId);
-  redirect(`/job-orders/${values.jobOrderId}`);
+  redirect(buildJobOrderRedirectPath(values.jobOrderId, redirectTab));
 }
 
 export async function recordJobOrderPartUsageAction(
@@ -210,10 +211,23 @@ function readRequiredValue(formData: FormData, key: string) {
   return value;
 }
 
+function readOptionalValue(formData: FormData, key: string) {
+  const value = formData.get(key);
+  return typeof value === "string" ? value : undefined;
+}
+
 function revalidateJobOrderPaths(jobOrderId: string) {
   revalidatePath("/job-orders");
   revalidatePath(`/job-orders/${jobOrderId}`);
   revalidatePath("/dashboard");
+}
+
+function buildJobOrderRedirectPath(jobOrderId: string, tab?: string) {
+  if (tab) {
+    return `/job-orders/${jobOrderId}?tab=${encodeURIComponent(tab)}`;
+  }
+
+  return `/job-orders/${jobOrderId}`;
 }
 
 async function saveJobOrderPartMovement(

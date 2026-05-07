@@ -8,17 +8,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
-import type { JobOrderFormOptions, JobOrderItemType } from "@/features/job-orders/types";
+import type {
+  JobOrderDetailTab,
+  JobOrderFormOptions,
+  JobOrderItemType,
+} from "@/features/job-orders/types";
 import { addJobOrderItemAction } from "@/features/job-orders/actions/job-order-actions";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 
 export function JobOrderAdditionalItemForm({
   jobOrderId,
   options,
+  redirectTab,
   closeDialog,
 }: {
   jobOrderId: string;
   options: Pick<JobOrderFormOptions, "products" | "services">;
+  redirectTab: JobOrderDetailTab;
   closeDialog: () => void;
 }) {
   const [state, formAction] = useActionState(addJobOrderItemAction, INITIAL_FORM_ACTION_STATE);
@@ -66,6 +72,7 @@ export function JobOrderAdditionalItemForm({
   return (
     <form action={formAction} className="space-y-5">
       <input type="hidden" name="jobOrderId" value={jobOrderId} />
+      <input type="hidden" name="redirectTab" value={redirectTab} />
 
       <FormStatusMessage message={state.message} />
 

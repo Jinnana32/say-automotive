@@ -26,13 +26,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   removeMechanicAction,
   setJobOrderItemApprovalAction,
 } from '@/features/job-orders/actions/job-order-actions';
 import { AssignMechanicForm } from '@/features/job-orders/components/assign-mechanic-form';
 import { JobOrderAdditionalItemDialog } from '@/features/job-orders/components/job-order-additional-item-dialog';
+import { JobOrderDetailTabs } from '@/features/job-orders/components/job-order-detail-tabs';
 import { JobOrderDetailsForm } from '@/features/job-orders/components/job-order-details-form';
 import { JobOrderPartsUsagePanel } from '@/features/job-orders/components/job-order-parts-usage-panel';
 import {
@@ -43,6 +43,7 @@ import {
 import { JobOrderStatusDialog } from '@/features/job-orders/components/job-order-status-dialog';
 import type {
   JobOrderDetail,
+  JobOrderDetailTab,
   JobOrderFormOptions,
   JobOrderMechanicOption,
 } from '@/features/job-orders/types';
@@ -57,10 +58,12 @@ export function JobOrderDetailPage({
   jobOrder,
   formOptions,
   availableMechanics,
+  activeTab,
 }: {
   jobOrder: JobOrderDetail;
   formOptions: JobOrderFormOptions;
   availableMechanics: JobOrderMechanicOption[];
+  activeTab: JobOrderDetailTab;
 }) {
   const isReleased = jobOrder.status === 'released';
 
@@ -195,16 +198,9 @@ export function JobOrderDetailPage({
         />
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="w-full justify-start">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="billing">Billing</TabsTrigger>
-          <TabsTrigger value="work-items">Work Items</TabsTrigger>
-          <TabsTrigger value="parts-usage">Parts Usage</TabsTrigger>
-          <TabsTrigger value="mechanics">Mechanics</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview">
+      <JobOrderDetailTabs
+        activeTab={activeTab}
+        overview={
           <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
             <SectionCard
               title="Customer and vehicle"
@@ -257,9 +253,8 @@ export function JobOrderDetailPage({
               <ReadOnlyOperationalNotes detail={jobOrder} />
             )}
           </div>
-        </TabsContent>
-
-        <TabsContent value="billing">
+        }
+        billing={
           <SectionCard
             title="Billing snapshot"
             description="Invoice readiness is based on actual approved work items, not the original estimate."
@@ -340,9 +335,8 @@ export function JobOrderDetailPage({
               </div>
             </div>
           </SectionCard>
-        </TabsContent>
-
-        <TabsContent value="work-items">
+        }
+        workItems={
           <div className="space-y-5">
             <SectionCard
               title="Job order items"
@@ -355,6 +349,7 @@ export function JobOrderDetailPage({
                       products: formOptions.products,
                       services: formOptions.services,
                     }}
+                    redirectTab={activeTab}
                   />
                 ) : null
               }
@@ -481,17 +476,15 @@ export function JobOrderDetailPage({
               </div>
             </SectionCard>
           </div>
-        </TabsContent>
-
-        <TabsContent value="parts-usage">
+        }
+        partsUsage={
           <JobOrderPartsUsagePanel
             jobOrderId={jobOrder.id}
             items={jobOrder.items}
             status={jobOrder.status}
           />
-        </TabsContent>
-
-        <TabsContent value="mechanics">
+        }
+        mechanics={
           <div className="space-y-5">
             <SectionCard
               title="Assigned mechanics"
@@ -550,11 +543,11 @@ export function JobOrderDetailPage({
               <AssignMechanicForm
                 jobOrderId={jobOrder.id}
                 mechanics={availableMechanics}
-              />
-            ) : null}
+                />
+              ) : null}
           </div>
-        </TabsContent>
-      </Tabs>
+        }
+      />
     </div>
   );
 }

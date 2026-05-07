@@ -1,9 +1,11 @@
-import type {
-  JobOrderDetail,
-  JobOrderItemDetail,
-  JobOrderItemInventoryTracking,
-  JobOrderPartUsageEntry,
-  JobOrderStatus,
+import {
+  JOB_ORDER_DETAIL_TABS,
+  type JobOrderDetail,
+  type JobOrderDetailTab,
+  type JobOrderItemDetail,
+  type JobOrderItemInventoryTracking,
+  type JobOrderPartUsageEntry,
+  type JobOrderStatus,
 } from "@/features/job-orders/types";
 
 const FINAL_MECHANIC_LOCKED_STATUSES: JobOrderStatus[] = [
@@ -26,6 +28,12 @@ const DETAIL_LOCKED_STATUSES: JobOrderStatus[] = ["released", "cancelled"];
 
 export function formatJobOrderStatus(status: JobOrderStatus) {
   return status.replaceAll("_", " ");
+}
+
+export function resolveJobOrderDetailTab(value: string | undefined): JobOrderDetailTab {
+  return JOB_ORDER_DETAIL_TABS.includes(value as JobOrderDetailTab)
+    ? (value as JobOrderDetailTab)
+    : "overview";
 }
 
 export function getAllowedJobOrderStatusTransitions(status: JobOrderStatus): JobOrderStatus[] {
