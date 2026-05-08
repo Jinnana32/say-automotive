@@ -13,6 +13,7 @@ import {
 import type {
   InvoiceDetail,
   InvoiceListItem,
+  PaymentDetail,
   PaymentListItem,
 } from "@/features/invoices/types";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
@@ -226,6 +227,116 @@ export async function listPayments(filters?: {
     );
   });
 }
+
+export const getPaymentById = cache(async (paymentId: string): Promise<PaymentDetail | null> => {
+  const { supabase } = await getAuthorizedSupabaseServerClient("payments:read");
+  const { data: payment, error: paymentError } = await supabase
+    .from("payments")
+    .select("*")
+    .eq("id", paymentId)
+    .maybeSingle();
+
+  if (paymentError) {
+    throw new Error(paymentError.message);
+  }
+
+  if (!payment) {
+    return null;
+  }
+
+  const paymentRow = payment as PaymentRow;
+  const { data: invoice, error: invoiceError } = await supabase
+    .from("invoices")
+    .select("*")
+    .eq("id", paymentRow.invoice_id)
+    .maybeSingle();
+
+  if (invoiceError) {
+    throw new Error(invoiceError.message);
+  }
+
+  if (!invoice) {
+    return null;
+  }
+
+  const invoiceRow = invoice as InvoiceRow;
+  const [sourceContext, customerResult, vehicleResult, receivedByResult] = await Promise.all([
+    getInvoiceSourceContext(invoiceRow),
+    invoiceRow.customer_id
+      ? supabase
+          .from("customers")
+          .select("display_name, contact_number, address")
+          .eq("id", invoiceRow.customer_id)
+          .maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+    invoiceRow.vehicle_id
+      ? supabase
+          .from("vehicles")
+          .select("*")
+          .eq("id", invoiceRow.vehicle_id)
+          .maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+    paymentRow.received_by
+      ? supabase
+          .from("staff")
+          .select("first_name, last_name, role")
+          .eq("linked_user_id", paymentRow.received_by)
+          .maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+  ]);
+
+  if (customerResult.error) {
+    throw new Error(customerResult.error.message);
+  }
+
+  if (vehicleResult.error) {
+    throw new Error(vehicleResult.error.message);
+  }
+
+  if (receivedByResult.error) {
+    throw new Error(receivedByResult.error.message);
+  }
+
+  const customer = customerResult.data;
+  const vehicle = vehicleResult.data as VehicleRow | null;
+  const receivedBy = receivedByResult.data;
+  const branchId = sourceContext.jobOrder?.branch_id ?? sourceContext.sale?.branch_id ?? null;
+
+  return {
+    id: paymentRow.id,
+    invoiceId: invoiceRow.id,
+    invoiceNumber: invoiceRow.invoice_number,
+    jobOrderId: invoiceRow.job_order_id,
+    jobOrderNumber: sourceContext.jobOrder?.job_order_number ?? null,
+    customerName: customer?.display_name ?? "Walk-in customer",
+    amount: paymentRow.amount,
+    paymentMethod: paymentRow.payment_method,
+    referenceNumber: paymentRow.reference_number,
+    paidAt: paymentRow.paid_at,
+    branchId,
+    invoiceDate: invoiceRow.invoice_date,
+    invoiceStatus: invoiceRow.status,
+    invoiceTotalAmount: invoiceRow.total_amount,
+    invoicePaidAmount: invoiceRow.paid_amount,
+    invoiceBalanceAfterPayment: invoiceRow.balance,
+    invoiceBalanceBeforePayment: Number((invoiceRow.balance + paymentRow.amount).toFixed(2)),
+    customerContactNumber: customer?.contact_number ?? null,
+    customerAddress: customer?.address ?? null,
+    vehicleId: invoiceRow.vehicle_id,
+    vehicleLabel: vehicle ? formatVehicleLabel(vehicle) : "No vehicle",
+    vehicleMake: vehicle?.make ?? null,
+    vehicleModel: vehicle?.model ?? null,
+    vehicleYear: vehicle?.year ?? null,
+    vehiclePlateNumber: vehicle?.plate_number ?? null,
+    vehicleVin: vehicle?.vin ?? null,
+    saleId: invoiceRow.sale_id,
+    saleNumber: sourceContext.sale?.sale_number ?? null,
+    notes: paymentRow.notes,
+    createdAt: paymentRow.created_at,
+    receivedByName: receivedBy ? `${receivedBy.first_name} ${receivedBy.last_name}`.trim() : null,
+    receivedByTitle: receivedBy ? receivedBy.role.replaceAll("_", " ") : null,
+  };
+});
 
 async function getInvoiceSourceContext(invoice: InvoiceRow) {
   const supabase = await getSupabaseServerClient();

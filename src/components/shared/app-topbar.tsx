@@ -31,7 +31,7 @@ export function AppTopbar({
         : null;
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border/80 bg-background/90 backdrop-blur">
+    <header className="border-b border-border/80 bg-background">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-start justify-between gap-3 lg:hidden">
           <div className="min-w-0">

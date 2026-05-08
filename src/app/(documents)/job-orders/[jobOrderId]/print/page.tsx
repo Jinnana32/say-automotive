@@ -25,7 +25,6 @@ export default async function JobOrderPrintPage({ params }: JobOrderPrintPagePro
     <ReportPage
       toolbar={
         <ReportToolbar
-          backHref={`/job-orders/${document.jobOrder.id}`}
           downloadHref={`/api/job-orders/${document.jobOrder.id}/pdf`}
         />
       }

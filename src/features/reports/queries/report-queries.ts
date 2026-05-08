@@ -1,27 +1,39 @@
 import type { TableRow } from "@/types/database";
 
 import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
-import { getBusinessNow } from "@/lib/dates";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
-import type { ReportsPageData, ReportWindow } from "@/features/reports/types";
+import type { ReportsPageData } from "@/features/reports/types";
 import {
   buildPaymentMethodBreakdown,
+  buildRevenueTrend,
   buildStatusBreakdown,
-  filterByIsoDate,
-  getReportWindowStart,
+  buildTopPerformers,
+  buildTrendBuckets,
+  buildWorkflowFunnel,
+  filterByIsoDateRange,
+  getReportRangeBounds,
+  resolveReportFilters,
 } from "@/features/reports/utils";
 
-type QuotationRow = Pick<TableRow<"quotations">, "status" | "total_amount" | "created_at">;
+type QuotationRow = Pick<
+  TableRow<"quotations">,
+  "status" | "total_amount" | "created_at" | "approved_at"
+>;
 type JobOrderRow = Pick<
   TableRow<"job_orders">,
-  "status" | "created_at" | "released_at"
+  "id" | "status" | "created_at" | "released_at"
 >;
 type InvoiceRow = Pick<
   TableRow<"invoices">,
   "id" | "invoice_number" | "status" | "total_amount" | "balance" | "customer_id" | "created_at"
 >;
-type PaymentRow = Pick<TableRow<"payments">, "amount" | "payment_method" | "paid_at">;
-type SaleRow = Pick<TableRow<"sales">, "total_amount" | "created_at">;
+type PaymentRow = Pick<TableRow<"payments">, "invoice_id" | "amount" | "payment_method" | "paid_at">;
+type SaleRow = Pick<TableRow<"sales">, "id" | "total_amount" | "created_at">;
+type InvoiceItemRow = Pick<
+  TableRow<"invoice_items">,
+  "invoice_id" | "item_type" | "description" | "quantity" | "total"
+>;
+type SaleItemRow = Pick<TableRow<"sale_items">, "sale_id" | "description" | "quantity" | "total">;
 type InventoryStockRow = Pick<
   TableRow<"inventory_stocks">,
   "quantity_on_hand" | "available_quantity" | "reorder_level"
@@ -33,7 +45,14 @@ type StockMovementRow = Pick<
 type ProductRow = Pick<TableRow<"products">, "id" | "name">;
 type CustomerRow = Pick<TableRow<"customers">, "id" | "display_name">;
 
-export async function getReportsPageData(window: ReportWindow): Promise<ReportsPageData> {
+export async function getReportsPageData(input: {
+  preset?: string;
+  from?: string;
+  to?: string;
+  groupBy?: string;
+}): Promise<ReportsPageData> {
+  const filters = resolveReportFilters(input);
+  const { fromIso, toIso } = getReportRangeBounds(filters);
   const { supabase } = await getAuthorizedSupabaseServerClient("reports:read");
   const [
     { data: quotations, error: quotationsError },
@@ -44,11 +63,13 @@ export async function getReportsPageData(window: ReportWindow): Promise<ReportsP
     { data: inventoryStocks, error: inventoryStocksError },
     { data: stockMovements, error: stockMovementsError },
   ] = await Promise.all([
-    supabase.from("quotations").select("status, total_amount, created_at"),
-    supabase.from("job_orders").select("status, created_at, released_at"),
-    supabase.from("invoices").select("id, invoice_number, status, total_amount, balance, customer_id, created_at"),
-    supabase.from("payments").select("amount, payment_method, paid_at"),
-    supabase.from("sales").select("total_amount, created_at").eq("status", "completed"),
+    supabase.from("quotations").select("status, total_amount, created_at, approved_at"),
+    supabase.from("job_orders").select("id, status, created_at, released_at"),
+    supabase
+      .from("invoices")
+      .select("id, invoice_number, status, total_amount, balance, customer_id, created_at"),
+    supabase.from("payments").select("invoice_id, amount, payment_method, paid_at"),
+    supabase.from("sales").select("id, total_amount, created_at").eq("status", "completed"),
     supabase.from("inventory_stocks").select("quantity_on_hand, available_quantity, reorder_level"),
     supabase
       .from("stock_movements")
@@ -85,8 +106,6 @@ export async function getReportsPageData(window: ReportWindow): Promise<ReportsP
     throw new Error(stockMovementsError.message);
   }
 
-  const nowIso = getBusinessNow().toISO() ?? new Date().toISOString();
-  const windowStartIso = getReportWindowStart(window, nowIso);
   const quotationRows = (quotations ?? []) as QuotationRow[];
   const jobOrderRows = (jobOrders ?? []) as JobOrderRow[];
   const invoiceRows = (invoices ?? []) as InvoiceRow[];
@@ -95,116 +114,204 @@ export async function getReportsPageData(window: ReportWindow): Promise<ReportsP
   const inventoryStockRows = (inventoryStocks ?? []) as InventoryStockRow[];
   const stockMovementRows = (stockMovements ?? []) as StockMovementRow[];
 
-  const periodQuotations = filterByIsoDate(quotationRows, {
+  const periodQuotations = filterByIsoDateRange(quotationRows, {
     getDate: (row) => row.created_at,
-    windowStartIso,
+    fromIso,
+    toIso,
   });
-  const periodJobOrders = filterByIsoDate(jobOrderRows, {
+  const periodApprovedQuotations = filterByIsoDateRange(quotationRows, {
+    getDate: (row) => row.approved_at,
+    fromIso,
+    toIso,
+  });
+  const periodJobOrders = filterByIsoDateRange(jobOrderRows, {
     getDate: (row) => row.created_at,
-    windowStartIso,
+    fromIso,
+    toIso,
   });
-  const periodReleasedJobOrders = filterByIsoDate(jobOrderRows, {
+  const periodReleasedJobOrders = filterByIsoDateRange(jobOrderRows, {
     getDate: (row) => row.released_at,
-    windowStartIso,
+    fromIso,
+    toIso,
   });
-  const periodInvoices = filterByIsoDate(invoiceRows, {
+  const periodInvoices = filterByIsoDateRange(invoiceRows, {
     getDate: (row) => row.created_at,
-    windowStartIso,
+    fromIso,
+    toIso,
   });
-  const periodPayments = filterByIsoDate(paymentRows, {
+  const periodPayments = filterByIsoDateRange(paymentRows, {
     getDate: (row) => row.paid_at,
-    windowStartIso,
+    fromIso,
+    toIso,
   });
-  const periodSales = filterByIsoDate(saleRows, {
+  const periodSales = filterByIsoDateRange(saleRows, {
     getDate: (row) => row.created_at,
-    windowStartIso,
+    fromIso,
+    toIso,
   });
 
+  const periodInvoiceIds = periodInvoices.map((row) => row.id);
+  const periodSaleIds = periodSales.map((row) => row.id);
+
+  const [invoiceItems, saleItems] = await Promise.all([
+    getInvoiceItems(periodInvoiceIds),
+    getSaleItems(periodSaleIds),
+  ]);
+
+  const serviceInvoiceItems = invoiceItems.filter(
+    (item) => item.item_type === "service" || item.item_type === "labor",
+  );
+  const productInvoiceItems = invoiceItems.filter((item) => item.item_type === "product");
+
+  const servicesRendered = sumBy(serviceInvoiceItems, (item) => item.quantity);
+  const averageInvoiceValue =
+    periodInvoices.length > 0
+      ? roundCurrency(sumBy(periodInvoices, (row) => row.total_amount) / periodInvoices.length)
+      : 0;
+
+  const paymentInvoiceIds = new Set(periodPayments.map((row) => row.invoice_id));
   const unpaidInvoices = invoiceRows.filter(isUnpaidInvoice);
   const unpaidCustomerIds = [
     ...new Set(unpaidInvoices.flatMap((invoice) => (invoice.customer_id ? [invoice.customer_id] : []))),
   ];
-  const stockMovementProductIds = [
-    ...new Set(stockMovementRows.map((movement) => movement.product_id)),
-  ];
+  const stockMovementProductIds = [...new Set(stockMovementRows.map((movement) => movement.product_id))];
   const [customerMap, productMap] = await Promise.all([
     getCustomerNameMap(unpaidCustomerIds),
     getProductNameMap(stockMovementProductIds),
   ]);
 
+  const trendBuckets = buildTrendBuckets(filters);
+
   return {
-    window,
-    performanceMetrics: [
+    filters,
+    periodPerformanceMetrics: [
       {
-        label: "Quotation value",
-        value: sumBy(periodQuotations, (row) => row.total_amount),
+        label: "Payments collected",
+        value: sumBy(periodPayments, (row) => row.amount),
         kind: "currency",
-      },
-      {
-        label: "Job orders opened",
-        value: periodJobOrders.length,
-        kind: "count",
-      },
-      {
-        label: "Vehicles released",
-        value: periodReleasedJobOrders.length,
-        kind: "count",
+        helper: `${periodPayments.length} payment record${periodPayments.length === 1 ? "" : "s"} in range`,
+        tone: "success",
       },
       {
         label: "Invoiced value",
         value: sumBy(periodInvoices, (row) => row.total_amount),
         kind: "currency",
+        helper: `${periodInvoices.length} invoice${periodInvoices.length === 1 ? "" : "s"} created in range`,
       },
       {
-        label: "Payments collected",
-        value: sumBy(periodPayments, (row) => row.amount),
+        label: "Quotation value",
+        value: sumBy(periodQuotations, (row) => row.total_amount),
         kind: "currency",
+        helper: `${periodQuotations.length} quotation${periodQuotations.length === 1 ? "" : "s"} created`,
+      },
+      {
+        label: "Job orders opened",
+        value: periodJobOrders.length,
+        kind: "count",
+        helper: `${periodReleasedJobOrders.length} released in the same period`,
+      },
+      {
+        label: "Vehicles released",
+        value: periodReleasedJobOrders.length,
+        kind: "count",
+        helper: "Counted from job orders released in the selected range",
+      },
+      {
+        label: "Services rendered",
+        value: servicesRendered,
+        kind: "quantity",
+        helper: "Based on invoiced service and labor line quantities",
+      },
+      {
+        label: "Average invoice value",
+        value: averageInvoiceValue,
+        kind: "currency",
+        helper: periodInvoices.length > 0 ? "Calculated from invoices in this period" : "No invoices in this period",
       },
       {
         label: "POS sales value",
         value: sumBy(periodSales, (row) => row.total_amount),
         kind: "currency",
+        helper: `${periodSales.length} completed sale${periodSales.length === 1 ? "" : "s"} in range`,
       },
     ],
-    operationalMetrics: [
+    operationalAlerts: [
       {
         label: "Open job orders",
-        value: jobOrderRows.filter(
-          (row) => !["released", "cancelled"].includes(row.status),
-        ).length,
+        value: jobOrderRows.filter((row) => !["released", "cancelled"].includes(row.status)).length,
         kind: "count",
+        helper: "Current active workload across the shop",
+        tone: "warning",
       },
       {
         label: "Unpaid invoices",
         value: unpaidInvoices.length,
         kind: "count",
+        helper: "Outstanding receivables that still need collection",
+        tone: unpaidInvoices.length > 0 ? "warning" : "success",
       },
       {
         label: "Low stock items",
         value: inventoryStockRows.filter(
-          (row) =>
-            row.reorder_level !== null &&
-            row.available_quantity <= row.reorder_level,
+          (row) => row.reorder_level !== null && row.available_quantity <= row.reorder_level,
         ).length,
         kind: "count",
+        helper: "Available quantity is at or below reorder level",
+        tone: "warning",
       },
       {
         label: "Out of stock items",
         value: inventoryStockRows.filter((row) => row.available_quantity <= 0).length,
         kind: "count",
+        helper: "Items with no available quantity right now",
+        tone: "danger",
       },
       {
-        label: "On-hand quantity",
+        label: "Current on-hand quantity",
         value: sumBy(inventoryStockRows, (row) => row.quantity_on_hand),
         kind: "quantity",
+        helper: "Live quantity on hand across all stocked items",
+        tone: "info",
       },
     ],
-    quotationStatusBreakdown: buildStatusBreakdown(
-      periodQuotations.map((row) => row.status),
+    revenueTrend: buildRevenueTrend({
+      buckets: trendBuckets,
+      payments: periodPayments,
+      releases: periodReleasedJobOrders,
+      getPaymentDate: (row) => row.paid_at,
+      getPaymentAmount: (row) => row.amount,
+      getReleaseDate: (row) => row.released_at ?? "",
+    }),
+    workflowFunnel: buildWorkflowFunnel({
+      quotationsCreated: periodQuotations.length,
+      quotationsApproved: periodApprovedQuotations.length,
+      jobOrdersOpened: periodJobOrders.length,
+      vehiclesReleased: periodReleasedJobOrders.length,
+      invoicesWithPaymentActivity: paymentInvoiceIds.size,
+      paymentsCollected: sumBy(periodPayments, (row) => row.amount),
+    }),
+    topServices: buildTopPerformers(
+      serviceInvoiceItems.map((item) => ({
+        label: item.description,
+        quantity: item.quantity,
+        amount: item.total,
+      })),
     ),
-    jobOrderStatusBreakdown: buildStatusBreakdown(
-      jobOrderRows.map((row) => row.status),
-    ),
+    topProducts: buildTopPerformers([
+      ...productInvoiceItems.map((item) => ({
+        label: item.description,
+        quantity: item.quantity,
+        amount: item.total,
+      })),
+      ...saleItems.map((item) => ({
+        label: item.description,
+        quantity: item.quantity,
+        amount: item.total,
+      })),
+    ]),
+    quotationStatusBreakdown: buildStatusBreakdown(periodQuotations.map((row) => row.status)),
+    periodJobOrderStatusBreakdown: buildStatusBreakdown(periodJobOrders.map((row) => row.status)),
+    liveJobOrderStatusBreakdown: buildStatusBreakdown(jobOrderRows.map((row) => row.status)),
     paymentMethodBreakdown: buildPaymentMethodBreakdown(
       periodPayments.map((row) => ({
         paymentMethod: row.payment_method,
@@ -240,10 +347,7 @@ async function getCustomerNameMap(customerIds: string[]) {
   }
 
   const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("customers")
-    .select("id, display_name")
-    .in("id", customerIds);
+  const { data, error } = await supabase.from("customers").select("id, display_name").in("id", customerIds);
 
   if (error) {
     throw new Error(error.message);
@@ -258,10 +362,7 @@ async function getProductNameMap(productIds: string[]) {
   }
 
   const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("products")
-    .select("id, name")
-    .in("id", productIds);
+  const { data, error } = await supabase.from("products").select("id, name").in("id", productIds);
 
   if (error) {
     throw new Error(error.message);
@@ -270,8 +371,48 @@ async function getProductNameMap(productIds: string[]) {
   return new Map(((data ?? []) as ProductRow[]).map((row) => [row.id, row.name]));
 }
 
+async function getInvoiceItems(invoiceIds: string[]) {
+  if (invoiceIds.length === 0) {
+    return [] as InvoiceItemRow[];
+  }
+
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("invoice_items")
+    .select("invoice_id, item_type, description, quantity, total")
+    .in("invoice_id", invoiceIds);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? []) as InvoiceItemRow[];
+}
+
+async function getSaleItems(saleIds: string[]) {
+  if (saleIds.length === 0) {
+    return [] as SaleItemRow[];
+  }
+
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("sale_items")
+    .select("sale_id, description, quantity, total")
+    .in("sale_id", saleIds);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? []) as SaleItemRow[];
+}
+
 function sumBy<T>(rows: T[], selector: (row: T) => number) {
-  return Number(rows.reduce((sum, row) => sum + selector(row), 0).toFixed(2));
+  return roundCurrency(rows.reduce((sum, row) => sum + selector(row), 0));
+}
+
+function roundCurrency(value: number) {
+  return Number(value.toFixed(2));
 }
 
 function isUnpaidInvoice(

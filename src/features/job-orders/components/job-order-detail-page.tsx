@@ -1,12 +1,12 @@
 import Link from 'next/link';
 import {
-  ArrowLeft,
   CarFront,
   ClipboardList,
   ReceiptText,
   Wrench,
 } from 'lucide-react';
 
+import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import {
   DetailSummaryGrid,
   DetailSummaryItem,
@@ -72,6 +72,13 @@ export function JobOrderDetailPage({
       <div className="sticky top-20 z-20 rounded-2xl border border-border/70 bg-background/95 px-5 py-4 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/90 lg:top-[5.25rem]">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="min-w-0 space-y-2">
+            <Breadcrumbs
+              items={[
+                { label: 'Service Desk' },
+                { label: 'Job Orders', href: '/job-orders' },
+                { label: jobOrder.jobOrderNumber },
+              ]}
+            />
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                 Job order
@@ -85,6 +92,9 @@ export function JobOrderDetailPage({
               <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                 {jobOrder.jobOrderNumber}
               </h1>
+              <p className="text-sm text-muted-foreground">
+                {jobOrder.customerName} • {jobOrder.vehicleLabel}
+              </p>
             </div>
           </div>
 
@@ -96,12 +106,6 @@ export function JobOrderDetailPage({
             </Button>
             <Button asChild variant="outline" size="sm">
               <a href={`/api/job-orders/${jobOrder.id}/pdf`}>Download PDF</a>
-            </Button>
-            <Button asChild variant="outline" size="sm">
-              <Link href="/job-orders">
-                <ArrowLeft className="size-4" />
-                Back to job orders
-              </Link>
             </Button>
             {jobOrder.quotationId ? (
               <Button asChild variant="ghost" size="sm">

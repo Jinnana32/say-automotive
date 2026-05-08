@@ -27,7 +27,6 @@ export default async function QuotationPrintPage({
     <ReportPage
       toolbar={
         <ReportToolbar
-          backHref={`/quotations/${document.quotation.id}`}
           downloadHref={`/api/quotations/${document.quotation.id}/pdf`}
         />
       }

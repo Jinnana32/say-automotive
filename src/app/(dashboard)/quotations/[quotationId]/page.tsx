@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { DetailSummaryGrid, DetailSummaryItem } from "@/components/shared/detail-summary-grid";
 import { PageHeader } from "@/components/shared/page-header";
 import { SectionCard } from "@/components/shared/section-card";
@@ -39,9 +40,17 @@ export default async function QuotationDetailPage({ params }: QuotationDetailPag
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs
+        items={[
+          { label: "Service Desk" },
+          { label: "Quotations", href: "/quotations" },
+          { label: quotation.quotationNumber },
+        ]}
+      />
+
       <PageHeader
         title={quotation.quotationNumber}
-        description="Quotation header, commercial totals, and quoted line items."
+        description={`${quotation.customerName} • ${quotation.vehicleLabel}`}
         actions={
           <>
             <Button asChild variant="outline">

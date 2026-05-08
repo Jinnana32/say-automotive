@@ -88,8 +88,16 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
                 <TableBody>
                   {payments.map((payment) => (
                     <TableRow key={payment.id}>
-                      <TableCell>{formatDateTime(payment.paidAt)}</TableCell>
-                      <TableCell className="font-semibold">{payment.invoiceNumber}</TableCell>
+                      <TableCell>
+                        <Link href={`/payments/${payment.id}`} className="underline-offset-4 hover:underline">
+                          {formatDateTime(payment.paidAt)}
+                        </Link>
+                      </TableCell>
+                      <TableCell className="font-semibold">
+                        <Link href={`/payments/${payment.id}`} className="underline-offset-4 hover:underline">
+                          {payment.invoiceNumber}
+                        </Link>
+                      </TableCell>
                       <TableCell>{payment.jobOrderNumber ?? "POS flow"}</TableCell>
                       <TableCell>{payment.customerName}</TableCell>
                       <TableCell>
@@ -98,9 +106,14 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
                       <TableCell>{formatCurrency(payment.amount)}</TableCell>
                       <TableCell>{payment.referenceNumber ?? "No reference"}</TableCell>
                       <TableCell className="text-right">
-                        <Button asChild size="sm" variant="ghost">
-                          <Link href={`/invoices/${payment.invoiceId}`}>Open invoice</Link>
-                        </Button>
+                        <div className="flex justify-end gap-1">
+                          <Button asChild size="sm" variant="ghost">
+                            <Link href={`/payments/${payment.id}`}>Open payment</Link>
+                          </Button>
+                          <Button asChild size="sm" variant="ghost">
+                            <Link href={`/invoices/${payment.invoiceId}`}>Open invoice</Link>
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

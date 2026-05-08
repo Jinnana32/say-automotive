@@ -1,15 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import { Download, Printer, Undo2 } from "lucide-react";
+import { Download, Printer } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
 export function ReportToolbar({
-  backHref,
   downloadHref,
 }: {
-  backHref: string;
   downloadHref: string;
 }) {
   return (
@@ -23,12 +20,6 @@ export function ReportToolbar({
           <Download className="size-4" />
           Download PDF
         </a>
-      </Button>
-      <Button asChild type="button" variant="outline" size="sm">
-        <Link href={backHref}>
-          <Undo2 className="size-4" />
-          Back
-        </Link>
       </Button>
     </div>
   );

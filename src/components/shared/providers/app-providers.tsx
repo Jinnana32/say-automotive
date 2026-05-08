@@ -3,6 +3,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
+import { GlobalLoadingOverlayProvider } from "@/components/shared/providers/global-loading-overlay-provider";
+
 export function AppProviders({
   children,
 }: Readonly<{
@@ -20,5 +22,9 @@ export function AppProviders({
       }),
   );
 
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <GlobalLoadingOverlayProvider>{children}</GlobalLoadingOverlayProvider>
+    </QueryClientProvider>
+  );
 }

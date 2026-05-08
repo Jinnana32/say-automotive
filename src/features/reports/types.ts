@@ -1,10 +1,18 @@
-export type ReportWindow = "7d" | "30d" | "90d" | "all";
+export type ReportPreset =
+  | "today"
+  | "this-week"
+  | "this-month"
+  | "last-30-days"
+  | "custom";
+
+export type ReportGroupBy = "daily" | "weekly" | "monthly";
 
 export type ReportMetric = {
   label: string;
   value: number;
   kind: "count" | "currency" | "quantity";
   helper?: string;
+  tone?: "default" | "success" | "warning" | "danger" | "info";
 };
 
 export type StatusBreakdownItem = {
@@ -43,13 +51,58 @@ export type StockMovementReportItem = {
   createdAt: string;
 };
 
+export type ReportsFilterState = {
+  preset: ReportPreset;
+  from: string;
+  to: string;
+  groupBy: ReportGroupBy;
+  periodLabel: string;
+};
+
+export type RevenueTrendPoint = {
+  key: string;
+  label: string;
+  paymentsCollected: number;
+  vehiclesReleased: number;
+};
+
+export type WorkflowFunnelStep = {
+  label: string;
+  count: number;
+  helper?: string;
+};
+
+export type TopPerformerItem = {
+  label: string;
+  quantity: number;
+  amount: number;
+};
+
 export type ReportsPageData = {
-  window: ReportWindow;
-  performanceMetrics: ReportMetric[];
-  operationalMetrics: ReportMetric[];
+  filters: ReportsFilterState;
+  periodPerformanceMetrics: ReportMetric[];
+  operationalAlerts: ReportMetric[];
+  revenueTrend: RevenueTrendPoint[];
+  workflowFunnel: WorkflowFunnelStep[];
+  topServices: TopPerformerItem[];
+  topProducts: TopPerformerItem[];
   quotationStatusBreakdown: StatusBreakdownItem[];
-  jobOrderStatusBreakdown: StatusBreakdownItem[];
+  periodJobOrderStatusBreakdown: StatusBreakdownItem[];
+  liveJobOrderStatusBreakdown: StatusBreakdownItem[];
   paymentMethodBreakdown: PaymentMethodBreakdownItem[];
   unpaidInvoices: UnpaidInvoiceReportItem[];
   recentStockMovements: StockMovementReportItem[];
+};
+
+export type ReportsPrintBusinessProfile = {
+  businessName: string;
+  businessContact: string | null;
+  businessEmail: string | null;
+  businessAddress: string | null;
+};
+
+export type ReportsPrintDocument = {
+  reports: ReportsPageData;
+  businessProfile: ReportsPrintBusinessProfile;
+  generatedAt: string;
 };

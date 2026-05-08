@@ -54,6 +54,30 @@ export type InvoiceDetail = InvoiceListItem & {
   canReleaseVehicle: boolean;
 };
 
+export type InvoicePrintDetail = InvoiceDetail & {
+  customerContactNumber: string | null;
+  customerAddress: string | null;
+  vehicleMake: string | null;
+  vehicleModel: string | null;
+  vehicleYear: number | null;
+  vehiclePlateNumber: string | null;
+  vehicleVin: string | null;
+  preparedByName: string | null;
+  preparedByTitle: string | null;
+};
+
+export type InvoicePrintBusinessProfile = {
+  businessName: string;
+  businessContact: string | null;
+  businessEmail: string | null;
+  businessAddress: string | null;
+};
+
+export type InvoicePrintDocument = {
+  invoice: InvoicePrintDetail;
+  businessProfile: InvoicePrintBusinessProfile;
+};
+
 export type PaymentListItem = {
   id: string;
   invoiceId: string;
@@ -64,4 +88,43 @@ export type PaymentListItem = {
   paymentMethod: PaymentMethod;
   referenceNumber: string | null;
   paidAt: string;
+};
+
+export type PaymentDetail = PaymentListItem & {
+  branchId: string | null;
+  invoiceDate: string;
+  invoiceStatus: InvoiceStatus;
+  invoiceTotalAmount: number;
+  invoicePaidAmount: number;
+  invoiceBalanceAfterPayment: number;
+  invoiceBalanceBeforePayment: number;
+  customerContactNumber: string | null;
+  customerAddress: string | null;
+  vehicleId: string | null;
+  vehicleLabel: string;
+  vehicleMake: string | null;
+  vehicleModel: string | null;
+  vehicleYear: number | null;
+  vehiclePlateNumber: string | null;
+  vehicleVin: string | null;
+  saleId: string | null;
+  saleNumber: string | null;
+  jobOrderId: string | null;
+  referenceNumber: string | null;
+  notes: string | null;
+  createdAt: string;
+  receivedByName: string | null;
+  receivedByTitle: string | null;
+};
+
+export type PaymentPrintBusinessProfile = {
+  businessName: string;
+  businessContact: string | null;
+  businessEmail: string | null;
+  businessAddress: string | null;
+};
+
+export type PaymentPrintDocument = {
+  payment: PaymentDetail;
+  businessProfile: PaymentPrintBusinessProfile;
 };

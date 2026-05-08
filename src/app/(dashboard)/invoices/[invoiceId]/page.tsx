@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { Breadcrumbs } from "@/components/shared/breadcrumbs";
+import { DetailSummaryGrid, DetailSummaryItem } from "@/components/shared/detail-summary-grid";
 import { EmptyState } from "@/components/shared/empty-state";
-import { MetricGrid } from "@/components/shared/metric-grid";
 import { PageHeader } from "@/components/shared/page-header";
 import { SectionCard } from "@/components/shared/section-card";
-import { StatCard } from "@/components/shared/stat-card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { InvoiceStatusBadge, PaymentMethodBadge } from "@/features/invoices/components/invoice-status-badge";
@@ -26,6 +26,8 @@ type InvoiceDetailPageProps = {
 export default async function InvoiceDetailPage({ params }: InvoiceDetailPageProps) {
   const { invoiceId } = await params;
   const invoice = await getInvoiceById(invoiceId);
+  const printHref = `/invoices/${invoiceId}/print`;
+  const downloadHref = `/api/invoices/${invoiceId}/pdf`;
 
   if (!invoice) {
     notFound();
@@ -33,13 +35,26 @@ export default async function InvoiceDetailPage({ params }: InvoiceDetailPagePro
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs
+        items={[
+          { label: "Billing" },
+          { label: "Invoices", href: "/invoices" },
+          { label: invoice.invoiceNumber },
+        ]}
+      />
+
       <PageHeader
         title={invoice.invoiceNumber}
         description="Billing record used for collection, balance control, and vehicle release enforcement."
         actions={
           <>
-            <Button asChild variant="outline">
-              <Link href="/invoices">Back to invoices</Link>
+            <Button asChild variant="outlineBlue">
+              <Link href={printHref} target="_blank" rel="noreferrer">
+                Print invoice
+              </Link>
+            </Button>
+            <Button asChild variant="bluePrimary">
+              <a href={downloadHref}>Download PDF</a>
             </Button>
             {invoice.jobOrderId ? (
               <Button asChild variant="ghost">
@@ -50,54 +65,55 @@ export default async function InvoiceDetailPage({ params }: InvoiceDetailPagePro
         }
       />
 
-      <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-        <SectionCard
-          title="Invoice summary"
-          description="Header data and collection state."
-        >
-          <div className="grid gap-4 text-sm">
-            <DetailRow label="Customer" value={invoice.customerName} />
-            <DetailRow label="Vehicle" value={invoice.vehicleLabel} />
-            <DetailRow
-              label="Source"
-              value={
-                invoice.jobOrderId && invoice.jobOrderNumber ? (
-                  <Link
-                    href={`/job-orders/${invoice.jobOrderId}`}
-                    className="underline-offset-4 hover:underline"
-                  >
-                    {invoice.jobOrderNumber}
-                  </Link>
-                ) : (
-                  invoice.saleNumber ?? "Direct sale"
-                )
-              }
-            />
-            <DetailRow
-              label="Status"
-              value={invoice.status.replaceAll("_", " ")}
-              badge={<InvoiceStatusBadge status={invoice.status} />}
-            />
-            <DetailRow label="Invoice date" value={formatDate(invoice.invoiceDate)} />
-            <DetailRow label="Created" value={formatDateTime(invoice.createdAt)} />
-          </div>
-        </SectionCard>
-
-        <SectionCard
-          title="Totals"
-          description="Payment and release rules are enforced from the final balance."
-        >
-          <MetricGrid className="md:grid-cols-3 xl:grid-cols-3">
-            <StatCard title="Total" value={formatCurrency(invoice.totalAmount)} />
-            <StatCard title="Paid" value={formatCurrency(invoice.paidAmount)} tone="success" />
-            <StatCard
-              title="Balance"
-              value={formatCurrency(invoice.balance)}
-              tone={invoice.balance > 0 ? "warning" : "success"}
-            />
-          </MetricGrid>
-        </SectionCard>
-      </section>
+      <DetailSummaryGrid>
+        <DetailSummaryItem label="Customer" value={invoice.customerName} />
+        <DetailSummaryItem label="Vehicle" value={invoice.vehicleLabel} />
+        <DetailSummaryItem
+          label="Source"
+          value={
+            invoice.jobOrderId && invoice.jobOrderNumber ? (
+              <Link
+                href={`/job-orders/${invoice.jobOrderId}`}
+                className="underline-offset-4 hover:underline"
+              >
+                {invoice.jobOrderNumber}
+              </Link>
+            ) : (
+              invoice.saleNumber ?? "Direct sale"
+            )
+          }
+        />
+        <DetailSummaryItem
+          label="Invoice status"
+          value={invoice.status.replaceAll("_", " ")}
+          hint={
+            invoice.releasedAt
+              ? `Vehicle released ${formatDateTime(invoice.releasedAt)}`
+              : "Billing and release rules are enforced from the final balance."
+          }
+          badge={<InvoiceStatusBadge status={invoice.status} />}
+        />
+        <DetailSummaryItem
+          label="Invoice date"
+          value={formatDate(invoice.invoiceDate)}
+          hint={`Created ${formatDateTime(invoice.createdAt)}`}
+        />
+        <DetailSummaryItem
+          label="Source total"
+          value={formatCurrency(invoice.totalAmount)}
+          hint={`${formatCurrency(invoice.discount)} discount • ${formatCurrency(invoice.tax)} tax`}
+        />
+        <DetailSummaryItem
+          label="Paid amount"
+          value={formatCurrency(invoice.paidAmount)}
+          hint={invoice.payments.length > 0 ? `${invoice.payments.length} payment record${invoice.payments.length === 1 ? "" : "s"}` : "No payments recorded yet"}
+        />
+        <DetailSummaryItem
+          label="Remaining balance"
+          value={formatCurrency(invoice.balance)}
+          hint={invoice.balance > 0 ? "Vehicle release stays blocked until balance rules are satisfied." : "Balance cleared."}
+        />
+      </DetailSummaryGrid>
 
       <section className="grid gap-6 2xl:grid-cols-[1.15fr_0.85fr]">
         <div className="space-y-6">
@@ -153,7 +169,12 @@ export default async function InvoiceDetailPage({ params }: InvoiceDetailPagePro
                     >
                       <div className="space-y-2">
                         <div className="flex items-center gap-3">
-                          <p className="font-semibold">{formatCurrency(payment.amount)}</p>
+                          <Link
+                            href={`/payments/${payment.id}`}
+                            className="font-semibold underline-offset-4 hover:underline"
+                          >
+                            {formatCurrency(payment.amount)}
+                          </Link>
                           <PaymentMethodBadge method={payment.paymentMethod} />
                         </div>
                         <p className="text-sm text-muted-foreground">
@@ -200,35 +221,6 @@ export default async function InvoiceDetailPage({ params }: InvoiceDetailPagePro
           ) : null}
         </div>
       </section>
-    </div>
-  );
-}
-
-function DetailRow({
-  label,
-  value,
-  badge,
-}: {
-  label: string;
-  value: React.ReactNode;
-  badge?: React.ReactNode;
-}) {
-  return (
-    <div className="grid gap-1 rounded-xl border border-border/70 bg-muted/20 p-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
-      <div className="flex items-center gap-3">
-        <p>{value}</p>
-        {badge}
-      </div>
-    </div>
-  );
-}
-
-function MetricCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-[1.25rem] border border-border/70 bg-muted/20 p-4">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="mt-2 text-xl font-semibold">{value}</p>
     </div>
   );
 }

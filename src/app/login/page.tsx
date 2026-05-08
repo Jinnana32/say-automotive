@@ -51,7 +51,7 @@ export default async function LoginPage({
     : resolvedSearchParams?.reason;
   const reasonMessage =
     reason === "inactive"
-      ? "This user is not linked to an active staff record."
+      ? "This account is not set up for active staff access."
       : undefined;
 
   return (
@@ -62,11 +62,11 @@ export default async function LoginPage({
             SAY Administration
           </p>
           <h1 className="mt-4 font-display text-4xl tracking-[0.08em]">
-            Workshop operations access is now role-gated.
+            Sign in to manage shop operations.
           </h1>
           <p className="mt-5 max-w-2xl text-sm leading-7 text-primary-foreground/84">
-            Sign in with a Supabase Auth user that is linked to an active staff record. Module
-            access is controlled by the linked workshop role.
+            Use the staff account provided for your branch so you can access quotations, job
+            orders, billing, inventory, and reports based on your assigned access.
           </p>
         </section>
 
@@ -76,8 +76,7 @@ export default async function LoginPage({
           </p>
           <h2 className="mt-3 text-2xl font-semibold text-foreground">Access the admin console</h2>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            Use the staff-linked account issued for internal operations. Direct public access is
-            blocked.
+            Enter the email and password assigned to your staff account to continue.
           </p>
           {reasonMessage ? (
             <div className="mt-6 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
