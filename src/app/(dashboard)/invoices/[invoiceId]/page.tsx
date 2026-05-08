@@ -1,21 +1,34 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
-import { Breadcrumbs } from "@/components/shared/breadcrumbs";
-import { DetailSummaryGrid, DetailSummaryItem } from "@/components/shared/detail-summary-grid";
-import { EmptyState } from "@/components/shared/empty-state";
-import { PageHeader } from "@/components/shared/page-header";
-import { SectionCard } from "@/components/shared/section-card";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { InvoiceStatusBadge, PaymentMethodBadge } from "@/features/invoices/components/invoice-status-badge";
-import { RecordPaymentForm } from "@/features/invoices/components/record-payment-form";
-import { ReleaseVehicleForm } from "@/features/invoices/components/release-vehicle-form";
-import { getInvoiceById } from "@/features/invoices/queries/invoice-queries";
-import { formatCurrency } from "@/lib/currency";
-import { formatDate, formatDateTime } from "@/lib/dates";
+import { Breadcrumbs } from '@/components/shared/breadcrumbs';
+import {
+  DetailSummaryGrid,
+  DetailSummaryItem,
+} from '@/components/shared/detail-summary-grid';
+import { EmptyState } from '@/components/shared/empty-state';
+import { PageHeader } from '@/components/shared/page-header';
+import { SectionCard } from '@/components/shared/section-card';
+import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  InvoiceStatusBadge,
+  PaymentMethodBadge,
+} from '@/features/invoices/components/invoice-status-badge';
+import { RecordPaymentForm } from '@/features/invoices/components/record-payment-form';
+import { ReleaseVehicleForm } from '@/features/invoices/components/release-vehicle-form';
+import { getInvoiceById } from '@/features/invoices/queries/invoice-queries';
+import { formatCurrency } from '@/lib/currency';
+import { formatDate, formatDateTime } from '@/lib/dates';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 type InvoiceDetailPageProps = {
   params: Promise<{
@@ -23,7 +36,9 @@ type InvoiceDetailPageProps = {
   }>;
 };
 
-export default async function InvoiceDetailPage({ params }: InvoiceDetailPageProps) {
+export default async function InvoiceDetailPage({
+  params,
+}: InvoiceDetailPageProps) {
   const { invoiceId } = await params;
   const invoice = await getInvoiceById(invoiceId);
   const printHref = `/invoices/${invoiceId}/print`;
@@ -37,8 +52,8 @@ export default async function InvoiceDetailPage({ params }: InvoiceDetailPagePro
     <div className="space-y-6">
       <Breadcrumbs
         items={[
-          { label: "Billing" },
-          { label: "Invoices", href: "/invoices" },
+          { label: 'Billing' },
+          { label: 'Invoices', href: '/invoices' },
           { label: invoice.invoiceNumber },
         ]}
       />
@@ -58,14 +73,16 @@ export default async function InvoiceDetailPage({ params }: InvoiceDetailPagePro
             </Button>
             {invoice.jobOrderId ? (
               <Button asChild variant="ghost">
-                <Link href={`/job-orders/${invoice.jobOrderId}`}>View job order</Link>
+                <Link href={`/job-orders/${invoice.jobOrderId}`}>
+                  View job order
+                </Link>
               </Button>
             ) : null}
           </>
         }
       />
 
-      <DetailSummaryGrid>
+      <DetailSummaryGrid className="grid-cols-2">
         <DetailSummaryItem label="Customer" value={invoice.customerName} />
         <DetailSummaryItem label="Vehicle" value={invoice.vehicleLabel} />
         <DetailSummaryItem
@@ -79,17 +96,17 @@ export default async function InvoiceDetailPage({ params }: InvoiceDetailPagePro
                 {invoice.jobOrderNumber}
               </Link>
             ) : (
-              invoice.saleNumber ?? "Direct sale"
+              (invoice.saleNumber ?? 'Direct sale')
             )
           }
         />
         <DetailSummaryItem
           label="Invoice status"
-          value={invoice.status.replaceAll("_", " ")}
+          value={invoice.status.replaceAll('_', ' ')}
           hint={
             invoice.releasedAt
               ? `Vehicle released ${formatDateTime(invoice.releasedAt)}`
-              : "Billing and release rules are enforced from the final balance."
+              : 'Billing and release rules are enforced from the final balance.'
           }
           badge={<InvoiceStatusBadge status={invoice.status} />}
         />
@@ -106,12 +123,20 @@ export default async function InvoiceDetailPage({ params }: InvoiceDetailPagePro
         <DetailSummaryItem
           label="Paid amount"
           value={formatCurrency(invoice.paidAmount)}
-          hint={invoice.payments.length > 0 ? `${invoice.payments.length} payment record${invoice.payments.length === 1 ? "" : "s"}` : "No payments recorded yet"}
+          hint={
+            invoice.payments.length > 0
+              ? `${invoice.payments.length} payment record${invoice.payments.length === 1 ? '' : 's'}`
+              : 'No payments recorded yet'
+          }
         />
         <DetailSummaryItem
           label="Remaining balance"
           value={formatCurrency(invoice.balance)}
-          hint={invoice.balance > 0 ? "Vehicle release stays blocked until balance rules are satisfied." : "Balance cleared."}
+          hint={
+            invoice.balance > 0
+              ? 'Vehicle release stays blocked until balance rules are satisfied.'
+              : 'Balance cleared.'
+          }
         />
       </DetailSummaryGrid>
 
@@ -122,32 +147,34 @@ export default async function InvoiceDetailPage({ params }: InvoiceDetailPagePro
             description="Snapshot of billable job-order items at invoice creation."
             contentClassName="p-0"
           >
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Line</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Quantity</TableHead>
-                      <TableHead>Unit price</TableHead>
-                      <TableHead>Total</TableHead>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Line</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Quantity</TableHead>
+                    <TableHead>Unit price</TableHead>
+                    <TableHead>Total</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {invoice.items.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>{item.lineNumber}</TableCell>
+                      <TableCell>{item.description}</TableCell>
+                      <TableCell className="capitalize">
+                        {item.itemType}
+                      </TableCell>
+                      <TableCell>{item.quantity}</TableCell>
+                      <TableCell>{formatCurrency(item.unitPrice)}</TableCell>
+                      <TableCell>{formatCurrency(item.total)}</TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {invoice.items.map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell>{item.lineNumber}</TableCell>
-                        <TableCell>{item.description}</TableCell>
-                        <TableCell className="capitalize">{item.itemType}</TableCell>
-                        <TableCell>{item.quantity}</TableCell>
-                        <TableCell>{formatCurrency(item.unitPrice)}</TableCell>
-                        <TableCell>{formatCurrency(item.total)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </SectionCard>
 
           <SectionCard
@@ -178,11 +205,15 @@ export default async function InvoiceDetailPage({ params }: InvoiceDetailPagePro
                           <PaymentMethodBadge method={payment.paymentMethod} />
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          {payment.referenceNumber ?? "No reference number"}
+                          {payment.referenceNumber ?? 'No reference number'}
                         </p>
-                        <p className="text-sm text-muted-foreground">{payment.notes ?? "No notes"}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {payment.notes ?? 'No notes'}
+                        </p>
                       </div>
-                      <p className="text-sm text-muted-foreground">{formatDateTime(payment.paidAt)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {formatDateTime(payment.paidAt)}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -197,12 +228,12 @@ export default async function InvoiceDetailPage({ params }: InvoiceDetailPagePro
               title="Record payment"
               description="The branch payment rules decide whether partial payments are accepted."
             >
-                <RecordPaymentForm
-                  invoiceId={invoice.id}
-                  jobOrderId={invoice.jobOrderId}
-                  balance={invoice.balance}
-                  allowPartialPayments={invoice.allowPartialPayments}
-                />
+              <RecordPaymentForm
+                invoiceId={invoice.id}
+                jobOrderId={invoice.jobOrderId}
+                balance={invoice.balance}
+                allowPartialPayments={invoice.allowPartialPayments}
+              />
             </SectionCard>
           ) : null}
 
@@ -211,12 +242,14 @@ export default async function InvoiceDetailPage({ params }: InvoiceDetailPagePro
               title="Release vehicle"
               description="Release is still checked server-side against branch settings and invoice balance."
             >
-                <ReleaseVehicleForm
-                  jobOrderId={invoice.jobOrderId}
-                  balance={invoice.balance}
-                  allowReleaseWithBalance={invoice.allowReleaseWithBalance}
-                  requireFullPaymentBeforeRelease={invoice.requireFullPaymentBeforeRelease}
-                />
+              <ReleaseVehicleForm
+                jobOrderId={invoice.jobOrderId}
+                balance={invoice.balance}
+                allowReleaseWithBalance={invoice.allowReleaseWithBalance}
+                requireFullPaymentBeforeRelease={
+                  invoice.requireFullPaymentBeforeRelease
+                }
+              />
             </SectionCard>
           ) : null}
         </div>

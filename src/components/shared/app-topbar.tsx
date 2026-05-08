@@ -35,9 +35,13 @@ export function AppTopbar({
       <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-start justify-between gap-3 lg:hidden">
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-foreground">{activeLabel}</p>
+            <p className="text-sm font-semibold text-foreground">
+              {activeLabel}
+            </p>
             {activeDescription ? (
-              <p className="mt-1 text-xs text-muted-foreground">{activeDescription}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {activeDescription}
+              </p>
             ) : null}
           </div>
           <Button
@@ -53,15 +57,11 @@ export function AppTopbar({
         </div>
 
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="w-full lg:max-w-md">
-            <SearchInput
-              aria-label="Global search placeholder"
-              placeholder="Search records, job orders, invoices..."
-            />
-          </div>
           <div className="flex items-center justify-between gap-2 lg:justify-end">
             <div className="hidden min-w-0 lg:block">
-              <p className="text-sm font-semibold text-foreground">{activeLabel}</p>
+              <p className="text-sm font-semibold text-foreground">
+                {activeLabel}
+              </p>
               <p className="mt-1 text-xs text-muted-foreground">
                 {activeDescription ?? `${userDisplayName} · ${userRoleLabel}`}
               </p>

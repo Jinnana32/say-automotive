@@ -1,19 +1,22 @@
-import Link from "next/link";
-import { Search } from "lucide-react";
+import Link from 'next/link';
+import { Search } from 'lucide-react';
 
-import { EmptyState } from "@/components/shared/empty-state";
-import { PageHeader } from "@/components/shared/page-header";
-import { Button } from "@/components/ui/button";
-import { QuickAccessResultsWorkspace } from "@/features/quick-access/components/quick-access-results-workspace";
-import { QuickAccessSearchDialog } from "@/features/quick-access/components/quick-access-search-dialog";
-import type { QuickAccessSearchState } from "@/features/quick-access/types";
+import { EmptyState } from '@/components/shared/empty-state';
+import { PageHeader } from '@/components/shared/page-header';
+import { Button } from '@/components/ui/button';
+import { QuickAccessResultsWorkspace } from '@/features/quick-access/components/quick-access-results-workspace';
+import { QuickAccessSearchDialog } from '@/features/quick-access/components/quick-access-search-dialog';
+import type { QuickAccessSearchState } from '@/features/quick-access/types';
+import { QuickQuotation } from './quick-quotation';
 
 export function QuickAccessPage({
   searchState,
 }: {
   searchState: QuickAccessSearchState;
 }) {
-  const hasSearch = Boolean(searchState.plateQuery || searchState.customerLastNameQuery);
+  const hasSearch = Boolean(
+    searchState.plateQuery || searchState.customerLastNameQuery,
+  );
   const hasResults = searchState.records.length > 0;
 
   return (
@@ -62,6 +65,8 @@ export function QuickAccessPage({
           </div>
         </div>
       )}
+
+      <QuickQuotation />
 
       <QuickAccessSearchDialog
         initialPlate={searchState.plateQuery}

@@ -1,10 +1,5 @@
 import Link from 'next/link';
-import {
-  CarFront,
-  ClipboardList,
-  ReceiptText,
-  Wrench,
-} from 'lucide-react';
+import { CarFront, ClipboardList, ReceiptText, Wrench } from 'lucide-react';
 
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import {
@@ -69,7 +64,7 @@ export function JobOrderDetailPage({
 
   return (
     <div className="space-y-5">
-      <div className="sticky top-20 z-20 rounded-2xl border border-border/70 bg-background/95 px-5 py-4 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/90 lg:top-[5.25rem]">
+      <div className="rounded-2xl border border-border/70 bg-background/95 px-5 py-4 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/90 lg:top-[5.25rem]">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="min-w-0 space-y-2">
             <Breadcrumbs
@@ -100,7 +95,11 @@ export function JobOrderDetailPage({
 
           <div className="flex flex-wrap items-center gap-2">
             <Button asChild variant="outline" size="sm">
-              <Link href={`/job-orders/${jobOrder.id}/print`} target="_blank" rel="noreferrer">
+              <Link
+                href={`/job-orders/${jobOrder.id}/print`}
+                target="_blank"
+                rel="noreferrer"
+              >
                 Print job order
               </Link>
             </Button>
@@ -139,7 +138,7 @@ export function JobOrderDetailPage({
             jobOrder.vehicleLabel,
             jobOrder.quotationId && jobOrder.quotationNumber ? (
               <span key="quotation-link">
-                Source{" "}
+                Source{' '}
                 <Link
                   href={`/quotations/${jobOrder.quotationId}`}
                   className="underline-offset-4 hover:text-foreground hover:underline"

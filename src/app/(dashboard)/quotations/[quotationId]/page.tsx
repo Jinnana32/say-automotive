@@ -1,25 +1,35 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
-import { Breadcrumbs } from "@/components/shared/breadcrumbs";
-import { DetailSummaryGrid, DetailSummaryItem } from "@/components/shared/detail-summary-grid";
-import { PageHeader } from "@/components/shared/page-header";
-import { SectionCard } from "@/components/shared/section-card";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatCurrency } from "@/lib/currency";
-import { formatDate, formatDateTime } from "@/lib/dates";
+import { Breadcrumbs } from '@/components/shared/breadcrumbs';
+import {
+  DetailSummaryGrid,
+  DetailSummaryItem,
+} from '@/components/shared/detail-summary-grid';
+import { PageHeader } from '@/components/shared/page-header';
+import { SectionCard } from '@/components/shared/section-card';
+import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { formatCurrency } from '@/lib/currency';
+import { formatDate, formatDateTime } from '@/lib/dates';
 import {
   approveQuotationAction,
   rejectQuotationAction,
-} from "@/features/quotations/actions/quotation-actions";
+} from '@/features/quotations/actions/quotation-actions';
 import {
   QuotationStatusBadge,
   formatQuotationStatus,
-} from "@/features/quotations/components/quotation-status-badge";
-import { getQuotationById } from "@/features/quotations/queries/quotation-queries";
+} from '@/features/quotations/components/quotation-status-badge';
+import { getQuotationById } from '@/features/quotations/queries/quotation-queries';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 type QuotationDetailPageProps = {
   params: Promise<{
@@ -27,7 +37,9 @@ type QuotationDetailPageProps = {
   }>;
 };
 
-export default async function QuotationDetailPage({ params }: QuotationDetailPageProps) {
+export default async function QuotationDetailPage({
+  params,
+}: QuotationDetailPageProps) {
   const { quotationId } = await params;
   const quotation = await getQuotationById(quotationId);
 
@@ -35,15 +47,16 @@ export default async function QuotationDetailPage({ params }: QuotationDetailPag
     notFound();
   }
 
-  const canApprove = quotation.status === "draft" || quotation.status === "pending_approval";
-  const canEdit = quotation.status !== "approved";
+  const canApprove =
+    quotation.status === 'draft' || quotation.status === 'pending_approval';
+  const canEdit = quotation.status !== 'approved';
 
   return (
     <div className="space-y-6">
       <Breadcrumbs
         items={[
-          { label: "Service Desk" },
-          { label: "Quotations", href: "/quotations" },
+          { label: 'Service Desk' },
+          { label: 'Quotations', href: '/quotations' },
           { label: quotation.quotationNumber },
         ]}
       />
@@ -54,7 +67,11 @@ export default async function QuotationDetailPage({ params }: QuotationDetailPag
         actions={
           <>
             <Button asChild variant="outline">
-              <Link href={`/quotations/${quotation.id}/print`} target="_blank" rel="noreferrer">
+              <Link
+                href={`/quotations/${quotation.id}/print`}
+                target="_blank"
+                rel="noreferrer"
+              >
                 Print quotation
               </Link>
             </Button>
@@ -63,17 +80,27 @@ export default async function QuotationDetailPage({ params }: QuotationDetailPag
             </Button>
             {canEdit ? (
               <Button asChild variant="outline">
-                <Link href={`/quotations/${quotation.id}/edit`}>Edit quotation</Link>
+                <Link href={`/quotations/${quotation.id}/edit`}>
+                  Edit quotation
+                </Link>
               </Button>
             ) : null}
             {canApprove ? (
               <>
                 <form action={approveQuotationAction}>
-                  <input type="hidden" name="quotationId" value={quotation.id} />
+                  <input
+                    type="hidden"
+                    name="quotationId"
+                    value={quotation.id}
+                  />
                   <Button type="submit">Approve and create job order</Button>
                 </form>
                 <form action={rejectQuotationAction}>
-                  <input type="hidden" name="quotationId" value={quotation.id} />
+                  <input
+                    type="hidden"
+                    name="quotationId"
+                    value={quotation.id}
+                  />
                   <Button type="submit" variant="ghost">
                     Reject quotation
                   </Button>
@@ -84,7 +111,7 @@ export default async function QuotationDetailPage({ params }: QuotationDetailPag
         }
       />
 
-      <DetailSummaryGrid>
+      <DetailSummaryGrid className="grid-cols-2">
         <DetailSummaryItem
           label="Customer"
           value={quotation.customerName}
@@ -93,18 +120,26 @@ export default async function QuotationDetailPage({ params }: QuotationDetailPag
         <DetailSummaryItem
           label="Vehicle"
           value={quotation.vehicleLabel}
-          hint={quotation.vehiclePlateNumber ?? quotation.vehicleVin ?? "No plate or VIN recorded"}
+          hint={
+            quotation.vehiclePlateNumber ??
+            quotation.vehicleVin ??
+            'No plate or VIN recorded'
+          }
         />
         <DetailSummaryItem
           label="Quotation status"
           value={formatQuotationStatus(quotation.status)}
-          hint={quotation.approvedAt ? `Approved ${formatDateTime(quotation.approvedAt)}` : `Created ${formatDate(quotation.createdAt)}`}
+          hint={
+            quotation.approvedAt
+              ? `Approved ${formatDateTime(quotation.approvedAt)}`
+              : `Created ${formatDate(quotation.createdAt)}`
+          }
           badge={<QuotationStatusBadge status={quotation.status} />}
         />
         <DetailSummaryItem
           label="Prepared by"
-          value={quotation.preparedByName ?? "Not captured"}
-          hint={quotation.preparedByTitle ?? "No title captured"}
+          value={quotation.preparedByName ?? 'Not captured'}
+          hint={quotation.preparedByTitle ?? 'No title captured'}
         />
         <DetailSummaryItem
           label="Job order"
@@ -117,14 +152,14 @@ export default async function QuotationDetailPage({ params }: QuotationDetailPag
                 {quotation.jobOrderNumber}
               </Link>
             ) : (
-              "Not created"
+              'Not created'
             )
           }
           hint="Created only after quotation approval."
         />
         <DetailSummaryItem
           label="Quoted items"
-          value={`${quotation.items.length} line item${quotation.items.length === 1 ? "" : "s"}`}
+          value={`${quotation.items.length} line item${quotation.items.length === 1 ? '' : 's'}`}
           hint={`Subtotal ${formatCurrency(quotation.subtotal)}`}
         />
         <DetailSummaryItem
@@ -135,7 +170,7 @@ export default async function QuotationDetailPage({ params }: QuotationDetailPag
         <DetailSummaryItem
           label="Total estimate"
           value={formatCurrency(quotation.totalAmount)}
-          hint={quotation.natureOfRepair ?? "No nature of repair provided"}
+          hint={quotation.natureOfRepair ?? 'No nature of repair provided'}
         />
       </DetailSummaryGrid>
 
@@ -146,32 +181,32 @@ export default async function QuotationDetailPage({ params }: QuotationDetailPag
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <MetadataItem
             label="Contact number"
-            value={quotation.customerContactNumber ?? "No contact number"}
+            value={quotation.customerContactNumber ?? 'No contact number'}
           />
           <MetadataItem
             label="Address"
-            value={quotation.customerAddress ?? "No address"}
+            value={quotation.customerAddress ?? 'No address'}
           />
           <MetadataItem
             label="Car model & year"
             value={
               quotation.vehicleMake && quotation.vehicleModel
-                ? `${quotation.vehicleMake} ${quotation.vehicleModel}${quotation.vehicleYear ? ` (${quotation.vehicleYear})` : ""}`
+                ? `${quotation.vehicleMake} ${quotation.vehicleModel}${quotation.vehicleYear ? ` (${quotation.vehicleYear})` : ''}`
                 : quotation.vehicleLabel
             }
           />
           <MetadataItem
             label="Plate number"
-            value={quotation.vehiclePlateNumber ?? "No plate number"}
+            value={quotation.vehiclePlateNumber ?? 'No plate number'}
           />
-          <MetadataItem label="VIN" value={quotation.vehicleVin ?? "No VIN"} />
+          <MetadataItem label="VIN" value={quotation.vehicleVin ?? 'No VIN'} />
           <MetadataItem
             label="Nature of repair"
-            value={quotation.natureOfRepair ?? "Not provided"}
+            value={quotation.natureOfRepair ?? 'Not provided'}
           />
           <MetadataItem
             label="Inspection notes"
-            value={quotation.inspectionNotes ?? "No inspection notes"}
+            value={quotation.inspectionNotes ?? 'No inspection notes'}
             className="md:col-span-2 xl:col-span-3"
           />
         </div>
@@ -200,7 +235,9 @@ export default async function QuotationDetailPage({ params }: QuotationDetailPag
                   <TableCell>{item.lineNumber}</TableCell>
                   <TableCell className="capitalize">{item.itemType}</TableCell>
                   <TableCell>{item.description}</TableCell>
-                  <TableCell>{formatQuantityWithUnit(item.quantity, item.unitLabel)}</TableCell>
+                  <TableCell>
+                    {formatQuantityWithUnit(item.quantity, item.unitLabel)}
+                  </TableCell>
                   <TableCell>{formatCurrency(item.unitPrice)}</TableCell>
                   <TableCell>{formatCurrency(item.total)}</TableCell>
                 </TableRow>
@@ -210,10 +247,20 @@ export default async function QuotationDetailPage({ params }: QuotationDetailPag
         </div>
 
         <div className="grid gap-3 rounded-[1.25rem] border border-border/70 bg-muted/20 p-4 text-sm md:grid-cols-2 xl:grid-cols-4">
-          <TotalRow label="Subtotal" value={formatCurrency(quotation.subtotal)} />
-          <TotalRow label="Discount" value={formatCurrency(quotation.discount)} />
+          <TotalRow
+            label="Subtotal"
+            value={formatCurrency(quotation.subtotal)}
+          />
+          <TotalRow
+            label="Discount"
+            value={formatCurrency(quotation.discount)}
+          />
           <TotalRow label="Tax" value={formatCurrency(quotation.tax)} />
-          <TotalRow label="Total estimate" value={formatCurrency(quotation.totalAmount)} emphasized />
+          <TotalRow
+            label="Total estimate"
+            value={formatCurrency(quotation.totalAmount)}
+            emphasized
+          />
         </div>
       </SectionCard>
     </div>
@@ -230,7 +277,9 @@ function TotalRow({
 }) {
   return (
     <div className="space-y-1 rounded-xl border border-border/70 bg-background/80 p-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+        {label}
+      </p>
       <p className="text-base font-semibold text-foreground">{value}</p>
     </div>
   );
@@ -247,7 +296,9 @@ function MetadataItem({
 }) {
   return (
     <div className={className}>
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+        {label}
+      </p>
       <p className="mt-2 text-sm text-foreground">{value}</p>
     </div>
   );
