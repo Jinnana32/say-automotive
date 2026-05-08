@@ -1,5 +1,6 @@
 import type { CustomerDetail } from "@/features/customers/types";
 import type { QuotationListItem } from "@/features/quotations/types";
+import type { ServiceHistoryEntry } from "@/features/service-history/types";
 import type { VehicleDetail } from "@/features/vehicles/types";
 
 export type QuickAccessRecordMatch = {
@@ -13,6 +14,7 @@ export type QuickAccessCustomerRecord = {
   customer: CustomerDetail;
   vehicles: VehicleDetail[];
   recentQuotations: QuotationListItem[];
+  serviceHistory: ServiceHistoryEntry[];
   highlightedVehicleId: string | null;
   match: QuickAccessRecordMatch;
 };
@@ -20,6 +22,7 @@ export type QuickAccessCustomerRecord = {
 export type QuickAccessPermissions = {
   canCreateQuotations: boolean;
   canViewQuotations: boolean;
+  canViewServiceHistory: boolean;
 };
 
 export type QuickAccessSearchState = {

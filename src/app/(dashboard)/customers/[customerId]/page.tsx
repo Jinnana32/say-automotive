@@ -6,8 +6,16 @@ import { SectionCard } from "@/components/shared/section-card";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { PaymentMethodBadge, InvoiceStatusBadge } from "@/features/invoices/components/invoice-status-badge";
+import { JobOrderStatusBadge } from "@/features/job-orders/components/job-order-status-badge";
+import { QuotationStatusBadge } from "@/features/quotations/components/quotation-status-badge";
+import { CustomerServiceHistory } from "@/features/service-history/components/customer-service-history";
+import { listServiceHistoryByVehicleIds } from "@/features/service-history/queries/service-history-queries";
+import type { CustomerDocumentHistoryItem } from "@/features/customers/types";
+import { formatCurrency } from "@/lib/currency";
 import { formatDate } from "@/lib/dates";
 import { getCustomerById } from "@/features/customers/queries/customer-queries";
+import { requireAuthenticatedStaff } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 
@@ -18,12 +26,18 @@ type CustomerDetailPageProps = {
 };
 
 export default async function CustomerDetailPage({ params }: CustomerDetailPageProps) {
+  const session = await requireAuthenticatedStaff();
   const { customerId } = await params;
   const customer = await getCustomerById(customerId);
 
   if (!customer) {
     notFound();
   }
+
+  const canViewServiceHistory = session.capabilities.includes("job_orders:read");
+  const serviceHistory = canViewServiceHistory
+    ? await listServiceHistoryByVehicleIds(customer.vehicles.map((vehicle) => vehicle.id))
+    : [];
 
   return (
     <div className="space-y-6">
@@ -100,9 +114,12 @@ export default async function CustomerDetailPage({ params }: CustomerDetailPageP
                   <TableRow key={vehicle.id}>
                     <TableCell>
                       <div className="space-y-1">
-                        <p className="font-semibold">
+                        <Link
+                          href={`/vehicles/${vehicle.id}`}
+                          className="font-semibold text-foreground underline-offset-4 hover:underline"
+                        >
                           {vehicle.make} {vehicle.model}
-                        </p>
+                        </Link>
                         <p className="text-sm text-muted-foreground">
                           {vehicle.year ? String(vehicle.year) : "Year not set"}
                         </p>
@@ -114,7 +131,84 @@ export default async function CustomerDetailPage({ params }: CustomerDetailPageP
                     <TableCell className="capitalize">{vehicle.status}</TableCell>
                     <TableCell className="text-right">
                       <Button asChild size="sm" variant="ghost">
-                        <Link href={`/vehicles/${vehicle.id}/edit`}>Edit</Link>
+                        <Link href={`/vehicles/${vehicle.id}`}>Open</Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </SectionCard>
+
+      <CustomerServiceHistory
+        vehicles={customer.vehicles}
+        entries={serviceHistory}
+        canViewServiceHistory={canViewServiceHistory}
+      />
+
+      <SectionCard
+        title="Document history"
+        description="Related quotations, job orders, invoices, and payments for this customer."
+        contentClassName="p-0"
+      >
+        {customer.documentHistory.length === 0 ? (
+          <div className="p-5 text-sm text-muted-foreground">
+            No related documents recorded yet. Items will appear here as this customer moves through the
+            quotation, service, billing, and payment workflow.
+          </div>
+        ) : (
+          <div className="overflow-hidden rounded-b-[1.25rem]">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Document</TableHead>
+                  <TableHead>Vehicle</TableHead>
+                  <TableHead>Status / method</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Linked records</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {customer.documentHistory.map((entry) => (
+                  <TableRow key={`${entry.documentType}-${entry.id}`}>
+                    <TableCell>{formatDate(entry.occurredAt)}</TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">
+                          {formatDocumentType(entry.documentType)}
+                        </p>
+                        <Link href={entry.documentHref} className="font-semibold underline-offset-4 hover:underline">
+                          {entry.documentLabel}
+                        </Link>
+                      </div>
+                    </TableCell>
+                    <TableCell>{entry.vehicleLabel ?? "No vehicle"}</TableCell>
+                    <TableCell>{renderDocumentStatus(entry)}</TableCell>
+                    <TableCell>{entry.amount === null ? "—" : formatCurrency(entry.amount)}</TableCell>
+                    <TableCell>
+                      {entry.linkedRecords.length === 0 ? (
+                        <span className="text-sm text-muted-foreground">No linked records</span>
+                      ) : (
+                        <div className="flex flex-wrap gap-2">
+                          {entry.linkedRecords.map((record) => (
+                            <Link
+                              key={`${entry.id}-${record.href}`}
+                              href={record.href}
+                              className="text-sm underline-offset-4 hover:underline"
+                            >
+                              {record.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button asChild size="sm" variant="ghost">
+                        <Link href={entry.documentHref}>Open</Link>
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -133,4 +227,24 @@ function toTitleCase(value: string) {
     .split(" ")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+function formatDocumentType(value: CustomerDocumentHistoryItem["documentType"]) {
+  return value.replaceAll("_", " ");
+}
+
+function renderDocumentStatus(entry: CustomerDocumentHistoryItem) {
+  if (entry.documentType === "quotation") {
+    return <QuotationStatusBadge status={entry.status} />;
+  }
+
+  if (entry.documentType === "job_order") {
+    return <JobOrderStatusBadge status={entry.status} />;
+  }
+
+  if (entry.documentType === "invoice") {
+    return <InvoiceStatusBadge status={entry.status} />;
+  }
+
+  return <PaymentMethodBadge method={entry.paymentMethod} />;
 }

@@ -2,6 +2,7 @@ import type { TableRow } from "@/types/database";
 
 import type {
   CustomerDetail,
+  CustomerDocumentHistoryItem,
   CustomerFormValues,
   CustomerListItem,
   CustomerOption,
@@ -53,6 +54,7 @@ export function mapVehicleRowToCustomerVehicleSummary(row: VehicleRow): Customer
 export function mapCustomerDetail(
   row: CustomerRow,
   vehicleRows: VehicleRow[],
+  documentHistory: CustomerDocumentHistoryItem[],
 ): CustomerDetail {
   return {
     ...mapCustomerRowToListItem(row),
@@ -62,6 +64,7 @@ export function mapCustomerDetail(
     address: row.address,
     notes: row.notes,
     vehicles: vehicleRows.map(mapVehicleRowToCustomerVehicleSummary),
+    documentHistory,
   };
 }
 

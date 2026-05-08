@@ -105,9 +105,12 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
                   <TableRow key={vehicle.id}>
                     <TableCell>
                       <div className="space-y-1">
-                        <p className="font-medium">
+                        <Link
+                          href={`/vehicles/${vehicle.id}`}
+                          className="font-medium text-foreground transition-colors hover:text-primary"
+                        >
                           {vehicle.make} {vehicle.model}
-                        </p>
+                        </Link>
                         <p className="text-xs text-muted-foreground">
                           {vehicle.variant ?? "No variant"} · {vehicle.year ? String(vehicle.year) : "Year not set"}
                         </p>

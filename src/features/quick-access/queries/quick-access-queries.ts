@@ -1,8 +1,11 @@
 import { redirect } from "next/navigation";
 
+import type { AppCapability } from "@/lib/auth/permissions";
 import { mapCustomerDetail } from "@/features/customers/mappers";
 import { mapQuotationRowToListItem, mapVehicleRowToQuotationOption } from "@/features/quotations/mappers";
 import type { QuotationListItem } from "@/features/quotations/types";
+import { listServiceHistoryByVehicleIdsForContext } from "@/features/service-history/queries/service-history-queries";
+import { groupServiceHistoryByVehicle } from "@/features/service-history/utils";
 import type {
   QuickAccessCustomerRecord,
   QuickAccessRecordMatch,
@@ -37,15 +40,22 @@ export async function getQuickAccessSearchState({
   const permissions = {
     canCreateQuotations: context.capabilities.includes("quotations:write"),
     canViewQuotations: context.capabilities.includes("quotations:read"),
+    canViewServiceHistory: context.capabilities.includes("job_orders:read"),
   };
   const supabase = await getSupabaseServerClient();
   const plateQuery = plate?.trim() ?? "";
   const customerLastNameQuery = plateQuery ? "" : lastName?.trim() ?? "";
   const records = plateQuery
-    ? await searchQuickAccessByPlate(supabase, plateQuery, permissions.canViewQuotations)
+    ? await searchQuickAccessByPlate(
+        supabase,
+        context.capabilities,
+        plateQuery,
+        permissions.canViewQuotations,
+      )
     : customerLastNameQuery
       ? await searchQuickAccessByCustomerLastName(
           supabase,
+          context.capabilities,
           customerLastNameQuery,
           permissions.canViewQuotations,
         )
@@ -61,6 +71,7 @@ export async function getQuickAccessSearchState({
 
 async function searchQuickAccessByPlate(
   supabase: Awaited<ReturnType<typeof getSupabaseServerClient>>,
+  capabilities: readonly AppCapability[],
   plateQuery: string,
   canViewQuotations: boolean,
 ) {
@@ -128,6 +139,7 @@ async function searchQuickAccessByPlate(
 
   return buildQuickAccessRecords({
     supabase,
+    capabilities,
     customerRows: (customers ?? []) as CustomerRow[],
     vehicleRows: (relatedVehicles ?? []) as VehicleRow[],
     matches: matchedVehicleRows.map(({ vehicleRow, match }) => ({
@@ -141,6 +153,7 @@ async function searchQuickAccessByPlate(
 
 async function searchQuickAccessByCustomerLastName(
   supabase: Awaited<ReturnType<typeof getSupabaseServerClient>>,
+  capabilities: readonly AppCapability[],
   lastNameQuery: string,
   canViewQuotations: boolean,
 ) {
@@ -175,6 +188,7 @@ async function searchQuickAccessByCustomerLastName(
 
   return buildQuickAccessRecords({
     supabase,
+    capabilities,
     customerRows,
     vehicleRows: (vehicles ?? []) as VehicleRow[],
     matches: customerRows.map((customer) => ({
@@ -191,6 +205,7 @@ async function searchQuickAccessByCustomerLastName(
 
 async function buildQuickAccessRecords(params: {
   supabase: Awaited<ReturnType<typeof getSupabaseServerClient>>;
+  capabilities: readonly AppCapability[];
   customerRows: CustomerRow[];
   vehicleRows: VehicleRow[];
   matches: Array<{
@@ -212,6 +227,12 @@ async function buildQuickAccessRecords(params: {
     vehicleRows: params.vehicleRows,
     canViewQuotations: params.canViewQuotations,
   });
+  const serviceHistoryEntries = await listServiceHistoryByVehicleIdsForContext({
+    supabase: params.supabase,
+    capabilities: params.capabilities,
+    vehicleIds: params.vehicleRows.map((vehicle) => vehicle.id),
+  });
+  const serviceHistoryByVehicleId = groupServiceHistoryByVehicle(serviceHistoryEntries);
 
   return params.matches.flatMap((match) => {
     const customerRow = customerMap.get(match.customerId);
@@ -221,7 +242,7 @@ async function buildQuickAccessRecords(params: {
     }
 
     const relatedVehicleRows = vehiclesByCustomerId.get(match.customerId) ?? [];
-    const customer = mapCustomerDetail(customerRow, relatedVehicleRows);
+    const customer = mapCustomerDetail(customerRow, relatedVehicleRows, []);
     const vehicles = relatedVehicleRows.map((vehicleRow) =>
       mapVehicleDetail(vehicleRow, customer.displayName),
     );
@@ -229,6 +250,9 @@ async function buildQuickAccessRecords(params: {
       quotationsByCustomerId.get(match.customerId) ?? [],
       match.highlightedVehicleId,
     ).slice(0, 6);
+    const serviceHistory = relatedVehicleRows.flatMap(
+      (vehicleRow) => serviceHistoryByVehicleId.get(vehicleRow.id) ?? [],
+    );
 
     return [
       {
@@ -236,6 +260,7 @@ async function buildQuickAccessRecords(params: {
         customer,
         vehicles,
         recentQuotations,
+        serviceHistory,
         highlightedVehicleId: match.highlightedVehicleId,
         match: match.match,
       },

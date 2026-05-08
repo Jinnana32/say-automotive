@@ -1,7 +1,8 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Link from 'next/link';
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import {
   BarChart3,
   Boxes,
@@ -24,25 +25,28 @@ import {
   Wrench,
   WalletCards,
   X,
-} from "lucide-react";
+} from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
-import { signOutAction } from "@/features/auth/actions/auth-actions";
+import { Button } from '@/components/ui/button';
+import { signOutAction } from '@/features/auth/actions/auth-actions';
 import {
   navigationItemMatchesPath,
   resolveActiveNavigationItem,
   type NavigationGroup,
   type NavigationIconName,
-} from "@/lib/navigation";
-import { cn } from "@/lib/utils";
+} from '@/lib/navigation';
+import { cn } from '@/lib/utils';
 
-const ICONS: Record<NavigationIconName, React.ComponentType<{ className?: string }>> = {
+const ICONS: Record<
+  NavigationIconName,
+  React.ComponentType<{ className?: string }>
+> = {
   dashboard: LayoutDashboard,
-  "quick-access": ScanSearch,
+  'quick-access': ScanSearch,
   customers: Users,
   vehicles: CarFront,
   quotations: FileText,
-  "job-orders": ClipboardList,
+  'job-orders': ClipboardList,
   inventory: Boxes,
   products: Package,
   services: Wrench,
@@ -83,10 +87,14 @@ export function AppSidebar({
   showCloseButton?: boolean;
 }) {
   const pathname = usePathname();
-  const mobileShortcutItems = navigationItems.filter((item) => item.showAsMobileShortcut);
+  const mobileShortcutItems = navigationItems.filter(
+    (item) => item.showAsMobileShortcut,
+  );
   const activeItem = resolveActiveNavigationItem(navigationItems, pathname);
 
-  const groupedItems = navigationItems.reduce<Record<NavigationGroup, typeof navigationItems>>(
+  const groupedItems = navigationItems.reduce<
+    Record<NavigationGroup, typeof navigationItems>
+  >(
     (groups, item) => {
       if (item.showInSidebar === false) {
         return groups;
@@ -98,8 +106,8 @@ export function AppSidebar({
     },
     {
       Overview: [],
-      "Service Desk": [],
-      "Stock & Catalog": [],
+      'Service Desk': [],
+      'Stock & Catalog': [],
       Billing: [],
       People: [],
       Insights: [],
@@ -110,18 +118,27 @@ export function AppSidebar({
   return (
     <aside
       className={cn(
-        "border-r border-border bg-card/95 backdrop-blur",
+        'border-r border-border bg-card/95 backdrop-blur',
         className,
       )}
     >
       <div className="flex h-full flex-col px-4 py-5">
         <div className="flex items-center justify-between gap-3 border-b border-border/80 pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
-              <ShieldCheck className="size-5" />
+            <div className="flex size-10 items-center justify-center rounded-2xl shadow-sm">
+              <Image
+                src="/say-auto-care-logo.jpeg"
+                alt="SAY Auto Care"
+                width={150}
+                height={128}
+                className="h-12 w-auto rounded-sm object-contain sm:h-[52px]"
+                priority
+              />
             </div>
             <div>
-              <p className="text-sm font-semibold text-foreground">SAY Auto Care</p>
+              <p className="text-sm font-semibold text-foreground">
+                SAY Auto Care
+              </p>
               <p className="text-xs text-muted-foreground">Administration</p>
             </div>
           </div>
@@ -145,7 +162,9 @@ export function AppSidebar({
               .filter(([, items]) => items.length > 0)
               .map(([group, items]) => (
                 <div key={group} className="space-y-1.5">
-                  {showCloseButton && group === "Overview" && mobileShortcutItems.length > 0 ? (
+                  {showCloseButton &&
+                  group === 'Overview' &&
+                  mobileShortcutItems.length > 0 ? (
                     <div className="space-y-2 pb-1">
                       {mobileShortcutItems.map((item) => {
                         const Icon = ICONS[item.iconName];
@@ -187,10 +206,10 @@ export function AppSidebar({
                           href={item.href}
                           onClick={onNavigate}
                           className={cn(
-                            "flex items-center gap-3 rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors",
+                            'flex items-center gap-3 rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors',
                             isActive
-                              ? "border-primary/20 bg-primary/10 text-primary shadow-sm"
-                              : "border-transparent text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground",
+                              ? 'border-primary/20 bg-primary/10 text-primary shadow-sm'
+                              : 'border-transparent text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground',
                           )}
                         >
                           <Icon className="size-4" />
@@ -205,12 +224,18 @@ export function AppSidebar({
         </nav>
 
         <div className="mt-4 rounded-2xl border border-border/80 bg-muted/25 p-3">
-          <p className="text-sm font-medium text-foreground">{userDisplayName}</p>
+          <p className="text-sm font-medium text-foreground">
+            {userDisplayName}
+          </p>
           <p className="mt-1 text-xs uppercase tracking-[0.14em] text-muted-foreground">
             {userRoleLabel}
           </p>
           <form action={signOutAction} className="mt-3">
-            <Button type="submit" variant="outline" className="w-full justify-center">
+            <Button
+              type="submit"
+              variant="outline"
+              className="w-full justify-center"
+            >
               Sign out
             </Button>
           </form>
