@@ -8,16 +8,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { assignMechanicAction } from "@/features/job-orders/actions/job-order-actions";
-import type { JobOrderMechanicOption } from "@/features/job-orders/types";
+import type { JobOrderDetailTab, JobOrderMechanicOption } from "@/features/job-orders/types";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 import { useFormValues } from "@/lib/use-form-values";
 
 export function AssignMechanicForm({
   jobOrderId,
   mechanics,
+  redirectTab,
 }: {
   jobOrderId: string;
   mechanics: JobOrderMechanicOption[];
+  redirectTab: JobOrderDetailTab;
 }) {
   const [state, formAction] = useActionState(assignMechanicAction, INITIAL_FORM_ACTION_STATE);
   const { values, updateFormValue } = useFormValues({
@@ -41,6 +43,7 @@ export function AssignMechanicForm({
         ) : (
           <form action={formAction} className="space-y-4">
             <input type="hidden" name="jobOrderId" value={jobOrderId} />
+            <input type="hidden" name="redirectTab" value={redirectTab} />
 
             <FormStatusMessage message={state.message} />
 

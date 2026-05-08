@@ -90,6 +90,14 @@ export function JobOrderDetailPage({
 
           <div className="flex flex-wrap items-center gap-2">
             <Button asChild variant="outline" size="sm">
+              <Link href={`/job-orders/${jobOrder.id}/print`} target="_blank" rel="noreferrer">
+                Print job order
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <a href={`/api/job-orders/${jobOrder.id}/pdf`}>Download PDF</a>
+            </Button>
+            <Button asChild variant="outline" size="sm">
               <Link href="/job-orders">
                 <ArrowLeft className="size-4" />
                 Back to job orders
@@ -125,9 +133,19 @@ export function JobOrderDetailPage({
           }
           lines={[
             jobOrder.vehicleLabel,
-            jobOrder.quotationNumber
-              ? `Source ${jobOrder.quotationNumber}`
-              : 'Manual flow',
+            jobOrder.quotationId && jobOrder.quotationNumber ? (
+              <span key="quotation-link">
+                Source{" "}
+                <Link
+                  href={`/quotations/${jobOrder.quotationId}`}
+                  className="underline-offset-4 hover:text-foreground hover:underline"
+                >
+                  {jobOrder.quotationNumber}
+                </Link>
+              </span>
+            ) : (
+              'Manual flow'
+            ),
           ]}
         />
         <SummaryCard
@@ -154,6 +172,7 @@ export function JobOrderDetailPage({
                 jobOrderId={jobOrder.id}
                 currentStatus={jobOrder.status}
                 availableNextStatuses={jobOrder.availableNextStatuses}
+                redirectTab={activeTab}
               />
             ) : null}
           </div>
@@ -166,7 +185,18 @@ export function JobOrderDetailPage({
         <SummaryCard
           title="Invoice & payment"
           icon={ReceiptText}
-          value={jobOrder.invoiceNumber ?? 'No invoice yet'}
+          value={
+            jobOrder.invoiceId && jobOrder.invoiceNumber ? (
+              <Link
+                href={`/invoices/${jobOrder.invoiceId}`}
+                className="underline-offset-4 hover:underline"
+              >
+                {jobOrder.invoiceNumber}
+              </Link>
+            ) : (
+              'No invoice yet'
+            )
+          }
           badge={
             jobOrder.invoiceStatus ? (
               <InvoiceStatusBadge status={jobOrder.invoiceStatus} />
@@ -224,7 +254,18 @@ export function JobOrderDetailPage({
                 />
                 <DetailSummaryItem
                   label="Quotation source"
-                  value={jobOrder.quotationNumber ?? 'Manual flow'}
+                  value={
+                    jobOrder.quotationId && jobOrder.quotationNumber ? (
+                      <Link
+                        href={`/quotations/${jobOrder.quotationId}`}
+                        className="text-foreground underline-offset-4 hover:underline"
+                      >
+                        {jobOrder.quotationNumber}
+                      </Link>
+                    ) : (
+                      'Manual flow'
+                    )
+                  }
                   hint={
                     jobOrder.quotationId
                       ? 'This work order came from an approved quotation.'
@@ -248,7 +289,7 @@ export function JobOrderDetailPage({
             </SectionCard>
 
             {jobOrder.canEditDetails ? (
-              <JobOrderDetailsForm detail={jobOrder} />
+              <JobOrderDetailsForm detail={jobOrder} redirectTab={activeTab} />
             ) : (
               <ReadOnlyOperationalNotes detail={jobOrder} />
             )}
@@ -430,6 +471,11 @@ export function JobOrderDetailPage({
                                   name="approvalStatus"
                                   value="approved"
                                 />
+                                <input
+                                  type="hidden"
+                                  name="redirectTab"
+                                  value={activeTab}
+                                />
                                 <Button
                                   type="submit"
                                   size="sm"
@@ -453,6 +499,11 @@ export function JobOrderDetailPage({
                                   type="hidden"
                                   name="approvalStatus"
                                   value="rejected"
+                                />
+                                <input
+                                  type="hidden"
+                                  name="redirectTab"
+                                  value={activeTab}
                                 />
                                 <Button type="submit" size="sm" variant="ghost">
                                   Reject
@@ -482,6 +533,7 @@ export function JobOrderDetailPage({
             jobOrderId={jobOrder.id}
             items={jobOrder.items}
             status={jobOrder.status}
+            redirectTab={activeTab}
           />
         }
         mechanics={
@@ -527,6 +579,11 @@ export function JobOrderDetailPage({
                               name="assignmentId"
                               value={mechanic.id}
                             />
+                            <input
+                              type="hidden"
+                              name="redirectTab"
+                              value={activeTab}
+                            />
                             <Button type="submit" size="sm" variant="ghost">
                               Remove
                             </Button>
@@ -543,8 +600,9 @@ export function JobOrderDetailPage({
               <AssignMechanicForm
                 jobOrderId={jobOrder.id}
                 mechanics={availableMechanics}
-                />
-              ) : null}
+                redirectTab={activeTab}
+              />
+            ) : null}
           </div>
         }
       />
@@ -563,7 +621,7 @@ function SummaryCard({
   title: string;
   icon: typeof CarFront;
   value: React.ReactNode;
-  lines: string[];
+  lines: React.ReactNode[];
   badge?: React.ReactNode;
   children?: React.ReactNode;
 }) {

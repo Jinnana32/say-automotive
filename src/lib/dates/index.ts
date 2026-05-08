@@ -16,6 +16,16 @@ export function formatDate(value: string | Date | null | undefined) {
     .toFormat("LLL dd, yyyy");
 }
 
+export function formatDocumentDate(value: string | Date | null | undefined) {
+  if (!value) {
+    return "N/A";
+  }
+
+  return DateTime.fromJSDate(value instanceof Date ? value : new Date(value))
+    .setZone(BUSINESS_TIMEZONE)
+    .toFormat("MM/dd/yyyy");
+}
+
 export function formatDateTime(value: string | Date | null | undefined) {
   if (!value) {
     return "N/A";

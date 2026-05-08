@@ -7,7 +7,11 @@ import { AppSidebar } from "@/components/shared/app-sidebar";
 import { AppTopbar } from "@/components/shared/app-topbar";
 import { PageContainer } from "@/components/shared/page-container";
 import type { AppCapability } from "@/lib/auth/permissions";
-import type { NavigationGroup, NavigationIconName } from "@/lib/navigation";
+import {
+  resolveActiveNavigationItem,
+  type NavigationGroup,
+  type NavigationIconName,
+} from "@/lib/navigation";
 
 export function AppShell({
   children,
@@ -32,10 +36,7 @@ export function AppShell({
 }>) {
   const pathname = usePathname();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const activeItem =
-    navigationItems.find(
-      (item) => pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href)),
-    ) ?? navigationItems[0];
+  const activeItem = resolveActiveNavigationItem(navigationItems, pathname);
 
   return (
     <div className="min-h-screen bg-background">

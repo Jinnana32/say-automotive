@@ -30,6 +30,10 @@ export function formatJobOrderStatus(status: JobOrderStatus) {
   return status.replaceAll("_", " ");
 }
 
+export function toTitleCaseWords(value: string) {
+  return value.replace(/\b\w/g, (match) => match.toUpperCase());
+}
+
 export function resolveJobOrderDetailTab(value: string | undefined): JobOrderDetailTab {
   return JOB_ORDER_DETAIL_TABS.includes(value as JobOrderDetailTab)
     ? (value as JobOrderDetailTab)

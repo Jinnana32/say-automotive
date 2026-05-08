@@ -25,6 +25,7 @@ export function mapBusinessSettingsRowToValues(
     businessName: row.business_name,
     businessAddress: row.business_address ?? "",
     businessContact: row.business_contact ?? "",
+    businessEmail: row.business_email ?? "",
     receiptFooter: row.receipt_footer ?? "",
     defaultTaxRate: String(row.default_tax_rate),
     allowPartialPayments: row.allow_partial_payments,

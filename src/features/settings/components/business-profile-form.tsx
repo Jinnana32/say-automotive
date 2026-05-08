@@ -25,6 +25,7 @@ export function BusinessProfileForm({
   const { values, updateFormValue } = useFormValues({
     businessName: initialValues.businessName,
     businessContact: initialValues.businessContact,
+    businessEmail: initialValues.businessEmail,
     businessAddress: initialValues.businessAddress,
     defaultTaxRate: initialValues.defaultTaxRate,
     receiptFooter: initialValues.receiptFooter,
@@ -41,7 +42,7 @@ export function BusinessProfileForm({
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="businessName">Business name</Label>
-              <Input
+            <Input
               id="businessName"
               name="businessName"
               value={values.businessName}
@@ -52,7 +53,7 @@ export function BusinessProfileForm({
 
           <div className="space-y-2">
             <Label htmlFor="businessContact">Business contact</Label>
-              <Input
+            <Input
               id="businessContact"
               name="businessContact"
               value={values.businessContact}
@@ -60,6 +61,18 @@ export function BusinessProfileForm({
             />
             <FieldError errors={state.fieldErrors} name="businessContact" />
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="businessEmail">Business email</Label>
+          <Input
+            id="businessEmail"
+            name="businessEmail"
+            type="email"
+            value={values.businessEmail}
+            onChange={(event) => updateFormValue("businessEmail", event.target.value)}
+          />
+          <FieldError errors={state.fieldErrors} name="businessEmail" />
         </div>
 
         <div className="space-y-2">

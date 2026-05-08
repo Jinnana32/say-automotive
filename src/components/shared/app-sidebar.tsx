@@ -20,6 +20,7 @@ import {
   Truck,
   Users,
   UserSquare2,
+  Globe,
   Wrench,
   WalletCards,
   X,
@@ -27,7 +28,12 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { signOutAction } from "@/features/auth/actions/auth-actions";
-import type { NavigationGroup, NavigationIconName } from "@/lib/navigation";
+import {
+  navigationItemMatchesPath,
+  resolveActiveNavigationItem,
+  type NavigationGroup,
+  type NavigationIconName,
+} from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
 const ICONS: Record<NavigationIconName, React.ComponentType<{ className?: string }>> = {
@@ -48,6 +54,7 @@ const ICONS: Record<NavigationIconName, React.ComponentType<{ className?: string
   attendance: Clock3,
   payroll: HandCoins,
   reports: BarChart3,
+  website: Globe,
   settings: Settings2,
 };
 
@@ -77,6 +84,7 @@ export function AppSidebar({
 }) {
   const pathname = usePathname();
   const mobileShortcutItems = navigationItems.filter((item) => item.showAsMobileShortcut);
+  const activeItem = resolveActiveNavigationItem(navigationItems, pathname);
 
   const groupedItems = navigationItems.reduce<Record<NavigationGroup, typeof navigationItems>>(
     (groups, item) => {
@@ -170,8 +178,8 @@ export function AppSidebar({
                     {items.map((item) => {
                       const Icon = ICONS[item.iconName];
                       const isActive =
-                        pathname === item.href ||
-                        (item.href !== "/dashboard" && pathname.startsWith(item.href));
+                        activeItem?.href === item.href &&
+                        navigationItemMatchesPath(item.href, pathname);
 
                       return (
                         <Link

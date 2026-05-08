@@ -44,6 +44,14 @@ export default async function QuotationDetailPage({ params }: QuotationDetailPag
         description="Quotation header, commercial totals, and quoted line items."
         actions={
           <>
+            <Button asChild variant="outline">
+              <Link href={`/quotations/${quotation.id}/print`} target="_blank" rel="noreferrer">
+                Print quotation
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <a href={`/api/quotations/${quotation.id}/pdf`}>Download PDF</a>
+            </Button>
             {canEdit ? (
               <Button asChild variant="outline">
                 <Link href={`/quotations/${quotation.id}/edit`}>Edit quotation</Link>
@@ -71,7 +79,12 @@ export default async function QuotationDetailPage({ params }: QuotationDetailPag
         <DetailSummaryItem
           label="Customer"
           value={quotation.customerName}
-          hint={quotation.vehicleLabel}
+          hint={quotation.customerContactNumber ?? quotation.vehicleLabel}
+        />
+        <DetailSummaryItem
+          label="Vehicle"
+          value={quotation.vehicleLabel}
+          hint={quotation.vehiclePlateNumber ?? quotation.vehicleVin ?? "No plate or VIN recorded"}
         />
         <DetailSummaryItem
           label="Quotation status"
@@ -80,8 +93,24 @@ export default async function QuotationDetailPage({ params }: QuotationDetailPag
           badge={<QuotationStatusBadge status={quotation.status} />}
         />
         <DetailSummaryItem
+          label="Prepared by"
+          value={quotation.preparedByName ?? "Not captured"}
+          hint={quotation.preparedByTitle ?? "No title captured"}
+        />
+        <DetailSummaryItem
           label="Job order"
-          value={quotation.jobOrderNumber ?? "Not created"}
+          value={
+            quotation.jobOrderId && quotation.jobOrderNumber ? (
+              <Link
+                href={`/job-orders/${quotation.jobOrderId}`}
+                className="underline-offset-4 hover:underline"
+              >
+                {quotation.jobOrderNumber}
+              </Link>
+            ) : (
+              "Not created"
+            )
+          }
           hint="Created only after quotation approval."
         />
         <DetailSummaryItem
@@ -97,9 +126,47 @@ export default async function QuotationDetailPage({ params }: QuotationDetailPag
         <DetailSummaryItem
           label="Total estimate"
           value={formatCurrency(quotation.totalAmount)}
-          hint={quotation.inspectionNotes ?? "No inspection notes"}
+          hint={quotation.natureOfRepair ?? "No nature of repair provided"}
         />
       </DetailSummaryGrid>
+
+      <SectionCard
+        title="Quotation context"
+        description="Print-facing customer, vehicle, and repair scope data captured on the quotation."
+      >
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <MetadataItem
+            label="Contact number"
+            value={quotation.customerContactNumber ?? "No contact number"}
+          />
+          <MetadataItem
+            label="Address"
+            value={quotation.customerAddress ?? "No address"}
+          />
+          <MetadataItem
+            label="Car model & year"
+            value={
+              quotation.vehicleMake && quotation.vehicleModel
+                ? `${quotation.vehicleMake} ${quotation.vehicleModel}${quotation.vehicleYear ? ` (${quotation.vehicleYear})` : ""}`
+                : quotation.vehicleLabel
+            }
+          />
+          <MetadataItem
+            label="Plate number"
+            value={quotation.vehiclePlateNumber ?? "No plate number"}
+          />
+          <MetadataItem label="VIN" value={quotation.vehicleVin ?? "No VIN"} />
+          <MetadataItem
+            label="Nature of repair"
+            value={quotation.natureOfRepair ?? "Not provided"}
+          />
+          <MetadataItem
+            label="Inspection notes"
+            value={quotation.inspectionNotes ?? "No inspection notes"}
+            className="md:col-span-2 xl:col-span-3"
+          />
+        </div>
+      </SectionCard>
 
       <SectionCard
         title="Estimate items"
@@ -113,7 +180,7 @@ export default async function QuotationDetailPage({ params }: QuotationDetailPag
                 <TableHead>Line</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Description</TableHead>
-                <TableHead>Quantity</TableHead>
+                <TableHead>Qty / Unit</TableHead>
                 <TableHead>Unit price</TableHead>
                 <TableHead>Total</TableHead>
               </TableRow>
@@ -124,7 +191,7 @@ export default async function QuotationDetailPage({ params }: QuotationDetailPag
                   <TableCell>{item.lineNumber}</TableCell>
                   <TableCell className="capitalize">{item.itemType}</TableCell>
                   <TableCell>{item.description}</TableCell>
-                  <TableCell>{item.quantity}</TableCell>
+                  <TableCell>{formatQuantityWithUnit(item.quantity, item.unitLabel)}</TableCell>
                   <TableCell>{formatCurrency(item.unitPrice)}</TableCell>
                   <TableCell>{formatCurrency(item.total)}</TableCell>
                 </TableRow>
@@ -158,4 +225,25 @@ function TotalRow({
       <p className="text-base font-semibold text-foreground">{value}</p>
     </div>
   );
+}
+
+function MetadataItem({
+  label,
+  value,
+  className,
+}: {
+  label: string;
+  value: string;
+  className?: string;
+}) {
+  return (
+    <div className={className}>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
+      <p className="mt-2 text-sm text-foreground">{value}</p>
+    </div>
+  );
+}
+
+function formatQuantityWithUnit(quantity: number, unitLabel: string | null) {
+  return unitLabel ? `${quantity} ${unitLabel}` : String(quantity);
 }

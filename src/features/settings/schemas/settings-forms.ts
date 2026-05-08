@@ -6,6 +6,11 @@ export const businessProfileSettingsSchema = z.object({
   businessName: z.string().trim().min(1, "Business name is required."),
   businessAddress: z.string().trim().max(500, "Business address is too long."),
   businessContact: z.string().trim().max(200, "Business contact is too long."),
+  businessEmail: z
+    .string()
+    .trim()
+    .max(200, "Business email is too long.")
+    .refine((value) => !value || z.email().safeParse(value).success, "Enter a valid business email."),
   receiptFooter: z.string().trim().max(500, "Receipt footer is too long."),
   defaultTaxRate: z
     .string()
@@ -48,6 +53,7 @@ export function parseBusinessProfileSettingsFormData(formData: FormData) {
     businessName: readString(formData, "businessName"),
     businessAddress: readString(formData, "businessAddress"),
     businessContact: readString(formData, "businessContact"),
+    businessEmail: readString(formData, "businessEmail"),
     receiptFooter: readString(formData, "receiptFooter"),
     defaultTaxRate: readString(formData, "defaultTaxRate"),
   };

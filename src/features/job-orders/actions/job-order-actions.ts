@@ -31,6 +31,7 @@ export async function saveJobOrderDetailsAction(
   }
 
   const values = parsed.data;
+  const redirectTab = resolveJobOrderDetailTab(readOptionalValue(formData, "redirectTab"));
   const { supabase } = await getAuthorizedSupabaseServerClient("job_orders:write");
   const { error } = await supabase.rpc("save_job_order_details", {
     p_job_order_id: values.jobOrderId,
@@ -50,7 +51,7 @@ export async function saveJobOrderDetailsAction(
   }
 
   revalidateJobOrderPaths(values.jobOrderId);
-  redirect(`/job-orders/${values.jobOrderId}`);
+  redirect(buildJobOrderRedirectPath(values.jobOrderId, redirectTab));
 }
 
 export async function updateJobOrderStatusAction(
@@ -66,6 +67,7 @@ export async function updateJobOrderStatusAction(
   }
 
   const values = parsed.data;
+  const redirectTab = resolveJobOrderDetailTab(readOptionalValue(formData, "redirectTab"));
   const { supabase } = await getAuthorizedSupabaseServerClient("job_orders:write");
   const { error } = await supabase.rpc("update_job_order_status", {
     p_job_order_id: values.jobOrderId,
@@ -80,7 +82,7 @@ export async function updateJobOrderStatusAction(
   }
 
   revalidateJobOrderPaths(values.jobOrderId);
-  redirect(`/job-orders/${values.jobOrderId}`);
+  redirect(buildJobOrderRedirectPath(values.jobOrderId, redirectTab));
 }
 
 export async function assignMechanicAction(
@@ -94,6 +96,7 @@ export async function assignMechanicAction(
   }
 
   const values = parsed.data;
+  const redirectTab = resolveJobOrderDetailTab(readOptionalValue(formData, "redirectTab"));
   const { supabase } = await getAuthorizedSupabaseServerClient("job_orders:write");
   const { error } = await supabase.rpc("assign_job_order_mechanic", {
     p_job_order_id: values.jobOrderId,
@@ -109,7 +112,7 @@ export async function assignMechanicAction(
   }
 
   revalidateJobOrderPaths(values.jobOrderId);
-  redirect(`/job-orders/${values.jobOrderId}`);
+  redirect(buildJobOrderRedirectPath(values.jobOrderId, redirectTab));
 }
 
 export async function addJobOrderItemAction(
@@ -163,6 +166,7 @@ export async function recordJobOrderPartReturnAction(
 export async function removeMechanicAction(formData: FormData) {
   const jobOrderId = readRequiredValue(formData, "jobOrderId");
   const assignmentId = readRequiredValue(formData, "assignmentId");
+  const redirectTab = resolveJobOrderDetailTab(readOptionalValue(formData, "redirectTab"));
   const { supabase } = await getAuthorizedSupabaseServerClient("job_orders:write");
   const { error } = await supabase.rpc("remove_job_order_mechanic", {
     p_assignment_id: assignmentId,
@@ -173,13 +177,14 @@ export async function removeMechanicAction(formData: FormData) {
   }
 
   revalidateJobOrderPaths(jobOrderId);
-  redirect(`/job-orders/${jobOrderId}`);
+  redirect(buildJobOrderRedirectPath(jobOrderId, redirectTab));
 }
 
 export async function setJobOrderItemApprovalAction(formData: FormData) {
   const jobOrderId = readRequiredValue(formData, "jobOrderId");
   const itemId = readRequiredValue(formData, "jobOrderItemId");
   const approvalStatus = readRequiredValue(formData, "approvalStatus");
+  const redirectTab = resolveJobOrderDetailTab(readOptionalValue(formData, "redirectTab"));
 
   if (!["pending", "approved", "rejected"].includes(approvalStatus)) {
     throw new Error("Unsupported approval status.");
@@ -198,7 +203,7 @@ export async function setJobOrderItemApprovalAction(formData: FormData) {
   }
 
   revalidateJobOrderPaths(jobOrderId);
-  redirect(`/job-orders/${jobOrderId}`);
+  redirect(buildJobOrderRedirectPath(jobOrderId, redirectTab));
 }
 
 function readRequiredValue(formData: FormData, key: string) {
@@ -241,6 +246,7 @@ async function saveJobOrderPartMovement(
   }
 
   const values = parsed.data;
+  const redirectTab = resolveJobOrderDetailTab(readOptionalValue(formData, "redirectTab"));
   const { context, supabase } = await getAuthorizedSupabaseServerClient("job_orders:write");
   const rpcArgs = {
     p_job_order_item_id: values.jobOrderItemId,
@@ -261,5 +267,5 @@ async function saveJobOrderPartMovement(
   }
 
   revalidateJobOrderPaths(values.jobOrderId);
-  redirect(`/job-orders/${values.jobOrderId}`);
+  redirect(buildJobOrderRedirectPath(values.jobOrderId, redirectTab));
 }

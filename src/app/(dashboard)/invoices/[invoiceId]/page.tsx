@@ -60,7 +60,18 @@ export default async function InvoiceDetailPage({ params }: InvoiceDetailPagePro
             <DetailRow label="Vehicle" value={invoice.vehicleLabel} />
             <DetailRow
               label="Source"
-              value={invoice.jobOrderNumber ?? invoice.saleNumber ?? "Direct sale"}
+              value={
+                invoice.jobOrderId && invoice.jobOrderNumber ? (
+                  <Link
+                    href={`/job-orders/${invoice.jobOrderId}`}
+                    className="underline-offset-4 hover:underline"
+                  >
+                    {invoice.jobOrderNumber}
+                  </Link>
+                ) : (
+                  invoice.saleNumber ?? "Direct sale"
+                )
+              }
             />
             <DetailRow
               label="Status"
@@ -199,7 +210,7 @@ function DetailRow({
   badge,
 }: {
   label: string;
-  value: string;
+  value: React.ReactNode;
   badge?: React.ReactNode;
 }) {
   return (

@@ -16,6 +16,7 @@ export type BusinessSettingsValues = {
   businessName: string;
   businessAddress: string;
   businessContact: string;
+  businessEmail: string;
   receiptFooter: string;
   defaultTaxRate: string;
   allowPartialPayments: boolean;

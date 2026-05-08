@@ -74,3 +74,65 @@
     background-size: 100% 52px;
   }
 }
+
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+.report-preview-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(255, 210, 74, 0.18), transparent 28%),
+    linear-gradient(180deg, #eef2f8 0%, #e7edf5 100%);
+}
+
+.report-print-page {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  background: #fff;
+  box-shadow:
+    0 18px 50px rgba(15, 23, 42, 0.12),
+    0 4px 18px rgba(15, 23, 42, 0.08);
+}
+
+.report-section-keep,
+.report-row-avoid {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .report-preview-shell {
+    min-height: 0;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  .report-print-page {
+    width: auto;
+    min-height: auto;
+    margin: 0;
+    box-shadow: none;
+  }
+
+  tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

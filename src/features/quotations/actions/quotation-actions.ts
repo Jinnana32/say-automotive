@@ -122,6 +122,7 @@ async function saveQuotation(formData: FormData): Promise<FormActionState> {
     p_branch_id: branchId,
     p_customer_id: values.customerId,
     p_vehicle_id: values.vehicleId,
+    p_nature_of_repair: values.natureOfRepair || null,
     p_inspection_notes: values.inspectionNotes || null,
     p_status: values.status,
     p_subtotal: subtotal,

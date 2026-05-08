@@ -8,6 +8,7 @@ describe("quotationFormSchema", () => {
     const result = quotationFormSchema.safeParse({
       customerId: crypto.randomUUID(),
       vehicleId: crypto.randomUUID(),
+      natureOfRepair: "",
       inspectionNotes: "",
       status: "draft",
       discount: "0",
@@ -29,6 +30,7 @@ describe("quotationFormSchema", () => {
     const result = quotationFormSchema.safeParse({
       customerId: crypto.randomUUID(),
       vehicleId: crypto.randomUUID(),
+      natureOfRepair: "Change oil and filters",
       inspectionNotes: "",
       status: "pending_approval",
       discount: "0",

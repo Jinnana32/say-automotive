@@ -6,16 +6,18 @@ import { Pencil } from "lucide-react";
 import { IconActionButton } from "@/components/shared/icon-action";
 import { ModalDialog } from "@/components/shared/modal-dialog";
 import { JobOrderStatusForm } from "@/features/job-orders/components/job-order-status-form";
-import type { JobOrderStatus } from "@/features/job-orders/types";
+import type { JobOrderDetailTab, JobOrderStatus } from "@/features/job-orders/types";
 
 export function JobOrderStatusDialog({
   jobOrderId,
   currentStatus,
   availableNextStatuses,
+  redirectTab,
 }: {
   jobOrderId: string;
   currentStatus: JobOrderStatus;
   availableNextStatuses: JobOrderStatus[];
+  redirectTab: JobOrderDetailTab;
 }) {
   const [dialogInstance, setDialogInstance] = useState(0);
 
@@ -44,6 +46,7 @@ export function JobOrderStatusDialog({
           currentStatus={currentStatus}
           availableNextStatuses={availableNextStatuses}
           closeDialog={closeDialog}
+          redirectTab={redirectTab}
         />
       )}
     </ModalDialog>

@@ -40,6 +40,7 @@ export const quotationFormSchema = z.object({
   quotationId: z.string().uuid().optional(),
   customerId: z.string().uuid("Customer is required."),
   vehicleId: z.string().uuid("Vehicle is required."),
+  natureOfRepair: z.string().trim(),
   inspectionNotes: z.string().trim(),
   status: z.enum(["draft", "pending_approval"]),
   discount: z
@@ -58,6 +59,7 @@ export function parseQuotationFormData(formData: FormData): QuotationFormValues 
     quotationId: readString(formData, "quotationId") || undefined,
     customerId: readString(formData, "customerId"),
     vehicleId: readString(formData, "vehicleId"),
+    natureOfRepair: readString(formData, "natureOfRepair"),
     inspectionNotes: readString(formData, "inspectionNotes"),
     status: readString(formData, "status") as QuotationFormValues["status"],
     discount: readString(formData, "discount"),

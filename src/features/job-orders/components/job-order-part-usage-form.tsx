@@ -10,6 +10,7 @@ import {
   recordJobOrderPartReturnAction,
   recordJobOrderPartUsageAction,
 } from "@/features/job-orders/actions/job-order-actions";
+import type { JobOrderDetailTab } from "@/features/job-orders/types";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 import { useFormValues } from "@/lib/use-form-values";
 
@@ -18,11 +19,13 @@ export function JobOrderPartUsageForm({
   jobOrderId,
   jobOrderItemId,
   maxQuantity,
+  redirectTab,
 }: {
   mode: "use" | "return";
   jobOrderId: string;
   jobOrderItemId: string;
   maxQuantity: number;
+  redirectTab: JobOrderDetailTab;
 }) {
   const [state, formAction] = useActionState(
     mode === "use" ? recordJobOrderPartUsageAction : recordJobOrderPartReturnAction,
@@ -38,6 +41,7 @@ export function JobOrderPartUsageForm({
     <form action={formAction} className="space-y-3 rounded-xl border border-border/70 bg-background p-4">
       <input type="hidden" name="jobOrderId" value={jobOrderId} />
       <input type="hidden" name="jobOrderItemId" value={jobOrderItemId} />
+      <input type="hidden" name="redirectTab" value={redirectTab} />
 
       <div className="flex items-center justify-between gap-3">
         <div>

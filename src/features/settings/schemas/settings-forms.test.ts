@@ -12,6 +12,7 @@ describe("settings form schemas", () => {
       businessName: "",
       businessAddress: "",
       businessContact: "",
+      businessEmail: "",
       receiptFooter: "",
       defaultTaxRate: "12",
     });

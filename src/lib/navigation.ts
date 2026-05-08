@@ -27,6 +27,7 @@ export type NavigationIconName =
   | "attendance"
   | "payroll"
   | "reports"
+  | "website"
   | "settings";
 
 export const DASHBOARD_NAV_ITEMS: ReadonlyArray<{
@@ -180,6 +181,14 @@ export const DASHBOARD_NAV_ITEMS: ReadonlyArray<{
     iconName: "reports",
   },
   {
+    href: "/settings/website",
+    label: "Website",
+    description: "Public website content and lead intake.",
+    capability: "settings:read",
+    group: "System",
+    iconName: "website",
+  },
+  {
     href: "/settings",
     label: "Settings",
     description: "Business rules and preferences.",
@@ -188,3 +197,23 @@ export const DASHBOARD_NAV_ITEMS: ReadonlyArray<{
     iconName: "settings",
   },
 ];
+
+export function navigationItemMatchesPath(href: string, pathname: string) {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+export function resolveActiveNavigationItem<
+  TItem extends {
+    href: string;
+  },
+>(items: readonly TItem[], pathname: string) {
+  const matchedItems = items.filter((item) => navigationItemMatchesPath(item.href, pathname));
+
+  if (matchedItems.length === 0) {
+    return items[0];
+  }
+
+  return matchedItems.reduce((mostSpecific, item) =>
+    item.href.length > mostSpecific.href.length ? item : mostSpecific,
+  );
+}

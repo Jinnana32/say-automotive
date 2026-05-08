@@ -5,17 +5,23 @@ import { SectionCard } from "@/components/shared/section-card";
 import { Badge } from "@/components/ui/badge";
 import { JobOrderPartUsageForm } from "@/features/job-orders/components/job-order-part-usage-form";
 import { JobOrderUsageBadge } from "@/features/job-orders/components/job-order-status-badge";
-import type { JobOrderItemDetail, JobOrderStatus } from "@/features/job-orders/types";
+import type {
+  JobOrderDetailTab,
+  JobOrderItemDetail,
+  JobOrderStatus,
+} from "@/features/job-orders/types";
 import { formatDateTime } from "@/lib/dates";
 
 export function JobOrderPartsUsagePanel({
   jobOrderId,
   items,
   status,
+  redirectTab,
 }: {
   jobOrderId: string;
   items: JobOrderItemDetail[];
   status: JobOrderStatus;
+  redirectTab: JobOrderDetailTab;
 }) {
   const productItems = items.filter((item) => item.itemType === "product");
   const isReleased = status === "released";
@@ -131,12 +137,14 @@ export function JobOrderPartsUsagePanel({
                           jobOrderId={jobOrderId}
                           jobOrderItemId={item.id}
                           maxQuantity={maxUseQuantity}
+                          redirectTab={redirectTab}
                         />
                         <JobOrderPartUsageForm
                           mode="return"
                           jobOrderId={jobOrderId}
                           jobOrderItemId={item.id}
                           maxQuantity={maxReturnQuantity}
+                          redirectTab={redirectTab}
                         />
                       </div>
 

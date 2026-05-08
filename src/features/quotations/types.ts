@@ -13,6 +13,7 @@ export type QuotationItemType = "product" | "service" | "labor";
 export type QuotationListItem = {
   id: string;
   quotationNumber: string;
+  branchId: string;
   customerId: string;
   customerName: string;
   vehicleId: string;
@@ -34,12 +35,23 @@ export type QuotationItemDetail = {
   serviceId: string | null;
   description: string;
   quantity: number;
+  unitLabel: string | null;
   unitPrice: number;
   total: number;
 };
 
 export type QuotationDetail = QuotationListItem & {
+  customerContactNumber: string | null;
+  customerAddress: string | null;
+  vehicleMake: string | null;
+  vehicleModel: string | null;
+  vehicleYear: number | null;
+  vehiclePlateNumber: string | null;
+  vehicleVin: string | null;
+  natureOfRepair: string | null;
   inspectionNotes: string | null;
+  preparedByName: string | null;
+  preparedByTitle: string | null;
   items: QuotationItemDetail[];
   jobOrderId: string | null;
   jobOrderNumber: string | null;
@@ -79,6 +91,7 @@ export type QuotationFormValues = {
   quotationId?: string;
   customerId: string;
   vehicleId: string;
+  natureOfRepair: string;
   inspectionNotes: string;
   status: Extract<QuotationStatus, "draft" | "pending_approval">;
   discount: string;
@@ -95,4 +108,16 @@ export type QuotationFormOptions = {
 
 export type QuotationCreateFlowOptions = QuotationFormOptions & {
   vehicleLookups: VehicleFormLookupData;
+};
+
+export type QuotationPrintBusinessProfile = {
+  businessName: string;
+  businessContact: string | null;
+  businessEmail: string | null;
+  businessAddress: string | null;
+};
+
+export type QuotationPrintDocument = {
+  quotation: QuotationDetail;
+  businessProfile: QuotationPrintBusinessProfile;
 };

@@ -42,6 +42,7 @@ export function QuotationForm({
   const [customerId, setCustomerId] = useState(initialValues.customerId);
   const [vehicleId, setVehicleId] = useState(initialValues.vehicleId);
   const [status, setStatus] = useState(initialValues.status);
+  const [natureOfRepair, setNatureOfRepair] = useState(initialValues.natureOfRepair);
   const [inspectionNotes, setInspectionNotes] = useState(initialValues.inspectionNotes);
   const [discount, setDiscount] = useState(initialValues.discount);
   const [tax, setTax] = useState(initialValues.tax);
@@ -142,15 +143,27 @@ export function QuotationForm({
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="inspectionNotes">Inspection notes</Label>
-                <Textarea
-                  id="inspectionNotes"
-                  name="inspectionNotes"
-                  value={inspectionNotes}
-                  onChange={(event) => setInspectionNotes(event.target.value)}
-                />
-                <FieldError errors={state.fieldErrors} name="inspectionNotes" />
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="natureOfRepair">Nature of repair</Label>
+                  <Textarea
+                    id="natureOfRepair"
+                    name="natureOfRepair"
+                    value={natureOfRepair}
+                    onChange={(event) => setNatureOfRepair(event.target.value)}
+                  />
+                  <FieldError errors={state.fieldErrors} name="natureOfRepair" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="inspectionNotes">Inspection notes</Label>
+                  <Textarea
+                    id="inspectionNotes"
+                    name="inspectionNotes"
+                    value={inspectionNotes}
+                    onChange={(event) => setInspectionNotes(event.target.value)}
+                  />
+                  <FieldError errors={state.fieldErrors} name="inspectionNotes" />
+                </div>
               </div>
             </CardContent>
           </Card>

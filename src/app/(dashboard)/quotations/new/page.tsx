@@ -38,6 +38,7 @@ export default async function NewQuotationPage({
         initialValues={{
           customerId: selection.customerId,
           vehicleId: selection.vehicleId,
+          natureOfRepair: "",
           inspectionNotes: "",
           status: "draft",
           discount: "0",

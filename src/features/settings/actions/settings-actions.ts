@@ -50,6 +50,7 @@ export async function updateBusinessProfileSettingsAction(
     business_name: parsed.data.businessName,
     business_address: normalizeNullable(parsed.data.businessAddress),
     business_contact: normalizeNullable(parsed.data.businessContact),
+    business_email: normalizeNullable(parsed.data.businessEmail),
     receipt_footer: normalizeNullable(parsed.data.receiptFooter),
     default_tax_rate: Number(parsed.data.defaultTaxRate),
   };
@@ -69,12 +70,13 @@ export async function updateBusinessProfileSettingsAction(
     entityId: String(currentSettings.id),
     userId: context.userId,
     beforeData: {
-      business_name: currentSettings.business_name,
-      business_address: currentSettings.business_address,
-      business_contact: currentSettings.business_contact,
-      receipt_footer: currentSettings.receipt_footer,
-      default_tax_rate: currentSettings.default_tax_rate,
-    },
+        business_name: currentSettings.business_name,
+        business_address: currentSettings.business_address,
+        business_contact: currentSettings.business_contact,
+        business_email: currentSettings.business_email,
+        receipt_footer: currentSettings.receipt_footer,
+        default_tax_rate: currentSettings.default_tax_rate,
+      },
     afterData: payload,
   });
 

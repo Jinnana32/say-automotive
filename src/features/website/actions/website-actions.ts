@@ -41,7 +41,7 @@ export async function submitWebsiteQuoteRequestAction(
     return { status: "error", message: "Default branch is not configured." };
   }
 
-  const { error } = await supabase.from("website_quote_requests").insert({
+  const payload = {
     branch_id: branch.id,
     first_name: parsed.data.firstName,
     last_name: parsed.data.lastName,
@@ -61,7 +61,19 @@ export async function submitWebsiteQuoteRequestAction(
       : null,
     service_needed: parsed.data.serviceNeeded,
     customer_concern: parsed.data.customerConcern,
-  });
+  };
+
+  let { error } = await supabase.from("website_quote_requests").insert(payload);
+
+  // Some deployed databases may still enforce the old plate-number constraint.
+  // Retry with a blank legacy value so the public form keeps working until the
+  // nullable migration is applied everywhere.
+  if (isLegacyWebsiteQuotePlateNumberConstraint(error)) {
+    ({ error } = await supabase.from("website_quote_requests").insert({
+      ...payload,
+      plate_number: "",
+    }));
+  }
 
   if (error) {
     return { status: "error", message: error.message };
@@ -235,4 +247,13 @@ async function saveWebsitePost(formData: FormData): Promise<FormActionState> {
 function readString(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value : "";
+}
+
+function isLegacyWebsiteQuotePlateNumberConstraint(
+  error: {
+    code?: string;
+    message?: string;
+  } | null,
+) {
+  return error?.code === "23502" && error.message?.includes("plate_number");
 }

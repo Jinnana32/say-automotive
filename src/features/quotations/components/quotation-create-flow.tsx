@@ -413,6 +413,7 @@ export function QuotationCreateFlow({
           <form action={quotationFormAction} className="space-y-6">
             <input type="hidden" name="customerId" value={values.customerId} />
             <input type="hidden" name="vehicleId" value={values.vehicleId} />
+            <input type="hidden" name="natureOfRepair" value={values.natureOfRepair} />
             <input type="hidden" name="status" value={values.status} />
             <input type="hidden" name="inspectionNotes" value={values.inspectionNotes} />
             <input type="hidden" name="discount" value={values.discount} />
@@ -443,7 +444,17 @@ export function QuotationCreateFlow({
                   <div className="space-y-5">
                     <FormStatusMessage message={quotationState.message} />
 
-                    <div className="grid gap-5 md:grid-cols-2">
+                    <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_220px]">
+                      <div className="space-y-2">
+                        <Label htmlFor="natureOfRepair">Nature of repair</Label>
+                        <Textarea
+                          id="natureOfRepair"
+                          value={values.natureOfRepair}
+                          onChange={(event) => updateFormValue("natureOfRepair", event.target.value)}
+                          placeholder="Printed customer-facing repair scope or requested job."
+                        />
+                        <FieldError errors={quotationState.fieldErrors} name="natureOfRepair" />
+                      </div>
                       <div className="space-y-2">
                         <Label htmlFor="inspectionNotes">Inspection notes</Label>
                         <Textarea
@@ -699,7 +710,7 @@ export function QuotationCreateFlow({
                   <div className="space-y-5">
                     <FormStatusMessage message={quotationState.message} />
 
-                    <div className="grid gap-5 md:grid-cols-2">
+                    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
                       <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                           Customer
@@ -714,6 +725,14 @@ export function QuotationCreateFlow({
                         </p>
                         <p className="mt-2 text-base font-semibold text-foreground">
                           {selectedVehicle?.label ?? "Not selected"}
+                        </p>
+                      </div>
+                      <div className="rounded-2xl border border-border/70 bg-muted/20 p-4 md:col-span-2 xl:col-span-2">
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                          Nature of repair
+                        </p>
+                        <p className="mt-2 text-base font-semibold text-foreground">
+                          {values.natureOfRepair || "Not provided"}
                         </p>
                       </div>
                     </div>
@@ -780,6 +799,17 @@ export function QuotationCreateFlow({
                         <FieldError errors={quotationState.fieldErrors} name="tax" />
                       </div>
                     </div>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                          Inspection notes
+                        </p>
+                        <p className="mt-2 text-sm text-foreground">
+                          {values.inspectionNotes || "No inspection notes added."}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </SectionCard>
 
@@ -837,6 +867,17 @@ export function QuotationCreateFlow({
                         </p>
                         <p className="mt-2 text-base font-semibold text-foreground">
                           {values.items.length}
+                        </p>
+                      </div>
+                      <div className="rounded-2xl border border-border/70 bg-muted/20 p-4 md:col-span-2 lg:col-span-4">
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                          Nature of repair
+                        </p>
+                        <p className="mt-2 text-base font-semibold text-foreground">
+                          {values.natureOfRepair || "Not provided"}
+                        </p>
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          {values.inspectionNotes || "No inspection notes added."}
                         </p>
                       </div>
                     </div>

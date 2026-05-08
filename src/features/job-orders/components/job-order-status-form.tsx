@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { JobOrderStatusBadge } from "@/features/job-orders/components/job-order-status-badge";
 import { updateJobOrderStatusAction } from "@/features/job-orders/actions/job-order-actions";
-import type { JobOrderStatus } from "@/features/job-orders/types";
+import type { JobOrderDetailTab, JobOrderStatus } from "@/features/job-orders/types";
 import { formatJobOrderStatus } from "@/features/job-orders/utils";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 
@@ -18,11 +18,13 @@ export function JobOrderStatusForm({
   currentStatus,
   availableNextStatuses,
   closeDialog,
+  redirectTab,
 }: {
   jobOrderId: string;
   currentStatus: JobOrderStatus;
   availableNextStatuses: JobOrderStatus[];
   closeDialog: () => void;
+  redirectTab: JobOrderDetailTab;
 }) {
   const [state, formAction] = useActionState(updateJobOrderStatusAction, INITIAL_FORM_ACTION_STATE);
   const [nextStatus, setNextStatus] = useState<JobOrderStatus | "">(availableNextStatuses[0] ?? "");
@@ -30,6 +32,7 @@ export function JobOrderStatusForm({
   return (
     <form action={formAction} className="space-y-5">
       <input type="hidden" name="jobOrderId" value={jobOrderId} />
+      <input type="hidden" name="redirectTab" value={redirectTab} />
 
       <div className="rounded-2xl border border-border/70 bg-muted/20 px-4 py-4">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">

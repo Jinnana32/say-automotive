@@ -121,6 +121,30 @@ export type JobOrderDetail = JobOrderListItem & {
   availableNextStatuses: JobOrderStatus[];
 };
 
+export type JobOrderPrintDetail = JobOrderDetail & {
+  customerContactNumber: string | null;
+  customerAddress: string | null;
+  vehicleMake: string | null;
+  vehicleModel: string | null;
+  vehicleYear: number | null;
+  vehiclePlateNumber: string | null;
+  vehicleVin: string | null;
+  preparedByName: string | null;
+  preparedByTitle: string | null;
+};
+
+export type JobOrderPrintBusinessProfile = {
+  businessName: string;
+  businessContact: string | null;
+  businessEmail: string | null;
+  businessAddress: string | null;
+};
+
+export type JobOrderPrintDocument = {
+  jobOrder: JobOrderPrintDetail;
+  businessProfile: JobOrderPrintBusinessProfile;
+};
+
 export type JobOrderMechanicOption = {
   id: string;
   label: string;
