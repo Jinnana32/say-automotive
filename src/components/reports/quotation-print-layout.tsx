@@ -1,6 +1,5 @@
 import { ReportFooter } from "@/components/reports/report-footer";
 import { ReportHeader } from "@/components/reports/report-header";
-import { ReportSignatureBlock } from "@/components/reports/report-signature-block";
 import { ReportTotals } from "@/components/reports/report-totals";
 import { buildQuotationPrintBreakdown } from "@/features/quotations/report-utils";
 import type { QuotationPrintDocument } from "@/features/quotations/types";
@@ -17,6 +16,9 @@ export function QuotationPrintLayout({
 }) {
   const { quotation, businessProfile } = document;
   const breakdown = buildQuotationPrintBreakdown(quotation);
+  const defaultTerms = buildDefaultQuotationTerms();
+  const serviceAdviserName = quotation.preparedByName || "Not captured";
+  const serviceAdviserTitle = quotation.preparedByTitle || null;
 
   return (
     <article className="flex min-h-[297mm] flex-col bg-white px-[12mm] py-[10mm] text-[11px] leading-[1.35] text-slate-900">
@@ -37,6 +39,7 @@ export function QuotationPrintLayout({
             { label: "Address", value: quotation.customerAddress || "—" },
             { label: "Car Model & Year", value: formatVehicleModel(quotation) },
             { label: "VIN", value: quotation.vehicleVin || "—" },
+            { label: "Service Adviser", value: serviceAdviserName },
           ]}
         />
       </section>
@@ -110,30 +113,23 @@ export function QuotationPrintLayout({
         </div>
       </section>
 
-      <section className="report-section-keep mt-8 grid gap-8 sm:grid-cols-[1fr_250px]">
-        <div>
-          <ReportSignatureBlock
-            label="Prepared by:"
-            name={quotation.preparedByName || "Not captured"}
-            subtitle={quotation.preparedByTitle || "No title captured"}
-          />
+      <section className="report-section-keep mt-6 grid gap-6 sm:grid-cols-[minmax(0,1fr)_250px]">
+        <div className="space-y-5">
+          <QuotationTermsSection terms={defaultTerms} />
+          <ServiceAdviserSection name={serviceAdviserName} title={serviceAdviserTitle} />
         </div>
-        <ReportTotals
-          lines={[
-            { label: "Total Parts:", value: formatCurrency(breakdown.totalParts) },
-            { label: "Total Labor:", value: formatCurrency(breakdown.totalLabor) },
-            { label: "Discount:", value: formatCurrency(breakdown.discount) },
-            ...(breakdown.tax > 0 ? [{ label: "Tax:", value: formatCurrency(breakdown.tax) }] : []),
-            { label: "TOTAL:", value: formatCurrency(breakdown.grandTotal), emphasized: true },
-          ]}
-          className="justify-self-end"
-        />
-      </section>
-
-      <section className="report-section-keep mt-10 text-center text-[10px] text-slate-700">
-        <p>By signing below, I agree to comply with all the terms and conditions as stated in this agreement.</p>
-        <div className="mt-8">
-          <ReportSignatureBlock label="Customer Signature" align="center" />
+        <div className="space-y-5">
+          <ReportTotals
+            lines={[
+              { label: "Total Parts:", value: formatCurrency(breakdown.totalParts) },
+              { label: "Total Labor:", value: formatCurrency(breakdown.totalLabor) },
+              { label: "Discount:", value: formatCurrency(breakdown.discount) },
+              ...(breakdown.tax > 0 ? [{ label: "Tax:", value: formatCurrency(breakdown.tax) }] : []),
+              { label: "TOTAL:", value: formatCurrency(breakdown.grandTotal), emphasized: true },
+            ]}
+            className="justify-self-end"
+          />
+          <CustomerApprovalSection />
         </div>
       </section>
 
@@ -143,6 +139,63 @@ export function QuotationPrintLayout({
         address={businessProfile.businessAddress}
       />
     </article>
+  );
+}
+
+function QuotationTermsSection({
+  terms,
+}: {
+  terms: string[];
+}) {
+  return (
+    <section className="report-section-keep border border-slate-300 px-4 py-4">
+      <p className="font-semibold text-slate-800">Terms &amp; Notes</p>
+      <ul className="mt-2 list-disc space-y-1 pl-4 text-[10px] text-slate-700">
+        {terms.map((term) => (
+          <li key={term}>{term}</li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function CustomerApprovalSection() {
+  return (
+    <section className="report-section-keep border border-slate-300 px-4 py-4">
+      <p className="font-semibold text-slate-800">Customer Approval</p>
+      <p className="mt-2 text-[10px] text-slate-700">
+        I have reviewed this quotation and approve the services and costs as listed above.
+      </p>
+      <div className="mt-4 space-y-3">
+        <SignatureLine label="Signature" />
+        <SignatureLine label="Print Name" />
+        <SignatureLine label="Date" />
+      </div>
+    </section>
+  );
+}
+
+function ServiceAdviserSection({
+  name,
+  title,
+}: {
+  name: string;
+  title: string | null;
+}) {
+  return (
+    <section className="report-section-keep border border-slate-300 px-4 py-4">
+      <p className="font-semibold text-slate-800">Service Adviser</p>
+      <p className="mt-2 text-[10px] text-slate-700">
+        Prepared and discussed by the assigned service adviser before customer approval.
+      </p>
+      <div className="mt-4 space-y-3">
+        <SignatureLine label="Signature" />
+        <SignatureLine label="Print Name" value={name} />
+        {title ? (
+          <p className="pl-[86px] text-[10px] text-slate-600">{title}</p>
+        ) : null}
+      </div>
+    </section>
   );
 }
 
@@ -164,6 +217,33 @@ function MetadataColumn({
       ))}
     </div>
   );
+}
+
+function SignatureLine({
+  label,
+  value,
+}: {
+  label: string;
+  value?: string | null;
+}) {
+  return (
+    <div className="grid grid-cols-[76px_minmax(0,1fr)] items-end gap-2">
+      <p className="text-[10px] font-semibold text-slate-700">{label}:</p>
+      <div className="min-h-[20px] border-b border-slate-500 pb-0.5 text-[10.5px] text-slate-950">
+        {value?.trim() || "\u00A0"}
+      </div>
+    </div>
+  );
+}
+
+function buildDefaultQuotationTerms() {
+  return [
+    "Prices are inclusive of parts and labor unless otherwise stated.",
+    "This quotation is non-binding until approved and confirmed.",
+    "Parts and services are warranted for 30 days or 1,000 km, whichever comes first.",
+    "Price may change without prior notice if additional work or parts are required upon further inspection.",
+    "Thank you for choosing SAY Auto Care.",
+  ];
 }
 
 function formatVehicleModel(document: QuotationPrintDocument["quotation"]) {
