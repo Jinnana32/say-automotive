@@ -66,6 +66,8 @@ export function AppSidebar({
   navigationItems,
   userDisplayName,
   userRoleLabel,
+  businessName,
+  businessLogoUrl,
   className,
   onNavigate,
   onClose,
@@ -81,6 +83,8 @@ export function AppSidebar({
   }>;
   userDisplayName: string;
   userRoleLabel: string;
+  businessName: string;
+  businessLogoUrl: string | null;
   className?: string;
   onNavigate?: () => void;
   onClose?: () => void;
@@ -125,20 +129,18 @@ export function AppSidebar({
       <div className="flex h-full flex-col px-4 py-5">
         <div className="flex items-center justify-between gap-3 border-b border-border/80 pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-2xl shadow-sm">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/90 p-1.5 shadow-sm">
               <Image
-                src="/say-auto-care-logo.jpeg"
-                alt="SAY Auto Care"
-                width={150}
-                height={128}
-                className="h-12 w-auto rounded-sm object-contain sm:h-[52px]"
+                src={businessLogoUrl ?? "/say-auto-care-logo.jpeg"}
+                alt={businessName}
+                width={240}
+                height={192}
+                className="h-14 w-auto rounded-sm object-contain sm:h-16"
                 priority
               />
             </div>
             <div>
-              <p className="text-sm font-semibold text-foreground">
-                SAY Auto Care
-              </p>
+              <p className="text-sm font-semibold text-foreground">{businessName}</p>
               <p className="text-xs text-muted-foreground">Administration</p>
             </div>
           </div>

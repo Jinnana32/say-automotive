@@ -15,15 +15,15 @@ export function ReportHeader({
     <header className="report-section-keep">
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex w-16 shrink-0 items-center justify-center">
+          <div className="flex w-24 shrink-0 items-center justify-center">
             <Image
               src={logoSrc}
               alt={businessName}
-              width={120}
-              height={64}
+              width={180}
+              height={96}
               priority
               unoptimized
-              className="h-9 w-auto object-contain"
+              className="h-14 w-auto object-contain"
             />
           </div>
           <div className="min-w-0">

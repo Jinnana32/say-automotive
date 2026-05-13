@@ -72,11 +72,13 @@ export function PaymentPrintLayout({
             </div>
           </div>
 
-          <ReportSignatureBlock
-            label="Received by:"
-            name={payment.receivedByName || "Not captured"}
-            subtitle={payment.receivedByTitle ? formatLabel(payment.receivedByTitle) : "No title captured"}
-          />
+          <div className="mt-8">
+            <ReportSignatureBlock
+              label="Received by:"
+              name={payment.receivedByName || "Not captured"}
+              subtitle={payment.receivedByTitle ? formatLabel(payment.receivedByTitle) : "No title captured"}
+            />
+          </div>
         </div>
 
         <div className="justify-self-end space-y-2">

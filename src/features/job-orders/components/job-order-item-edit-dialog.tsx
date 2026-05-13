@@ -12,10 +12,12 @@ export function JobOrderItemEditDialog({
   jobOrderId,
   item,
   redirectTab,
+  trigger,
 }: {
   jobOrderId: string;
   item: JobOrderItemDetail;
   redirectTab: JobOrderDetailTab;
+  trigger?: (controls: { openDialog: () => void }) => React.ReactNode;
 }) {
   const [dialogInstance, setDialogInstance] = useState(0);
 
@@ -24,20 +26,29 @@ export function JobOrderItemEditDialog({
       title="Edit work item"
       description="Update the quoted line before billing. Additional items may return to pending approval after changes."
       size="lg"
-      trigger={({ openDialog }) => (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            setDialogInstance((currentValue) => currentValue + 1);
-            openDialog();
-          }}
-        >
-          <PencilLine className="size-4" />
-          Edit
-        </Button>
-      )}
+      trigger={({ openDialog }) =>
+        trigger ? (
+          trigger({
+            openDialog: () => {
+              setDialogInstance((currentValue) => currentValue + 1);
+              openDialog();
+            },
+          })
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setDialogInstance((currentValue) => currentValue + 1);
+              openDialog();
+            }}
+          >
+            <PencilLine className="size-4" />
+            Edit
+          </Button>
+        )
+      }
     >
       {({ closeDialog }) => (
         <JobOrderItemEditForm

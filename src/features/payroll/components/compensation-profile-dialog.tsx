@@ -13,10 +13,12 @@ export function CompensationProfileDialog({
   staffId,
   staffName,
   profile,
+  trigger,
 }: {
   staffId: string;
   staffName: string;
   profile: CompensationProfileSummary | null;
+  trigger?: (controls: { openDialog: () => void }) => React.ReactNode;
 }) {
   const [dialogInstance, setDialogInstance] = useState(0);
 
@@ -25,16 +27,25 @@ export function CompensationProfileDialog({
       title="Compensation profile"
       description={`Configure how ${staffName} should be treated in payroll.`}
       size="lg"
-      trigger={({ openDialog }) => (
-        <IconActionButton
-          label={`Edit compensation for ${staffName}`}
-          icon={HandCoins}
-          onClick={() => {
-            setDialogInstance((currentValue) => currentValue + 1);
-            openDialog();
-          }}
-        />
-      )}
+      trigger={({ openDialog }) =>
+        trigger ? (
+          trigger({
+            openDialog: () => {
+              setDialogInstance((currentValue) => currentValue + 1);
+              openDialog();
+            },
+          })
+        ) : (
+          <IconActionButton
+            label={`Edit compensation for ${staffName}`}
+            icon={HandCoins}
+            onClick={() => {
+              setDialogInstance((currentValue) => currentValue + 1);
+              openDialog();
+            }}
+          />
+        )
+      }
     >
       {({ closeDialog }) => (
         <CompensationProfileForm

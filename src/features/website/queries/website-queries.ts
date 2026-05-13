@@ -17,6 +17,7 @@ import type {
 } from "@/features/website/types";
 import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
+import { buildBusinessLogoUrl } from "@/lib/storage";
 import type { TableRow } from "@/types/database";
 
 type ProductRow = TableRow<"products">;
@@ -44,7 +45,7 @@ export const getWebsiteShellData = cache(async (): Promise<WebsiteShellData> => 
 
   const { data: settings, error: settingsError } = await supabase
     .from("business_settings")
-    .select("business_name, business_address, business_contact")
+    .select("business_name, business_address, business_contact, business_logo_path")
     .eq("branch_id", branch.id)
     .maybeSingle();
 
@@ -54,6 +55,7 @@ export const getWebsiteShellData = cache(async (): Promise<WebsiteShellData> => 
 
   return {
     businessName: settings?.business_name ?? branch.name,
+    businessLogoUrl: buildBusinessLogoUrl(settings?.business_logo_path ?? null),
     branchName: branch.name,
     address: settings?.business_address ?? null,
     contactNumber: settings?.business_contact ?? null,

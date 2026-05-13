@@ -8,6 +8,10 @@ import { SearchInput } from "@/components/shared/search-input";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  TableRowActionsMenu,
+  TableRowActionsMenuLink,
+} from "@/components/shared/table-row-actions-menu";
 import { InvoiceStatusBadge } from "@/features/invoices/components/invoice-status-badge";
 import { listInvoices } from "@/features/invoices/queries/invoice-queries";
 import { formatCurrency } from "@/lib/currency";
@@ -106,9 +110,12 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
                     <TableCell>{formatCurrency(invoice.balance)}</TableCell>
                     <TableCell>{formatDate(invoice.invoiceDate)}</TableCell>
                     <TableCell className="text-right">
-                      <Button asChild size="sm">
-                        <Link href={`/invoices/${invoice.id}`}>Open</Link>
-                      </Button>
+                      <TableRowActionsMenu label={`Invoice actions for ${invoice.invoiceNumber}`}>
+                        <TableRowActionsMenuLink
+                          href={`/invoices/${invoice.id}`}
+                          label="Open invoice"
+                        />
+                      </TableRowActionsMenu>
                     </TableCell>
                   </TableRow>
                 ))}

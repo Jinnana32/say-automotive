@@ -5,6 +5,7 @@ export type WebsiteQuoteRequestStatus = "new" | "reviewed" | "contacted" | "quot
 
 export type WebsiteShellData = {
   businessName: string;
+  businessLogoUrl: string | null;
   branchName: string;
   address: string | null;
   contactNumber: string | null;

@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDateTime } from "@/lib/dates";
-import { updateWebsiteQuoteRequestStatusAction } from "@/features/website/actions/website-actions";
 import { listWebsiteQuoteRequests } from "@/features/website/queries/website-queries";
 import { getWebsiteQuoteRequestTone } from "@/features/website/utils";
+import { WebsiteQuoteRequestRowActions } from "@/features/website/components/website-quote-request-row-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -129,22 +129,10 @@ export default async function WebsiteQuoteRequestsPage({
                       </StatusBadge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <form
-                        action={updateWebsiteQuoteRequestStatusAction}
-                        className="flex items-center justify-end gap-2"
-                      >
-                        <input type="hidden" name="requestId" value={request.id} />
-                        <NativeSelect name="status" defaultValue={request.status} className="w-[150px]">
-                          <option value="new">New</option>
-                          <option value="reviewed">Reviewed</option>
-                          <option value="contacted">Contacted</option>
-                          <option value="quoted">Quoted</option>
-                          <option value="closed">Closed</option>
-                        </NativeSelect>
-                        <Button size="sm" type="submit" variant="outline">
-                          Save
-                        </Button>
-                      </form>
+                      <WebsiteQuoteRequestRowActions
+                        requestId={request.id}
+                        currentStatus={request.status}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

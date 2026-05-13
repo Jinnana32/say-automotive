@@ -19,6 +19,8 @@ export function AppShell({
   userDisplayName,
   userRoleLabel,
   capabilities,
+  businessName,
+  businessLogoUrl,
 }: Readonly<{
   children: React.ReactNode;
   navigationItems: ReadonlyArray<{
@@ -33,6 +35,8 @@ export function AppShell({
   userDisplayName: string;
   userRoleLabel: string;
   capabilities: readonly AppCapability[];
+  businessName: string;
+  businessLogoUrl: string | null;
 }>) {
   const pathname = usePathname();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -44,6 +48,8 @@ export function AppShell({
         navigationItems={navigationItems}
         userDisplayName={userDisplayName}
         userRoleLabel={userRoleLabel}
+        businessName={businessName}
+        businessLogoUrl={businessLogoUrl}
         className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-64 lg:flex-col"
       />
       {isMobileSidebarOpen ? (
@@ -61,6 +67,8 @@ export function AppShell({
           navigationItems={navigationItems}
           userDisplayName={userDisplayName}
           userRoleLabel={userRoleLabel}
+          businessName={businessName}
+          businessLogoUrl={businessLogoUrl}
           className="fixed inset-y-0 left-0 z-50 flex w-[18rem] max-w-[calc(100vw-2rem)] flex-col shadow-2xl lg:hidden"
           onNavigate={() => setIsMobileSidebarOpen(false)}
           onClose={() => setIsMobileSidebarOpen(false)}

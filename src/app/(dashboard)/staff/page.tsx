@@ -5,6 +5,10 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  TableRowActionsMenu,
+  TableRowActionsMenuLink,
+} from "@/components/shared/table-row-actions-menu";
 import { listStaff } from "@/features/staff/queries/staff-queries";
 
 export const dynamic = "force-dynamic";
@@ -88,9 +92,12 @@ export default async function StaffPage({ searchParams }: StaffPageProps) {
                       <TableCell>{person.contactNumber ?? "No contact number"}</TableCell>
                       <TableCell className="capitalize">{person.status}</TableCell>
                       <TableCell className="text-right">
-                        <Button asChild size="sm" variant="ghost">
-                          <Link href={`/staff/${person.id}/edit`}>Edit</Link>
-                        </Button>
+                        <TableRowActionsMenu label={`Staff actions for ${person.fullName}`}>
+                          <TableRowActionsMenuLink
+                            href={`/staff/${person.id}/edit`}
+                            label="Edit staff record"
+                          />
+                        </TableRowActionsMenu>
                       </TableCell>
                     </TableRow>
                   ))}

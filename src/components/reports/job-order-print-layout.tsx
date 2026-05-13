@@ -1,16 +1,16 @@
-import { ReportFooter } from "@/components/reports/report-footer";
-import { ReportHeader } from "@/components/reports/report-header";
-import { ReportSectionHeading } from "@/components/reports/report-section-heading";
-import { ReportSignatureBlock } from "@/components/reports/report-signature-block";
-import { ReportTotals } from "@/components/reports/report-totals";
-import { buildJobOrderPrintBreakdown } from "@/features/job-orders/report-utils";
-import type { JobOrderPrintDocument } from "@/features/job-orders/types";
-import { formatJobOrderStatus, toTitleCaseWords } from "@/features/job-orders/utils";
+import { ReportFooter } from '@/components/reports/report-footer';
+import { ReportHeader } from '@/components/reports/report-header';
+import { ReportSectionHeading } from '@/components/reports/report-section-heading';
+import { ReportSignatureBlock } from '@/components/reports/report-signature-block';
+import { ReportTotals } from '@/components/reports/report-totals';
+import { buildJobOrderPrintBreakdown } from '@/features/job-orders/report-utils';
+import type { JobOrderPrintDocument } from '@/features/job-orders/types';
 import {
-  formatCurrency,
-  formatPrintCurrencyNumber,
-} from "@/lib/currency";
-import { formatDocumentDate, formatDateTime } from "@/lib/dates";
+  formatJobOrderStatus,
+  toTitleCaseWords,
+} from '@/features/job-orders/utils';
+import { formatCurrency, formatPrintCurrencyNumber } from '@/lib/currency';
+import { formatDocumentDate, formatDateTime } from '@/lib/dates';
 
 export function JobOrderPrintLayout({
   document,
@@ -34,18 +34,27 @@ export function JobOrderPrintLayout({
       <section className="report-section-keep mt-5 grid gap-x-8 gap-y-2 sm:grid-cols-2">
         <MetadataColumn
           items={[
-            { label: "Job Order No.", value: jobOrder.jobOrderNumber },
-            { label: "Customer", value: jobOrder.customerName },
-            { label: "Contact Number", value: jobOrder.customerContactNumber || "—" },
-            { label: "Plate Number", value: jobOrder.vehiclePlateNumber || "—" },
+            { label: 'Job Order No.', value: jobOrder.jobOrderNumber },
+            { label: 'Customer', value: jobOrder.customerName },
+            {
+              label: 'Contact Number',
+              value: jobOrder.customerContactNumber || '—',
+            },
+            {
+              label: 'Plate Number',
+              value: jobOrder.vehiclePlateNumber || '—',
+            },
           ]}
         />
         <MetadataColumn
           items={[
-            { label: "Date", value: formatDocumentDate(jobOrder.createdAt) },
-            { label: "Status", value: toTitleCaseWords(formatJobOrderStatus(jobOrder.status)) },
-            { label: "Address", value: jobOrder.customerAddress || "—" },
-            { label: "Car Model & Year", value: formatVehicleModel(jobOrder) },
+            { label: 'Date', value: formatDocumentDate(jobOrder.createdAt) },
+            {
+              label: 'Status',
+              value: toTitleCaseWords(formatJobOrderStatus(jobOrder.status)),
+            },
+            { label: 'Address', value: jobOrder.customerAddress || '—' },
+            { label: 'Car Model & Year', value: formatVehicleModel(jobOrder) },
           ]}
         />
       </section>
@@ -53,25 +62,37 @@ export function JobOrderPrintLayout({
       <section className="report-section-keep mt-3 grid gap-x-8 gap-y-2 sm:grid-cols-2">
         <MetadataColumn
           items={[
-            { label: "Quotation", value: jobOrder.quotationNumber || "Manual flow" },
-            { label: "Invoice", value: jobOrder.invoiceNumber || "Not billed yet" },
-            { label: "Mileage In", value: formatMileage(jobOrder.mileageIn) },
-            { label: "Mileage Out", value: formatMileage(jobOrder.mileageOut) },
+            {
+              label: 'Quotation',
+              value: jobOrder.quotationNumber || 'Manual flow',
+            },
+            {
+              label: 'Invoice',
+              value: jobOrder.invoiceNumber || 'Not billed yet',
+            },
+            { label: 'Mileage In', value: formatMileage(jobOrder.mileageIn) },
+            { label: 'Mileage Out', value: formatMileage(jobOrder.mileageOut) },
           ]}
         />
         <MetadataColumn
           items={[
-            { label: "Started", value: optionalDate(jobOrder.startedAt) },
-            { label: "Completed", value: optionalDate(jobOrder.completedAt) },
-            { label: "Released", value: optionalDate(jobOrder.releasedAt) },
-            { label: "VIN", value: jobOrder.vehicleVin || "—" },
+            { label: 'Started', value: optionalDate(jobOrder.startedAt) },
+            { label: 'Completed', value: optionalDate(jobOrder.completedAt) },
+            { label: 'Released', value: optionalDate(jobOrder.releasedAt) },
+            { label: 'VIN', value: jobOrder.vehicleVin || '—' },
           ]}
         />
       </section>
 
       <section className="report-section-keep mt-4 grid gap-3 sm:grid-cols-2">
-        <NarrativeBlock title="Customer Concern" value={jobOrder.customerConcern} />
-        <NarrativeBlock title="Inspection Notes" value={jobOrder.inspectionNotes} />
+        <NarrativeBlock
+          title="Customer Concern"
+          value={jobOrder.customerConcern}
+        />
+        <NarrativeBlock
+          title="Inspection Notes"
+          value={jobOrder.inspectionNotes}
+        />
         <NarrativeBlock title="Diagnosis" value={jobOrder.diagnosis} />
         <NarrativeBlock title="Work Performed" value={jobOrder.workPerformed} />
       </section>
@@ -82,31 +103,54 @@ export function JobOrderPrintLayout({
           <table className="w-full border-collapse text-[11px]">
             <thead className="bg-[#173c99] text-white">
               <tr>
-                <th className="w-16 px-2 py-1.5 text-left font-semibold">Type</th>
-                <th className="px-2 py-1.5 text-left font-semibold">Description</th>
-                <th className="w-20 px-2 py-1.5 text-right font-semibold">Qty</th>
+                <th className="w-16 px-2 py-1.5 text-left font-semibold">
+                  Type
+                </th>
+                <th className="px-2 py-1.5 text-left font-semibold">
+                  Description
+                </th>
+                <th className="w-20 px-2 py-1.5 text-right font-semibold">
+                  Qty
+                </th>
                 {!hidePrices ? (
                   <>
-                    <th className="w-24 px-2 py-1.5 text-right font-semibold">Unit Price</th>
-                    <th className="w-24 px-2 py-1.5 text-right font-semibold">Total</th>
+                    <th className="w-24 px-2 py-1.5 text-right font-semibold">
+                      Unit Price
+                    </th>
+                    <th className="w-24 px-2 py-1.5 text-right font-semibold">
+                      Total
+                    </th>
                   </>
                 ) : null}
-                <th className="w-24 px-2 py-1.5 text-left font-semibold">Approval</th>
-                <th className="w-20 px-2 py-1.5 text-left font-semibold">Usage</th>
+                <th className="w-24 px-2 py-1.5 text-left font-semibold">
+                  Approval
+                </th>
+                <th className="w-20 px-2 py-1.5 text-left font-semibold">
+                  Usage
+                </th>
               </tr>
             </thead>
             <tbody>
               {breakdown.workLines.length > 0 ? (
                 breakdown.workLines.map((item) => (
-                  <tr key={item.id} className="report-row-avoid border-t border-slate-200">
-                    <td className="px-2 py-1.5 align-top uppercase text-slate-700">{item.itemType}</td>
+                  <tr
+                    key={item.id}
+                    className="report-row-avoid border-t border-slate-200"
+                  >
+                    <td className="px-2 py-1.5 align-top uppercase text-slate-700">
+                      {item.itemType}
+                    </td>
                     <td className="px-2 py-1.5 align-top">
                       <p>{item.description}</p>
                       {item.isAdditional ? (
-                        <p className="text-[10px] text-slate-500">Additional item</p>
+                        <p className="text-[10px] text-slate-500">
+                          Additional item
+                        </p>
                       ) : null}
                     </td>
-                    <td className="px-2 py-1.5 text-right align-top">{item.quantityLabel}</td>
+                    <td className="px-2 py-1.5 text-right align-top">
+                      {item.quantityLabel}
+                    </td>
                     {!hidePrices ? (
                       <>
                         <td className="px-2 py-1.5 text-right align-top">
@@ -117,13 +161,20 @@ export function JobOrderPrintLayout({
                         </td>
                       </>
                     ) : null}
-                    <td className="px-2 py-1.5 align-top">{formatStatusLabel(item.approvalStatus)}</td>
-                    <td className="px-2 py-1.5 align-top">{formatStatusLabel(item.usageStatus)}</td>
+                    <td className="px-2 py-1.5 align-top">
+                      {formatStatusLabel(item.approvalStatus)}
+                    </td>
+                    <td className="px-2 py-1.5 align-top">
+                      {formatStatusLabel(item.usageStatus)}
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr className="border-t border-slate-200">
-                  <td colSpan={hidePrices ? 5 : 7} className="px-2 py-3 text-center text-slate-500">
+                  <td
+                    colSpan={hidePrices ? 5 : 7}
+                    className="px-2 py-3 text-center text-slate-500"
+                  >
                     No work items recorded.
                   </td>
                 </tr>
@@ -140,30 +191,62 @@ export function JobOrderPrintLayout({
             <thead className="bg-[#173c99] text-white">
               <tr>
                 <th className="px-2 py-1.5 text-left font-semibold">Part</th>
-                <th className="w-16 px-2 py-1.5 text-right font-semibold">Planned</th>
-                <th className="w-16 px-2 py-1.5 text-right font-semibold">Used</th>
-                <th className="w-16 px-2 py-1.5 text-right font-semibold">Returned</th>
-                <th className="w-16 px-2 py-1.5 text-right font-semibold">Remaining</th>
-                <th className="w-20 px-2 py-1.5 text-right font-semibold">Avail.</th>
-                <th className="w-20 px-2 py-1.5 text-left font-semibold">Status</th>
+                <th className="w-16 px-2 py-1.5 text-right font-semibold">
+                  Planned
+                </th>
+                <th className="w-16 px-2 py-1.5 text-right font-semibold">
+                  Used
+                </th>
+                <th className="w-16 px-2 py-1.5 text-right font-semibold">
+                  Returned
+                </th>
+                <th className="w-16 px-2 py-1.5 text-right font-semibold">
+                  Remaining
+                </th>
+                <th className="w-20 px-2 py-1.5 text-right font-semibold">
+                  Avail.
+                </th>
+                <th className="w-20 px-2 py-1.5 text-left font-semibold">
+                  Status
+                </th>
               </tr>
             </thead>
             <tbody>
               {breakdown.partUsageLines.length > 0 ? (
                 breakdown.partUsageLines.map((item) => (
-                  <tr key={item.id} className="report-row-avoid border-t border-slate-200">
-                    <td className="px-2 py-1.5 align-top">{item.description}</td>
-                    <td className="px-2 py-1.5 text-right align-top">{item.plannedQuantity}</td>
-                    <td className="px-2 py-1.5 text-right align-top">{item.usedQuantity}</td>
-                    <td className="px-2 py-1.5 text-right align-top">{item.returnedQuantity}</td>
-                    <td className="px-2 py-1.5 text-right align-top">{item.remainingQuantity}</td>
-                    <td className="px-2 py-1.5 text-right align-top">{item.stockAvailability}</td>
-                    <td className="px-2 py-1.5 align-top">{formatStatusLabel(item.usageStatus)}</td>
+                  <tr
+                    key={item.id}
+                    className="report-row-avoid border-t border-slate-200"
+                  >
+                    <td className="px-2 py-1.5 align-top">
+                      {item.description}
+                    </td>
+                    <td className="px-2 py-1.5 text-right align-top">
+                      {item.plannedQuantity}
+                    </td>
+                    <td className="px-2 py-1.5 text-right align-top">
+                      {item.usedQuantity}
+                    </td>
+                    <td className="px-2 py-1.5 text-right align-top">
+                      {item.returnedQuantity}
+                    </td>
+                    <td className="px-2 py-1.5 text-right align-top">
+                      {item.remainingQuantity}
+                    </td>
+                    <td className="px-2 py-1.5 text-right align-top">
+                      {item.stockAvailability}
+                    </td>
+                    <td className="px-2 py-1.5 align-top">
+                      {formatStatusLabel(item.usageStatus)}
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr className="border-t border-slate-200">
-                  <td colSpan={7} className="px-2 py-3 text-center text-slate-500">
+                  <td
+                    colSpan={7}
+                    className="px-2 py-3 text-center text-slate-500"
+                  >
                     No parts tracked on this job order.
                   </td>
                 </tr>
@@ -174,23 +257,30 @@ export function JobOrderPrintLayout({
       </section>
 
       <section
-        className={`report-section-keep mt-4 grid gap-6 ${hidePrices ? "sm:grid-cols-1" : "sm:grid-cols-[1fr_250px]"}`}
+        className={`report-section-keep mt-4 grid gap-6 ${hidePrices ? 'sm:grid-cols-1' : 'sm:grid-cols-[1fr_250px]'}`}
       >
-        <div className="space-y-3">
+        <div className="space-y-20">
           <div>
             <ReportSectionHeading title="MECHANICS" />
             <div className="overflow-hidden border border-[#173c99]/20">
               <table className="w-full border-collapse text-[11px]">
                 <thead className="bg-[#173c99] text-white">
                   <tr>
-                    <th className="px-2 py-1.5 text-left font-semibold">Name</th>
+                    <th className="px-2 py-1.5 text-left font-semibold">
+                      Name
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {jobOrder.mechanics.length > 0 ? (
                     jobOrder.mechanics.map((mechanic) => (
-                      <tr key={mechanic.id} className="report-row-avoid border-t border-slate-200">
-                        <td className="px-2 py-1.5 align-top">{mechanic.fullName}</td>
+                      <tr
+                        key={mechanic.id}
+                        className="report-row-avoid border-t border-slate-200"
+                      >
+                        <td className="px-2 py-1.5 align-top">
+                          {mechanic.fullName}
+                        </td>
                       </tr>
                     ))
                   ) : (
@@ -206,8 +296,8 @@ export function JobOrderPrintLayout({
           </div>
           <ReportSignatureBlock
             label="Prepared by:"
-            name={jobOrder.preparedByName || "Not captured"}
-            subtitle={jobOrder.preparedByTitle || "No title captured"}
+            name={jobOrder.preparedByName || 'Not captured'}
+            subtitle={jobOrder.preparedByTitle || 'No title captured'}
           />
         </div>
 
@@ -217,15 +307,39 @@ export function JobOrderPrintLayout({
             <div className="overflow-hidden border border-[#173c99]/20 px-3 py-3">
               <ReportTotals
                 lines={[
-                  { label: "Parts:", value: formatCurrency(breakdown.totalParts) },
-                  { label: "Labor:", value: formatCurrency(breakdown.totalLabor) },
-                  { label: "Pending Extras:", value: formatCurrency(breakdown.pendingExtras) },
-                  { label: "Rejected Extras:", value: formatCurrency(breakdown.rejectedExtras) },
-                  { label: "Billable Total:", value: formatCurrency(breakdown.billableTotal), emphasized: true },
+                  {
+                    label: 'Parts:',
+                    value: formatCurrency(breakdown.totalParts),
+                  },
+                  {
+                    label: 'Labor:',
+                    value: formatCurrency(breakdown.totalLabor),
+                  },
+                  {
+                    label: 'Pending Extras:',
+                    value: formatCurrency(breakdown.pendingExtras),
+                  },
+                  {
+                    label: 'Rejected Extras:',
+                    value: formatCurrency(breakdown.rejectedExtras),
+                  },
+                  {
+                    label: 'Billable Total:',
+                    value: formatCurrency(breakdown.billableTotal),
+                    emphasized: true,
+                  },
                   ...(jobOrder.invoiceId
                     ? [
-                        { label: "Invoice Total:", value: formatCurrency(jobOrder.invoiceTotalAmount ?? 0) },
-                        { label: "Balance:", value: formatCurrency(jobOrder.invoiceBalance ?? 0) },
+                        {
+                          label: 'Invoice Total:',
+                          value: formatCurrency(
+                            jobOrder.invoiceTotalAmount ?? 0,
+                          ),
+                        },
+                        {
+                          label: 'Balance:',
+                          value: formatCurrency(jobOrder.invoiceBalance ?? 0),
+                        },
                       ]
                     : []),
                 ]}
@@ -234,9 +348,7 @@ export function JobOrderPrintLayout({
             </div>
           </div>
         ) : (
-          <div className="justify-self-end rounded-md border border-dashed border-slate-300 px-4 py-3 text-right text-[10px] uppercase tracking-[0.16em] text-slate-500">
-            Pricing omitted on this printout.
-          </div>
+          <></>
         )}
       </section>
 
@@ -260,7 +372,10 @@ function MetadataColumn({
   return (
     <div className="space-y-1">
       {items.map((item) => (
-        <div key={item.label} className="grid grid-cols-[110px_minmax(0,1fr)] gap-2">
+        <div
+          key={item.label}
+          className="grid grid-cols-[110px_minmax(0,1fr)] gap-2"
+        >
           <p className="font-semibold text-slate-800">{item.label}</p>
           <p className="min-w-0">{item.value}</p>
         </div>
@@ -279,14 +394,14 @@ function NarrativeBlock({
   return (
     <div className="rounded-md border border-slate-300 px-3 py-2">
       <p className="font-semibold text-slate-800">{title}</p>
-      <p className="mt-1">{value || "—"}</p>
+      <p className="mt-1">{value || '—'}</p>
     </div>
   );
 }
 
-function formatVehicleModel(document: JobOrderPrintDocument["jobOrder"]) {
+function formatVehicleModel(document: JobOrderPrintDocument['jobOrder']) {
   if (document.vehicleMake && document.vehicleModel) {
-    const yearPart = document.vehicleYear ? ` (${document.vehicleYear})` : "";
+    const yearPart = document.vehicleYear ? ` (${document.vehicleYear})` : '';
     return `${document.vehicleMake} ${document.vehicleModel}${yearPart}`;
   }
 
@@ -294,13 +409,13 @@ function formatVehicleModel(document: JobOrderPrintDocument["jobOrder"]) {
 }
 
 function formatMileage(value: number | null) {
-  return value === null ? "—" : `${value.toLocaleString("en-PH")} km`;
+  return value === null ? '—' : `${value.toLocaleString('en-PH')} km`;
 }
 
 function optionalDate(value: string | null) {
-  return value ? formatDateTime(value) : "—";
+  return value ? formatDateTime(value) : '—';
 }
 
 function formatStatusLabel(value: string) {
-  return toTitleCaseWords(value.replaceAll("_", " "));
+  return toTitleCaseWords(value.replaceAll('_', ' '));
 }

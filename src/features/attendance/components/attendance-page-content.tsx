@@ -11,6 +11,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AttendanceApprovalButton } from "@/features/attendance/components/attendance-approval-button";
 import { AttendanceEntryDialog } from "@/features/attendance/components/attendance-entry-dialog";
 import { StaffScheduleDialog } from "@/features/attendance/components/staff-schedule-dialog";
+import {
+  TableRowActionsMenu,
+  TableRowActionsMenuButton,
+} from "@/components/shared/table-row-actions-menu";
 import type { AttendanceRosterData } from "@/features/attendance/types";
 import {
   ATTENDANCE_FILTER_OPTIONS,
@@ -240,17 +244,27 @@ export function AttendancePageContent({ data }: { data: AttendanceRosterData }) 
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
+                        <TableRowActionsMenu label={`Attendance actions for ${item.fullName}`}>
                           <StaffScheduleDialog
                             staffId={item.staffId}
                             staffName={item.fullName}
                             schedule={item.schedule}
+                            trigger={({ openDialog }) => (
+                              <TableRowActionsMenuButton label="Edit schedule" onSelect={openDialog} />
+                            )}
                           />
                           {item.attendance ? (
                             <AttendanceApprovalButton
                               attendanceId={item.attendance.id}
                               isApproved={item.isApproved}
                               disabled={!canApproveAttendanceForLockedPeriod(lockedPeriod)}
+                              trigger={({ submit }) => (
+                                <TableRowActionsMenuButton
+                                  label={item.isApproved ? "Remove approval" : "Approve attendance"}
+                                  disabled={!canApproveAttendanceForLockedPeriod(lockedPeriod)}
+                                  onSelect={submit}
+                                />
+                              )}
                             />
                           ) : null}
                           <AttendanceEntryDialog
@@ -259,8 +273,15 @@ export function AttendancePageContent({ data }: { data: AttendanceRosterData }) 
                             attendanceDate={filters.date}
                             attendance={item.attendance}
                             disabled={!canEditAttendanceForLockedPeriod(lockedPeriod)}
+                            trigger={({ openDialog }) => (
+                              <TableRowActionsMenuButton
+                                label="Edit attendance"
+                                disabled={!canEditAttendanceForLockedPeriod(lockedPeriod)}
+                                onSelect={openDialog}
+                              />
+                            )}
                           />
-                        </div>
+                        </TableRowActionsMenu>
                       </TableCell>
                     </TableRow>
                   ))}

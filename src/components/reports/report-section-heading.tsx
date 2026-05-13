@@ -12,7 +12,7 @@ export function ReportSectionHeading({
       <span className="bg-[#173c99] px-3 py-1.5 text-[10.5px] font-semibold tracking-[0.24em] text-white">
         {title}
       </span>
-      <span className="h-[2px] flex-1 bg-[#c73d3d]" />
+      <span className="h-[2px] flex-1 bg-slate-300" />
     </div>
   );
 }

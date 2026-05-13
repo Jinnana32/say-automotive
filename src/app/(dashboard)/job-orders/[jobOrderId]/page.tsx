@@ -1,7 +1,10 @@
 import { notFound } from "next/navigation";
 
 import { JobOrderDetailPage } from "@/features/job-orders/components/job-order-detail-page";
-import { getJobOrderById, getJobOrderFormOptions } from "@/features/job-orders/queries/job-order-queries";
+import {
+  getJobOrderById,
+  getJobOrderMechanicOptions,
+} from "@/features/job-orders/queries/job-order-queries";
 import { resolveJobOrderDetailTab } from "@/features/job-orders/utils";
 
 export const dynamic = "force-dynamic";
@@ -18,9 +21,9 @@ type JobOrderDetailRouteProps = {
 export default async function JobOrderDetailRoute({ params, searchParams }: JobOrderDetailRouteProps) {
   const { jobOrderId } = await params;
   const { tab } = await searchParams;
-  const [jobOrder, formOptions] = await Promise.all([
+  const [jobOrder, mechanics] = await Promise.all([
     getJobOrderById(jobOrderId),
-    getJobOrderFormOptions(),
+    getJobOrderMechanicOptions(),
   ]);
 
   if (!jobOrder) {
@@ -28,14 +31,13 @@ export default async function JobOrderDetailRoute({ params, searchParams }: JobO
   }
 
   const assignedMechanicIds = new Set(jobOrder.mechanics.map((mechanic) => mechanic.staffId));
-  const availableMechanics = formOptions.mechanics.filter(
+  const availableMechanics = mechanics.filter(
     (mechanic) => !assignedMechanicIds.has(mechanic.id),
   );
 
   return (
     <JobOrderDetailPage
       jobOrder={jobOrder}
-      formOptions={formOptions}
       availableMechanics={availableMechanics}
       activeTab={resolveJobOrderDetailTab(tab)}
     />

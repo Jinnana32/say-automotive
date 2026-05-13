@@ -16,6 +16,10 @@ import {
 import { DetailSummaryGrid, DetailSummaryItem } from "@/components/shared/detail-summary-grid";
 import { EmptyState } from "@/components/shared/empty-state";
 import { SectionCard } from "@/components/shared/section-card";
+import {
+  TableRowActionsMenu,
+  TableRowActionsMenuLink,
+} from "@/components/shared/table-row-actions-menu";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { QuotationStatusBadge } from "@/features/quotations/components/quotation-status-badge";
 import { MobileServiceHistoryAccordion } from "@/features/service-history/components/mobile-service-history-accordion";
@@ -419,11 +423,14 @@ function QuickAccessRecordPanel({
                       </TableCell>
                       <TableCell>{formatCurrency(quotation.totalAmount)}</TableCell>
                       <TableCell>{formatDateTime(quotation.createdAt)}</TableCell>
-                      <TableCell className="text-right">
-                        <Button asChild size="sm" variant="ghost">
-                          <Link href={`/quotations/${quotation.id}`}>Open quotation</Link>
-                        </Button>
-                      </TableCell>
+                    <TableCell className="text-right">
+                      <TableRowActionsMenu label={`Quotation actions for ${quotation.quotationNumber}`}>
+                        <TableRowActionsMenuLink
+                          href={`/quotations/${quotation.id}`}
+                          label="Open quotation"
+                        />
+                      </TableRowActionsMenu>
+                    </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -515,9 +522,12 @@ function QuickAccessVehiclesTable({
                   </TableCell>
                   <TableCell>{formatDateTime(vehicle.updatedAt)}</TableCell>
                   <TableCell className="text-right">
-                    <Button asChild size="sm" variant="ghost">
-                      <Link href={`/vehicles/${vehicle.id}`}>Open vehicle</Link>
-                    </Button>
+                    <TableRowActionsMenu label={`Vehicle actions for ${vehicle.make} ${vehicle.model}`}>
+                      <TableRowActionsMenuLink
+                        href={`/vehicles/${vehicle.id}`}
+                        label="Open vehicle"
+                      />
+                    </TableRowActionsMenu>
                   </TableCell>
                 </TableRow>
               );

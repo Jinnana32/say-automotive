@@ -19,6 +19,7 @@ import type {
   JobOrderFormOptions,
   JobOrderItemDetail,
   JobOrderListItem,
+  JobOrderMechanicOption,
 } from "@/features/job-orders/types";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -218,34 +219,40 @@ export const getJobOrderById = cache(async (jobOrderId: string): Promise<JobOrde
   });
 });
 
-export async function getJobOrderFormOptions(): Promise<JobOrderFormOptions> {
-  const { supabase } = await getAuthorizedSupabaseServerClient("job_orders:write");
-  const [
-    { data: mechanics, error: mechanicsError },
-    { data: products, error: productsError },
-    { data: services, error: servicesError },
-  ] = await Promise.all([
-    supabase
-      .from("staff")
-      .select("id, first_name, last_name")
-      .eq("status", "active")
-      .eq("role", "mechanic")
-      .order("last_name", { ascending: true }),
-    supabase
-      .from("products")
-      .select("id, name, sku, selling_price")
-      .eq("status", "active")
-      .order("name", { ascending: true }),
-    supabase
-      .from("services")
-      .select("id, name, category, labor_price")
-      .eq("status", "active")
-      .order("name", { ascending: true }),
-  ]);
+export const getJobOrderMechanicOptions = cache(async (): Promise<JobOrderMechanicOption[]> => {
+  const supabase = await getSupabaseServerClient();
+  const { data: mechanics, error } = await supabase
+    .from("staff")
+    .select("id, first_name, last_name")
+    .eq("status", "active")
+    .eq("role", "mechanic")
+    .order("last_name", { ascending: true });
 
-  if (mechanicsError) {
-    throw new Error(mechanicsError.message);
+  if (error) {
+    throw new Error(error.message);
   }
+
+  return ((mechanics ?? []) as StaffRow[]).map(mapStaffRowToMechanicOption);
+});
+
+export const getJobOrderItemCatalogOptions = cache(async (): Promise<{
+  products: JobOrderFormOptions["products"];
+  services: JobOrderFormOptions["services"];
+}> => {
+  const supabase = await getSupabaseServerClient();
+  const [{ data: products, error: productsError }, { data: services, error: servicesError }] =
+    await Promise.all([
+      supabase
+        .from("products")
+        .select("id, name, sku, selling_price")
+        .eq("status", "active")
+        .order("name", { ascending: true }),
+      supabase
+        .from("services")
+        .select("id, name, category, labor_price")
+        .eq("status", "active")
+        .order("name", { ascending: true }),
+    ]);
 
   if (productsError) {
     throw new Error(productsError.message);
@@ -256,9 +263,21 @@ export async function getJobOrderFormOptions(): Promise<JobOrderFormOptions> {
   }
 
   return {
-    mechanics: ((mechanics ?? []) as StaffRow[]).map(mapStaffRowToMechanicOption),
     products: ((products ?? []) as ProductRow[]).map(mapProductRowToJobOrderOption),
     services: ((services ?? []) as ServiceRow[]).map(mapServiceRowToJobOrderOption),
+  };
+});
+
+export async function getJobOrderFormOptions(): Promise<JobOrderFormOptions> {
+  const [mechanics, catalog] = await Promise.all([
+    getJobOrderMechanicOptions(),
+    getJobOrderItemCatalogOptions(),
+  ]);
+
+  return {
+    mechanics,
+    products: catalog.products,
+    services: catalog.services,
   };
 }
 

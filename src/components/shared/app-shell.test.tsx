@@ -43,6 +43,8 @@ describe("AppShell", () => {
         userDisplayName="Alex"
         userRoleLabel="Administrator"
         capabilities={[]}
+        businessName="SAY Auto Care Center"
+        businessLogoUrl={null}
       >
         <div>Dashboard content</div>
       </AppShell>,

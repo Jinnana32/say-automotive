@@ -30,6 +30,10 @@ import {
   MONEY_INPUT_STEP,
 } from "@/lib/currency";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
+import {
+  TableRowActionsMenu,
+  TableRowActionsMenuButton,
+} from "@/components/shared/table-row-actions-menu";
 
 export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
   const [state, formAction] = useActionState(completePosSaleAction, INITIAL_FORM_ACTION_STATE);
@@ -253,15 +257,15 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
                           </TableCell>
                           <TableCell>{formatCurrency(item.quantity * item.unitPrice)}</TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              onClick={() =>
-                                setItems((current) => removeCartItem(current, item.productId))
-                              }
-                            >
-                              Remove
-                            </Button>
+                            <TableRowActionsMenu label={`Cart actions for ${item.name}`}>
+                              <TableRowActionsMenuButton
+                                label="Remove item"
+                                tone="destructive"
+                                onSelect={() =>
+                                  setItems((current) => removeCartItem(current, item.productId))
+                                }
+                              />
+                            </TableRowActionsMenu>
                           </TableCell>
                         </TableRow>
                       ))

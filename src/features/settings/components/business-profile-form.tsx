@@ -39,7 +39,7 @@ export function BusinessProfileForm({
       title="Business profile"
       description="Values used on invoices, POS receipts, and printed shop documents."
     >
-      <form action={formAction} encType="multipart/form-data" className="space-y-5">
+      <form action={formAction} className="space-y-5">
         <FormStatusMessage message={state.message} />
 
         <div className="grid gap-4 md:grid-cols-[180px_minmax(0,1fr)]">

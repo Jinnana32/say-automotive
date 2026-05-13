@@ -29,6 +29,11 @@ export type BusinessSettingsValues = {
   enableShelfLocation: boolean;
 };
 
+export type BusinessBranding = {
+  businessName: string;
+  businessLogoUrl: string | null;
+};
+
 export type SettingsAuditEntry = {
   id: string;
   action: string;

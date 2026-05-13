@@ -2,8 +2,10 @@
 
 import { Check, Power, RotateCcw } from "lucide-react";
 
-import { ConfirmActionDialog } from "@/components/shared/confirm-action-dialog";
-import { IconActionButton } from "@/components/shared/icon-action";
+import {
+  TableRowActionsMenu,
+  TableRowActionsMenuConfirm,
+} from "@/components/shared/table-row-actions-menu";
 import {
   approveStaffDeviceAction,
   revokeStaffDeviceAction,
@@ -18,9 +20,10 @@ export function AttendanceDeviceRowActions({
   const displayName = device.deviceName?.trim() || device.userAgent?.trim() || "this device";
 
   return (
-    <div className="flex justify-end gap-1">
+    <TableRowActionsMenu label={`Device actions for ${displayName}`}>
       {device.status !== "approved" ? (
-        <ConfirmActionDialog
+        <TableRowActionsMenuConfirm
+          label="Approve device"
           title={`Approve ${displayName}?`}
           description="Approving this device will automatically revoke any other approved attendance device for this mechanic."
           confirmLabel="Approve device"
@@ -28,19 +31,12 @@ export function AttendanceDeviceRowActions({
           action={approveStaffDeviceAction}
           fields={[{ name: "deviceId", value: device.id }]}
           confirmVariant="default"
-          trigger={({ openDialog }) => (
-            <IconActionButton
-              type="button"
-              label={`Approve ${displayName}`}
-              icon={Check}
-              className="text-emerald-700 hover:bg-emerald-50 hover:text-emerald-700"
-              onClick={openDialog}
-            />
-          )}
+          icon={Check}
         />
       ) : null}
 
-      <ConfirmActionDialog
+      <TableRowActionsMenuConfirm
+        label={device.status === "approved" ? "Reset device access" : "Revoke device"}
         title={`${device.status === "approved" ? "Reset" : "Revoke"} ${displayName}?`}
         description={
           device.status === "approved"
@@ -51,16 +47,9 @@ export function AttendanceDeviceRowActions({
         cancelLabel="Cancel"
         action={revokeStaffDeviceAction}
         fields={[{ name: "deviceId", value: device.id }]}
-        trigger={({ openDialog }) => (
-          <IconActionButton
-            type="button"
-            label={`${device.status === "approved" ? "Reset" : "Revoke"} ${displayName}`}
-            icon={device.status === "approved" ? RotateCcw : Power}
-            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-            onClick={openDialog}
-          />
-        )}
+        icon={device.status === "approved" ? RotateCcw : Power}
+        tone="destructive"
       />
-    </div>
+    </TableRowActionsMenu>
   );
 }

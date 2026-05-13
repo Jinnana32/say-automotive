@@ -9,6 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DtrAmendmentReviewDialog } from "@/features/attendance/components/dtr-amendment-review-dialog";
+import {
+  TableRowActionsMenu,
+  TableRowActionsMenuButton,
+} from "@/components/shared/table-row-actions-menu";
 import type { AttendanceAmendmentsPageData } from "@/features/attendance/types";
 import {
   formatAttendanceLogTypeLabel,
@@ -130,7 +134,14 @@ export function AttendanceAmendmentsPageContent({
                       </TableCell>
                       <TableCell className="text-right">
                         {amendment.status === "pending" ? (
-                          <DtrAmendmentReviewDialog amendment={amendment} />
+                          <TableRowActionsMenu label={`Amendment actions for ${amendment.staffName}`}>
+                            <DtrAmendmentReviewDialog
+                              amendment={amendment}
+                              trigger={({ openDialog }) => (
+                                <TableRowActionsMenuButton label="Review amendment" onSelect={openDialog} />
+                              )}
+                            />
+                          </TableRowActionsMenu>
                         ) : (
                           <span className="text-sm text-muted-foreground">Reviewed</span>
                         )}

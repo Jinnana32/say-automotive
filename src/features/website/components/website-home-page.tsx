@@ -23,6 +23,7 @@ import {
   listFeaturedWebsiteProducts,
   listPublishedWebsitePosts,
 } from "@/features/website/queries/website-queries";
+import type { WebsiteShellData } from "@/features/website/types";
 
 const FEATURE_BLOCKS = [
   {
@@ -90,7 +91,11 @@ const HERO_POINTS = [
   },
 ] as const;
 
-export async function WebsiteHomePage() {
+export async function WebsiteHomePage({
+  shellData,
+}: {
+  shellData: WebsiteShellData;
+}) {
   const [featuredProducts, latestPosts] = await Promise.all([
     listFeaturedWebsiteProducts(6),
     listPublishedWebsitePosts(3),
@@ -115,11 +120,11 @@ export async function WebsiteHomePage() {
         aside={
           <div className="space-y-5">
             <Image
-              src="/say-auto-care-logo.jpeg"
-              alt="SAY Auto Care"
-              width={360}
-              height={306}
-              className="mx-auto h-auto w-full max-w-[320px] rounded-2xl bg-[#f3f5fa] p-4"
+              src={shellData.businessLogoUrl ?? "/say-auto-care-logo.jpeg"}
+              alt={shellData.businessName}
+              width={420}
+              height={360}
+              className="mx-auto h-auto w-full max-w-[380px] rounded-2xl bg-[#f3f5fa] p-5"
             />
             <div className="rounded-2xl bg-[#f3f5fa] p-5">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#173c99]">

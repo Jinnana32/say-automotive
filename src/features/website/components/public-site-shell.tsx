@@ -80,16 +80,16 @@ export function PublicSiteShell({
         <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
           <Link href="/" className="flex min-w-0 items-center gap-3">
             <Image
-              src="/say-auto-care-logo.jpeg"
-              alt="SAY Auto Care"
-              width={150}
-              height={128}
-              className="h-12 w-auto rounded-sm object-contain sm:h-[52px]"
+              src={shellData.businessLogoUrl ?? "/say-auto-care-logo.jpeg"}
+              alt={shellData.businessName}
+              width={240}
+              height={192}
+              className="h-14 w-auto rounded-sm object-contain sm:h-16"
               priority
             />
             <div className="hidden min-w-0 sm:block">
               <p className="truncate text-base font-semibold uppercase tracking-[0.12em] text-[#173c99]">
-                SAY Auto Care
+                {shellData.businessName}
               </p>
               <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#5c6a8a]">
                 Pinoy craftsmanship. American precision.

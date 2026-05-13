@@ -9,7 +9,7 @@ export default async function HomePage() {
 
   return (
     <PublicSiteShell shellData={shellData}>
-      <WebsiteHomePage />
+      <WebsiteHomePage shellData={shellData} />
     </PublicSiteShell>
   );
 }

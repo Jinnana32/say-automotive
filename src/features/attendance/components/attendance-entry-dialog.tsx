@@ -16,12 +16,14 @@ export function AttendanceEntryDialog({
   attendanceDate,
   attendance,
   disabled = false,
+  trigger,
 }: {
   staffId: string;
   staffName: string;
   attendanceDate: string;
   attendance: AttendanceRecordSummary | null;
   disabled?: boolean;
+  trigger?: (controls: { openDialog: () => void }) => React.ReactNode;
 }) {
   const [dialogInstance, setDialogInstance] = useState(0);
 
@@ -30,17 +32,26 @@ export function AttendanceEntryDialog({
       title="Attendance entry"
       description={`Review or update ${staffName}'s record for ${formatDate(attendanceDate)}.`}
       size="lg"
-      trigger={({ openDialog }) => (
-        <IconActionButton
-          label={`Edit attendance for ${staffName}`}
-          icon={Clock3}
-          disabled={disabled}
-          onClick={() => {
-            setDialogInstance((currentValue) => currentValue + 1);
-            openDialog();
-          }}
-        />
-      )}
+      trigger={({ openDialog }) =>
+        trigger ? (
+          trigger({
+            openDialog: () => {
+              setDialogInstance((currentValue) => currentValue + 1);
+              openDialog();
+            },
+          })
+        ) : (
+          <IconActionButton
+            label={`Edit attendance for ${staffName}`}
+            icon={Clock3}
+            disabled={disabled}
+            onClick={() => {
+              setDialogInstance((currentValue) => currentValue + 1);
+              openDialog();
+            }}
+          />
+        )
+      }
     >
       {({ closeDialog }) => (
         <AttendanceForm

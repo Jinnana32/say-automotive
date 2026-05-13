@@ -8,6 +8,10 @@ import { SearchInput } from "@/components/shared/search-input";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  TableRowActionsMenu,
+  TableRowActionsMenuLink,
+} from "@/components/shared/table-row-actions-menu";
 import { formatCurrency } from "@/lib/currency";
 import { listProducts } from "@/features/products/queries/product-queries";
 
@@ -121,9 +125,12 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                       </StatusBadge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button asChild size="sm" variant="ghost">
-                        <Link href={`/products/${product.id}/edit`}>Edit</Link>
-                      </Button>
+                      <TableRowActionsMenu label={`Product actions for ${product.name}`}>
+                        <TableRowActionsMenuLink
+                          href={`/products/${product.id}/edit`}
+                          label="Edit product"
+                        />
+                      </TableRowActionsMenu>
                     </TableCell>
                   </TableRow>
                 ))}

@@ -47,6 +47,7 @@ export function InventoryMovementDialog({
   triggerMode = "button",
   triggerLabel,
   triggerText,
+  trigger,
 }: {
   products?: InventoryProductOption[];
   prefilledProduct?: InventoryProductOption;
@@ -54,6 +55,7 @@ export function InventoryMovementDialog({
   triggerMode?: "button" | "icon" | "quiet";
   triggerLabel?: string;
   triggerText?: string;
+  trigger?: (controls: { openDialog: () => void }) => React.ReactNode;
 }) {
   const [state, formAction] = useActionState(
     submitInventoryMovementAction,
@@ -124,6 +126,10 @@ export function InventoryMovementDialog({
           resetDialogState();
           openDialog();
         };
+
+        if (trigger) {
+          return trigger({ openDialog: handleOpen });
+        }
 
         return triggerMode === "icon" ? (
           <IconActionButton

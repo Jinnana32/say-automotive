@@ -83,7 +83,7 @@ export function QuotationPrintLayout({
           <span className="bg-[#173c99] px-3 py-1.5 text-[10.5px] font-semibold tracking-[0.24em] text-white">
             QUOTED SERVICES
           </span>
-          <span className="h-[2px] flex-1 bg-[#c73d3d]" />
+          <span className="h-[2px] flex-1 bg-gray-100" />
         </div>
         <div className="overflow-hidden border border-slate-300">
           <table className="w-full border-collapse text-[11px]">
@@ -243,7 +243,7 @@ function QuotationPrintHeader({
             <img
               src={logoSrc ?? '/say-auto-care-logo.jpeg'}
               alt={businessName}
-              className="h-auto max-h-[64px] w-auto max-w-[92px] object-contain sm:max-h-[72px] sm:max-w-[108px]"
+              className="h-auto max-h-[84px] w-auto max-w-[132px] object-contain sm:max-h-[96px] sm:max-w-[148px]"
             />
           </div>
           <div className="min-w-0">
@@ -284,7 +284,7 @@ function QuotationInfoPanel({
         <span className="bg-[#173c99] px-3 py-1.5 text-[10.5px] font-semibold tracking-[0.24em] text-white">
           {title}
         </span>
-        <span className="h-px flex-1 bg-slate-300" />
+        <span className="h-px flex-1 bg-gray-100" />
       </div>
       <div className="mt-3 space-y-2.5">
         {rows.map((row) => (

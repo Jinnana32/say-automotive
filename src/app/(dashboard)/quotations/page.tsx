@@ -9,6 +9,11 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  TableRowActionsMenu,
+  TableRowActionsMenuLink,
+  TableRowActionsMenuSeparator,
+} from "@/components/shared/table-row-actions-menu";
 import { formatCurrency } from "@/lib/currency";
 import { formatDate } from "@/lib/dates";
 import { QuotationStatusBadge } from "@/features/quotations/components/quotation-status-badge";
@@ -109,18 +114,18 @@ export default async function QuotationsPage({ searchParams }: QuotationsPagePro
                     <TableCell>{formatCurrency(quotation.totalAmount)}</TableCell>
                     <TableCell>{formatDate(quotation.createdAt)}</TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button asChild size="sm" variant="outline">
-                          <Link href={`/quotations/${quotation.id}`}>View</Link>
-                        </Button>
-                        {quotation.status === "approved" ? (
-                          <StatusBadge tone="neutral">Locked</StatusBadge>
-                        ) : (
-                          <Button asChild size="sm" variant="ghost">
-                            <Link href={`/quotations/${quotation.id}/edit`}>Edit</Link>
-                          </Button>
+                      <TableRowActionsMenu label={`Quotation actions for ${quotation.quotationNumber}`}>
+                        <TableRowActionsMenuLink
+                          href={`/quotations/${quotation.id}`}
+                          label="View quotation"
+                        />
+                        {quotation.status === "approved" ? null : (
+                          <TableRowActionsMenuLink
+                            href={`/quotations/${quotation.id}/edit`}
+                            label="Edit quotation"
+                          />
                         )}
-                      </div>
+                      </TableRowActionsMenu>
                     </TableCell>
                   </TableRow>
                 ))}

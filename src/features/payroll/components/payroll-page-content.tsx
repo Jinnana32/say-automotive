@@ -10,6 +10,11 @@ import { StatCard } from "@/components/shared/stat-card";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  TableRowActionsMenu,
+  TableRowActionsMenuButton,
+  TableRowActionsMenuLink,
+} from "@/components/shared/table-row-actions-menu";
 import { formatScheduleSummary } from "@/features/attendance/utils";
 import { StaffScheduleDialog } from "@/features/attendance/components/staff-schedule-dialog";
 import { CompensationProfileDialog } from "@/features/payroll/components/compensation-profile-dialog";
@@ -126,9 +131,9 @@ export function PayrollPageContent({ data }: { data: PayrollPageData }) {
                       <span className="line-clamp-2">{period.notes?.trim() ? period.notes : "No notes"}</span>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button asChild size="sm">
-                        <Link href={`/payroll/${period.id}`}>Open</Link>
-                      </Button>
+                      <TableRowActionsMenu label={`Payroll period actions for ${period.label}`}>
+                        <TableRowActionsMenuLink href={`/payroll/${period.id}`} label="Open payroll period" />
+                      </TableRowActionsMenu>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -213,18 +218,27 @@ export function PayrollPageContent({ data }: { data: PayrollPageData }) {
                       {item.profile ? formatDate(item.profile.effectiveStartDate) : "Not configured"}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
+                      <TableRowActionsMenu label={`Compensation actions for ${item.fullName}`}>
                         <StaffScheduleDialog
                           staffId={item.staffId}
                           staffName={item.fullName}
                           schedule={item.schedule}
+                          trigger={({ openDialog }) => (
+                            <TableRowActionsMenuButton label="Edit schedule" onSelect={openDialog} />
+                          )}
                         />
                         <CompensationProfileDialog
                           staffId={item.staffId}
                           staffName={item.fullName}
                           profile={item.profile}
+                          trigger={({ openDialog }) => (
+                            <TableRowActionsMenuButton
+                              label="Edit compensation"
+                              onSelect={openDialog}
+                            />
+                          )}
                         />
-                      </div>
+                      </TableRowActionsMenu>
                     </TableCell>
                   </TableRow>
                 ))}

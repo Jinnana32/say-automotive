@@ -1,17 +1,43 @@
+import { cache } from "react";
+
 import type { TableRow } from "@/types/database";
 
 import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
 import { getDefaultBranch } from "@/lib/branches";
+import { buildBusinessLogoUrl } from "@/lib/storage";
 import {
   mapAuditLogRowToEntry,
   mapBusinessSettingsRowToValues,
   mapDocumentSequenceRowToItem,
 } from "@/features/settings/mappers";
-import type { SettingsPageData } from "@/features/settings/types";
+import type { BusinessBranding, SettingsPageData } from "@/features/settings/types";
 
 type BusinessSettingsRow = TableRow<"business_settings">;
 type DocumentSequenceRow = TableRow<"document_sequences">;
 type AuditLogRow = Pick<TableRow<"audit_logs">, "id" | "action" | "entity_type" | "created_at">;
+
+export const getBusinessBranding = cache(async (branchId?: string | null): Promise<BusinessBranding> => {
+  const branch = branchId ? { id: branchId } : await getDefaultBranch();
+  const { supabase } = await getAuthorizedSupabaseServerClient("settings:read");
+  const { data, error } = await supabase
+    .from("business_settings")
+    .select("business_name, business_logo_path")
+    .eq("branch_id", branch.id)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data) {
+    throw new Error("Business settings are not configured for the default branch.");
+  }
+
+  return {
+    businessName: data.business_name,
+    businessLogoUrl: buildBusinessLogoUrl(data.business_logo_path),
+  };
+});
 
 export async function getSettingsPageData(): Promise<SettingsPageData> {
   const branch = await getDefaultBranch();

@@ -6,15 +6,13 @@ import { Plus } from "lucide-react";
 import { ModalDialog } from "@/components/shared/modal-dialog";
 import { Button } from "@/components/ui/button";
 import { JobOrderAdditionalItemForm } from "@/features/job-orders/components/job-order-additional-item-form";
-import type { JobOrderDetailTab, JobOrderFormOptions } from "@/features/job-orders/types";
+import type { JobOrderDetailTab } from "@/features/job-orders/types";
 
 export function JobOrderAdditionalItemDialog({
   jobOrderId,
-  options,
   redirectTab,
 }: {
   jobOrderId: string;
-  options: Pick<JobOrderFormOptions, "products" | "services">;
   redirectTab: JobOrderDetailTab;
 }) {
   const [dialogInstance, setDialogInstance] = useState(0);
@@ -43,7 +41,6 @@ export function JobOrderAdditionalItemDialog({
         <JobOrderAdditionalItemForm
           key={dialogInstance}
           jobOrderId={jobOrderId}
-          options={options}
           redirectTab={redirectTab}
           closeDialog={closeDialog}
         />

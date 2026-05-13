@@ -8,6 +8,10 @@ import { SearchInput } from "@/components/shared/search-input";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  TableRowActionsMenu,
+  TableRowActionsMenuLink,
+} from "@/components/shared/table-row-actions-menu";
 import { JobOrderStatusBadge } from "@/features/job-orders/components/job-order-status-badge";
 import { listJobOrders } from "@/features/job-orders/queries/job-order-queries";
 import { formatCurrency } from "@/lib/currency";
@@ -126,9 +130,12 @@ export default async function JobOrdersPage({ searchParams }: JobOrdersPageProps
                       {jobOrder.startedAt ? formatDateTime(jobOrder.startedAt) : formatDate(jobOrder.createdAt)}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button asChild size="sm">
-                        <Link href={`/job-orders/${jobOrder.id}`}>Open</Link>
-                      </Button>
+                      <TableRowActionsMenu label={`Job order actions for ${jobOrder.jobOrderNumber}`}>
+                        <TableRowActionsMenuLink
+                          href={`/job-orders/${jobOrder.id}`}
+                          label="Open job order"
+                        />
+                      </TableRowActionsMenu>
                     </TableCell>
                   </TableRow>
                 ))}

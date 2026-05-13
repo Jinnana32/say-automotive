@@ -25,6 +25,10 @@ import {
 } from "@/features/inventory/utils";
 import { formatCurrency } from "@/lib/currency";
 import { formatDateTime } from "@/lib/dates";
+import {
+  TableRowActionsMenu,
+  TableRowActionsMenuButton,
+} from "@/components/shared/table-row-actions-menu";
 
 export const dynamic = "force-dynamic";
 
@@ -149,7 +153,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
                       {formatCurrency(stock.quantityOnHand * stock.costPrice)}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end">
+                      <TableRowActionsMenu label={`Inventory actions for ${stock.productName}`}>
                         <InventoryMovementDialog
                           prefilledProduct={{
                             id: stock.productId,
@@ -162,11 +166,14 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
                             hasStockRecord: stock.hasStockRecord,
                           }}
                           lockProduct
-                          triggerMode="quiet"
-                          triggerLabel={`Record movement for ${stock.productName}`}
-                          triggerText="Adjust"
+                          trigger={({ openDialog }) => (
+                            <TableRowActionsMenuButton
+                              label="Adjust stock"
+                              onSelect={openDialog}
+                            />
+                          )}
                         />
-                      </div>
+                      </TableRowActionsMenu>
                     </TableCell>
                   </TableRow>
                 ))}

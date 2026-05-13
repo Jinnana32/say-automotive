@@ -4,6 +4,10 @@ import { notFound } from "next/navigation";
 import { DetailSummaryGrid, DetailSummaryItem } from "@/components/shared/detail-summary-grid";
 import { SectionCard } from "@/components/shared/section-card";
 import { PageHeader } from "@/components/shared/page-header";
+import {
+  TableRowActionsMenu,
+  TableRowActionsMenuLink,
+} from "@/components/shared/table-row-actions-menu";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PaymentMethodBadge, InvoiceStatusBadge } from "@/features/invoices/components/invoice-status-badge";
@@ -130,9 +134,9 @@ export default async function CustomerDetailPage({ params }: CustomerDetailPageP
                     </TableCell>
                     <TableCell className="capitalize">{vehicle.status}</TableCell>
                     <TableCell className="text-right">
-                      <Button asChild size="sm" variant="ghost">
-                        <Link href={`/vehicles/${vehicle.id}`}>Open</Link>
-                      </Button>
+                      <TableRowActionsMenu label={`Vehicle actions for ${vehicle.make} ${vehicle.model}`}>
+                        <TableRowActionsMenuLink href={`/vehicles/${vehicle.id}`} label="Open vehicle" />
+                      </TableRowActionsMenu>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -207,9 +211,9 @@ export default async function CustomerDetailPage({ params }: CustomerDetailPageP
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button asChild size="sm" variant="ghost">
-                        <Link href={entry.documentHref}>Open</Link>
-                      </Button>
+                      <TableRowActionsMenu label={`Document actions for ${entry.documentLabel}`}>
+                        <TableRowActionsMenuLink href={entry.documentHref} label="Open document" />
+                      </TableRowActionsMenu>
                     </TableCell>
                   </TableRow>
                 ))}

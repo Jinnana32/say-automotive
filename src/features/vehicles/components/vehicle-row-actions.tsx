@@ -2,8 +2,11 @@
 
 import { Pencil, Trash2 } from "lucide-react";
 
-import { ConfirmActionDialog } from "@/components/shared/confirm-action-dialog";
-import { IconActionButton, IconActionLink } from "@/components/shared/icon-action";
+import {
+  TableRowActionsMenu,
+  TableRowActionsMenuConfirm,
+  TableRowActionsMenuLink,
+} from "@/components/shared/table-row-actions-menu";
 import { deleteVehicleAction } from "@/features/vehicles/actions/vehicle-actions";
 
 export function VehicleRowActions({
@@ -14,29 +17,18 @@ export function VehicleRowActions({
   vehicleLabel: string;
 }) {
   return (
-    <div className="flex justify-end gap-1">
-      <IconActionLink
-        href={`/vehicles/${vehicleId}/edit`}
-        label={`Edit ${vehicleLabel}`}
-        icon={Pencil}
-      />
-      <ConfirmActionDialog
+    <TableRowActionsMenu label={`Vehicle actions for ${vehicleLabel}`}>
+      <TableRowActionsMenuLink href={`/vehicles/${vehicleId}/edit`} label="Edit vehicle" icon={Pencil} />
+      <TableRowActionsMenuConfirm
+        label="Delete vehicle"
         title={`Delete ${vehicleLabel}?`}
         description="This vehicle will be removed permanently if it is not already used in workshop records."
         confirmLabel="Delete vehicle"
         cancelLabel="Keep vehicle"
         action={deleteVehicleAction}
         fields={[{ name: "vehicleId", value: vehicleId }]}
-        trigger={({ openDialog }) => (
-          <IconActionButton
-            type="button"
-            label={`Delete ${vehicleLabel}`}
-            icon={Trash2}
-            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-            onClick={openDialog}
-          />
-        )}
+        icon={Trash2}
       />
-    </div>
+    </TableRowActionsMenu>
   );
 }

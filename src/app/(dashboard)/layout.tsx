@@ -1,6 +1,7 @@
 import { AppShell } from "@/components/shared/app-shell";
 import { DASHBOARD_NAV_ITEMS } from "@/lib/navigation";
 import { requireAuthenticatedStaff } from "@/lib/auth/session";
+import { getBusinessBranding } from "@/features/settings/queries/settings-queries";
 
 const ROLE_LABELS = {
   owner: "Owner",
@@ -17,6 +18,7 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }>) {
   const context = await requireAuthenticatedStaff();
+  const branding = await getBusinessBranding(context.branchId);
   const navigationItems = DASHBOARD_NAV_ITEMS.filter((item) =>
     (item.requiredCapabilities ?? [item.capability]).every((capability) =>
       context.capabilities.includes(capability),
@@ -29,6 +31,8 @@ export default async function DashboardLayout({
       userDisplayName={context.displayName}
       userRoleLabel={ROLE_LABELS[context.role]}
       capabilities={context.capabilities}
+      businessName={branding.businessName}
+      businessLogoUrl={branding.businessLogoUrl}
     >
       {children}
     </AppShell>

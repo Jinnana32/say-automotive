@@ -5,6 +5,10 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  TableRowActionsMenu,
+  TableRowActionsMenuLink,
+} from "@/components/shared/table-row-actions-menu";
 import { PaymentMethodBadge } from "@/features/invoices/components/invoice-status-badge";
 import { listPayments } from "@/features/invoices/queries/invoice-queries";
 import { formatCurrency } from "@/lib/currency";
@@ -106,14 +110,16 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
                       <TableCell>{formatCurrency(payment.amount)}</TableCell>
                       <TableCell>{payment.referenceNumber ?? "No reference"}</TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button asChild size="sm" variant="ghost">
-                            <Link href={`/payments/${payment.id}`}>Open payment</Link>
-                          </Button>
-                          <Button asChild size="sm" variant="ghost">
-                            <Link href={`/invoices/${payment.invoiceId}`}>Open invoice</Link>
-                          </Button>
-                        </div>
+                        <TableRowActionsMenu label={`Payment actions for ${payment.invoiceNumber}`}>
+                          <TableRowActionsMenuLink
+                            href={`/payments/${payment.id}`}
+                            label="Open payment"
+                          />
+                          <TableRowActionsMenuLink
+                            href={`/invoices/${payment.invoiceId}`}
+                            label="Open invoice"
+                          />
+                        </TableRowActionsMenu>
                       </TableCell>
                     </TableRow>
                   ))}

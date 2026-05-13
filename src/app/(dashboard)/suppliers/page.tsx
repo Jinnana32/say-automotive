@@ -5,6 +5,10 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  TableRowActionsMenu,
+  TableRowActionsMenuLink,
+} from "@/components/shared/table-row-actions-menu";
 import { listSuppliers } from "@/features/suppliers/queries/supplier-queries";
 
 export const dynamic = "force-dynamic";
@@ -84,9 +88,12 @@ export default async function SuppliersPage({ searchParams }: SuppliersPageProps
                       <TableCell>{supplier.paymentTerms ?? "Not set"}</TableCell>
                       <TableCell className="capitalize">{supplier.status}</TableCell>
                       <TableCell className="text-right">
-                        <Button asChild size="sm" variant="ghost">
-                          <Link href={`/suppliers/${supplier.id}/edit`}>Edit</Link>
-                        </Button>
+                        <TableRowActionsMenu label={`Supplier actions for ${supplier.supplierName}`}>
+                          <TableRowActionsMenuLink
+                            href={`/suppliers/${supplier.id}/edit`}
+                            label="Edit supplier"
+                          />
+                        </TableRowActionsMenu>
                       </TableCell>
                     </TableRow>
                   ))}

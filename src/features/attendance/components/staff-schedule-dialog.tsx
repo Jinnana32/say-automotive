@@ -13,10 +13,12 @@ export function StaffScheduleDialog({
   staffId,
   staffName,
   schedule,
+  trigger,
 }: {
   staffId: string;
   staffName: string;
   schedule: StaffScheduleSummary | null;
+  trigger?: (controls: { openDialog: () => void }) => React.ReactNode;
 }) {
   const [dialogInstance, setDialogInstance] = useState(0);
 
@@ -25,16 +27,25 @@ export function StaffScheduleDialog({
       title="Work schedule"
       description={`Configure the expected weekly schedule for ${staffName}.`}
       size="lg"
-      trigger={({ openDialog }) => (
-        <IconActionButton
-          label={`Edit work schedule for ${staffName}`}
-          icon={CalendarClock}
-          onClick={() => {
-            setDialogInstance((currentValue) => currentValue + 1);
-            openDialog();
-          }}
-        />
-      )}
+      trigger={({ openDialog }) =>
+        trigger ? (
+          trigger({
+            openDialog: () => {
+              setDialogInstance((currentValue) => currentValue + 1);
+              openDialog();
+            },
+          })
+        ) : (
+          <IconActionButton
+            label={`Edit work schedule for ${staffName}`}
+            icon={CalendarClock}
+            onClick={() => {
+              setDialogInstance((currentValue) => currentValue + 1);
+              openDialog();
+            }}
+          />
+        )
+      }
     >
       {({ closeDialog }) => (
         <StaffScheduleForm

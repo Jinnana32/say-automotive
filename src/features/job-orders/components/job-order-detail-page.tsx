@@ -23,6 +23,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
+  TableRowActionsMenu,
+  TableRowActionsMenuButton,
+} from '@/components/shared/table-row-actions-menu';
+import {
   removeMechanicAction,
   setJobOrderItemApprovalAction,
 } from '@/features/job-orders/actions/job-order-actions';
@@ -30,6 +34,7 @@ import { AssignMechanicForm } from '@/features/job-orders/components/assign-mech
 import { JobOrderAdditionalItemDialog } from '@/features/job-orders/components/job-order-additional-item-dialog';
 import { JobOrderDetailTabs } from '@/features/job-orders/components/job-order-detail-tabs';
 import { JobOrderDetailsForm } from '@/features/job-orders/components/job-order-details-form';
+import { JobOrderItemApprovalAction } from '@/features/job-orders/components/job-order-item-approval-action';
 import { JobOrderItemEditDialog } from '@/features/job-orders/components/job-order-item-edit-dialog';
 import { JobOrderPartsUsagePanel } from '@/features/job-orders/components/job-order-parts-usage-panel';
 import {
@@ -41,7 +46,6 @@ import { JobOrderStatusDialog } from '@/features/job-orders/components/job-order
 import type {
   JobOrderDetail,
   JobOrderDetailTab,
-  JobOrderFormOptions,
   JobOrderMechanicOption,
 } from '@/features/job-orders/types';
 import { formatJobOrderStatus } from '@/features/job-orders/utils';
@@ -53,12 +57,10 @@ import { formatDate, formatDateTime } from '@/lib/dates';
 
 export function JobOrderDetailPage({
   jobOrder,
-  formOptions,
   availableMechanics,
   activeTab,
 }: {
   jobOrder: JobOrderDetail;
-  formOptions: JobOrderFormOptions;
   availableMechanics: JobOrderMechanicOption[];
   activeTab: JobOrderDetailTab;
 }) {
@@ -399,14 +401,7 @@ export function JobOrderDetailPage({
               description="Quoted lines and additional charges are easier to review here before billing."
               action={
                 jobOrder.canAddAdditionalItems ? (
-                  <JobOrderAdditionalItemDialog
-                    jobOrderId={jobOrder.id}
-                    options={{
-                      products: formOptions.products,
-                      services: formOptions.services,
-                    }}
-                    redirectTab={activeTab}
-                  />
+                  <JobOrderAdditionalItemDialog jobOrderId={jobOrder.id} redirectTab={activeTab} />
                 ) : null
               }
               contentClassName="p-0"
@@ -472,68 +467,35 @@ export function JobOrderDetailPage({
                                 jobOrderId={jobOrder.id}
                                 item={item}
                                 redirectTab={activeTab}
+                                trigger={({ openDialog }) => (
+                                  <TableRowActionsMenuButton
+                                    label="Edit work item"
+                                    onSelect={openDialog}
+                                  />
+                                )}
                               />
                             ) : null}
 
                             {jobOrder.canResolveAdditionalItems &&
                             item.isAdditional &&
                             item.approvalStatus === 'pending' ? (
-                              <div className="flex justify-end gap-2">
-                                <form action={setJobOrderItemApprovalAction}>
-                                  <input
-                                    type="hidden"
-                                    name="jobOrderId"
-                                    value={jobOrder.id}
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name="jobOrderItemId"
-                                    value={item.id}
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name="approvalStatus"
-                                    value="approved"
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name="redirectTab"
-                                    value={activeTab}
-                                  />
-                                  <Button
-                                    type="submit"
-                                    size="sm"
-                                    variant="outline"
-                                  >
-                                    Approve
-                                  </Button>
-                                </form>
-                                <form action={setJobOrderItemApprovalAction}>
-                                  <input
-                                    type="hidden"
-                                    name="jobOrderId"
-                                    value={jobOrder.id}
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name="jobOrderItemId"
-                                    value={item.id}
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name="approvalStatus"
-                                    value="rejected"
-                                  />
-                                  <input
-                                    type="hidden"
-                                    name="redirectTab"
-                                    value={activeTab}
-                                  />
-                                  <Button type="submit" size="sm" variant="ghost">
-                                    Reject
-                                  </Button>
-                                </form>
-                              </div>
+                              <TableRowActionsMenu label={`Approval actions for ${item.description}`}>
+                                <JobOrderItemApprovalAction
+                                  label="Approve extra item"
+                                  jobOrderId={jobOrder.id}
+                                  jobOrderItemId={item.id}
+                                  approvalStatus="approved"
+                                  redirectTab={activeTab}
+                                />
+                                <JobOrderItemApprovalAction
+                                  label="Reject extra item"
+                                  jobOrderId={jobOrder.id}
+                                  jobOrderItemId={item.id}
+                                  approvalStatus="rejected"
+                                  redirectTab={activeTab}
+                                  tone="destructive"
+                                />
+                              </TableRowActionsMenu>
                             ) : (
                               <span className="text-sm text-muted-foreground">
                                 {item.approvedAt

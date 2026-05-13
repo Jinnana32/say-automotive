@@ -17,6 +17,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  TableRowActionsMenu,
+  TableRowActionsMenuLink,
+} from '@/components/shared/table-row-actions-menu';
 import { InventoryMovementTypeBadge } from '@/features/inventory/components/inventory-status-badge';
 import { OperationalAlerts } from '@/features/reports/components/operational-alerts';
 import { PaymentMethodMix } from '@/features/reports/components/payment-method-mix';
@@ -179,11 +183,12 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                           {formatDateTime(invoice.createdAt)}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button asChild size="sm" variant="ghost">
-                            <Link href={`/invoices/${invoice.invoiceId}`}>
-                              Open invoice
-                            </Link>
-                          </Button>
+                          <TableRowActionsMenu label={`Invoice actions for ${invoice.invoiceNumber}`}>
+                            <TableRowActionsMenuLink
+                              href={`/invoices/${invoice.invoiceId}`}
+                              label="Open invoice"
+                            />
+                          </TableRowActionsMenu>
                         </TableCell>
                       </TableRow>
                     ))}

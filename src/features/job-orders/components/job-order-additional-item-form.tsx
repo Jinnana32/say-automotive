@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 
 import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
@@ -8,27 +8,35 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
-import type {
-  JobOrderDetailTab,
-  JobOrderFormOptions,
-  JobOrderItemType,
-} from "@/features/job-orders/types";
+import type { JobOrderDetailTab, JobOrderItemType } from "@/features/job-orders/types";
 import { addJobOrderItemAction } from "@/features/job-orders/actions/job-order-actions";
 import { formatMoneyInputValue, MONEY_INPUT_STEP } from "@/lib/currency";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 
+type CatalogOptions = {
+  products: Array<{ id: string; label: string; sku: string | null; unitPrice: number }>;
+  services: Array<{ id: string; label: string; category: string | null; unitPrice: number }>;
+};
+
 export function JobOrderAdditionalItemForm({
   jobOrderId,
-  options,
   redirectTab,
   closeDialog,
 }: {
   jobOrderId: string;
-  options: Pick<JobOrderFormOptions, "products" | "services">;
   redirectTab: JobOrderDetailTab;
   closeDialog: () => void;
 }) {
   const [state, formAction] = useActionState(addJobOrderItemAction, INITIAL_FORM_ACTION_STATE);
+  const [catalogState, setCatalogState] = useState<
+    | { status: "loading"; options: null; error: null }
+    | { status: "ready"; options: CatalogOptions; error: null }
+    | { status: "error"; options: null; error: string }
+  >({
+    status: "loading",
+    options: null,
+    error: null,
+  });
   const [itemType, setItemType] = useState<JobOrderItemType | "">("");
   const [productId, setProductId] = useState("");
   const [serviceId, setServiceId] = useState("");
@@ -36,6 +44,47 @@ export function JobOrderAdditionalItemForm({
   const [quantity, setQuantity] = useState("1");
   const [unitPrice, setUnitPrice] = useState("");
 
+  useEffect(() => {
+    const controller = new AbortController();
+    let isMounted = true;
+
+    async function loadCatalogOptions() {
+      try {
+        const response = await fetch("/api/job-orders/item-options", {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error("Unable to load catalog options.");
+        }
+
+        const data = (await response.json()) as CatalogOptions;
+
+        if (isMounted) {
+          setCatalogState({ status: "ready", options: data, error: null });
+        }
+      } catch (error) {
+        if (!isMounted || controller.signal.aborted) {
+          return;
+        }
+
+        setCatalogState({
+          status: "error",
+          options: null,
+          error: error instanceof Error ? error.message : "Unable to load catalog options.",
+        });
+      }
+    }
+
+    loadCatalogOptions();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, []);
+
+  const catalogOptions = catalogState.status === "ready" ? catalogState.options : null;
   const isProductType = itemType === "product";
   const isServiceType = itemType === "service";
   const isLaborType = itemType === "labor";
@@ -77,6 +126,12 @@ export function JobOrderAdditionalItemForm({
 
       <FormStatusMessage message={state.message} />
 
+      {catalogState.status === "error" ? (
+        <div className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          {catalogState.error}
+        </div>
+      ) : null}
+
       <div className="space-y-2">
         <Label htmlFor="itemType">Item type</Label>
         <NativeSelect
@@ -103,51 +158,63 @@ export function JobOrderAdditionalItemForm({
       {isProductType ? (
         <div className="space-y-2">
           <Label htmlFor="productId">Product</Label>
-          <NativeSelect
-            id="productId"
-            name="productId"
-            value={productId}
-            onChange={(event) => {
-              const nextProductId = event.target.value;
-              const selected = options.products.find((product) => product.id === nextProductId);
-              setProductId(nextProductId);
-              setDescription(selected?.label ?? "");
-              setUnitPrice(selected ? formatMoneyInputValue(selected.unitPrice) : "");
-            }}
-          >
-            <option value="">Select product</option>
-            {options.products.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.label}
-                {product.sku ? ` (${product.sku})` : ""}
-              </option>
-            ))}
-          </NativeSelect>
+          {catalogOptions ? (
+            <NativeSelect
+              id="productId"
+              name="productId"
+              value={productId}
+              onChange={(event) => {
+                const nextProductId = event.target.value;
+                const selected = catalogOptions.products.find((product) => product.id === nextProductId);
+                setProductId(nextProductId);
+                setDescription(selected?.label ?? "");
+                setUnitPrice(selected ? formatMoneyInputValue(selected.unitPrice) : "");
+              }}
+            >
+              <option value="">Select product</option>
+              {catalogOptions.products.map((product) => (
+                <option key={product.id} value={product.id}>
+                  {product.label}
+                  {product.sku ? ` (${product.sku})` : ""}
+                </option>
+              ))}
+            </NativeSelect>
+          ) : (
+            <NativeSelect id="productId" disabled value="">
+              <option value="">Loading products...</option>
+            </NativeSelect>
+          )}
           <FieldError errors={state.fieldErrors} name="productId" />
         </div>
       ) : isServiceType ? (
         <div className="space-y-2">
           <Label htmlFor="serviceId">Service</Label>
-          <NativeSelect
-            id="serviceId"
-            name="serviceId"
-            value={serviceId}
-            onChange={(event) => {
-              const nextServiceId = event.target.value;
-              const selected = options.services.find((service) => service.id === nextServiceId);
-              setServiceId(nextServiceId);
-              setDescription(selected?.label ?? "");
-              setUnitPrice(selected ? formatMoneyInputValue(selected.unitPrice) : "");
-            }}
-          >
-            <option value="">Select service</option>
-            {options.services.map((service) => (
-              <option key={service.id} value={service.id}>
-                {service.label}
-                {service.category ? ` (${service.category})` : ""}
-              </option>
-            ))}
-          </NativeSelect>
+          {catalogOptions ? (
+            <NativeSelect
+              id="serviceId"
+              name="serviceId"
+              value={serviceId}
+              onChange={(event) => {
+                const nextServiceId = event.target.value;
+                const selected = catalogOptions.services.find((service) => service.id === nextServiceId);
+                setServiceId(nextServiceId);
+                setDescription(selected?.label ?? "");
+                setUnitPrice(selected ? formatMoneyInputValue(selected.unitPrice) : "");
+              }}
+            >
+              <option value="">Select service</option>
+              {catalogOptions.services.map((service) => (
+                <option key={service.id} value={service.id}>
+                  {service.label}
+                  {service.category ? ` (${service.category})` : ""}
+                </option>
+              ))}
+            </NativeSelect>
+          ) : (
+            <NativeSelect id="serviceId" disabled value="">
+              <option value="">Loading services...</option>
+            </NativeSelect>
+          )}
           <FieldError errors={state.fieldErrors} name="serviceId" />
         </div>
       ) : isLaborType ? (
