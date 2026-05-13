@@ -18,6 +18,7 @@ export type QuotationLaborPrintLine = {
 export type QuotationPrintBreakdown = {
   partLines: QuotationPartPrintLine[];
   laborLines: QuotationLaborPrintLine[];
+  subtotal: number;
   totalParts: number;
   totalLabor: number;
   discount: number;
@@ -48,6 +49,10 @@ export function buildQuotationPrintBreakdown(
   return {
     partLines,
     laborLines,
+    subtotal: roundCurrency(
+      partLines.reduce((sum, item) => sum + item.total, 0) +
+        laborLines.reduce((sum, item) => sum + item.total, 0),
+    ),
     totalParts: roundCurrency(partLines.reduce((sum, item) => sum + item.total, 0)),
     totalLabor: roundCurrency(laborLines.reduce((sum, item) => sum + item.total, 0)),
     discount: quotation.discount,

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   additionalJobOrderItemSchema,
   jobOrderDetailsSchema,
+  jobOrderItemEditSchema,
   jobOrderPartUsageSchema,
 } from "@/features/job-orders/schemas/job-order-forms";
 
@@ -44,6 +45,18 @@ describe("job order forms", () => {
       description: "Brake pads",
       quantity: "1",
       unitPrice: "1200.123",
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+
+  it("rejects invalid work item edit quantities", () => {
+    const parsed = jobOrderItemEditSchema.safeParse({
+      jobOrderId: "34c25057-b0f8-4da0-9a27-c1792efa2ebd",
+      jobOrderItemId: "9868e516-a49f-4fe2-86d4-c5f84cd6f18a",
+      description: "Brake pads",
+      quantity: "0",
+      unitPrice: "1200",
     });
 
     expect(parsed.success).toBe(false);

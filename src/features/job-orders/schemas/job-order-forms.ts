@@ -108,6 +108,39 @@ export const additionalJobOrderItemSchema = z
     }
   });
 
+export const jobOrderItemEditSchema = z
+  .object({
+    jobOrderId: z.string().uuid("Job order is required."),
+    jobOrderItemId: z.string().uuid("Job order item is required."),
+    description: z
+      .string()
+      .trim()
+      .min(1, "Description is required.")
+      .max(500, "Description is too long."),
+    quantity: z.string(),
+    unitPrice: z.string(),
+  })
+  .superRefine((value, ctx) => {
+    const quantity = Number(value.quantity);
+    const unitPrice = Number(value.unitPrice);
+
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Quantity must be greater than zero.",
+        path: ["quantity"],
+      });
+    }
+
+    if (!isNonNegativeMoneyInput(value.unitPrice) || !Number.isFinite(unitPrice) || unitPrice < 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Unit price must be zero or greater with up to 2 decimal places.",
+        path: ["unitPrice"],
+      });
+    }
+  });
+
 export const jobOrderPartUsageSchema = z.object({
   jobOrderId: z.string().uuid("Job order is required."),
   jobOrderItemId: z.string().uuid("Job order item is required."),
@@ -150,6 +183,16 @@ export function parseAdditionalJobOrderItemFormData(formData: FormData) {
     itemType: readString(formData, "itemType"),
     productId: readString(formData, "productId"),
     serviceId: readString(formData, "serviceId"),
+    description: readString(formData, "description"),
+    quantity: readString(formData, "quantity"),
+    unitPrice: readString(formData, "unitPrice"),
+  };
+}
+
+export function parseJobOrderItemEditFormData(formData: FormData) {
+  return {
+    jobOrderId: readString(formData, "jobOrderId"),
+    jobOrderItemId: readString(formData, "jobOrderItemId"),
     description: readString(formData, "description"),
     quantity: readString(formData, "quantity"),
     unitPrice: readString(formData, "unitPrice"),

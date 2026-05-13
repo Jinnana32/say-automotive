@@ -33,7 +33,8 @@ export function ReportsPrintLayout({
       <ReportHeader
         businessName={businessProfile.businessName}
         documentTitle="Business Reports"
-        eyebrow="SAY Automotive - Reports"
+        documentMeta={`Preset: ${reports.filters.preset.replaceAll("-", " ")} • Period: ${reports.filters.periodLabel}`}
+        logoSrc={businessProfile.businessLogoUrl ?? undefined}
       />
 
       <section className="report-section-keep mt-5 grid gap-x-8 gap-y-2 sm:grid-cols-2">

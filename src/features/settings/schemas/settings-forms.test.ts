@@ -13,6 +13,7 @@ describe("settings form schemas", () => {
       businessAddress: "",
       businessContact: "",
       businessEmail: "",
+      businessVatRegistrationNo: "",
       receiptFooter: "",
       defaultTaxRate: "12",
     });
@@ -25,6 +26,7 @@ describe("settings form schemas", () => {
       allowPartialPayments: true,
       allowReleaseWithBalance: false,
       requireFullPaymentBeforeRelease: true,
+      requireAdditionalItemPreApproval: true,
       enableBarcodeSupport: true,
       enableShelfLocation: false,
     });

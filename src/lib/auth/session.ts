@@ -96,11 +96,17 @@ export async function requireStaffCapability(capability: AppCapability) {
 }
 
 export async function getAuthorizedSupabaseServerClient(capability: AppCapability) {
+  return getAuthorizedSupabaseServerClientCached(capability);
+}
+
+const getAuthorizedSupabaseServerClientCached = cache(
+  async (capability: AppCapability) => {
   const context = await requireStaffCapability(capability);
   const supabase = await getSupabaseServerClient();
 
   return { context, supabase };
-}
+  },
+);
 
 function mapStaffContext(userId: string, email: string | null, staff: Pick<
   StaffRow,

@@ -1,5 +1,6 @@
 import { ReportFooter } from "@/components/reports/report-footer";
 import { ReportHeader } from "@/components/reports/report-header";
+import { ReportSectionHeading } from "@/components/reports/report-section-heading";
 import { ReportSignatureBlock } from "@/components/reports/report-signature-block";
 import { ReportTotals } from "@/components/reports/report-totals";
 import type { InvoicePrintDocument } from "@/features/invoices/types";
@@ -24,7 +25,8 @@ export function InvoicePrintLayout({
       <ReportHeader
         businessName={businessProfile.businessName}
         documentTitle="Invoice"
-        eyebrow="SAY Automotive - Invoice"
+        documentMeta={`Invoice No.: ${invoice.invoiceNumber} • Date: ${formatDocumentDate(invoice.invoiceDate)}`}
+        logoSrc={businessProfile.businessLogoUrl ?? undefined}
       />
 
       <section className="report-section-keep mt-5 grid gap-x-8 gap-y-2 sm:grid-cols-2">
@@ -70,10 +72,10 @@ export function InvoicePrintLayout({
       </section>
 
       <section className="mt-4">
-        <h2 className="font-display text-[18px] font-semibold uppercase text-slate-950">BILLING ITEMS</h2>
-        <div className="mt-1 overflow-hidden border border-slate-300">
+        <ReportSectionHeading title="BILLING ITEMS" />
+        <div className="overflow-hidden border border-[#173c99]/20">
           <table className="w-full border-collapse text-[11px]">
-            <thead className="bg-slate-100">
+            <thead className="bg-[#173c99] text-white">
               <tr>
                 <th className="w-12 px-2 py-1.5 text-left font-semibold">Line</th>
                 <th className="px-2 py-1.5 text-left font-semibold">Description</th>
@@ -110,10 +112,10 @@ export function InvoicePrintLayout({
       <section className="report-section-keep mt-4 grid gap-8 sm:grid-cols-[1fr_250px]">
         <div className="space-y-4">
           <div>
-            <h2 className="font-display text-[18px] font-semibold uppercase text-slate-950">PAYMENTS</h2>
-            <div className="mt-1 overflow-hidden border border-slate-300">
+            <ReportSectionHeading title="PAYMENTS" />
+            <div className="overflow-hidden border border-[#173c99]/20">
               <table className="w-full border-collapse text-[11px]">
-                <thead className="bg-slate-100">
+                <thead className="bg-[#173c99] text-white">
                   <tr>
                     <th className="w-24 px-2 py-1.5 text-left font-semibold">Date</th>
                     <th className="w-20 px-2 py-1.5 text-left font-semibold">Method</th>
@@ -150,17 +152,22 @@ export function InvoicePrintLayout({
           />
         </div>
 
-        <ReportTotals
-          lines={[
-            { label: "Subtotal:", value: formatCurrency(invoice.subtotal) },
-            { label: "Discount:", value: formatCurrency(invoice.discount) },
-            { label: "Tax:", value: formatCurrency(invoice.tax) },
-            { label: "TOTAL:", value: formatCurrency(invoice.totalAmount), emphasized: true },
-            { label: "Paid:", value: formatCurrency(paidTotals) },
-            { label: "Balance:", value: formatCurrency(invoice.balance), emphasized: invoice.balance > 0 },
-          ]}
-          className="justify-self-end"
-        />
+        <div className="justify-self-end space-y-2">
+          <ReportSectionHeading title="INVOICE SUMMARY" />
+          <div className="overflow-hidden border border-[#173c99]/20 px-3 py-3">
+            <ReportTotals
+              lines={[
+                { label: "Subtotal:", value: formatCurrency(invoice.subtotal) },
+                { label: "Discount:", value: formatCurrency(invoice.discount) },
+                { label: "Tax:", value: formatCurrency(invoice.tax) },
+                { label: "TOTAL:", value: formatCurrency(invoice.totalAmount), emphasized: true },
+                { label: "Paid:", value: formatCurrency(paidTotals) },
+                { label: "Balance:", value: formatCurrency(invoice.balance), emphasized: invoice.balance > 0 },
+              ]}
+              className="justify-self-end"
+            />
+          </div>
+        </div>
       </section>
 
       <ReportFooter

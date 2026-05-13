@@ -1,5 +1,6 @@
 import { ReportFooter } from "@/components/reports/report-footer";
 import { ReportHeader } from "@/components/reports/report-header";
+import { ReportSectionHeading } from "@/components/reports/report-section-heading";
 import { ReportSignatureBlock } from "@/components/reports/report-signature-block";
 import { ReportTotals } from "@/components/reports/report-totals";
 import type { PaymentPrintDocument } from "@/features/invoices/types";
@@ -19,7 +20,8 @@ export function PaymentPrintLayout({
       <ReportHeader
         businessName={businessProfile.businessName}
         documentTitle="Payment Receipt"
-        eyebrow="SAY Automotive - Payment Receipt"
+        documentMeta={`Invoice No.: ${payment.invoiceNumber} • Paid At: ${formatDocumentDate(payment.paidAt)}`}
+        logoSrc={businessProfile.businessLogoUrl ?? undefined}
       />
 
       <section className="report-section-keep mt-5 grid gap-x-8 gap-y-2 sm:grid-cols-2">
@@ -62,9 +64,12 @@ export function PaymentPrintLayout({
 
       <section className="report-section-keep mt-4 grid gap-4 sm:grid-cols-[1fr_250px]">
         <div className="space-y-4">
-          <div className="rounded-md border border-slate-300 px-3 py-2">
-            <p className="font-semibold text-slate-800">Payment Notes</p>
-            <p className="mt-1">{payment.notes || "No notes recorded for this payment."}</p>
+          <div>
+            <ReportSectionHeading title="PAYMENT NOTES" />
+            <div className="overflow-hidden border border-[#173c99]/20 px-3 py-2">
+              <p className="font-semibold text-slate-800">Payment Notes</p>
+              <p className="mt-1">{payment.notes || "No notes recorded for this payment."}</p>
+            </div>
           </div>
 
           <ReportSignatureBlock
@@ -74,15 +79,20 @@ export function PaymentPrintLayout({
           />
         </div>
 
-        <ReportTotals
-          lines={[
-            { label: "Invoice Total:", value: formatCurrency(payment.invoiceTotalAmount) },
-            { label: "Balance Before:", value: formatCurrency(payment.invoiceBalanceBeforePayment) },
-            { label: "Payment Amount:", value: formatCurrency(payment.amount), emphasized: true },
-            { label: "Balance After:", value: formatCurrency(payment.invoiceBalanceAfterPayment) },
-          ]}
-          className="justify-self-end"
-        />
+        <div className="justify-self-end space-y-2">
+          <ReportSectionHeading title="PAYMENT SUMMARY" />
+          <div className="overflow-hidden border border-[#173c99]/20 px-3 py-3">
+            <ReportTotals
+              lines={[
+                { label: "Invoice Total:", value: formatCurrency(payment.invoiceTotalAmount) },
+                { label: "Balance Before:", value: formatCurrency(payment.invoiceBalanceBeforePayment) },
+                { label: "Payment Amount:", value: formatCurrency(payment.amount), emphasized: true },
+                { label: "Balance After:", value: formatCurrency(payment.invoiceBalanceAfterPayment) },
+              ]}
+              className="justify-self-end"
+            />
+          </div>
+        </div>
       </section>
 
       <ReportFooter

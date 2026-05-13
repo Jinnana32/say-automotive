@@ -302,6 +302,7 @@ export type Database = {
           allow_partial_payments: boolean;
           allow_release_with_balance: boolean;
           require_full_payment_before_release: boolean;
+          require_additional_item_preapproval: boolean;
           require_shop_ip_for_mechanic_attendance: boolean;
           allow_dtr_amendments: boolean;
           allow_attendance_admin_override: boolean;
@@ -309,9 +310,11 @@ export type Database = {
           enable_shelf_location: boolean;
           default_tax_rate: number;
           business_name: string;
+          business_logo_path: string | null;
           business_address: string | null;
           business_contact: string | null;
           business_email: string | null;
+          business_vat_registration_no: string | null;
           receipt_footer: string | null;
           created_at: string;
           updated_at: string;
@@ -322,6 +325,7 @@ export type Database = {
           allow_partial_payments?: boolean;
           allow_release_with_balance?: boolean;
           require_full_payment_before_release?: boolean;
+          require_additional_item_preapproval?: boolean;
           require_shop_ip_for_mechanic_attendance?: boolean;
           allow_dtr_amendments?: boolean;
           allow_attendance_admin_override?: boolean;
@@ -329,9 +333,11 @@ export type Database = {
           enable_shelf_location?: boolean;
           default_tax_rate?: number;
           business_name: string;
+          business_logo_path?: string | null;
           business_address?: string | null;
           business_contact?: string | null;
           business_email?: string | null;
+          business_vat_registration_no?: string | null;
           receipt_footer?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -1710,6 +1716,15 @@ export type Database = {
           p_description?: string | null;
           p_quantity?: number;
           p_unit_price?: number;
+        };
+        Returns: string;
+      };
+      update_job_order_item: {
+        Args: {
+          p_job_order_item_id: string;
+          p_description: string;
+          p_quantity: number;
+          p_unit_price: number;
         };
         Returns: string;
       };

@@ -11,6 +11,7 @@ export const businessProfileSettingsSchema = z.object({
     .trim()
     .max(200, "Business email is too long.")
     .refine((value) => !value || z.email().safeParse(value).success, "Enter a valid business email."),
+  businessVatRegistrationNo: z.string().trim().max(100, "VAT registration number is too long."),
   receiptFooter: z.string().trim().max(500, "Receipt footer is too long."),
   defaultTaxRate: z
     .string()
@@ -25,6 +26,7 @@ export const operationalRulesSettingsSchema = z.object({
   allowPartialPayments: z.boolean(),
   allowReleaseWithBalance: z.boolean(),
   requireFullPaymentBeforeRelease: z.boolean(),
+  requireAdditionalItemPreApproval: z.boolean(),
   enableBarcodeSupport: z.boolean(),
   enableShelfLocation: z.boolean(),
 });
@@ -54,6 +56,7 @@ export function parseBusinessProfileSettingsFormData(formData: FormData) {
     businessAddress: readString(formData, "businessAddress"),
     businessContact: readString(formData, "businessContact"),
     businessEmail: readString(formData, "businessEmail"),
+    businessVatRegistrationNo: readString(formData, "businessVatRegistrationNo"),
     receiptFooter: readString(formData, "receiptFooter"),
     defaultTaxRate: readString(formData, "defaultTaxRate"),
   };
@@ -64,6 +67,7 @@ export function parseOperationalRulesSettingsFormData(formData: FormData) {
     allowPartialPayments: readCheckbox(formData, "allowPartialPayments"),
     allowReleaseWithBalance: readCheckbox(formData, "allowReleaseWithBalance"),
     requireFullPaymentBeforeRelease: readCheckbox(formData, "requireFullPaymentBeforeRelease"),
+    requireAdditionalItemPreApproval: readCheckbox(formData, "requireAdditionalItemPreApproval"),
     enableBarcodeSupport: readCheckbox(formData, "enableBarcodeSupport"),
     enableShelfLocation: readCheckbox(formData, "enableShelfLocation"),
   };

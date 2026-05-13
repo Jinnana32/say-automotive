@@ -6,6 +6,7 @@ import {
   calculateJobOrderPendingApprovalCount,
   calculateJobOrderPendingApprovalTotal,
   getAllowedJobOrderStatusTransitions,
+  canEditJobOrderItems,
 } from "@/features/job-orders/utils";
 
 const items = [
@@ -76,6 +77,12 @@ describe("job order utils", () => {
     expect(getAllowedJobOrderStatusTransitions("pending")).toEqual(["in_progress", "cancelled"]);
     expect(getAllowedJobOrderStatusTransitions("completed")).toEqual(["ready_for_billing"]);
     expect(getAllowedJobOrderStatusTransitions("released")).toEqual([]);
+  });
+
+  it("allows work item editing until the job order is finalized", () => {
+    expect(canEditJobOrderItems("pending")).toBe(true);
+    expect(canEditJobOrderItems("in_progress")).toBe(true);
+    expect(canEditJobOrderItems("released")).toBe(false);
   });
 
   it("builds inventory tracking from usage history and stock state", () => {

@@ -6,17 +6,20 @@ import { redirect } from "next/navigation";
 import {
   additionalJobOrderItemSchema,
   jobOrderDetailsSchema,
+  jobOrderItemEditSchema,
   jobOrderStatusTransitionSchema,
   jobOrderPartUsageSchema,
   mechanicAssignmentSchema,
   parseAdditionalJobOrderItemFormData,
   parseJobOrderDetailsFormData,
+  parseJobOrderItemEditFormData,
   parseJobOrderPartUsageFormData,
   parseJobOrderStatusTransitionFormData,
   parseMechanicAssignmentFormData,
   parseOptionalNumeric,
 } from "@/features/job-orders/schemas/job-order-forms";
 import { resolveJobOrderDetailTab, toNumeric } from "@/features/job-orders/utils";
+import { writeAuditLog } from "@/lib/audit";
 import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
 import { INITIAL_FORM_ACTION_STATE, toFormActionState, type FormActionState } from "@/lib/forms";
 
@@ -144,6 +147,106 @@ export async function addJobOrderItemAction(
       message: error.message,
     };
   }
+
+  revalidateJobOrderPaths(values.jobOrderId);
+  redirect(buildJobOrderRedirectPath(values.jobOrderId, redirectTab));
+}
+
+export async function updateJobOrderItemAction(
+  _prevState: FormActionState = INITIAL_FORM_ACTION_STATE,
+  formData: FormData,
+): Promise<FormActionState> {
+  const parsed = jobOrderItemEditSchema.safeParse(parseJobOrderItemEditFormData(formData));
+
+  if (!parsed.success) {
+    return toFormActionState(parsed.error);
+  }
+
+  const values = parsed.data;
+  const redirectTab = resolveJobOrderDetailTab(readOptionalValue(formData, "redirectTab"));
+  const { context, supabase } = await getAuthorizedSupabaseServerClient("job_orders:write");
+  const { data: beforeItem, error: beforeError } = await supabase
+    .from("job_order_items")
+    .select("id, job_order_id, line_number, item_type, description, quantity, unit_price, total, is_additional, approval_status, usage_status, approved_at, rejected_at")
+    .eq("id", values.jobOrderItemId)
+    .maybeSingle();
+
+  if (beforeError) {
+    return {
+      status: "error",
+      message: beforeError.message,
+    };
+  }
+
+  if (!beforeItem) {
+    return {
+      status: "error",
+      message: "Job order item does not exist.",
+    };
+  }
+
+  if (beforeItem.job_order_id !== values.jobOrderId) {
+    return {
+      status: "error",
+      message: "Job order item does not belong to the selected job order.",
+    };
+  }
+
+  const { error } = await supabase.rpc("update_job_order_item", {
+    p_job_order_item_id: values.jobOrderItemId,
+    p_description: values.description,
+    p_quantity: toNumeric(values.quantity),
+    p_unit_price: toNumeric(values.unitPrice),
+  });
+
+  if (error) {
+    return {
+      status: "error",
+      message: error.message,
+    };
+  }
+
+  const { data: afterItem, error: afterError } = await supabase
+    .from("job_order_items")
+    .select("id, job_order_id, line_number, item_type, description, quantity, unit_price, total, is_additional, approval_status, usage_status, approved_at, rejected_at")
+    .eq("id", values.jobOrderItemId)
+    .maybeSingle();
+
+  if (afterError) {
+    return {
+      status: "error",
+      message: afterError.message,
+    };
+  }
+
+  await writeAuditLog(supabase, {
+    action: "Updated job order item",
+    entityType: "job_order_item",
+    entityId: values.jobOrderItemId,
+    userId: context.userId,
+    beforeData: beforeItem
+      ? {
+          description: beforeItem.description,
+          quantity: beforeItem.quantity,
+          unit_price: beforeItem.unit_price,
+          total: beforeItem.total,
+          approval_status: beforeItem.approval_status,
+          usage_status: beforeItem.usage_status,
+          is_additional: beforeItem.is_additional,
+        }
+      : null,
+    afterData: afterItem
+      ? {
+          description: afterItem.description,
+          quantity: afterItem.quantity,
+          unit_price: afterItem.unit_price,
+          total: afterItem.total,
+          approval_status: afterItem.approval_status,
+          usage_status: afterItem.usage_status,
+          is_additional: afterItem.is_additional,
+        }
+      : null,
+  });
 
   revalidateJobOrderPaths(values.jobOrderId);
   redirect(buildJobOrderRedirectPath(values.jobOrderId, redirectTab));

@@ -24,6 +24,7 @@ export function OperationalRulesForm({
     allowPartialPayments: initialValues.allowPartialPayments,
     allowReleaseWithBalance: initialValues.allowReleaseWithBalance,
     requireFullPaymentBeforeRelease: initialValues.requireFullPaymentBeforeRelease,
+    requireAdditionalItemPreApproval: initialValues.requireAdditionalItemPreApproval,
     enableBarcodeSupport: initialValues.enableBarcodeSupport,
     enableShelfLocation: initialValues.enableShelfLocation,
   });
@@ -57,6 +58,15 @@ export function OperationalRulesForm({
             description="Keep release blocked unless the invoice is fully paid."
             checked={values.requireFullPaymentBeforeRelease}
             onCheckedChange={(checked) => updateFormValue("requireFullPaymentBeforeRelease", checked)}
+          />
+          <RuleToggle
+            name="requireAdditionalItemPreApproval"
+            title="Pre-approve additional work items"
+            description="Require added job-order items to be approved before they can be used in parts usage."
+            checked={values.requireAdditionalItemPreApproval}
+            onCheckedChange={(checked) =>
+              updateFormValue("requireAdditionalItemPreApproval", checked)
+            }
           />
           <RuleToggle
             name="enableBarcodeSupport"

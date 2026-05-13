@@ -6,6 +6,7 @@ import type {
   SettingsDocumentSequence,
   SettingsDocumentSequenceKey,
 } from "@/features/settings/types";
+import { buildBusinessLogoUrl } from "@/lib/storage";
 
 type BusinessSettingsRow = TableRow<"business_settings">;
 type DocumentSequenceRow = TableRow<"document_sequences">;
@@ -23,14 +24,17 @@ export function mapBusinessSettingsRowToValues(
 ): BusinessSettingsValues {
   return {
     businessName: row.business_name,
+    businessLogoUrl: buildBusinessLogoUrl(row.business_logo_path),
     businessAddress: row.business_address ?? "",
     businessContact: row.business_contact ?? "",
     businessEmail: row.business_email ?? "",
+    businessVatRegistrationNo: row.business_vat_registration_no ?? "",
     receiptFooter: row.receipt_footer ?? "",
     defaultTaxRate: String(row.default_tax_rate),
     allowPartialPayments: row.allow_partial_payments,
     allowReleaseWithBalance: row.allow_release_with_balance,
     requireFullPaymentBeforeRelease: row.require_full_payment_before_release,
+    requireAdditionalItemPreApproval: row.require_additional_item_preapproval,
     enableBarcodeSupport: row.enable_barcode_support,
     enableShelfLocation: row.enable_shelf_location,
   };

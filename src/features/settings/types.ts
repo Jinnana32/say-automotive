@@ -14,14 +14,17 @@ export type SettingsDocumentSequence = {
 
 export type BusinessSettingsValues = {
   businessName: string;
+  businessLogoUrl: string | null;
   businessAddress: string;
   businessContact: string;
   businessEmail: string;
+  businessVatRegistrationNo: string;
   receiptFooter: string;
   defaultTaxRate: string;
   allowPartialPayments: boolean;
   allowReleaseWithBalance: boolean;
   requireFullPaymentBeforeRelease: boolean;
+  requireAdditionalItemPreApproval: boolean;
   enableBarcodeSupport: boolean;
   enableShelfLocation: boolean;
 };

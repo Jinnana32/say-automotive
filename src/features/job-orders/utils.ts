@@ -70,6 +70,10 @@ export function canAddAdditionalItems(status: JobOrderStatus) {
   return !FINAL_ITEM_LOCKED_STATUSES.includes(status);
 }
 
+export function canEditJobOrderItems(status: JobOrderStatus) {
+  return !FINAL_ITEM_LOCKED_STATUSES.includes(status);
+}
+
 export function canResolveAdditionalItems(status: JobOrderStatus) {
   return !FINAL_ITEM_LOCKED_STATUSES.includes(status);
 }
@@ -185,6 +189,7 @@ function buildJobOrderDetailCapabilities(params: {
 }) {
   return {
     canEditDetails: canEditJobOrderDetails(params.status),
+    canEditItems: canEditJobOrderItems(params.status),
     canAssignMechanics: canAssignMechanics(params.status),
     canAddAdditionalItems: canAddAdditionalItems(params.status),
     canResolveAdditionalItems: canResolveAdditionalItems(params.status),

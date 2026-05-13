@@ -1,5 +1,6 @@
 import { ReportFooter } from "@/components/reports/report-footer";
 import { ReportHeader } from "@/components/reports/report-header";
+import { ReportSectionHeading } from "@/components/reports/report-section-heading";
 import { ReportSignatureBlock } from "@/components/reports/report-signature-block";
 import { ReportTotals } from "@/components/reports/report-totals";
 import { buildJobOrderPrintBreakdown } from "@/features/job-orders/report-utils";
@@ -26,7 +27,8 @@ export function JobOrderPrintLayout({
       <ReportHeader
         businessName={businessProfile.businessName}
         documentTitle="Job Order"
-        eyebrow="SAY Automotive - Job Order"
+        documentMeta={`Job Order No.: ${jobOrder.jobOrderNumber} • Date: ${formatDocumentDate(jobOrder.createdAt)}`}
+        logoSrc={businessProfile.businessLogoUrl ?? undefined}
       />
 
       <section className="report-section-keep mt-5 grid gap-x-8 gap-y-2 sm:grid-cols-2">
@@ -75,10 +77,10 @@ export function JobOrderPrintLayout({
       </section>
 
       <section className="mt-4">
-        <h2 className="font-display text-[18px] font-semibold uppercase text-slate-950">WORK ITEMS</h2>
-        <div className="mt-1 overflow-hidden border border-slate-300">
+        <ReportSectionHeading title="WORK ITEMS" />
+        <div className="overflow-hidden border border-[#173c99]/20">
           <table className="w-full border-collapse text-[11px]">
-            <thead className="bg-slate-100">
+            <thead className="bg-[#173c99] text-white">
               <tr>
                 <th className="w-16 px-2 py-1.5 text-left font-semibold">Type</th>
                 <th className="px-2 py-1.5 text-left font-semibold">Description</th>
@@ -132,10 +134,10 @@ export function JobOrderPrintLayout({
       </section>
 
       <section className="mt-4">
-        <h2 className="font-display text-[18px] font-semibold uppercase text-slate-950">PARTS USAGE</h2>
-        <div className="mt-1 overflow-hidden border border-slate-300">
+        <ReportSectionHeading title="PARTS USAGE" />
+        <div className="overflow-hidden border border-[#173c99]/20">
           <table className="w-full border-collapse text-[11px]">
-            <thead className="bg-slate-100">
+            <thead className="bg-[#173c99] text-white">
               <tr>
                 <th className="px-2 py-1.5 text-left font-semibold">Part</th>
                 <th className="w-16 px-2 py-1.5 text-right font-semibold">Planned</th>
@@ -176,10 +178,10 @@ export function JobOrderPrintLayout({
       >
         <div className="space-y-3">
           <div>
-            <h2 className="font-display text-[18px] font-semibold uppercase text-slate-950">MECHANICS</h2>
-            <div className="mt-1 overflow-hidden border border-slate-300">
+            <ReportSectionHeading title="MECHANICS" />
+            <div className="overflow-hidden border border-[#173c99]/20">
               <table className="w-full border-collapse text-[11px]">
-                <thead className="bg-slate-100">
+                <thead className="bg-[#173c99] text-white">
                   <tr>
                     <th className="px-2 py-1.5 text-left font-semibold">Name</th>
                   </tr>
@@ -210,22 +212,27 @@ export function JobOrderPrintLayout({
         </div>
 
         {!hidePrices ? (
-          <ReportTotals
-            lines={[
-              { label: "Parts:", value: formatCurrency(breakdown.totalParts) },
-              { label: "Labor:", value: formatCurrency(breakdown.totalLabor) },
-              { label: "Pending Extras:", value: formatCurrency(breakdown.pendingExtras) },
-              { label: "Rejected Extras:", value: formatCurrency(breakdown.rejectedExtras) },
-              { label: "Billable Total:", value: formatCurrency(breakdown.billableTotal), emphasized: true },
-              ...(jobOrder.invoiceId
-                ? [
-                    { label: "Invoice Total:", value: formatCurrency(jobOrder.invoiceTotalAmount ?? 0) },
-                    { label: "Balance:", value: formatCurrency(jobOrder.invoiceBalance ?? 0) },
-                  ]
-                : []),
-            ]}
-            className="justify-self-end"
-          />
+          <div className="justify-self-end space-y-2">
+            <ReportSectionHeading title="JOB ORDER SUMMARY" />
+            <div className="overflow-hidden border border-[#173c99]/20 px-3 py-3">
+              <ReportTotals
+                lines={[
+                  { label: "Parts:", value: formatCurrency(breakdown.totalParts) },
+                  { label: "Labor:", value: formatCurrency(breakdown.totalLabor) },
+                  { label: "Pending Extras:", value: formatCurrency(breakdown.pendingExtras) },
+                  { label: "Rejected Extras:", value: formatCurrency(breakdown.rejectedExtras) },
+                  { label: "Billable Total:", value: formatCurrency(breakdown.billableTotal), emphasized: true },
+                  ...(jobOrder.invoiceId
+                    ? [
+                        { label: "Invoice Total:", value: formatCurrency(jobOrder.invoiceTotalAmount ?? 0) },
+                        { label: "Balance:", value: formatCurrency(jobOrder.invoiceBalance ?? 0) },
+                      ]
+                    : []),
+                ]}
+                className="justify-self-end"
+              />
+            </div>
+          </div>
         ) : (
           <div className="justify-self-end rounded-md border border-dashed border-slate-300 px-4 py-3 text-right text-[10px] uppercase tracking-[0.16em] text-slate-500">
             Pricing omitted on this printout.

@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { cache } from "react";
 
 import type { Database } from "@/types/database";
 
@@ -43,7 +44,7 @@ export function createSupabaseServerClient(cookieStore: CookieStore) {
   });
 }
 
-export async function getSupabaseServerClient() {
+export const getSupabaseServerClient = cache(async () => {
   const cookieStore = await cookies();
 
   return createSupabaseServerClient({
@@ -60,4 +61,4 @@ export async function getSupabaseServerClient() {
       }
     },
   });
-}
+});

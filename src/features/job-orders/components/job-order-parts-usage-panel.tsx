@@ -52,7 +52,9 @@ export function JobOrderPartsUsagePanel({
               const canUseInventory =
                 tracking !== null &&
                 tracking.hasStockRecord &&
-                (!item.isAdditional || item.approvalStatus === "approved");
+                (!item.isAdditional ||
+                  item.approvalStatus === "approved" ||
+                  item.approvalStatus === "not_required");
               const maxUseQuantity =
                 tracking === null || !canUseInventory
                   ? 0

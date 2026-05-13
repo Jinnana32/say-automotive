@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 
 import { useActionState } from "react";
 
@@ -26,18 +27,51 @@ export function BusinessProfileForm({
     businessName: initialValues.businessName,
     businessContact: initialValues.businessContact,
     businessEmail: initialValues.businessEmail,
+    businessVatRegistrationNo: initialValues.businessVatRegistrationNo,
     businessAddress: initialValues.businessAddress,
     defaultTaxRate: initialValues.defaultTaxRate,
     receiptFooter: initialValues.receiptFooter,
   });
+  const logoPreviewSrc = initialValues.businessLogoUrl ?? "/say-auto-care-logo.jpeg";
 
   return (
     <FormSection
       title="Business profile"
       description="Values used on invoices, POS receipts, and printed shop documents."
     >
-      <form action={formAction} className="space-y-5">
+      <form action={formAction} encType="multipart/form-data" className="space-y-5">
         <FormStatusMessage message={state.message} />
+
+        <div className="grid gap-4 md:grid-cols-[180px_minmax(0,1fr)]">
+          <div className="space-y-2">
+            <Label>Current logo</Label>
+            <div className="flex h-[104px] items-center justify-center rounded-xl border border-border/70 bg-muted/15 px-4 py-3">
+              <img
+                src={logoPreviewSrc}
+                alt="Current business logo"
+                className="max-h-[72px] max-w-full object-contain"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {initialValues.businessLogoUrl
+                ? "Custom logo stored in Supabase is currently in use."
+                : "Default SAY Auto Care logo is currently in use."}
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="businessLogo">Replace logo</Label>
+            <Input
+              id="businessLogo"
+              name="businessLogo"
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/svg+xml"
+            />
+            <p className="text-xs text-muted-foreground">
+              Upload a new logo to replace the current one. PNG, JPG, WebP, or SVG up to 2 MB.
+            </p>
+          </div>
+        </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
@@ -61,6 +95,17 @@ export function BusinessProfileForm({
             />
             <FieldError errors={state.fieldErrors} name="businessContact" />
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="businessVatRegistrationNo">VAT registration no.</Label>
+          <Input
+            id="businessVatRegistrationNo"
+            name="businessVatRegistrationNo"
+            value={values.businessVatRegistrationNo}
+            onChange={(event) => updateFormValue("businessVatRegistrationNo", event.target.value)}
+          />
+          <FieldError errors={state.fieldErrors} name="businessVatRegistrationNo" />
         </div>
 
         <div className="space-y-2">

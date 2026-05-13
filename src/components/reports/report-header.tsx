@@ -3,43 +3,46 @@ import Image from "next/image";
 export function ReportHeader({
   businessName,
   documentTitle,
-  eyebrow = "SAY Automotive - Job Quotation",
+  documentMeta,
   logoSrc = "/say-auto-care-logo.jpeg",
 }: {
   businessName: string;
   documentTitle: string;
-  eyebrow?: string;
+  documentMeta?: string | null;
   logoSrc?: string;
 }) {
   return (
     <header className="report-section-keep">
-      <p className="text-right text-[9px] text-slate-500">{eyebrow}</p>
-      <div className="mt-2 flex items-center gap-3">
-        <div className="flex w-20 shrink-0 items-center justify-center">
-          <Image
-            src={logoSrc}
-            alt={businessName}
-            width={140}
-            height={80}
-            priority
-            unoptimized
-            className="h-12 w-auto object-contain"
-          />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="border border-[#173c99]">
-            <div className="h-1.5 bg-[#173c99]" />
-            <div className="bg-[#ffd24a] px-3 py-1.5">
-              <p className="font-display text-xl font-semibold uppercase tracking-[0.08em] text-[#10224d]">
-                {businessName}
-              </p>
-            </div>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex w-16 shrink-0 items-center justify-center">
+            <Image
+              src={logoSrc}
+              alt={businessName}
+              width={120}
+              height={64}
+              priority
+              unoptimized
+              className="h-9 w-auto object-contain"
+            />
+          </div>
+          <div className="min-w-0">
+            <p className="font-display text-[12px] font-semibold uppercase tracking-[0.28em] text-[#173c99]">
+              {businessName}
+            </p>
           </div>
         </div>
+        <div className="text-right">
+          <h1 className="font-display text-[23px] font-semibold uppercase tracking-[0.16em] text-[#10224d]">
+            {documentTitle}
+          </h1>
+          <div className="ml-auto mt-1 h-[3px] w-44 bg-[#c73d3d]" />
+          {documentMeta ? (
+            <p className="mt-1 text-[10px] font-medium text-slate-600">{documentMeta}</p>
+          ) : null}
+        </div>
       </div>
-      <div className="mt-4 text-center">
-        <h1 className="font-display text-[21px] font-semibold text-slate-950">{documentTitle}</h1>
-      </div>
+      <div className="mt-3 h-px bg-slate-300" />
     </header>
   );
 }

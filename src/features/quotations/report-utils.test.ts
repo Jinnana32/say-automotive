@@ -72,6 +72,7 @@ describe("buildQuotationPrintBreakdown", () => {
         total: 600,
       },
     ]);
+    expect(result.subtotal).toBe(1800);
     expect(result.totalParts).toBe(500);
     expect(result.totalLabor).toBe(1300);
     expect(result.grandTotal).toBe(1700);

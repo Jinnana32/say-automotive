@@ -30,6 +30,7 @@ import { AssignMechanicForm } from '@/features/job-orders/components/assign-mech
 import { JobOrderAdditionalItemDialog } from '@/features/job-orders/components/job-order-additional-item-dialog';
 import { JobOrderDetailTabs } from '@/features/job-orders/components/job-order-detail-tabs';
 import { JobOrderDetailsForm } from '@/features/job-orders/components/job-order-details-form';
+import { JobOrderItemEditDialog } from '@/features/job-orders/components/job-order-item-edit-dialog';
 import { JobOrderPartsUsagePanel } from '@/features/job-orders/components/job-order-parts-usage-panel';
 import {
   JobOrderApprovalBadge,
@@ -465,74 +466,84 @@ export function JobOrderDetailPage({
                         </TableCell>
                         <TableCell>{formatCurrency(item.total)}</TableCell>
                         <TableCell className="text-right">
-                          {jobOrder.canResolveAdditionalItems &&
-                          item.isAdditional &&
-                          item.approvalStatus === 'pending' ? (
-                            <div className="flex justify-end gap-2">
-                              <form action={setJobOrderItemApprovalAction}>
-                                <input
-                                  type="hidden"
-                                  name="jobOrderId"
-                                  value={jobOrder.id}
-                                />
-                                <input
-                                  type="hidden"
-                                  name="jobOrderItemId"
-                                  value={item.id}
-                                />
-                                <input
-                                  type="hidden"
-                                  name="approvalStatus"
-                                  value="approved"
-                                />
-                                <input
-                                  type="hidden"
-                                  name="redirectTab"
-                                  value={activeTab}
-                                />
-                                <Button
-                                  type="submit"
-                                  size="sm"
-                                  variant="outline"
-                                >
-                                  Approve
-                                </Button>
-                              </form>
-                              <form action={setJobOrderItemApprovalAction}>
-                                <input
-                                  type="hidden"
-                                  name="jobOrderId"
-                                  value={jobOrder.id}
-                                />
-                                <input
-                                  type="hidden"
-                                  name="jobOrderItemId"
-                                  value={item.id}
-                                />
-                                <input
-                                  type="hidden"
-                                  name="approvalStatus"
-                                  value="rejected"
-                                />
-                                <input
-                                  type="hidden"
-                                  name="redirectTab"
-                                  value={activeTab}
-                                />
-                                <Button type="submit" size="sm" variant="ghost">
-                                  Reject
-                                </Button>
-                              </form>
-                            </div>
-                          ) : (
-                            <span className="text-sm text-muted-foreground">
-                              {item.approvedAt
-                                ? `Approved ${formatDate(item.approvedAt)}`
-                                : item.rejectedAt
-                                  ? `Rejected ${formatDate(item.rejectedAt)}`
-                                  : 'No action'}
-                            </span>
-                          )}
+                          <div className="flex flex-col items-end gap-2">
+                            {jobOrder.canEditItems ? (
+                              <JobOrderItemEditDialog
+                                jobOrderId={jobOrder.id}
+                                item={item}
+                                redirectTab={activeTab}
+                              />
+                            ) : null}
+
+                            {jobOrder.canResolveAdditionalItems &&
+                            item.isAdditional &&
+                            item.approvalStatus === 'pending' ? (
+                              <div className="flex justify-end gap-2">
+                                <form action={setJobOrderItemApprovalAction}>
+                                  <input
+                                    type="hidden"
+                                    name="jobOrderId"
+                                    value={jobOrder.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="jobOrderItemId"
+                                    value={item.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="approvalStatus"
+                                    value="approved"
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="redirectTab"
+                                    value={activeTab}
+                                  />
+                                  <Button
+                                    type="submit"
+                                    size="sm"
+                                    variant="outline"
+                                  >
+                                    Approve
+                                  </Button>
+                                </form>
+                                <form action={setJobOrderItemApprovalAction}>
+                                  <input
+                                    type="hidden"
+                                    name="jobOrderId"
+                                    value={jobOrder.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="jobOrderItemId"
+                                    value={item.id}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="approvalStatus"
+                                    value="rejected"
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="redirectTab"
+                                    value={activeTab}
+                                  />
+                                  <Button type="submit" size="sm" variant="ghost">
+                                    Reject
+                                  </Button>
+                                </form>
+                              </div>
+                            ) : (
+                              <span className="text-sm text-muted-foreground">
+                                {item.approvedAt
+                                  ? `Approved ${formatDate(item.approvedAt)}`
+                                  : item.rejectedAt
+                                    ? `Rejected ${formatDate(item.rejectedAt)}`
+                                    : 'No action'}
+                              </span>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}

@@ -113,6 +113,7 @@ export type JobOrderDetail = JobOrderListItem & {
   mechanics: JobOrderMechanicAssignment[];
   rejectedAdditionalTotal: number;
   canEditDetails: boolean;
+  canEditItems: boolean;
   canAssignMechanics: boolean;
   canAddAdditionalItems: boolean;
   canResolveAdditionalItems: boolean;
@@ -135,6 +136,7 @@ export type JobOrderPrintDetail = JobOrderDetail & {
 
 export type JobOrderPrintBusinessProfile = {
   businessName: string;
+  businessLogoUrl: string | null;
   businessContact: string | null;
   businessEmail: string | null;
   businessAddress: string | null;
@@ -191,6 +193,14 @@ export type JobOrderAdditionalItemFormValues = {
   itemType: JobOrderItemType;
   productId: string;
   serviceId: string;
+  description: string;
+  quantity: string;
+  unitPrice: string;
+};
+
+export type JobOrderItemEditFormValues = {
+  jobOrderId: string;
+  jobOrderItemId: string;
   description: string;
   quantity: string;
   unitPrice: string;

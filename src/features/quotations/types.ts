@@ -112,6 +112,8 @@ export type QuotationCreateFlowOptions = QuotationFormOptions & {
 
 export type QuotationPrintBusinessProfile = {
   businessName: string;
+  businessLogoUrl: string | null;
+  businessVatRegistrationNo: string | null;
   businessContact: string | null;
   businessEmail: string | null;
   businessAddress: string | null;
@@ -120,4 +122,13 @@ export type QuotationPrintBusinessProfile = {
 export type QuotationPrintDocument = {
   quotation: QuotationDetail;
   businessProfile: QuotationPrintBusinessProfile;
+  customerSnapshot: {
+    companyName: string | null;
+    email: string | null;
+  };
+  vehicleSnapshot: {
+    color: string | null;
+    mileage: number | null;
+  };
+  validUntil: string | null;
 };

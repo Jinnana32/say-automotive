@@ -1,28 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { PencilLine } from "lucide-react";
 
 import { ModalDialog } from "@/components/shared/modal-dialog";
 import { Button } from "@/components/ui/button";
-import { JobOrderAdditionalItemForm } from "@/features/job-orders/components/job-order-additional-item-form";
-import type { JobOrderDetailTab, JobOrderFormOptions } from "@/features/job-orders/types";
+import { JobOrderItemEditForm } from "@/features/job-orders/components/job-order-item-edit-form";
+import type { JobOrderDetailTab, JobOrderItemDetail } from "@/features/job-orders/types";
 
-export function JobOrderAdditionalItemDialog({
+export function JobOrderItemEditDialog({
   jobOrderId,
-  options,
+  item,
   redirectTab,
 }: {
   jobOrderId: string;
-  options: Pick<JobOrderFormOptions, "products" | "services">;
+  item: JobOrderItemDetail;
   redirectTab: JobOrderDetailTab;
 }) {
   const [dialogInstance, setDialogInstance] = useState(0);
 
   return (
     <ModalDialog
-      title="Add additional item"
-      description="Additional items follow the shop approval rule before they affect billing or stock usage."
+      title="Edit work item"
+      description="Update the quoted line before billing. Additional items may return to pending approval after changes."
       size="lg"
       trigger={({ openDialog }) => (
         <Button
@@ -34,16 +34,16 @@ export function JobOrderAdditionalItemDialog({
             openDialog();
           }}
         >
-          <Plus className="size-4" />
-          Add additional item
+          <PencilLine className="size-4" />
+          Edit
         </Button>
       )}
     >
       {({ closeDialog }) => (
-        <JobOrderAdditionalItemForm
+        <JobOrderItemEditForm
           key={dialogInstance}
           jobOrderId={jobOrderId}
-          options={options}
+          item={item}
           redirectTab={redirectTab}
           closeDialog={closeDialog}
         />

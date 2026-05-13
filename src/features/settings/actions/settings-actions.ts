@@ -12,6 +12,10 @@ import {
   type FormActionState,
 } from "@/lib/forms";
 import {
+  BUSINESS_ASSETS_BUCKET,
+  buildBusinessLogoObjectKey,
+} from "@/lib/constants/storage";
+import {
   businessProfileSettingsSchema,
   documentSequenceSettingsSchema,
   operationalRulesSettingsSchema,
@@ -46,11 +50,38 @@ export async function updateBusinessProfileSettingsAction(
     return { status: "error", message: currentError.message };
   }
 
+  const businessLogoFile = readFile(formData, "businessLogo");
+  let businessLogoPath = currentSettings.business_logo_path as string | null;
+
+  if (businessLogoFile) {
+    const fileValidationError = validateBusinessLogoFile(businessLogoFile);
+
+    if (fileValidationError) {
+      return { status: "error", message: fileValidationError };
+    }
+
+    const uploadPath = buildBusinessLogoObjectKey(branch.id);
+    const { error: uploadError } = await supabase.storage
+      .from(BUSINESS_ASSETS_BUCKET)
+      .upload(uploadPath, businessLogoFile, {
+        contentType: businessLogoFile.type,
+        upsert: true,
+      });
+
+    if (uploadError) {
+      return { status: "error", message: uploadError.message };
+    }
+
+    businessLogoPath = uploadPath;
+  }
+
   const payload = {
     business_name: parsed.data.businessName,
+    business_logo_path: businessLogoPath,
     business_address: normalizeNullable(parsed.data.businessAddress),
     business_contact: normalizeNullable(parsed.data.businessContact),
     business_email: normalizeNullable(parsed.data.businessEmail),
+    business_vat_registration_no: normalizeNullable(parsed.data.businessVatRegistrationNo),
     receipt_footer: normalizeNullable(parsed.data.receiptFooter),
     default_tax_rate: Number(parsed.data.defaultTaxRate),
   };
@@ -70,13 +101,15 @@ export async function updateBusinessProfileSettingsAction(
     entityId: String(currentSettings.id),
     userId: context.userId,
     beforeData: {
-        business_name: currentSettings.business_name,
-        business_address: currentSettings.business_address,
-        business_contact: currentSettings.business_contact,
-        business_email: currentSettings.business_email,
-        receipt_footer: currentSettings.receipt_footer,
-        default_tax_rate: currentSettings.default_tax_rate,
-      },
+      business_name: currentSettings.business_name,
+      business_logo_path: currentSettings.business_logo_path,
+      business_address: currentSettings.business_address,
+      business_contact: currentSettings.business_contact,
+      business_email: currentSettings.business_email,
+      business_vat_registration_no: currentSettings.business_vat_registration_no,
+      receipt_footer: currentSettings.receipt_footer,
+      default_tax_rate: currentSettings.default_tax_rate,
+    },
     afterData: payload,
   });
 
@@ -114,6 +147,7 @@ export async function updateOperationalRulesSettingsAction(
     allow_partial_payments: parsed.data.allowPartialPayments,
     allow_release_with_balance: parsed.data.allowReleaseWithBalance,
     require_full_payment_before_release: parsed.data.requireFullPaymentBeforeRelease,
+    require_additional_item_preapproval: parsed.data.requireAdditionalItemPreApproval,
     enable_barcode_support: parsed.data.enableBarcodeSupport,
     enable_shelf_location: parsed.data.enableShelfLocation,
   };
@@ -137,6 +171,8 @@ export async function updateOperationalRulesSettingsAction(
       allow_release_with_balance: currentSettings.allow_release_with_balance,
       require_full_payment_before_release:
         currentSettings.require_full_payment_before_release,
+      require_additional_item_preapproval:
+        currentSettings.require_additional_item_preapproval,
       enable_barcode_support: currentSettings.enable_barcode_support,
       enable_shelf_location: currentSettings.enable_shelf_location,
     },
@@ -220,4 +256,22 @@ function revalidateSettingsPaths() {
 function normalizeNullable(value: string) {
   const trimmed = value.trim();
   return trimmed ? trimmed : null;
+}
+
+function readFile(formData: FormData, key: string) {
+  const value = formData.get(key);
+
+  return value instanceof File && value.size > 0 ? value : null;
+}
+
+function validateBusinessLogoFile(file: File) {
+  if (!file.type.startsWith("image/")) {
+    return "Upload a PNG, JPG, WebP, or SVG logo image.";
+  }
+
+  if (file.size > 2 * 1024 * 1024) {
+    return "Logo file must be 2 MB or smaller.";
+  }
+
+  return null;
 }
