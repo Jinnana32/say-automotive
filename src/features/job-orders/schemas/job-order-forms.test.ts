@@ -35,6 +35,20 @@ describe("job order forms", () => {
     expect(parsed.success).toBe(false);
   });
 
+  it("rejects additional item unit prices beyond two decimal places", () => {
+    const parsed = additionalJobOrderItemSchema.safeParse({
+      jobOrderId: "34c25057-b0f8-4da0-9a27-c1792efa2ebd",
+      itemType: "labor",
+      productId: "",
+      serviceId: "",
+      description: "Brake pads",
+      quantity: "1",
+      unitPrice: "1200.123",
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+
   it("rejects zero quantity for part usage", () => {
     const parsed = jobOrderPartUsageSchema.safeParse({
       jobOrderId: "34c25057-b0f8-4da0-9a27-c1792efa2ebd",

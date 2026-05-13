@@ -1,6 +1,7 @@
 import { cache } from "react";
 
 import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { roundCurrency } from "@/lib/currency";
 import type { TableRow } from "@/types/database";
 
 import {
@@ -319,7 +320,7 @@ export const getPaymentById = cache(async (paymentId: string): Promise<PaymentDe
     invoiceTotalAmount: invoiceRow.total_amount,
     invoicePaidAmount: invoiceRow.paid_amount,
     invoiceBalanceAfterPayment: invoiceRow.balance,
-    invoiceBalanceBeforePayment: Number((invoiceRow.balance + paymentRow.amount).toFixed(2)),
+    invoiceBalanceBeforePayment: roundCurrency(invoiceRow.balance + paymentRow.amount),
     customerContactNumber: customer?.contact_number ?? null,
     customerAddress: customer?.address ?? null,
     vehicleId: invoiceRow.vehicle_id,

@@ -14,6 +14,7 @@ import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 import { useFormValues } from "@/lib/use-form-values";
 import { createProductAction, updateProductAction } from "@/features/products/actions/product-actions";
 import type { ProductFormValues, ReferenceOption } from "@/features/products/types";
+import { MONEY_INPUT_STEP } from "@/lib/currency";
 
 export function ProductForm({
   mode,
@@ -131,9 +132,9 @@ export function ProductForm({
           </div>
 
           <div className="grid gap-6 md:grid-cols-4">
-            <NumberField name="costPrice" label="Cost price" value={values.costPrice} errors={state.fieldErrors} onChange={(value) => updateFormValue("costPrice", value)} />
-            <NumberField name="sellingPrice" label="Selling price" value={values.sellingPrice} errors={state.fieldErrors} onChange={(value) => updateFormValue("sellingPrice", value)} />
-            <NumberField name="reorderLevel" label="Reorder level" value={values.reorderLevel} errors={state.fieldErrors} onChange={(value) => updateFormValue("reorderLevel", value)} />
+            <NumberField name="costPrice" label="Cost price" value={values.costPrice} errors={state.fieldErrors} onChange={(value) => updateFormValue("costPrice", value)} step={MONEY_INPUT_STEP} />
+            <NumberField name="sellingPrice" label="Selling price" value={values.sellingPrice} errors={state.fieldErrors} onChange={(value) => updateFormValue("sellingPrice", value)} step={MONEY_INPUT_STEP} />
+            <NumberField name="reorderLevel" label="Reorder level" value={values.reorderLevel} errors={state.fieldErrors} onChange={(value) => updateFormValue("reorderLevel", value)} step={MONEY_INPUT_STEP} />
             <NumberField name="warrantyDurationDays" label="Warranty days" value={values.warrantyDurationDays} errors={state.fieldErrors} onChange={(value) => updateFormValue("warrantyDurationDays", value)} />
           </div>
 
@@ -325,17 +326,19 @@ function NumberField({
   value,
   errors,
   onChange,
+  step,
 }: {
   name: string;
   label: string;
   value: string;
   errors?: Record<string, string[] | undefined>;
   onChange: (value: string) => void;
+  step?: string;
 }) {
   return (
     <div className="space-y-2">
       <Label htmlFor={name}>{label}</Label>
-      <Input id={name} name={name} inputMode="decimal" value={value} onChange={(event) => onChange(event.target.value)} />
+      <Input id={name} name={name} type="number" step={step} inputMode="decimal" value={value} onChange={(event) => onChange(event.target.value)} />
       <FieldError errors={errors} name={name} />
     </div>
   );

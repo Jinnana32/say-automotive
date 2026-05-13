@@ -24,6 +24,11 @@ import {
   calculateQuotationSubtotal,
   createQuotationItem,
 } from "@/features/quotations/utils";
+import {
+  formatCurrencyNumber,
+  formatMoneyInputValue,
+  MONEY_INPUT_STEP,
+} from "@/lib/currency";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 
 export function QuotationForm({
@@ -214,7 +219,7 @@ export function QuotationForm({
                               productId: "",
                               serviceId: "",
                               description: "",
-                              unitPrice: "0",
+                              unitPrice: formatMoneyInputValue(0),
                             })
                           }
                           className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -236,7 +241,7 @@ export function QuotationForm({
                                 productId: event.target.value,
                                 serviceId: "",
                                 description: selected?.label ?? "",
-                                unitPrice: selected ? String(selected.unitPrice) : "0",
+                                unitPrice: selected ? formatMoneyInputValue(selected.unitPrice) : formatMoneyInputValue(0),
                               });
                             }}
                             className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -261,7 +266,7 @@ export function QuotationForm({
                                 serviceId: event.target.value,
                                 productId: "",
                                 description: selected?.label ?? "",
-                                unitPrice: selected ? String(selected.unitPrice) : "0",
+                                unitPrice: selected ? formatMoneyInputValue(selected.unitPrice) : formatMoneyInputValue(0),
                               });
                             }}
                             className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -317,6 +322,8 @@ export function QuotationForm({
                         <Label>Unit price</Label>
                         <Input
                           inputMode="decimal"
+                          type="number"
+                          step={MONEY_INPUT_STEP}
                           value={item.unitPrice}
                           onChange={(event) =>
                             updateItem(setItems, item.key, { unitPrice: event.target.value })
@@ -326,7 +333,7 @@ export function QuotationForm({
                       <div className="space-y-2">
                         <Label>Line total</Label>
                         <div className="flex h-11 items-center rounded-xl border border-input bg-background px-3 text-sm font-medium">
-                          {lineTotal.toFixed(2)}
+                          {formatCurrencyNumber(lineTotal)}
                         </div>
                       </div>
                     </div>
@@ -352,6 +359,8 @@ export function QuotationForm({
                   id="discount"
                   name="discount"
                   inputMode="decimal"
+                  type="number"
+                  step={MONEY_INPUT_STEP}
                   value={discount}
                   onChange={(event) => setDiscount(event.target.value)}
                 />
@@ -363,6 +372,8 @@ export function QuotationForm({
                   id="tax"
                   name="tax"
                   inputMode="decimal"
+                  type="number"
+                  step={MONEY_INPUT_STEP}
                   value={tax}
                   onChange={(event) => setTax(event.target.value)}
                 />
@@ -372,19 +383,19 @@ export function QuotationForm({
               <div className="rounded-[1.25rem] border border-border/70 bg-muted/30 p-4 text-sm">
                 <div className="flex items-center justify-between py-2">
                   <span>Subtotal</span>
-                  <span>{subtotal.toFixed(2)}</span>
+                  <span>{formatCurrencyNumber(subtotal)}</span>
                 </div>
                 <div className="flex items-center justify-between py-2">
                   <span>Discount</span>
-                  <span>{Number(discount || 0).toFixed(2)}</span>
+                  <span>{formatCurrencyNumber(Number(discount || 0))}</span>
                 </div>
                 <div className="flex items-center justify-between py-2">
                   <span>Tax</span>
-                  <span>{Number(tax || 0).toFixed(2)}</span>
+                  <span>{formatCurrencyNumber(Number(tax || 0))}</span>
                 </div>
                 <div className="mt-2 flex items-center justify-between border-t border-border/70 pt-3 text-base font-semibold">
                   <span>Total estimate</span>
-                  <span>{grandTotal.toFixed(2)}</span>
+                  <span>{formatCurrencyNumber(grandTotal)}</span>
                 </div>
               </div>
 

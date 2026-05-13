@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isPositiveMoneyInput } from "@/lib/currency";
 
 export const createInvoiceFromJobOrderSchema = z.object({
   jobOrderId: z.string().uuid("Job order is required."),
@@ -9,7 +10,8 @@ export const recordInvoicePaymentSchema = z.object({
   jobOrderId: z.string().optional(),
   amount: z
     .string()
-    .refine((value) => Number.isFinite(Number(value)) && Number(value) > 0, "Amount must be greater than zero."),
+    .trim()
+    .refine(isPositiveMoneyInput, "Amount must be greater than zero with up to 2 decimal places."),
   paymentMethod: z.enum(["cash", "gcash", "card", "bank_transfer", "check"]),
   referenceNumber: z.string().trim().max(100, "Reference number is too long."),
   notes: z.string().trim().max(500, "Notes are too long."),

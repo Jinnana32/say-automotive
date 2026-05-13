@@ -1,4 +1,5 @@
 import type { QuotationDetail, QuotationItemDetail } from "@/features/quotations/types";
+import { roundCurrency } from "@/lib/currency";
 
 export type QuotationPartPrintLine = {
   id: string;
@@ -69,8 +70,4 @@ function formatLaborDescription(item: QuotationItemDetail) {
 
 function trimNumeric(value: number) {
   return Number.isInteger(value) ? String(value) : String(value);
-}
-
-function roundCurrency(value: number) {
-  return Number(value.toFixed(2));
 }

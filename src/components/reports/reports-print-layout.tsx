@@ -1,7 +1,7 @@
 import { ReportFooter } from "@/components/reports/report-footer";
 import { ReportHeader } from "@/components/reports/report-header";
 import type { ReportsPrintDocument } from "@/features/reports/types";
-import { formatCurrency } from "@/lib/currency";
+import { formatPrintCurrency } from "@/lib/currency";
 import { formatDateTime } from "@/lib/dates";
 
 export function ReportsPrintLayout({
@@ -87,7 +87,7 @@ export function ReportsPrintLayout({
             activeTrendRows.map(
               (point): [string, string, string] => [
                 point.label,
-                formatCurrency(point.paymentsCollected),
+                formatPrintCurrency(point.paymentsCollected),
                 String(point.vehiclesReleased),
               ],
             )
@@ -119,7 +119,7 @@ export function ReportsPrintLayout({
               (item): [string, string, string] => [
                 item.label,
                 formatQuantity(item.quantity),
-                formatCurrency(item.amount),
+                formatPrintCurrency(item.amount),
               ],
             )
           }
@@ -134,7 +134,7 @@ export function ReportsPrintLayout({
               (item): [string, string, string] => [
                 item.label,
                 formatQuantity(item.quantity),
-                formatCurrency(item.amount),
+                formatPrintCurrency(item.amount),
               ],
             )
           }
@@ -164,7 +164,7 @@ export function ReportsPrintLayout({
               (item): [string, string, string] => [
                 item.label,
                 String(item.count),
-                formatCurrency(item.amount),
+                formatPrintCurrency(item.amount),
               ],
             )
           }
@@ -189,7 +189,7 @@ export function ReportsPrintLayout({
               (invoice): [string, string, string] => [
                 invoice.invoiceNumber,
                 invoice.customerName,
-                formatCurrency(invoice.balance),
+                formatPrintCurrency(invoice.balance),
               ],
             )
           }
@@ -333,7 +333,7 @@ function TableSection({
 
 function formatMetricValue(metric: ReportsPrintDocument["reports"]["periodPerformanceMetrics"][number]) {
   if (metric.kind === "currency") {
-    return formatCurrency(metric.value);
+    return formatPrintCurrency(metric.value);
   }
 
   return formatQuantity(metric.value);

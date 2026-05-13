@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { websiteCardVariants } from "@/features/website/components/website-card-variants";
 import type { WebsiteCatalogProduct } from "@/features/website/types";
-import { formatCurrency } from "@/lib/currency";
 
 export function WebsiteProductCard({
   product,
@@ -69,10 +68,13 @@ export function WebsiteProductCard({
         <div className="flex items-end justify-between gap-4 border-t border-[#e7edf8] pt-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#6e7ca2]">
-              Starting at
+              In-store item
             </p>
             <p className="text-xl font-semibold text-[#102b84] sm:text-2xl">
-              {formatCurrency(product.price)}
+              Ask the shop
+            </p>
+            <p className="mt-1 text-xs uppercase tracking-[0.14em] text-[#6e7ca2]">
+              {product.unitLabel}
             </p>
           </div>
 

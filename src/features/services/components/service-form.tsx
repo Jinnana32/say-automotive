@@ -14,6 +14,7 @@ import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 import { useFormValues } from "@/lib/use-form-values";
 import { createServiceAction, updateServiceAction } from "@/features/services/actions/service-actions";
 import type { ServiceFormValues } from "@/features/services/types";
+import { MONEY_INPUT_STEP } from "@/lib/currency";
 
 export function ServiceForm({
   mode,
@@ -65,6 +66,8 @@ export function ServiceForm({
                 id="laborPrice"
                 name="laborPrice"
                 inputMode="decimal"
+                type="number"
+                step={MONEY_INPUT_STEP}
                 value={values.laborPrice}
                 onChange={(event) => updateFormValue("laborPrice", event.target.value)}
               />

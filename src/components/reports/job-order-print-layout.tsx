@@ -5,13 +5,18 @@ import { ReportTotals } from "@/components/reports/report-totals";
 import { buildJobOrderPrintBreakdown } from "@/features/job-orders/report-utils";
 import type { JobOrderPrintDocument } from "@/features/job-orders/types";
 import { formatJobOrderStatus, toTitleCaseWords } from "@/features/job-orders/utils";
-import { formatCurrency } from "@/lib/currency";
+import {
+  formatCurrency,
+  formatPrintCurrencyNumber,
+} from "@/lib/currency";
 import { formatDocumentDate, formatDateTime } from "@/lib/dates";
 
 export function JobOrderPrintLayout({
   document,
+  hidePrices = false,
 }: {
   document: JobOrderPrintDocument;
+  hidePrices?: boolean;
 }) {
   const { jobOrder, businessProfile } = document;
   const breakdown = buildJobOrderPrintBreakdown(jobOrder);
@@ -78,8 +83,12 @@ export function JobOrderPrintLayout({
                 <th className="w-16 px-2 py-1.5 text-left font-semibold">Type</th>
                 <th className="px-2 py-1.5 text-left font-semibold">Description</th>
                 <th className="w-20 px-2 py-1.5 text-right font-semibold">Qty</th>
-                <th className="w-24 px-2 py-1.5 text-right font-semibold">Unit Price</th>
-                <th className="w-24 px-2 py-1.5 text-right font-semibold">Total</th>
+                {!hidePrices ? (
+                  <>
+                    <th className="w-24 px-2 py-1.5 text-right font-semibold">Unit Price</th>
+                    <th className="w-24 px-2 py-1.5 text-right font-semibold">Total</th>
+                  </>
+                ) : null}
                 <th className="w-24 px-2 py-1.5 text-left font-semibold">Approval</th>
                 <th className="w-20 px-2 py-1.5 text-left font-semibold">Usage</th>
               </tr>
@@ -96,15 +105,23 @@ export function JobOrderPrintLayout({
                       ) : null}
                     </td>
                     <td className="px-2 py-1.5 text-right align-top">{item.quantityLabel}</td>
-                    <td className="px-2 py-1.5 text-right align-top">{formatPesoNumber(item.unitPrice)}</td>
-                    <td className="px-2 py-1.5 text-right align-top">{formatPesoNumber(item.total)}</td>
+                    {!hidePrices ? (
+                      <>
+                        <td className="px-2 py-1.5 text-right align-top">
+                          {formatPrintCurrencyNumber(item.unitPrice)}
+                        </td>
+                        <td className="px-2 py-1.5 text-right align-top">
+                          {formatPrintCurrencyNumber(item.total)}
+                        </td>
+                      </>
+                    ) : null}
                     <td className="px-2 py-1.5 align-top">{formatStatusLabel(item.approvalStatus)}</td>
                     <td className="px-2 py-1.5 align-top">{formatStatusLabel(item.usageStatus)}</td>
                   </tr>
                 ))
               ) : (
                 <tr className="border-t border-slate-200">
-                  <td colSpan={7} className="px-2 py-3 text-center text-slate-500">
+                  <td colSpan={hidePrices ? 5 : 7} className="px-2 py-3 text-center text-slate-500">
                     No work items recorded.
                   </td>
                 </tr>
@@ -154,7 +171,9 @@ export function JobOrderPrintLayout({
         </div>
       </section>
 
-      <section className="report-section-keep mt-4 grid gap-6 sm:grid-cols-[1fr_250px]">
+      <section
+        className={`report-section-keep mt-4 grid gap-6 ${hidePrices ? "sm:grid-cols-1" : "sm:grid-cols-[1fr_250px]"}`}
+      >
         <div className="space-y-3">
           <div>
             <h2 className="font-display text-[18px] font-semibold uppercase text-slate-950">MECHANICS</h2>
@@ -163,9 +182,6 @@ export function JobOrderPrintLayout({
                 <thead className="bg-slate-100">
                   <tr>
                     <th className="px-2 py-1.5 text-left font-semibold">Name</th>
-                    <th className="px-2 py-1.5 text-left font-semibold">Task</th>
-                    <th className="w-28 px-2 py-1.5 text-left font-semibold">Started</th>
-                    <th className="w-28 px-2 py-1.5 text-left font-semibold">Completed</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -173,14 +189,11 @@ export function JobOrderPrintLayout({
                     jobOrder.mechanics.map((mechanic) => (
                       <tr key={mechanic.id} className="report-row-avoid border-t border-slate-200">
                         <td className="px-2 py-1.5 align-top">{mechanic.fullName}</td>
-                        <td className="px-2 py-1.5 align-top">{mechanic.taskDescription || "—"}</td>
-                        <td className="px-2 py-1.5 align-top">{optionalDate(mechanic.startedAt)}</td>
-                        <td className="px-2 py-1.5 align-top">{optionalDate(mechanic.completedAt)}</td>
                       </tr>
                     ))
                   ) : (
                     <tr className="border-t border-slate-200">
-                      <td colSpan={4} className="px-2 py-3 text-center text-slate-500">
+                      <td className="px-2 py-3 text-center text-slate-500">
                         No mechanics assigned.
                       </td>
                     </tr>
@@ -196,22 +209,28 @@ export function JobOrderPrintLayout({
           />
         </div>
 
-        <ReportTotals
-          lines={[
-            { label: "Parts:", value: formatCurrency(breakdown.totalParts) },
-            { label: "Labor:", value: formatCurrency(breakdown.totalLabor) },
-            { label: "Pending Extras:", value: formatCurrency(breakdown.pendingExtras) },
-            { label: "Rejected Extras:", value: formatCurrency(breakdown.rejectedExtras) },
-            { label: "Billable Total:", value: formatCurrency(breakdown.billableTotal), emphasized: true },
-            ...(jobOrder.invoiceId
-              ? [
-                  { label: "Invoice Total:", value: formatCurrency(jobOrder.invoiceTotalAmount ?? 0) },
-                  { label: "Balance:", value: formatCurrency(jobOrder.invoiceBalance ?? 0) },
-                ]
-              : []),
-          ]}
-          className="justify-self-end"
-        />
+        {!hidePrices ? (
+          <ReportTotals
+            lines={[
+              { label: "Parts:", value: formatCurrency(breakdown.totalParts) },
+              { label: "Labor:", value: formatCurrency(breakdown.totalLabor) },
+              { label: "Pending Extras:", value: formatCurrency(breakdown.pendingExtras) },
+              { label: "Rejected Extras:", value: formatCurrency(breakdown.rejectedExtras) },
+              { label: "Billable Total:", value: formatCurrency(breakdown.billableTotal), emphasized: true },
+              ...(jobOrder.invoiceId
+                ? [
+                    { label: "Invoice Total:", value: formatCurrency(jobOrder.invoiceTotalAmount ?? 0) },
+                    { label: "Balance:", value: formatCurrency(jobOrder.invoiceBalance ?? 0) },
+                  ]
+                : []),
+            ]}
+            className="justify-self-end"
+          />
+        ) : (
+          <div className="justify-self-end rounded-md border border-dashed border-slate-300 px-4 py-3 text-right text-[10px] uppercase tracking-[0.16em] text-slate-500">
+            Pricing omitted on this printout.
+          </div>
+        )}
       </section>
 
       <ReportFooter
@@ -277,11 +296,4 @@ function optionalDate(value: string | null) {
 
 function formatStatusLabel(value: string) {
   return toTitleCaseWords(value.replaceAll("_", " "));
-}
-
-function formatPesoNumber(value: number) {
-  return value.toLocaleString("en-PH", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 }

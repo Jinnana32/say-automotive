@@ -15,6 +15,7 @@ type JobOrderPdfRouteContext = {
 export async function GET(request: NextRequest, context: JobOrderPdfRouteContext) {
   const { jobOrderId } = await context.params;
   const document = await getJobOrderPrintDocument(jobOrderId);
+  const hidePrices = request.nextUrl.searchParams.get("hidePrices") === "1";
 
   if (!document) {
     return new Response("Job order not found.", { status: 404 });
@@ -22,11 +23,14 @@ export async function GET(request: NextRequest, context: JobOrderPdfRouteContext
 
   try {
     const printUrl = new URL(`/job-orders/${jobOrderId}/print`, request.nextUrl.origin);
+    if (hidePrices) {
+      printUrl.searchParams.set("hidePrices", "1");
+    }
     const pdfBuffer = await renderInternalUrlToPdf({
       url: printUrl.toString(),
       cookieHeader: request.headers.get("cookie"),
     });
-    const filename = `SAY-JobOrder-${document.jobOrder.jobOrderNumber}.pdf`;
+    const filename = `SAY-JobOrder-${document.jobOrder.jobOrderNumber}${hidePrices ? "-NoPrices" : ""}.pdf`;
 
     return new Response(Buffer.from(pdfBuffer), {
       headers: {

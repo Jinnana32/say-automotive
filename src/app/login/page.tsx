@@ -15,6 +15,8 @@ export default async function LoginPage({
   ]);
 
   if (session.status === "authenticated") {
+    const homePath = session.context.role === "mechanic" ? "/portal/attendance" : "/dashboard";
+
     return (
       <div className="min-h-screen bg-dashboard-grid px-4 py-12">
         <div className="mx-auto max-w-lg rounded-[2rem] border border-border/80 bg-background/95 p-8 shadow-[0_24px_80px_rgba(14,34,61,0.08)]">
@@ -27,10 +29,10 @@ export default async function LoginPage({
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
-              href="/dashboard"
+              href={homePath}
               className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground"
             >
-              Go to dashboard
+              {session.context.role === "mechanic" ? "Go to attendance portal" : "Go to dashboard"}
             </Link>
             <form action={signOutAction}>
               <button

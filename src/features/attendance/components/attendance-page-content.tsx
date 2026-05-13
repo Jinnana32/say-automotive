@@ -65,11 +65,19 @@ export function AttendancePageContent({ data }: { data: AttendanceRosterData }) 
         title="Attendance"
         description={`Daily time record for ${formatDate(filters.date)}. Keep one attendance summary per active staff member, while holidays and approved leave remove false payroll blockers.`}
         actions={
-          filters.date !== today ? (
+          <>
             <Button asChild variant="outline">
-              <Link href="/attendance">Today</Link>
+              <Link href="/attendance/devices">Review devices</Link>
             </Button>
-          ) : null
+            <Button asChild variant="outline">
+              <Link href="/attendance/amendments">Review amendments</Link>
+            </Button>
+            {filters.date !== today ? (
+              <Button asChild variant="outline">
+                <Link href="/attendance">Today</Link>
+              </Button>
+            ) : null}
+          </>
         }
       />
 

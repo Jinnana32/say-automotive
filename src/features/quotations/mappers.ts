@@ -1,5 +1,6 @@
 import type { TableRow } from "@/types/database";
 
+import { formatMoneyInputValue } from "@/lib/currency";
 import type {
   QuotationDetail,
   QuotationFormItem,
@@ -97,8 +98,8 @@ export function mapQuotationDetailToFormValues(detail: QuotationDetail): Quotati
     natureOfRepair: detail.natureOfRepair ?? "",
     inspectionNotes: detail.inspectionNotes ?? "",
     status: detail.status === "draft" ? "draft" : "pending_approval",
-    discount: String(detail.discount),
-    tax: String(detail.tax),
+    discount: formatMoneyInputValue(detail.discount),
+    tax: formatMoneyInputValue(detail.tax),
     items: detail.items.map((item) =>
       createQuotationItem({
         key: item.id,
@@ -107,7 +108,7 @@ export function mapQuotationDetailToFormValues(detail: QuotationDetail): Quotati
         serviceId: item.serviceId ?? "",
         description: item.description,
         quantity: String(item.quantity),
-        unitPrice: String(item.unitPrice),
+        unitPrice: formatMoneyInputValue(item.unitPrice),
       }),
     ),
   };

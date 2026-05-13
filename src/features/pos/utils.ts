@@ -1,4 +1,5 @@
 import type { PosCartItem, PosProductOption, PosSerializedItem } from "@/features/pos/types";
+import { roundCurrency } from "@/lib/currency";
 
 export function createPosCartItem(product: PosProductOption): PosCartItem {
   return {
@@ -96,8 +97,4 @@ function clampQuantity(quantity: number, availableQuantity: number) {
   }
 
   return Math.min(Number(quantity.toFixed(4)), availableQuantity);
-}
-
-function roundCurrency(value: number) {
-  return Number(value.toFixed(2));
 }

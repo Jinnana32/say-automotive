@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { CarFront, ClipboardList, ReceiptText, Wrench } from 'lucide-react';
 
+import { ActionDropdown } from '@/components/shared/action-dropdown';
 import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 import {
   DetailSummaryGrid,
@@ -94,15 +95,25 @@ export function JobOrderDetailPage({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link
-                href={`/job-orders/${jobOrder.id}/print`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Print job order
-              </Link>
-            </Button>
+            <ActionDropdown
+              label="Print job order"
+              variant="outline"
+              size="sm"
+              items={[
+                {
+                  label: 'Print',
+                  href: `/job-orders/${jobOrder.id}/print`,
+                  target: '_blank',
+                  rel: 'noreferrer',
+                },
+                {
+                  label: 'Print without prices',
+                  href: `/job-orders/${jobOrder.id}/print?hidePrices=1`,
+                  target: '_blank',
+                  rel: 'noreferrer',
+                },
+              ]}
+            />
             <Button asChild variant="outline" size="sm">
               <a href={`/api/job-orders/${jobOrder.id}/pdf`}>Download PDF</a>
             </Button>

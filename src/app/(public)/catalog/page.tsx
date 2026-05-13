@@ -61,7 +61,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
         <PageHeader
           eyebrow="Catalog"
           title="TIRES, FLUIDS, BATTERIES, AND WORKSHOP ESSENTIALS."
-          description="The catalog should feel like a real automotive storefront, with strong brand contrast, clear filters, visible pricing, and obvious ways to contact or visit the shop."
+          description="The catalog should feel like a real automotive storefront, with strong brand contrast, clear filters, and obvious ways to contact or visit the shop for availability and fitment."
           inverse
           titleTag="h1"
           size="hero"
@@ -164,7 +164,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-[#d8e3ff]">
                   When the catalog only has one published item, the layout now supports it with a
                   branded information panel instead of leaving a large empty grid area. Keep the
-                  price visible and route product questions toward contact or an in-store visit.
+                  product visible and route questions toward contact or an in-store visit.
                 </p>
                 <div className="mt-6 grid gap-4 sm:grid-cols-3">
                   <div className="rounded-2xl border border-white/12 bg-white/10 p-4 backdrop-blur">
@@ -209,7 +209,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
       <CTASection
         eyebrow="Need service work too?"
         title="KEEP PRODUCT BROWSING SIMPLE, AND USE THE SERVICE FORM ONLY FOR WORKSHOP REQUESTS."
-        description="Catalog items already show pricing. For product availability, call or visit the shop. For maintenance, repairs, inspections, or workshop concerns, use the service quote form."
+        description="For product availability, fitment, and current pricing, call or visit the shop. For maintenance, repairs, inspections, or workshop concerns, use the service quote form."
         actions={
           <>
             <Button asChild variant="yellowPrimary" size="pill">

@@ -18,7 +18,7 @@ describe("quotationFormSchema", () => {
           itemType: "product",
           description: "Brake Pad",
           quantity: "1",
-          unitPrice: "1000",
+          unitPrice: "1000.123",
         }),
       ],
     });
@@ -41,13 +41,13 @@ describe("quotationFormSchema", () => {
           serviceId: crypto.randomUUID(),
           description: "Oil Change",
           quantity: "1",
-          unitPrice: "500",
+          unitPrice: "500.12",
         }),
         createQuotationItem({
           itemType: "labor",
           description: "Manual labor",
           quantity: "2",
-          unitPrice: "300",
+          unitPrice: "300.01",
         }),
       ],
     });

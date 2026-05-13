@@ -1,5 +1,6 @@
 import type { TableRow } from "@/types/database";
 
+import { formatMoneyInputValue } from "@/lib/currency";
 import type { ProductFormValues, ProductListItem, ReferenceOption } from "@/features/products/types";
 
 type ProductRow = TableRow<"products">;
@@ -59,8 +60,8 @@ export function mapProductRowToFormValues(row: ProductRow): ProductFormValues {
     oemNumber: row.oem_number ?? "",
     description: row.description ?? "",
     productType: row.product_type,
-    costPrice: String(row.cost_price),
-    sellingPrice: String(row.selling_price),
+    costPrice: formatMoneyInputValue(row.cost_price),
+    sellingPrice: formatMoneyInputValue(row.selling_price),
     reorderLevel: String(row.reorder_level),
     warrantyDurationDays: row.warranty_duration_days ? String(row.warranty_duration_days) : "",
     shelfLocation: row.shelf_location ?? "",

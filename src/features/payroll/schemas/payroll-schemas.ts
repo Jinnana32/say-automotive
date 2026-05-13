@@ -6,6 +6,7 @@ import type {
   PayrollPeriodFormValues,
   PayrollPeriodStatusFormValues,
 } from "@/features/payroll/types";
+import { isNonNegativeMoneyInput } from "@/lib/currency";
 
 const BUSINESS_TIMEZONE = "Asia/Manila";
 
@@ -13,15 +14,15 @@ const moneyField = z
   .string()
   .trim()
   .min(1, "This amount is required.")
-  .refine((value) => !Number.isNaN(Number(value)) && Number(value) >= 0, {
-    message: "Enter a valid amount.",
+  .refine(isNonNegativeMoneyInput, {
+    message: "Enter a valid amount with up to 2 decimal places.",
   });
 
 const optionalMoneyField = z
   .string()
   .trim()
-  .refine((value) => value.length === 0 || (!Number.isNaN(Number(value)) && Number(value) >= 0), {
-    message: "Enter a valid amount.",
+  .refine((value) => value.length === 0 || isNonNegativeMoneyInput(value), {
+    message: "Enter a valid amount with up to 2 decimal places.",
   });
 
 export const compensationProfileSchema = z.object({

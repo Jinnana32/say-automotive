@@ -3,11 +3,13 @@ import { DateTime } from "luxon";
 import { getBusinessNow, fromUtcIso } from "@/lib/dates";
 import type { StaffRole } from "@/lib/auth/permissions";
 import type {
+  AttendanceAccessSettings,
   AttendanceDateLockSummary,
   AttendanceDailySummary,
   AttendanceEntryActionState,
   AttendanceFilterStatus,
   AttendanceFormValues,
+  AttendanceLogType,
   AttendancePageFilters,
   AttendanceRecordSummary,
   AttendanceRosterItem,
@@ -15,6 +17,11 @@ import type {
   BranchHolidayFormValues,
   BranchHolidayKind,
   BranchHolidaySummary,
+  DtrAmendmentFormValues,
+  DtrAmendmentStatus,
+  DtrAmendmentSummary,
+  DtrAmendmentType,
+  MechanicPortalIpStatus,
   StaffLeaveEntrySummary,
   StaffLeaveFormValues,
   StaffLeaveType,
@@ -77,6 +84,25 @@ export const STAFF_LEAVE_TYPE_OPTIONS: Array<{
   { value: "emergency", label: "Emergency leave" },
   { value: "unpaid", label: "Unpaid leave" },
   { value: "other", label: "Other leave" },
+];
+
+export const ATTENDANCE_LOG_TYPE_OPTIONS: Array<{
+  value: AttendanceLogType;
+  label: string;
+}> = [
+  { value: "time_in", label: "Time in" },
+  { value: "time_out", label: "Time out" },
+];
+
+export const DTR_AMENDMENT_TYPE_OPTIONS: Array<{
+  value: DtrAmendmentType;
+  label: string;
+}> = [
+  { value: "missed_time_in", label: "Missed time in" },
+  { value: "missed_time_out", label: "Missed time out" },
+  { value: "wrong_time", label: "Wrong time" },
+  { value: "shop_network_issue", label: "Shop network issue" },
+  { value: "other", label: "Other" },
 ];
 
 export const INITIAL_ATTENDANCE_ENTRY_ACTION_STATE: AttendanceEntryActionState = {
@@ -235,6 +261,19 @@ export function buildStaffLeaveFormValues(
   };
 }
 
+export function buildDtrAmendmentFormValues(
+  attendanceDate: string,
+  targetLogType: AttendanceLogType = "time_in",
+): DtrAmendmentFormValues {
+  return {
+    attendanceDate,
+    targetLogType,
+    amendmentType: targetLogType === "time_out" ? "missed_time_out" : "missed_time_in",
+    requestedTime: getBusinessNow().toFormat("HH:mm"),
+    reason: "",
+  };
+}
+
 export function hasMissingTimeout(attendance: AttendanceRecordSummary | null) {
   return Boolean(attendance?.timeIn && !attendance.timeOut);
 }
@@ -257,6 +296,109 @@ export function getAttendanceApprovalTone(attendance: AttendanceRecordSummary | 
   }
 
   return isAttendanceApproved(attendance) ? "success" : "warning";
+}
+
+export function formatAttendanceLogTypeLabel(value: AttendanceLogType) {
+  return ATTENDANCE_LOG_TYPE_OPTIONS.find((option) => option.value === value)?.label ?? value;
+}
+
+export function formatDtrAmendmentTypeLabel(value: DtrAmendmentType) {
+  return DTR_AMENDMENT_TYPE_OPTIONS.find((option) => option.value === value)?.label ?? value;
+}
+
+export function formatDtrAmendmentStatusLabel(value: DtrAmendmentStatus) {
+  switch (value) {
+    case "pending":
+      return "Pending";
+    case "approved":
+      return "Approved";
+    case "rejected":
+      return "Rejected";
+  }
+}
+
+export function getDtrAmendmentStatusTone(value: DtrAmendmentStatus) {
+  switch (value) {
+    case "pending":
+      return "warning";
+    case "approved":
+      return "success";
+    case "rejected":
+      return "destructive";
+  }
+}
+
+export function formatMechanicIpStatusMessage(
+  ipStatus: MechanicPortalIpStatus,
+  settings: AttendanceAccessSettings,
+) {
+  if (!settings.requireShopIpForMechanicAttendance) {
+    return "Shop network validation is disabled. Portal punches are currently allowed from any connection.";
+  }
+
+  if (ipStatus.isAllowed) {
+    const matchedLabel = ipStatus.matchedAllowedIp?.label?.trim();
+    return matchedLabel
+      ? `Connected to the approved shop network via ${matchedLabel}.`
+      : "Connected to the approved shop network.";
+  }
+
+  return "You are not connected to the approved shop network. Time-in/time-out is only allowed on-site. If this is a valid attendance issue, file a DTR amendment for admin approval.";
+}
+
+export function getMechanicPortalPrimaryLogType(
+  attendance: AttendanceRecordSummary | null,
+): AttendanceLogType | null {
+  if (!attendance || !attendance.timeIn) {
+    return "time_in";
+  }
+
+  if (!attendance.timeOut) {
+    return "time_out";
+  }
+
+  return null;
+}
+
+export function getMechanicPortalPrimaryActionLabel(
+  attendance: AttendanceRecordSummary | null,
+) {
+  const nextLogType = getMechanicPortalPrimaryLogType(attendance);
+
+  if (nextLogType === "time_in") {
+    return "Time In";
+  }
+
+  if (nextLogType === "time_out") {
+    return "Time Out";
+  }
+
+  return "Attendance complete";
+}
+
+export function formatMechanicAttendanceState(
+  attendance: AttendanceRecordSummary | null,
+  amendments: DtrAmendmentSummary[],
+) {
+  const pendingAmendment = amendments.find((item) => item.status === "pending");
+
+  if (pendingAmendment) {
+    return "Pending DTR amendment";
+  }
+
+  if (!attendance?.timeIn) {
+    return "Not timed in";
+  }
+
+  if (attendance.timeIn && !attendance.timeOut) {
+    return `Timed in at ${formatAttendanceTime(attendance.timeIn)}`;
+  }
+
+  if (attendance.timeOut) {
+    return `Timed out at ${formatAttendanceTime(attendance.timeOut)}`;
+  }
+
+  return "Attendance updated";
 }
 
 export function formatAttendanceLockMessage(lock: AttendanceDateLockSummary) {
@@ -320,6 +462,29 @@ export function formatScheduleTimeRange(schedule: StaffScheduleSummary) {
   }
 
   return `${shiftStart.toFormat("hh:mm a")} - ${shiftEnd.toFormat("hh:mm a")}`;
+}
+
+export function deriveAttendanceStatusFromTimeIn({
+  schedule,
+  timeInUtcIso,
+}: {
+  schedule: StaffScheduleSummary | null;
+  timeInUtcIso: string;
+}): AttendanceStatus {
+  if (!schedule) {
+    return "present";
+  }
+
+  const localizedTimeIn = fromUtcIso(timeInUtcIso);
+  const shiftStart = resolveScheduleTimeForDate(schedule.shiftStartTime, localizedTimeIn);
+
+  if (!shiftStart.isValid) {
+    return "present";
+  }
+
+  return localizedTimeIn > shiftStart.plus({ minutes: schedule.graceMinutes })
+    ? "late"
+    : "present";
 }
 
 export function countScheduledWorkdays(
@@ -514,4 +679,22 @@ function isStaffRole(value: string | undefined): value is StaffRole {
 
 function isAttendanceFilterStatus(value: string | undefined): value is AttendanceFilterStatus {
   return ATTENDANCE_FILTER_OPTIONS.some((option) => option.value === value);
+}
+
+function resolveScheduleTimeForDate(timeValue: string, date: DateTime) {
+  const parsed =
+    DateTime.fromFormat(timeValue, "HH:mm:ss", { zone: date.zone }).isValid
+      ? DateTime.fromFormat(timeValue, "HH:mm:ss", { zone: date.zone })
+      : DateTime.fromFormat(timeValue, "HH:mm", { zone: date.zone });
+
+  if (!parsed.isValid) {
+    return parsed;
+  }
+
+  return date.set({
+    hour: parsed.hour,
+    minute: parsed.minute,
+    second: parsed.second,
+    millisecond: 0,
+  });
 }

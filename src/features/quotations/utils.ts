@@ -1,5 +1,6 @@
 import type { CustomerOption } from "@/features/customers/types";
 import type { QuotationFormItem, QuotationVehicleOption } from "@/features/quotations/types";
+import { formatMoneyInputValue, roundCurrency } from "@/lib/currency";
 
 export function createQuotationItem(
   initial?: Partial<QuotationFormItem>,
@@ -11,7 +12,7 @@ export function createQuotationItem(
     serviceId: initial?.serviceId ?? "",
     description: initial?.description ?? "",
     quantity: initial?.quantity ?? "1",
-    unitPrice: initial?.unitPrice ?? "0",
+    unitPrice: initial?.unitPrice ?? formatMoneyInputValue(0),
   };
 }
 
@@ -62,8 +63,4 @@ export function resolveQuotationCreateFlowSelection(params: {
     customerId: hasRequestedCustomer ? params.requestedCustomerId ?? "" : "",
     vehicleId: "",
   };
-}
-
-function roundCurrency(value: number) {
-  return Number(value.toFixed(2));
 }

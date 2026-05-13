@@ -4,7 +4,10 @@ import { ReportSignatureBlock } from "@/components/reports/report-signature-bloc
 import { ReportTotals } from "@/components/reports/report-totals";
 import { buildQuotationPrintBreakdown } from "@/features/quotations/report-utils";
 import type { QuotationPrintDocument } from "@/features/quotations/types";
-import { formatCurrency } from "@/lib/currency";
+import {
+  formatCurrency,
+  formatPrintCurrencyNumber,
+} from "@/lib/currency";
 import { formatDocumentDate } from "@/lib/dates";
 
 export function QuotationPrintLayout({
@@ -61,8 +64,8 @@ export function QuotationPrintLayout({
                   <tr key={item.id} className="report-row-avoid border-t border-slate-200">
                     <td className="px-2 py-1.5 align-top">{item.description}</td>
                     <td className="px-2 py-1.5 align-top">{item.quantityLabel}</td>
-                    <td className="px-2 py-1.5 text-right align-top">{formatPesoNumber(item.unitPrice)}</td>
-                    <td className="px-2 py-1.5 text-right align-top">{formatPesoNumber(item.total)}</td>
+                    <td className="px-2 py-1.5 text-right align-top">{formatPrintCurrencyNumber(item.unitPrice)}</td>
+                    <td className="px-2 py-1.5 text-right align-top">{formatPrintCurrencyNumber(item.total)}</td>
                   </tr>
                 ))
               ) : (
@@ -92,7 +95,7 @@ export function QuotationPrintLayout({
                 breakdown.laborLines.map((item) => (
                   <tr key={item.id} className="report-row-avoid border-t border-slate-200">
                     <td className="px-2 py-1.5 align-top">{item.description}</td>
-                    <td className="px-2 py-1.5 text-right align-top">{formatPesoNumber(item.total)}</td>
+                    <td className="px-2 py-1.5 text-right align-top">{formatPrintCurrencyNumber(item.total)}</td>
                   </tr>
                 ))
               ) : (
@@ -170,11 +173,4 @@ function formatVehicleModel(document: QuotationPrintDocument["quotation"]) {
   }
 
   return document.vehicleLabel;
-}
-
-function formatPesoNumber(value: number) {
-  return value.toLocaleString("en-PH", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 }

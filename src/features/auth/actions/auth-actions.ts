@@ -24,7 +24,7 @@ export async function signInAction(
   }
 
   const supabase = await getSupabaseServerClient();
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,
     password: parsed.data.password,
   });
@@ -36,7 +36,26 @@ export async function signInAction(
     };
   }
 
-  redirect("/dashboard");
+  const signedInUserId = data.user?.id;
+
+  if (!signedInUserId) {
+    redirect("/dashboard");
+  }
+
+  const { data: staff, error: staffError } = await supabase
+    .from("staff")
+    .select("role")
+    .eq("linked_user_id", signedInUserId)
+    .maybeSingle();
+
+  if (staffError) {
+    return {
+      status: "error",
+      message: staffError.message,
+    };
+  }
+
+  redirect(staff?.role === "mechanic" ? "/portal/attendance" : "/dashboard");
 }
 
 export async function signOutAction() {

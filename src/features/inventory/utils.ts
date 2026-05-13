@@ -4,6 +4,7 @@ import type {
   InventoryStockItem,
   InventorySummary,
 } from "@/features/inventory/types";
+import { roundCurrency } from "@/lib/currency";
 
 export function formatInventoryMovementType(type: InventoryMovementType) {
   return type.replaceAll("_", " ");
@@ -61,11 +62,6 @@ export function filterInventoryStocks(
       .includes(loweredSearch);
   });
 }
-
-function roundCurrency(value: number) {
-  return Number(value.toFixed(2));
-}
-
 function roundQuantity(value: number) {
   return Number(value.toFixed(4));
 }

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isNonNegativeMoneyInput } from "@/lib/currency";
 
 export const jobOrderDetailsSchema = z
   .object({
@@ -82,10 +83,10 @@ export const additionalJobOrderItemSchema = z
       });
     }
 
-    if (!Number.isFinite(unitPrice) || unitPrice < 0) {
+    if (!isNonNegativeMoneyInput(value.unitPrice) || !Number.isFinite(unitPrice) || unitPrice < 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Unit price must be zero or greater.",
+        message: "Unit price must be zero or greater with up to 2 decimal places.",
         path: ["unitPrice"],
       });
     }

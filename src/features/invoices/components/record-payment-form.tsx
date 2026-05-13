@@ -7,6 +7,7 @@ import { SubmitButton } from "@/components/shared/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { recordInvoicePaymentAction } from "@/features/invoices/actions/invoice-actions";
+import { formatMoneyInputValue, MONEY_INPUT_STEP } from "@/lib/currency";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 import { useFormValues } from "@/lib/use-form-values";
 
@@ -23,7 +24,7 @@ export function RecordPaymentForm({
 }) {
   const [state, formAction] = useActionState(recordInvoicePaymentAction, INITIAL_FORM_ACTION_STATE);
   const { values, updateFormValue } = useFormValues({
-    amount: balance.toFixed(2),
+    amount: formatMoneyInputValue(balance),
     paymentMethod: "cash",
     referenceNumber: "",
     notes: "",
@@ -49,6 +50,8 @@ export function RecordPaymentForm({
             id="amount"
             name="amount"
             inputMode="decimal"
+            type="number"
+            step={MONEY_INPUT_STEP}
             value={values.amount}
             onChange={(event) => updateFormValue("amount", event.target.value)}
           />

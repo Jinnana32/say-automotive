@@ -2,6 +2,7 @@ import { DateTime } from "luxon";
 
 import { countScheduledWorkdays } from "@/features/attendance/utils";
 import type { StaffScheduleSummary } from "@/features/attendance/types";
+import { formatMoneyInputValue } from "@/lib/currency";
 import { formatDate, getBusinessNow } from "@/lib/dates";
 import type {
   CompensationProfileFormValues,
@@ -138,9 +139,9 @@ export function buildCompensationProfileFormValues(
   return {
     staffId,
     payBasis: profile?.payBasis ?? "daily",
-    baseRate: profile ? profile.baseRate.toFixed(2) : "",
-    overtimeRate: profile?.overtimeRate ? profile.overtimeRate.toFixed(2) : "",
-    allowancePerPeriod: profile ? profile.allowancePerPeriod.toFixed(2) : "0.00",
+    baseRate: profile ? formatMoneyInputValue(profile.baseRate) : "",
+    overtimeRate: profile?.overtimeRate ? formatMoneyInputValue(profile.overtimeRate) : "",
+    allowancePerPeriod: profile ? formatMoneyInputValue(profile.allowancePerPeriod) : formatMoneyInputValue(0),
     effectiveStartDate: profile?.effectiveStartDate ?? getBusinessNow().toFormat("yyyy-LL-dd"),
     notes: profile?.notes ?? "",
   };

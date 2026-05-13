@@ -7,6 +7,7 @@ import {
   type JobOrderPartUsageEntry,
   type JobOrderStatus,
 } from "@/features/job-orders/types";
+import { roundCurrency } from "@/lib/currency";
 
 const FINAL_MECHANIC_LOCKED_STATUSES: JobOrderStatus[] = [
   "completed",
@@ -197,11 +198,6 @@ function buildJobOrderDetailCapabilities(params: {
     availableNextStatuses: getAllowedJobOrderStatusTransitions(params.status),
   };
 }
-
-function roundCurrency(value: number) {
-  return Number(value.toFixed(2));
-}
-
 function roundQuantity(value: number) {
   return Number(value.toFixed(4));
 }

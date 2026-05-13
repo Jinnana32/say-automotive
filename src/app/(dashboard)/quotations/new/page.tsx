@@ -5,6 +5,7 @@ import {
   createQuotationItem,
   resolveQuotationCreateFlowSelection,
 } from "@/features/quotations/utils";
+import { formatMoneyInputValue } from "@/lib/currency";
 
 export const dynamic = "force-dynamic";
 
@@ -41,8 +42,8 @@ export default async function NewQuotationPage({
           natureOfRepair: "",
           inspectionNotes: "",
           status: "draft",
-          discount: "0",
-          tax: "0",
+          discount: formatMoneyInputValue(0),
+          tax: formatMoneyInputValue(0),
           items: [createQuotationItem()],
         }}
       />

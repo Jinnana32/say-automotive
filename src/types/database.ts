@@ -104,6 +104,99 @@ export type Database = {
           },
         ];
       };
+      attendance_allowed_ips: {
+        Row: {
+          id: string;
+          branch_id: string;
+          ip_address: string;
+          label: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          branch_id: string;
+          ip_address: string;
+          label?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["attendance_allowed_ips"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "attendance_allowed_ips_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      attendance_time_logs: {
+        Row: {
+          id: string;
+          staff_id: string;
+          attendance_id: string | null;
+          dtr_amendment_id: string | null;
+          staff_device_id: string | null;
+          attendance_date: string;
+          log_type: string;
+          logged_at: string;
+          source: string;
+          request_ip: string | null;
+          is_shop_ip_valid: boolean;
+          is_device_approved: boolean;
+          user_agent: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          staff_id: string;
+          attendance_id?: string | null;
+          dtr_amendment_id?: string | null;
+          staff_device_id?: string | null;
+          attendance_date: string;
+          log_type: string;
+          logged_at: string;
+          source: string;
+          request_ip?: string | null;
+          is_shop_ip_valid?: boolean;
+          is_device_approved?: boolean;
+          user_agent?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["attendance_time_logs"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "attendance_time_logs_attendance_id_fkey";
+            columns: ["attendance_id"];
+            isOneToOne: false;
+            referencedRelation: "attendance";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "attendance_time_logs_dtr_amendment_id_fkey";
+            columns: ["dtr_amendment_id"];
+            isOneToOne: false;
+            referencedRelation: "dtr_amendment_requests";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "attendance_time_logs_staff_device_id_fkey";
+            columns: ["staff_device_id"];
+            isOneToOne: false;
+            referencedRelation: "staff_devices";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "attendance_time_logs_staff_id_fkey";
+            columns: ["staff_id"];
+            isOneToOne: false;
+            referencedRelation: "staff";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       audit_logs: {
         Row: {
           id: string;
@@ -209,6 +302,9 @@ export type Database = {
           allow_partial_payments: boolean;
           allow_release_with_balance: boolean;
           require_full_payment_before_release: boolean;
+          require_shop_ip_for_mechanic_attendance: boolean;
+          allow_dtr_amendments: boolean;
+          allow_attendance_admin_override: boolean;
           enable_barcode_support: boolean;
           enable_shelf_location: boolean;
           default_tax_rate: number;
@@ -226,6 +322,9 @@ export type Database = {
           allow_partial_payments?: boolean;
           allow_release_with_balance?: boolean;
           require_full_payment_before_release?: boolean;
+          require_shop_ip_for_mechanic_attendance?: boolean;
+          allow_dtr_amendments?: boolean;
+          allow_attendance_admin_override?: boolean;
           enable_barcode_support?: boolean;
           enable_shelf_location?: boolean;
           default_tax_rate?: number;
@@ -303,6 +402,152 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["document_sequences"]["Insert"]>;
         Relationships: [];
+      };
+      dtr_amendment_requests: {
+        Row: {
+          id: string;
+          branch_id: string;
+          staff_id: string;
+          attendance_id: string | null;
+          attendance_date: string;
+          target_log_type: string;
+          amendment_type: string;
+          requested_timestamp: string;
+          reason: string;
+          proof_url: string | null;
+          status: string;
+          requested_ip: string | null;
+          request_user_agent: string | null;
+          approved_timestamp: string | null;
+          approved_by_staff_id: string | null;
+          rejected_at: string | null;
+          rejected_by_staff_id: string | null;
+          final_timestamp: string | null;
+          admin_note: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          branch_id: string;
+          staff_id: string;
+          attendance_id?: string | null;
+          attendance_date: string;
+          target_log_type: string;
+          amendment_type: string;
+          requested_timestamp: string;
+          reason: string;
+          proof_url?: string | null;
+          status?: string;
+          requested_ip?: string | null;
+          request_user_agent?: string | null;
+          approved_timestamp?: string | null;
+          approved_by_staff_id?: string | null;
+          rejected_at?: string | null;
+          rejected_by_staff_id?: string | null;
+          final_timestamp?: string | null;
+          admin_note?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["dtr_amendment_requests"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "dtr_amendment_requests_attendance_id_fkey";
+            columns: ["attendance_id"];
+            isOneToOne: false;
+            referencedRelation: "attendance";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "dtr_amendment_requests_approved_by_staff_id_fkey";
+            columns: ["approved_by_staff_id"];
+            isOneToOne: false;
+            referencedRelation: "staff";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "dtr_amendment_requests_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "dtr_amendment_requests_rejected_by_staff_id_fkey";
+            columns: ["rejected_by_staff_id"];
+            isOneToOne: false;
+            referencedRelation: "staff";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "dtr_amendment_requests_staff_id_fkey";
+            columns: ["staff_id"];
+            isOneToOne: false;
+            referencedRelation: "staff";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      staff_devices: {
+        Row: {
+          id: string;
+          staff_id: string;
+          device_id_hash: string;
+          device_name: string | null;
+          user_agent: string | null;
+          first_seen_at: string;
+          last_seen_at: string;
+          last_ip: string | null;
+          status: string;
+          approved_at: string | null;
+          approved_by_staff_id: string | null;
+          revoked_at: string | null;
+          revoked_by_staff_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          staff_id: string;
+          device_id_hash: string;
+          device_name?: string | null;
+          user_agent?: string | null;
+          first_seen_at?: string;
+          last_seen_at?: string;
+          last_ip?: string | null;
+          status?: string;
+          approved_at?: string | null;
+          approved_by_staff_id?: string | null;
+          revoked_at?: string | null;
+          revoked_by_staff_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["staff_devices"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "staff_devices_approved_by_staff_id_fkey";
+            columns: ["approved_by_staff_id"];
+            isOneToOne: false;
+            referencedRelation: "staff";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "staff_devices_revoked_by_staff_id_fkey";
+            columns: ["revoked_by_staff_id"];
+            isOneToOne: false;
+            referencedRelation: "staff";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "staff_devices_staff_id_fkey";
+            columns: ["staff_id"];
+            isOneToOne: false;
+            referencedRelation: "staff";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       vehicle_lookup_options: {
         Row: {

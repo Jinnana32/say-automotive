@@ -6,6 +6,13 @@ import { writeAuditLog } from "@/lib/audit";
 import { getDefaultBranch } from "@/lib/branches";
 import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
 import { toFormActionState } from "@/lib/forms";
+import { normalizeIpAddress } from "@/lib/network/request-ip";
+import {
+  attendanceAccessSettingsSchema,
+  attendanceAllowedIpSchema,
+  parseAttendanceAccessSettingsFormData,
+  parseAttendanceAllowedIpFormData,
+} from "@/features/attendance/schemas/attendance-settings-schema";
 import {
   branchHolidaySchema,
   parseBranchHolidayFormData,
@@ -360,11 +367,197 @@ export async function deleteStaffLeaveEntryAction(formData: FormData) {
   }
 }
 
+export async function updateAttendanceAccessSettingsAction(
+  _prevState: TimekeepingActionState = INITIAL_TIMEKEEPING_ACTION_STATE,
+  formData: FormData,
+): Promise<TimekeepingActionState> {
+  const parsed = attendanceAccessSettingsSchema.safeParse(
+    parseAttendanceAccessSettingsFormData(formData),
+  );
+
+  if (!parsed.success) {
+    return {
+      ...toFormActionState(parsed.error),
+      status: "error",
+    };
+  }
+
+  const [{ context, supabase }, defaultBranch] = await Promise.all([
+    getAuthorizedSupabaseServerClient("settings:write"),
+    getDefaultBranch(),
+  ]);
+  const branchId = context.branchId ?? defaultBranch.id;
+  const { data: currentSettings, error: currentSettingsError } = await supabase
+    .from("business_settings")
+    .select("*")
+    .eq("branch_id", branchId)
+    .single();
+
+  if (currentSettingsError) {
+    return {
+      status: "error",
+      message: currentSettingsError.message,
+    };
+  }
+
+  const payload = {
+    require_shop_ip_for_mechanic_attendance:
+      parsed.data.requireShopIpForMechanicAttendance,
+    allow_dtr_amendments: parsed.data.allowDtrAmendments,
+    allow_attendance_admin_override: parsed.data.allowAttendanceAdminOverride,
+  };
+
+  const { error } = await supabase
+    .from("business_settings")
+    .update(payload)
+    .eq("branch_id", branchId);
+
+  if (error) {
+    return {
+      status: "error",
+      message: error.message,
+    };
+  }
+
+  await writeAuditLog(supabase, {
+    action: "Updated mechanic attendance access rules",
+    entityType: "business_settings",
+    entityId: String(currentSettings.id),
+    userId: context.userId,
+    beforeData: {
+      require_shop_ip_for_mechanic_attendance:
+        currentSettings.require_shop_ip_for_mechanic_attendance,
+      allow_dtr_amendments: currentSettings.allow_dtr_amendments,
+      allow_attendance_admin_override:
+        currentSettings.allow_attendance_admin_override,
+    },
+    afterData: payload,
+  });
+
+  revalidateTimekeepingPaths();
+
+  return {
+    status: "success",
+    message: "Mechanic attendance settings saved.",
+  };
+}
+
+export async function addAttendanceAllowedIpAction(
+  _prevState: TimekeepingActionState = INITIAL_TIMEKEEPING_ACTION_STATE,
+  formData: FormData,
+): Promise<TimekeepingActionState> {
+  const parsed = attendanceAllowedIpSchema.safeParse(
+    parseAttendanceAllowedIpFormData(formData),
+  );
+
+  if (!parsed.success) {
+    return {
+      ...toFormActionState(parsed.error),
+      status: "error",
+    };
+  }
+
+  const [{ context, supabase }, defaultBranch] = await Promise.all([
+    getAuthorizedSupabaseServerClient("settings:write"),
+    getDefaultBranch(),
+  ]);
+  const branchId = context.branchId ?? defaultBranch.id;
+  const normalizedIp = normalizeIpAddress(parsed.data.ipAddress);
+
+  if (!normalizedIp) {
+    return {
+      status: "error",
+      message: "Enter a valid public IP address.",
+    };
+  }
+
+  const payload = {
+    branch_id: branchId,
+    ip_address: normalizedIp,
+    label: normalizeNullable(parsed.data.label),
+  };
+  const { data: savedIp, error } = await supabase
+    .from("attendance_allowed_ips")
+    .insert(payload)
+    .select("*")
+    .single();
+
+  if (error) {
+    return {
+      status: "error",
+      message:
+        error.code === "23505"
+          ? "That shop IP is already allowed."
+          : error.message,
+    };
+  }
+
+  await writeAuditLog(supabase, {
+    action: `Added allowed attendance IP ${savedIp.ip_address}`,
+    entityType: "attendance_allowed_ip",
+    entityId: savedIp.id,
+    userId: context.userId,
+    afterData: savedIp,
+  });
+
+  revalidateTimekeepingPaths();
+
+  return {
+    status: "success",
+    message: "Allowed shop IP added.",
+  };
+}
+
+export async function deleteAttendanceAllowedIpAction(formData: FormData) {
+  const allowedIpId = readString(formData, "allowedIpId");
+
+  if (!allowedIpId) {
+    return;
+  }
+
+  const [{ context, supabase }, defaultBranch] = await Promise.all([
+    getAuthorizedSupabaseServerClient("settings:write"),
+    getDefaultBranch(),
+  ]);
+  const branchId = context.branchId ?? defaultBranch.id;
+  const { data: currentAllowedIp, error: currentAllowedIpError } = await supabase
+    .from("attendance_allowed_ips")
+    .select("*")
+    .eq("id", allowedIpId)
+    .eq("branch_id", branchId)
+    .maybeSingle();
+
+  if (currentAllowedIpError || !currentAllowedIp) {
+    return;
+  }
+
+  const { error } = await supabase
+    .from("attendance_allowed_ips")
+    .delete()
+    .eq("id", allowedIpId)
+    .eq("branch_id", branchId);
+
+  if (!error) {
+    await writeAuditLog(supabase, {
+      action: `Deleted allowed attendance IP ${currentAllowedIp.ip_address}`,
+      entityType: "attendance_allowed_ip",
+      entityId: currentAllowedIp.id,
+      userId: context.userId,
+      beforeData: currentAllowedIp,
+    });
+
+    revalidateTimekeepingPaths();
+  }
+}
+
 function revalidateTimekeepingPaths() {
   revalidatePath("/settings");
   revalidatePath("/settings/timekeeping");
   revalidatePath("/attendance");
+  revalidatePath("/attendance/amendments");
   revalidatePath("/payroll");
+  revalidatePath("/portal/attendance");
+  revalidatePath("/portal/amendments");
 }
 
 function normalizeNullable(value: string) {

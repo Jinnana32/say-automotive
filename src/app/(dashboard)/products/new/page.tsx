@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/shared/page-header";
 import { ProductForm } from "@/features/products/components/product-form";
 import { getProductFormOptions } from "@/features/products/queries/product-queries";
+import { formatMoneyInputValue } from "@/lib/currency";
 
 export const dynamic = "force-dynamic";
 
@@ -31,8 +32,8 @@ export default async function NewProductPage() {
           oemNumber: "",
           description: "",
           productType: "part",
-          costPrice: "0",
-          sellingPrice: "0",
+          costPrice: formatMoneyInputValue(0),
+          sellingPrice: formatMoneyInputValue(0),
           reorderLevel: "0",
           warrantyDurationDays: "",
           shelfLocation: "",

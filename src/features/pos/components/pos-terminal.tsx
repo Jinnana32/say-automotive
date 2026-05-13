@@ -24,14 +24,18 @@ import {
   setCartItemQuantity,
   toNumericInput,
 } from "@/features/pos/utils";
-import { formatCurrency } from "@/lib/currency";
+import {
+  formatCurrency,
+  formatMoneyInputValue,
+  MONEY_INPUT_STEP,
+} from "@/lib/currency";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 
 export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
   const [state, formAction] = useActionState(completePosSaleAction, INITIAL_FORM_ACTION_STATE);
   const [search, setSearch] = useState("");
   const [customerId, setCustomerId] = useState("");
-  const [discount, setDiscount] = useState("0");
+  const [discount, setDiscount] = useState(formatMoneyInputValue(0));
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "gcash" | "card" | "bank_transfer" | "check">("cash");
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentTouched, setPaymentTouched] = useState(false);
@@ -48,7 +52,7 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
   const resolvedPaymentAmount =
     terminal.config.allowPartialPayments && paymentTouched
       ? paymentAmount
-      : total.toFixed(2);
+      : formatMoneyInputValue(total);
   const filteredProducts = terminal.products.filter((product) => {
     const needle = search.trim().toLowerCase();
 
@@ -187,6 +191,8 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
                     id="discount"
                     name="discount"
                     inputMode="decimal"
+                    type="number"
+                    step={MONEY_INPUT_STEP}
                     value={discount}
                     onChange={(event) => setDiscount(event.target.value)}
                   />
@@ -225,6 +231,8 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
                           <TableCell className="w-[160px]">
                             <Input
                               inputMode="decimal"
+                              type="number"
+                              step={MONEY_INPUT_STEP}
                               value={String(item.quantity)}
                               onChange={(event) => {
                                 if (event.target.value === "") {
@@ -296,6 +304,8 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
                     id="paymentAmount"
                     name="paymentAmount"
                     inputMode="decimal"
+                    type="number"
+                    step={MONEY_INPUT_STEP}
                     value={resolvedPaymentAmount}
                     readOnly={!terminal.config.allowPartialPayments}
                     onChange={(event) => {

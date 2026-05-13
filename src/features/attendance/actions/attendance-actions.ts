@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { getDefaultBranch } from "@/lib/branches";
 import { toUtcIso } from "@/lib/dates";
 import { toFormActionState } from "@/lib/forms";
 import { parseAttendanceEntryFormData, attendanceEntrySchema } from "@/features/attendance/schemas/attendance-form-schema";
@@ -26,6 +27,28 @@ export async function upsertAttendanceRecordAction(
 
   const values = parsed.data;
   const { context, supabase } = await getAuthorizedSupabaseServerClient("attendance:write");
+  const branchId = context.branchId ?? (await getDefaultBranch()).id;
+  const { data: businessSettings, error: businessSettingsError } = await supabase
+    .from("business_settings")
+    .select("allow_attendance_admin_override")
+    .eq("branch_id", branchId)
+    .single();
+
+  if (businessSettingsError) {
+    return {
+      status: "error",
+      message: businessSettingsError.message,
+    };
+  }
+
+  if (!businessSettings.allow_attendance_admin_override) {
+    return {
+      status: "error",
+      message:
+        "Manual attendance overrides are disabled in timekeeping settings. Review DTR amendments instead.",
+    };
+  }
+
   const payrollLock = await getPayrollPeriodLockForDate(supabase, values.attendanceDate);
 
   if (payrollLock) {

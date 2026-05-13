@@ -1,5 +1,6 @@
 import type { TableRow } from "@/types/database";
 
+import { formatMoneyInputValue } from "@/lib/currency";
 import type { ServiceFormValues, ServiceListItem } from "@/features/services/types";
 
 type ServiceRow = TableRow<"services">;
@@ -24,7 +25,7 @@ export function mapServiceRowToFormValues(row: ServiceRow): ServiceFormValues {
     name: row.name,
     category: row.category ?? "",
     description: row.description ?? "",
-    laborPrice: String(row.labor_price),
+    laborPrice: formatMoneyInputValue(row.labor_price),
     estimatedDurationMinutes: row.estimated_duration_minutes
       ? String(row.estimated_duration_minutes)
       : "",

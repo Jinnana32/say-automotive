@@ -14,6 +14,7 @@ import type {
   JobOrderItemType,
 } from "@/features/job-orders/types";
 import { addJobOrderItemAction } from "@/features/job-orders/actions/job-order-actions";
+import { formatMoneyInputValue, MONEY_INPUT_STEP } from "@/lib/currency";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 
 export function JobOrderAdditionalItemForm({
@@ -111,7 +112,7 @@ export function JobOrderAdditionalItemForm({
               const selected = options.products.find((product) => product.id === nextProductId);
               setProductId(nextProductId);
               setDescription(selected?.label ?? "");
-              setUnitPrice(selected ? String(selected.unitPrice) : "");
+              setUnitPrice(selected ? formatMoneyInputValue(selected.unitPrice) : "");
             }}
           >
             <option value="">Select product</option>
@@ -136,7 +137,7 @@ export function JobOrderAdditionalItemForm({
               const selected = options.services.find((service) => service.id === nextServiceId);
               setServiceId(nextServiceId);
               setDescription(selected?.label ?? "");
-              setUnitPrice(selected ? String(selected.unitPrice) : "");
+              setUnitPrice(selected ? formatMoneyInputValue(selected.unitPrice) : "");
             }}
           >
             <option value="">Select service</option>
@@ -196,6 +197,8 @@ export function JobOrderAdditionalItemForm({
             id="unitPrice"
             name="unitPrice"
             inputMode="decimal"
+            type="number"
+            step={MONEY_INPUT_STEP}
             value={unitPrice}
             onChange={(event) => setUnitPrice(event.target.value)}
             placeholder="0.00"

@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { upsertCompensationProfileAction } from "@/features/payroll/actions/payroll-actions";
 import type { CompensationProfileFormValues } from "@/features/payroll/types";
 import { INITIAL_PAYROLL_FORM_ACTION_STATE, PAY_BASIS_OPTIONS } from "@/features/payroll/utils";
+import { MONEY_INPUT_STEP } from "@/lib/currency";
 import { useFormValues } from "@/lib/use-form-values";
 
 export function CompensationProfileForm({
@@ -91,6 +92,8 @@ export function CompensationProfileForm({
             id="compensationBaseRate"
             name="baseRate"
             inputMode="decimal"
+            type="number"
+            step={MONEY_INPUT_STEP}
             value={values.baseRate}
             onChange={(event) => updateFormValue("baseRate", event.target.value)}
           />
@@ -103,6 +106,8 @@ export function CompensationProfileForm({
             id="compensationOvertimeRate"
             name="overtimeRate"
             inputMode="decimal"
+            type="number"
+            step={MONEY_INPUT_STEP}
             value={values.overtimeRate}
             onChange={(event) => updateFormValue("overtimeRate", event.target.value)}
             placeholder="Optional"
@@ -116,6 +121,8 @@ export function CompensationProfileForm({
             id="compensationAllowancePerPeriod"
             name="allowancePerPeriod"
             inputMode="decimal"
+            type="number"
+            step={MONEY_INPUT_STEP}
             value={values.allowancePerPeriod}
             onChange={(event) => updateFormValue("allowancePerPeriod", event.target.value)}
           />

@@ -3,7 +3,11 @@ import { ReportHeader } from "@/components/reports/report-header";
 import { ReportSignatureBlock } from "@/components/reports/report-signature-block";
 import { ReportTotals } from "@/components/reports/report-totals";
 import type { InvoicePrintDocument } from "@/features/invoices/types";
-import { formatCurrency } from "@/lib/currency";
+import {
+  formatCurrency,
+  formatPrintCurrency,
+  formatPrintCurrencyNumber,
+} from "@/lib/currency";
 import { formatDocumentDate, formatDateTime } from "@/lib/dates";
 
 export function InvoicePrintLayout({
@@ -58,7 +62,7 @@ export function InvoicePrintLayout({
               label: "Payment State",
               value:
                 invoice.balance > 0
-                  ? `Balance due ${formatCurrency(invoice.balance)}`
+                  ? `Balance due ${formatPrintCurrency(invoice.balance)}`
                   : "Balance cleared",
             },
           ]}
@@ -87,8 +91,8 @@ export function InvoicePrintLayout({
                     <td className="px-2 py-1.5 align-top">{item.description}</td>
                     <td className="px-2 py-1.5 align-top uppercase text-slate-700">{item.itemType}</td>
                     <td className="px-2 py-1.5 text-right align-top">{formatQuantity(item.quantity)}</td>
-                    <td className="px-2 py-1.5 text-right align-top">{formatPesoNumber(item.unitPrice)}</td>
-                    <td className="px-2 py-1.5 text-right align-top">{formatPesoNumber(item.total)}</td>
+                    <td className="px-2 py-1.5 text-right align-top">{formatPrintCurrencyNumber(item.unitPrice)}</td>
+                    <td className="px-2 py-1.5 text-right align-top">{formatPrintCurrencyNumber(item.total)}</td>
                   </tr>
                 ))
               ) : (
@@ -124,7 +128,7 @@ export function InvoicePrintLayout({
                         <td className="px-2 py-1.5 align-top">{formatDocumentDate(payment.paidAt)}</td>
                         <td className="px-2 py-1.5 align-top">{payment.paymentMethod.replaceAll("_", " ")}</td>
                         <td className="px-2 py-1.5 align-top">{payment.referenceNumber || "—"}</td>
-                        <td className="px-2 py-1.5 text-right align-top">{formatPesoNumber(payment.amount)}</td>
+                        <td className="px-2 py-1.5 text-right align-top">{formatPrintCurrencyNumber(payment.amount)}</td>
                       </tr>
                     ))
                   ) : (
@@ -195,13 +199,6 @@ function formatVehicleModel(invoice: InvoicePrintDocument["invoice"]) {
   }
 
   return invoice.vehicleLabel;
-}
-
-function formatPesoNumber(value: number) {
-  return value.toLocaleString("en-PH", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 }
 
 function formatQuantity(value: number) {

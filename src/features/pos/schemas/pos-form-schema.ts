@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isNonNegativeMoneyInput, isPositiveMoneyInput } from "@/lib/currency";
 
 const posSaleItemSchema = z.object({
   productId: z.string().uuid("Product is required."),
@@ -7,8 +8,14 @@ const posSaleItemSchema = z.object({
 
 export const completePosSaleSchema = z.object({
   customerId: z.string().uuid("Customer is invalid.").optional(),
-  discount: z.coerce.number().min(0, "Discount cannot be negative."),
-  paymentAmount: z.coerce.number().positive("Payment amount must be greater than zero."),
+  discount: z
+    .string()
+    .trim()
+    .refine(isNonNegativeMoneyInput, "Discount cannot be negative and must use up to 2 decimal places."),
+  paymentAmount: z
+    .string()
+    .trim()
+    .refine(isPositiveMoneyInput, "Payment amount must be greater than zero with up to 2 decimal places."),
   paymentMethod: z.enum(["cash", "gcash", "card", "bank_transfer", "check"]),
   referenceNumber: z.string().trim().max(100, "Reference number is too long."),
   notes: z.string().trim().max(500, "Notes are too long."),

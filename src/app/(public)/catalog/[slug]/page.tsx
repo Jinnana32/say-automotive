@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import { formatCurrency } from "@/lib/currency";
 import {
   getWebsiteProductBySlug,
   listFeaturedWebsiteProducts,
@@ -66,13 +65,16 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
           <div className="rounded-[20px] bg-[#f8faff] p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#7181a7]">
-              Starting at
+              Availability and fitment
             </p>
             <p className="mt-2 text-3xl font-semibold text-[#1937a6]">
-              {formatCurrency(product.price)}
+              Call or visit the shop
             </p>
             <p className="mt-2 text-sm text-[#5c6a8a]">
               {product.categoryName ?? product.productType} · {product.unitLabel}
+            </p>
+            <p className="mt-2 text-sm text-[#5c6a8a]">
+              The team can confirm stock, compatibility, and current in-store pricing.
             </p>
           </div>
 

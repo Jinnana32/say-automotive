@@ -40,6 +40,11 @@ import {
   createQuotationItem,
   toNumeric,
 } from '@/features/quotations/utils';
+import {
+  formatCurrencyNumber,
+  formatMoneyInputValue,
+  MONEY_INPUT_STEP,
+} from '@/lib/currency';
 import type {
   CustomerFormValues,
   CustomerOption,
@@ -638,7 +643,7 @@ export function QuotationCreateFlow({
                                     productId: '',
                                     serviceId: '',
                                     description: '',
-                                    unitPrice: '0',
+                                    unitPrice: formatMoneyInputValue(0),
                                   })
                                 }
                               >
@@ -664,8 +669,8 @@ export function QuotationCreateFlow({
                                       serviceId: '',
                                       description: selected?.label ?? '',
                                       unitPrice: selected
-                                        ? String(selected.unitPrice)
-                                        : '0',
+                                        ? formatMoneyInputValue(selected.unitPrice)
+                                        : formatMoneyInputValue(0),
                                     });
                                   }}
                                 >
@@ -694,8 +699,8 @@ export function QuotationCreateFlow({
                                       productId: '',
                                       description: selected?.label ?? '',
                                       unitPrice: selected
-                                        ? String(selected.unitPrice)
-                                        : '0',
+                                        ? formatMoneyInputValue(selected.unitPrice)
+                                        : formatMoneyInputValue(0),
                                     });
                                   }}
                                 >
@@ -757,6 +762,8 @@ export function QuotationCreateFlow({
                               <Label>Unit price</Label>
                               <Input
                                 inputMode="decimal"
+                                type="number"
+                                step={MONEY_INPUT_STEP}
                                 value={item.unitPrice}
                                 onChange={(event) =>
                                   updateQuotationItem(setValues, item.key, {
@@ -768,7 +775,7 @@ export function QuotationCreateFlow({
                             <div className="space-y-2">
                               <Label>Line total</Label>
                               <div className="flex h-10 items-center rounded-lg border border-input bg-background px-3 text-sm font-medium">
-                                {lineTotal.toFixed(2)}
+                                {formatCurrencyNumber(lineTotal)}
                               </div>
                             </div>
                           </div>
@@ -808,6 +815,8 @@ export function QuotationCreateFlow({
                     <Input
                       id="discount"
                       inputMode="decimal"
+                      type="number"
+                      step={MONEY_INPUT_STEP}
                       value={values.discount}
                       onChange={(event) =>
                         updateFormValue('discount', event.target.value)
@@ -823,6 +832,8 @@ export function QuotationCreateFlow({
                     <Input
                       id="tax"
                       inputMode="decimal"
+                      type="number"
+                      step={MONEY_INPUT_STEP}
                       value={values.tax}
                       onChange={(event) =>
                         updateFormValue('tax', event.target.value)
@@ -909,11 +920,11 @@ export function QuotationCreateFlow({
                             </p>
                             <p className="text-xs text-muted-foreground">
                               {item.itemType} · qty {item.quantity || '0'} ·
-                              unit {item.unitPrice || '0.00'}
+                              unit {item.unitPrice || formatMoneyInputValue(0)}
                             </p>
                           </div>
                           <p className="text-sm font-semibold text-foreground">
-                            {calculateQuotationLineTotal(item).toFixed(2)}
+                            {formatCurrencyNumber(calculateQuotationLineTotal(item))}
                           </p>
                         </div>
                       ))}
@@ -948,6 +959,8 @@ export function QuotationCreateFlow({
                       <Input
                         id="reviewDiscount"
                         inputMode="decimal"
+                        type="number"
+                        step={MONEY_INPUT_STEP}
                         value={values.discount}
                         onChange={(event) =>
                           updateFormValue('discount', event.target.value)
@@ -963,6 +976,8 @@ export function QuotationCreateFlow({
                       <Input
                         id="reviewTax"
                         inputMode="decimal"
+                        type="number"
+                        step={MONEY_INPUT_STEP}
                         value={values.tax}
                         onChange={(event) =>
                           updateFormValue('tax', event.target.value)
@@ -1076,19 +1091,19 @@ export function QuotationCreateFlow({
                       />
                       <SummaryRow
                         label="Items subtotal"
-                        value={subtotal.toFixed(2)}
+                        value={formatCurrencyNumber(subtotal)}
                       />
                       <SummaryRow
                         label="Discount"
-                        value={toNumeric(values.discount).toFixed(2)}
+                        value={formatCurrencyNumber(toNumeric(values.discount))}
                       />
                       <SummaryRow
                         label="Tax"
-                        value={toNumeric(values.tax).toFixed(2)}
+                        value={formatCurrencyNumber(toNumeric(values.tax))}
                       />
                       <SummaryRow
                         label="Final total"
-                        value={grandTotal.toFixed(2)}
+                        value={formatCurrencyNumber(grandTotal)}
                         emphasized
                       />
                     </div>

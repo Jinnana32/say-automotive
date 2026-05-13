@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import type { ServiceFormValues } from "@/features/services/types";
+import { isNonNegativeMoneyInput } from "@/lib/currency";
 
 export const serviceFormSchema = z.object({
   serviceId: z.string().uuid().optional(),
@@ -10,7 +11,7 @@ export const serviceFormSchema = z.object({
   laborPrice: z
     .string()
     .trim()
-    .refine((value) => !Number.isNaN(Number(value)) && Number(value) >= 0, "Labor price must be zero or greater."),
+    .refine(isNonNegativeMoneyInput, "Labor price must be zero or greater with up to 2 decimal places."),
   estimatedDurationMinutes: z
     .string()
     .trim()

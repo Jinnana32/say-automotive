@@ -10,6 +10,7 @@ import type {
   TopPerformerItem,
   WorkflowFunnelStep,
 } from "@/features/reports/types";
+import { formatCurrencyNumber, roundCurrency } from "@/lib/currency";
 
 const BUSINESS_TIMEZONE = "Asia/Manila";
 
@@ -152,7 +153,7 @@ export function buildPaymentMethodBreakdown<T extends string>(
   for (const row of rows) {
     const current = summary.get(row.paymentMethod) ?? { amount: 0, count: 0 };
     summary.set(row.paymentMethod, {
-      amount: Number((current.amount + row.amount).toFixed(2)),
+      amount: roundCurrency(current.amount + row.amount),
       count: current.count + 1,
     });
   }
@@ -278,7 +279,7 @@ export function buildWorkflowFunnel(params: {
     {
       label: "Invoices with payments",
       count: params.invoicesWithPaymentActivity,
-      helper: `₱${formatPesoNumber(params.paymentsCollected)} collected`,
+      helper: `₱${formatCurrencyNumber(params.paymentsCollected)} collected`,
     },
   ];
 }
@@ -346,15 +347,4 @@ function parseBusinessDate(value: string | undefined) {
 
 function formatDateLabel(value: DateTime) {
   return value.toFormat("LLL dd, yyyy");
-}
-
-function roundCurrency(value: number) {
-  return Number(value.toFixed(2));
-}
-
-function formatPesoNumber(value: number) {
-  return value.toLocaleString("en-PH", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 }

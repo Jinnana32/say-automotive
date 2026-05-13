@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import type { QuotationFormItem, QuotationFormValues } from "@/features/quotations/types";
+import { isNonNegativeMoneyInput } from "@/lib/currency";
 
 const quotationItemSchema = z
   .object({
@@ -16,7 +17,7 @@ const quotationItemSchema = z
     unitPrice: z
       .string()
       .trim()
-      .refine((value) => Number(value) >= 0, "Unit price must be zero or greater."),
+      .refine(isNonNegativeMoneyInput, "Unit price must be zero or greater with up to 2 decimal places."),
   })
   .superRefine((value, ctx) => {
     if (value.itemType === "product" && !value.productId) {
@@ -46,11 +47,11 @@ export const quotationFormSchema = z.object({
   discount: z
     .string()
     .trim()
-    .refine((value) => Number(value) >= 0, "Discount must be zero or greater."),
+    .refine(isNonNegativeMoneyInput, "Discount must be zero or greater with up to 2 decimal places."),
   tax: z
     .string()
     .trim()
-    .refine((value) => Number(value) >= 0, "Tax must be zero or greater."),
+    .refine(isNonNegativeMoneyInput, "Tax must be zero or greater with up to 2 decimal places."),
   items: z.array(quotationItemSchema).min(1, "At least one quotation item is required."),
 });
 

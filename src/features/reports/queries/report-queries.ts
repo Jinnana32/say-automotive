@@ -14,6 +14,7 @@ import {
   getReportRangeBounds,
   resolveReportFilters,
 } from "@/features/reports/utils";
+import { roundCurrency } from "@/lib/currency";
 
 type QuotationRow = Pick<
   TableRow<"quotations">,
@@ -410,11 +411,6 @@ async function getSaleItems(saleIds: string[]) {
 function sumBy<T>(rows: T[], selector: (row: T) => number) {
   return roundCurrency(rows.reduce((sum, row) => sum + selector(row), 0));
 }
-
-function roundCurrency(value: number) {
-  return Number(value.toFixed(2));
-}
-
 function isUnpaidInvoice(
   invoice: InvoiceRow,
 ): invoice is InvoiceRow & { status: "unpaid" | "partially_paid" } {

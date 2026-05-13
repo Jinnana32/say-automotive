@@ -5,6 +5,110 @@ export type AttendanceStatus = Database["public"]["Enums"]["attendance_status"];
 export type AttendanceFilterStatus = AttendanceStatus | "missing_timeout" | "unrecorded";
 export type BranchHolidayKind = "regular" | "special" | "branch_closure" | "other";
 export type StaffLeaveType = "vacation" | "sick" | "emergency" | "unpaid" | "other";
+export type AttendanceLogType = "time_in" | "time_out";
+export type AttendanceLogSource =
+  | "mechanic_portal"
+  | "admin_approved_amendment"
+  | "admin_override";
+export type StaffDeviceStatus = "pending" | "approved" | "revoked";
+export type DtrAmendmentType =
+  | "missed_time_in"
+  | "missed_time_out"
+  | "wrong_time"
+  | "shop_network_issue"
+  | "other";
+export type DtrAmendmentStatus = "pending" | "approved" | "rejected";
+
+export type AttendanceAccessSettings = {
+  requireShopIpForMechanicAttendance: boolean;
+  allowDtrAmendments: boolean;
+  allowAttendanceAdminOverride: boolean;
+};
+
+export type AttendanceAllowedIpSummary = {
+  id: string;
+  branchId: string;
+  ipAddress: string;
+  label: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AttendanceTimeLogSummary = {
+  id: string;
+  staffId: string;
+  attendanceId: string | null;
+  amendmentId: string | null;
+  staffDeviceId: string | null;
+  attendanceDate: string;
+  logType: AttendanceLogType;
+  loggedAt: string;
+  source: AttendanceLogSource;
+  requestIp: string | null;
+  isShopIpValid: boolean;
+  isDeviceApproved: boolean;
+  userAgent: string | null;
+  createdAt: string;
+};
+
+export type StaffDeviceSummary = {
+  id: string;
+  staffId: string;
+  deviceName: string | null;
+  userAgent: string | null;
+  firstSeenAt: string;
+  lastSeenAt: string;
+  lastIp: string | null;
+  status: StaffDeviceStatus;
+  approvedAt: string | null;
+  approvedByStaffId: string | null;
+  revokedAt: string | null;
+  revokedByStaffId: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type DtrAmendmentSummary = {
+  id: string;
+  branchId: string;
+  staffId: string;
+  staffName: string;
+  staffRole: StaffRole;
+  attendanceId: string | null;
+  attendanceDate: string;
+  targetLogType: AttendanceLogType;
+  amendmentType: DtrAmendmentType;
+  requestedTimestamp: string;
+  reason: string;
+  proofUrl: string | null;
+  status: DtrAmendmentStatus;
+  requestedIp: string | null;
+  requestUserAgent: string | null;
+  approvedTimestamp: string | null;
+  approvedByStaffId: string | null;
+  approvedByName: string | null;
+  rejectedAt: string | null;
+  rejectedByStaffId: string | null;
+  rejectedByName: string | null;
+  finalTimestamp: string | null;
+  adminNote: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type MechanicPortalIpStatus = {
+  requestIp: string | null;
+  isShopIpRequired: boolean;
+  isAllowed: boolean;
+  matchedAllowedIp: AttendanceAllowedIpSummary | null;
+};
+
+export type MechanicPortalDeviceStatus = {
+  status: "missing" | "pending" | "approved" | "revoked" | "registered_to_other_staff";
+  hasDeviceToken: boolean;
+  isApproved: boolean;
+  currentDevice: StaffDeviceSummary | null;
+};
 
 export type BranchHolidaySummary = {
   id: string;
@@ -155,6 +259,11 @@ export type StaffLeaveManagementItem = StaffLeaveEntrySummary & {
 
 export type TimekeepingCalendarPageData = {
   branchName: string;
+  attendanceAccessSettings: AttendanceAccessSettings;
+  allowedIpAddresses: AttendanceAllowedIpSummary[];
+  currentDetectedIp: string | null;
+  pendingAmendmentCount: number;
+  pendingDeviceCount: number;
   holidays: BranchHolidaySummary[];
   leaveEntries: StaffLeaveManagementItem[];
   activeStaff: TimekeepingCalendarStaffOption[];
@@ -167,3 +276,63 @@ export type AttendanceEntryActionState = {
 };
 
 export type TimekeepingActionState = AttendanceEntryActionState;
+
+export type AttendanceAccessSettingsFormValues = AttendanceAccessSettings;
+
+export type AttendanceAllowedIpFormValues = {
+  ipAddress: string;
+  label: string;
+};
+
+export type DtrAmendmentFormValues = {
+  attendanceDate: string;
+  targetLogType: AttendanceLogType;
+  amendmentType: DtrAmendmentType;
+  requestedTime: string;
+  reason: string;
+};
+
+export type DtrAmendmentReviewFormValues = {
+  amendmentId: string;
+  decision: "approved" | "rejected";
+  finalTime: string;
+  adminNote: string;
+};
+
+export type MechanicPortalAttendancePageData = {
+  staffId: string;
+  displayName: string;
+  todayDate: string;
+  settings: AttendanceAccessSettings;
+  ipStatus: MechanicPortalIpStatus;
+  deviceStatus: MechanicPortalDeviceStatus;
+  attendance: AttendanceRecordSummary | null;
+  todayAmendments: DtrAmendmentSummary[];
+  recentAmendments: DtrAmendmentSummary[];
+};
+
+export type MechanicPortalAmendmentsPageData = {
+  displayName: string;
+  todayDate: string;
+  settings: AttendanceAccessSettings;
+  deviceStatus: MechanicPortalDeviceStatus;
+  amendments: DtrAmendmentSummary[];
+};
+
+export type AttendanceAmendmentsPageData = {
+  pendingCount: number;
+  totalCount: number;
+  amendments: DtrAmendmentSummary[];
+};
+
+export type AttendanceStaffDeviceManagementItem = StaffDeviceSummary & {
+  staffName: string;
+  staffRole: StaffRole;
+};
+
+export type AttendanceDevicesPageData = {
+  pendingCount: number;
+  approvedCount: number;
+  revokedCount: number;
+  devices: AttendanceStaffDeviceManagementItem[];
+};

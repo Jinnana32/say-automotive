@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import type { ProductFormValues } from "@/features/products/types";
+import { isNonNegativeMoneyInput } from "@/lib/currency";
 
 export const productFormSchema = z.object({
   productId: z.string().uuid().optional(),
@@ -18,11 +19,11 @@ export const productFormSchema = z.object({
   costPrice: z
     .string()
     .trim()
-    .refine((value) => !Number.isNaN(Number(value)) && Number(value) >= 0, "Cost price must be zero or greater."),
+    .refine(isNonNegativeMoneyInput, "Cost price must be zero or greater with up to 2 decimal places."),
   sellingPrice: z
     .string()
     .trim()
-    .refine((value) => !Number.isNaN(Number(value)) && Number(value) >= 0, "Selling price must be zero or greater."),
+    .refine(isNonNegativeMoneyInput, "Selling price must be zero or greater with up to 2 decimal places."),
   reorderLevel: z
     .string()
     .trim()
