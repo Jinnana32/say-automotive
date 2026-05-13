@@ -79,7 +79,8 @@ export function TimekeepingCalendarPageContent({
               Approved shop IPs
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              Attendance punches are treated as on-site only when the current public IP matches one of these branch addresses.
+              Attendance punches are treated as on-site only when the current public internet IP
+              matches one of these branch addresses.
             </p>
           </CardHeader>
           <CardContent className="space-y-5">
@@ -92,7 +93,8 @@ export function TimekeepingCalendarPageContent({
                   {data.currentDetectedIp ?? "Unable to detect"}
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Use this to register the current branch connection after confirming you are on-site.
+                  Use this to register the current branch connection after confirming you are
+                  on-site. Do not use a local Wi-Fi address like 192.168.x.x here.
                 </p>
               </div>
               <div className="rounded-2xl border border-border/70 bg-muted/20 px-4 py-3">

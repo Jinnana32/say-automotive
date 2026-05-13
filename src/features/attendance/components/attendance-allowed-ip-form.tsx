@@ -50,6 +50,10 @@ export function AttendanceAllowedIpForm({
             placeholder="203.0.113.10"
             autoComplete="off"
           />
+          <p className="text-xs text-muted-foreground">
+            Register the public internet IP seen by the server, not the phone&apos;s local Wi-Fi
+            address like <span className="font-medium">192.168.1.9</span>.
+          </p>
           <FieldError errors={state.fieldErrors} name="ipAddress" />
         </div>
 
@@ -72,7 +76,7 @@ export function AttendanceAllowedIpForm({
               variant="outline"
               onClick={() => updateFormValue("ipAddress", currentDetectedIp)}
             >
-              Use current IP
+              Use detected public IP
             </Button>
           ) : null}
           <SubmitButton pendingLabel="Adding...">Add IP</SubmitButton>

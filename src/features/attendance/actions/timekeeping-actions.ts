@@ -6,7 +6,7 @@ import { writeAuditLog } from "@/lib/audit";
 import { getDefaultBranch } from "@/lib/branches";
 import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
 import { toFormActionState } from "@/lib/forms";
-import { normalizeIpAddress } from "@/lib/network/request-ip";
+import { isPublicIpAddress, normalizeIpAddress } from "@/lib/network/request-ip";
 import {
   attendanceAccessSettingsSchema,
   attendanceAllowedIpSchema,
@@ -468,6 +468,14 @@ export async function addAttendanceAllowedIpAction(
     return {
       status: "error",
       message: "Enter a valid public IP address.",
+    };
+  }
+
+  if (!isPublicIpAddress(normalizedIp)) {
+    return {
+      status: "error",
+      message:
+        "Enter the shop's public internet IP address. Local Wi-Fi IPs like 192.168.x.x will not work for attendance validation.",
     };
   }
 

@@ -1,6 +1,6 @@
 import { getDefaultBranch } from "@/lib/branches";
 import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
-import { getServerRequestNetworkContext } from "@/lib/network/request-ip";
+import { getServerRequestNetworkContext, normalizePublicIpAddress } from "@/lib/network/request-ip";
 import type {
   AttendanceAccessSettings,
   AttendanceAllowedIpSummary,
@@ -145,7 +145,7 @@ export async function getTimekeepingCalendarPageData(): Promise<TimekeepingCalen
     allowedIpAddresses: ((allowedIpData ?? []) as AttendanceAllowedIpRow[]).map(
       mapAllowedAttendanceIp,
     ),
-    currentDetectedIp: requestIp,
+    currentDetectedIp: normalizePublicIpAddress(requestIp),
     pendingAmendmentCount: pendingAmendmentCount ?? 0,
     pendingDeviceCount,
     holidays: ((holidayData ?? []) as BranchHolidayRow[]).map(mapBranchHoliday),

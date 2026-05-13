@@ -19,7 +19,7 @@ describe("attendance settings schemas", () => {
   it("validates allowed public IP entries", () => {
     expect(
       attendanceAllowedIpSchema.safeParse({
-        ipAddress: "203.0.113.10",
+        ipAddress: "124.217.16.204",
         label: "Main line",
       }).success,
     ).toBe(true);
@@ -28,6 +28,13 @@ describe("attendance settings schemas", () => {
       attendanceAllowedIpSchema.safeParse({
         ipAddress: "shop-network",
         label: "",
+      }).success,
+    ).toBe(false);
+
+    expect(
+      attendanceAllowedIpSchema.safeParse({
+        ipAddress: "192.168.1.9",
+        label: "Phone wifi address",
       }).success,
     ).toBe(false);
   });

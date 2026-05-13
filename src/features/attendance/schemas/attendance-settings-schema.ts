@@ -4,7 +4,7 @@ import type {
   AttendanceAccessSettingsFormValues,
   AttendanceAllowedIpFormValues,
 } from "@/features/attendance/types";
-import { isValidIpAddress } from "@/lib/network/request-ip";
+import { isPublicIpAddress } from "@/lib/network/request-ip";
 
 export const attendanceAccessSettingsSchema = z.object({
   requireShopIpForMechanicAttendance: z.boolean(),
@@ -16,7 +16,10 @@ export const attendanceAllowedIpSchema = z.object({
   ipAddress: z
     .string()
     .trim()
-    .refine((value) => isValidIpAddress(value), "Enter a valid public IP address."),
+    .refine(
+      (value) => isPublicIpAddress(value),
+      "Enter the shop's public internet IP address, not a local Wi-Fi IP like 192.168.x.x.",
+    ),
   label: z.string().trim().max(120, "Label is too long."),
 });
 
