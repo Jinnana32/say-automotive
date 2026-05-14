@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 const PORTAL_NAV_ITEMS = [
   { href: "/portal/attendance", label: "Attendance" },
   { href: "/portal/amendments", label: "Amendments" },
+  { href: "/portal/profile", label: "Profile" },
 ] as const;
 
 export function MechanicPortalMenu() {
@@ -17,12 +18,12 @@ export function MechanicPortalMenu() {
 
   return (
     <details className="group relative">
-      <summary className="flex size-11 list-none cursor-pointer items-center justify-center rounded-2xl border border-border/70 bg-background text-foreground shadow-sm [&::-webkit-details-marker]:hidden">
+      <summary className="flex size-10 list-none cursor-pointer items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 shadow-sm [&::-webkit-details-marker]:hidden">
         <Menu className="size-5" />
         <span className="sr-only">Open portal menu</span>
       </summary>
 
-      <div className="absolute right-0 top-full z-30 mt-2 w-56 overflow-hidden rounded-2xl border border-border/70 bg-background p-2 shadow-xl">
+      <div className="absolute right-0 top-full z-30 mt-2 w-56 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
         <div className="space-y-1">
           {PORTAL_NAV_ITEMS.map((item) => (
             <Link
@@ -31,8 +32,8 @@ export function MechanicPortalMenu() {
               className={cn(
                 "flex rounded-xl px-3 py-2 text-sm transition",
                 pathname === item.href
-                  ? "bg-primary text-primary-foreground"
-                  : "text-foreground hover:bg-muted",
+                  ? "bg-[#081735] text-white"
+                  : "text-slate-700 hover:bg-slate-100",
               )}
               onClick={(event) => closeMenu(event.currentTarget)}
             >
@@ -42,7 +43,7 @@ export function MechanicPortalMenu() {
           <form action={signOutAction}>
             <button
               type="submit"
-              className="flex w-full rounded-xl px-3 py-2 text-left text-sm text-foreground transition hover:bg-muted"
+              className="flex w-full rounded-xl px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-100"
               onClick={(event) => closeMenu(event.currentTarget)}
             >
               Sign out

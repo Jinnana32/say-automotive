@@ -3,7 +3,19 @@
 import { useEffect, useState } from "react";
 import { DateTime } from "luxon";
 
-export function MechanicPortalClock() {
+import { cn } from "@/lib/utils";
+
+export function MechanicPortalClock({
+  className,
+  timeClassName,
+  dateClassName,
+  timeFormat = "hh:mm:ss a",
+}: {
+  className?: string;
+  timeClassName?: string;
+  dateClassName?: string;
+  timeFormat?: string;
+}) {
   const [now, setNow] = useState(() => DateTime.now().setZone("Asia/Manila"));
 
   useEffect(() => {
@@ -15,11 +27,13 @@ export function MechanicPortalClock() {
   }, []);
 
   return (
-    <div>
-      <p className="text-3xl font-semibold tracking-tight text-foreground">
-        {now.toFormat("hh:mm:ss a")}
+    <div className={className}>
+      <p className={cn("text-3xl font-semibold tracking-tight text-foreground", timeClassName)}>
+        {now.toFormat(timeFormat)}
       </p>
-      <p className="text-sm text-muted-foreground">{now.toFormat("cccc, LLL dd, yyyy")}</p>
+      <p className={cn("text-sm text-muted-foreground", dateClassName)}>
+        {now.toFormat("cccc, LLL dd, yyyy")}
+      </p>
     </div>
   );
 }

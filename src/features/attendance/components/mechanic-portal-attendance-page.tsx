@@ -2,21 +2,18 @@
 
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { CircleAlert, ShieldCheck, Smartphone, TimerReset } from "lucide-react";
 
 import { FormStatusMessage } from "@/components/shared/form-status";
 import { ModalDialog } from "@/components/shared/modal-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { SubmitButton } from "@/components/shared/submit-button";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { recordMechanicAttendanceLogAction } from "@/features/attendance/actions/mechanic-portal-actions";
 import { DtrAmendmentForm } from "@/features/attendance/components/dtr-amendment-form";
-import {
-  formatMechanicDeviceStatusMessage,
-  formatStaffDeviceStatusLabel,
-  getStaffDeviceStatusTone,
-  summarizeCurrentDevice,
-} from "@/features/attendance/device-utils";
+import { summarizeCurrentDevice } from "@/features/attendance/device-utils";
+import { MechanicPortalSectionIntro } from "@/features/attendance/components/mechanic-portal-section-intro";
+import { MechanicPortalSlideAction } from "@/features/attendance/components/mechanic-portal-slide-action";
+import { MechanicPortalVerificationCard } from "@/features/attendance/components/mechanic-portal-verification-card";
 import { MechanicPortalClock } from "@/features/attendance/components/mechanic-portal-clock";
 import type { MechanicPortalAttendancePageData } from "@/features/attendance/types";
 import {
@@ -55,188 +52,164 @@ export function MechanicPortalAttendancePage({
     router.refresh();
   }, [router, state.status]);
 
+  const statusLabel = getMechanicAttendancePillLabel(data.attendance, data.todayAmendments);
+  const statusTone = getMechanicAttendancePillTone(data.attendance, data.todayAmendments);
+  const latestAction = getMechanicLatestActionSummary(data.attendance, data.todayAmendments);
+  const networkSubtitle = getMechanicNetworkSummary(data);
+  const deviceSubtitle = summarizeCurrentDevice(data.deviceStatus.currentDevice);
+  const actionLabel = getMechanicPortalPrimaryActionLabel(data.attendance);
+
   return (
-    <div className="space-y-5">
-      <div className="space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-          Mechanic portal
-        </p>
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-          Attendance
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Record your on-site time in and time out using the approved shop network.
-        </p>
+    <div className="space-y-4">
+      <MechanicPortalSectionIntro
+        eyebrow="Today"
+        title="Attendance"
+        description="Clock in and out using the approved shop network."
+      />
+
+      <section className="rounded-[1.9rem] border border-slate-200/80 bg-white px-5 py-5 shadow-[0_24px_60px_rgba(8,23,53,0.06)]">
+        <div className="flex items-start justify-between gap-4">
+          <MechanicPortalClock
+            timeFormat="hh:mm a"
+            timeClassName="text-[2.1rem] font-semibold leading-none tracking-[-0.04em] text-slate-950"
+            dateClassName="mt-2 text-sm text-slate-500"
+          />
+          <StatusBadge tone={statusTone}>{statusLabel}</StatusBadge>
+        </div>
+
+        <div className="mt-5 rounded-[1.35rem] border border-slate-200 bg-slate-50/75 px-4 py-3.5">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+            <TimerReset className="size-4 text-[#D62828]" />
+            Latest activity
+          </div>
+          <p className="mt-2 text-sm font-medium text-slate-900">{latestAction}</p>
+        </div>
+
+        <div className="mt-5 grid grid-cols-2 gap-3">
+          <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50/65 px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+              Time in
+            </p>
+            <p className="mt-2 text-base font-semibold text-slate-950">
+              {formatAttendanceTime(data.attendance?.timeIn)}
+            </p>
+          </div>
+          <div className="rounded-[1.25rem] border border-slate-200 bg-slate-50/65 px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+              Time out
+            </p>
+            <p className="mt-2 text-base font-semibold text-slate-950">
+              {formatAttendanceTime(data.attendance?.timeOut)}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div className="space-y-3">
+        <MechanicPortalVerificationCard
+          icon={
+            data.ipStatus.isAllowed ? (
+              <ShieldCheck className="size-5" />
+            ) : (
+              <CircleAlert className="size-5" />
+            )
+          }
+          title={
+            data.ipStatus.isAllowed ? "Shop network verified" : "Approved shop network required"
+          }
+          subtitle={networkSubtitle}
+          tone={data.ipStatus.isAllowed ? "success" : "warning"}
+        />
+        <MechanicPortalVerificationCard
+          icon={
+            data.deviceStatus.isApproved ? (
+              <Smartphone className="size-5" />
+            ) : (
+              <CircleAlert className="size-5" />
+            )
+          }
+          title={
+            data.deviceStatus.isApproved ? "Approved device" : "Attendance device review required"
+          }
+          subtitle={deviceSubtitle}
+          tone={data.deviceStatus.isApproved ? "success" : "warning"}
+        />
       </div>
 
-      <Card className="border-border/70 shadow-sm">
-        <CardContent className="space-y-5 p-5">
-          <MechanicPortalClock />
+      <section className="space-y-3 rounded-[1.9rem] border border-slate-200/80 bg-white px-4 py-4 shadow-[0_18px_45px_rgba(8,23,53,0.05)]">
+        <form action={formAction} className="space-y-3">
+          {nextLogType ? <input type="hidden" name="logType" value={nextLogType} /> : null}
 
-          <div className="rounded-2xl border border-border/70 bg-muted/20 px-4 py-4">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                  Today&apos;s status
-                </p>
-                <p className="text-lg font-semibold text-foreground">
-                  {formatMechanicAttendanceState(data.attendance, data.todayAmendments)}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {data.attendance?.approvedAt ? (
-                  <StatusBadge tone="success">Approved</StatusBadge>
-                ) : null}
-                {data.todayAmendments
-                  .filter((item) => item.status === "pending")
-                  .map((item) => (
-                    <StatusBadge key={item.id} tone="warning">
-                      Pending amendment
-                    </StatusBadge>
-                  ))}
-              </div>
-            </div>
+          <MechanicPortalSlideAction pendingLabel="Saving..." disabled={!canPunch}>
+            {nextLogType ? `Slide to ${actionLabel.toLowerCase()}` : actionLabel}
+          </MechanicPortalSlideAction>
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                  Time in
-                </p>
-                <p className="mt-1 text-base font-medium text-foreground">
-                  {formatAttendanceTime(data.attendance?.timeIn)}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                  Time out
-                </p>
-                <p className="mt-1 text-base font-medium text-foreground">
-                  {formatAttendanceTime(data.attendance?.timeOut)}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className={`rounded-2xl border px-4 py-4 text-sm ${
-              data.ipStatus.isAllowed
-                ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-                : "border-amber-200 bg-amber-50 text-amber-900"
-            }`}
-          >
-            <p className="font-medium">
-              {formatMechanicIpStatusMessage(data.ipStatus, data.settings)}
+          {!data.ipStatus.isAllowed || !data.deviceStatus.isApproved ? (
+            <p className="px-1 text-sm leading-6 text-slate-500">
+              Time-in and time-out stay blocked until both the approved shop network and an approved attendance device are present.
             </p>
-            <p className="mt-2 text-xs uppercase tracking-[0.2em] text-current/80">
-              Detected IP: {data.ipStatus.requestIp ?? "Unavailable"}
-            </p>
-          </div>
+          ) : null}
 
-          <div
-            className={`rounded-2xl border px-4 py-4 text-sm ${
-              data.deviceStatus.isApproved
-                ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-                : "border-amber-200 bg-amber-50 text-amber-900"
-            }`}
-          >
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="font-medium">
-                  {formatMechanicDeviceStatusMessage(data.deviceStatus)}
-                </p>
-                <p className="mt-2 text-xs uppercase tracking-[0.2em] text-current/80">
-                  Current device: {summarizeCurrentDevice(data.deviceStatus.currentDevice)}
-                </p>
-              </div>
-              <StatusBadge
-                tone={getStaffDeviceStatusTone(
-                  data.deviceStatus.currentDevice?.status ?? "pending",
-                )}
+          <FormStatusMessage message={state.status === "error" ? state.message : undefined} />
+        </form>
+
+        {data.settings.allowDtrAmendments ? (
+          <ModalDialog
+            title="File DTR amendment"
+            description="Use this if you missed a punch or were blocked by the wrong network."
+            trigger={({ openDialog }) => (
+              <Button
+                type="button"
+                variant="outline"
+                className="h-12 w-full rounded-[1.2rem] border-[#0B1F4D]/20 text-sm font-semibold text-[#0B1F4D] hover:bg-[#EAF1FB]"
+                onClick={openDialog}
               >
-                {data.deviceStatus.currentDevice
-                  ? formatStaffDeviceStatusLabel(data.deviceStatus.currentDevice.status)
-                  : data.deviceStatus.status === "registered_to_other_staff"
-                    ? "Bound elsewhere"
-                    : "Pending setup"}
-              </StatusBadge>
-            </div>
-          </div>
-
-          <form action={formAction} className="space-y-3">
-            {nextLogType ? <input type="hidden" name="logType" value={nextLogType} /> : null}
-
-            <SubmitButton
-              pendingLabel="Saving..."
-              disabled={!canPunch}
-              className="h-14 w-full text-base"
-            >
-              {getMechanicPortalPrimaryActionLabel(data.attendance)}
-            </SubmitButton>
-
-            {!data.ipStatus.isAllowed || !data.deviceStatus.isApproved ? (
-              <p className="text-center text-sm text-muted-foreground">
-                Time in and time out stay blocked until both the approved shop network and an approved attendance device are present.
-              </p>
-            ) : null}
-
-            <FormStatusMessage message={state.status === "error" ? state.message : undefined} />
-          </form>
-
-          {data.settings.allowDtrAmendments ? (
-            <ModalDialog
-              title="File DTR amendment"
-              description="Use this if you missed a punch or were blocked by the wrong network."
-              trigger={({ openDialog }) => (
-                <Button type="button" variant="outline" className="w-full" onClick={openDialog}>
-                  File DTR amendment
-                </Button>
-              )}
-            >
-              {({ closeDialog }) => (
-                <DtrAmendmentForm
-                  initialValues={buildDtrAmendmentFormValues(
-                    data.todayDate,
-                    nextLogType ?? "time_in",
-                  )}
-                  closeDialog={closeDialog}
-                />
-              )}
-            </ModalDialog>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              DTR amendments are currently disabled for this branch.
-            </p>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card className="border-border/70 shadow-sm">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-base font-semibold text-foreground">
-            Recent amendments
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Pending and recently reviewed attendance requests for your account.
+                File DTR amendment
+              </Button>
+            )}
+          >
+            {({ closeDialog }) => (
+              <DtrAmendmentForm
+                initialValues={buildDtrAmendmentFormValues(
+                  data.todayDate,
+                  nextLogType ?? "time_in",
+                )}
+                closeDialog={closeDialog}
+              />
+            )}
+          </ModalDialog>
+        ) : (
+          <p className="px-1 text-sm text-slate-500">
+            DTR amendments are currently disabled for this branch.
           </p>
-        </CardHeader>
-        <CardContent>
+        )}
+      </section>
+
+      <section className="rounded-[1.9rem] border border-slate-200/80 bg-white px-5 py-5 shadow-[0_18px_45px_rgba(8,23,53,0.05)]">
+        <div className="space-y-1">
+          <h2 className="text-base font-semibold text-slate-950">Recent amendments</h2>
+          <p className="text-sm text-slate-500">
+            Pending and recently reviewed attendance requests.
+          </p>
+        </div>
+
+        <div className="mt-4">
           {data.recentAmendments.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No DTR amendments yet.
-            </p>
+            <p className="text-sm text-slate-500">No DTR amendments yet.</p>
           ) : (
             <div className="space-y-3">
               {data.recentAmendments.map((amendment) => (
                 <div
                   key={amendment.id}
-                  className="rounded-2xl border border-border/70 bg-muted/15 px-4 py-4"
+                  className="rounded-[1.35rem] border border-slate-200 bg-slate-50/70 px-4 py-4"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="space-y-1">
-                      <p className="text-sm font-semibold text-foreground">
-                        {formatDate(amendment.attendanceDate)} · {formatDtrAmendmentTypeLabel(amendment.amendmentType)}
+                      <p className="text-sm font-semibold text-slate-950">
+                        {formatDate(amendment.attendanceDate)} ·{" "}
+                        {formatDtrAmendmentTypeLabel(amendment.amendmentType)}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-slate-500">
                         Requested for {formatDateTime(amendment.requestedTimestamp)}
                       </p>
                     </div>
@@ -244,9 +217,9 @@ export function MechanicPortalAttendancePage({
                       {formatDtrAmendmentStatusLabel(amendment.status)}
                     </StatusBadge>
                   </div>
-                  <p className="mt-3 text-sm text-foreground">{amendment.reason}</p>
+                  <p className="mt-3 text-sm text-slate-900">{amendment.reason}</p>
                   {amendment.adminNote?.trim() ? (
-                    <p className="mt-2 text-sm text-muted-foreground">
+                    <p className="mt-2 text-sm text-slate-500">
                       Admin note: {amendment.adminNote}
                     </p>
                   ) : null}
@@ -254,8 +227,86 @@ export function MechanicPortalAttendancePage({
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </div>
   );
+}
+
+function getMechanicAttendancePillLabel(
+  attendance: MechanicPortalAttendancePageData["attendance"],
+  amendments: MechanicPortalAttendancePageData["todayAmendments"],
+) {
+  const pendingAmendment = amendments.find((item) => item.status === "pending");
+
+  if (pendingAmendment) {
+    return "PENDING";
+  }
+
+  if (!attendance?.timeIn) {
+    return "READY";
+  }
+
+  if (attendance.timeIn && !attendance.timeOut) {
+    return "TIMED IN";
+  }
+
+  return "TIMED OUT";
+}
+
+function getMechanicAttendancePillTone(
+  attendance: MechanicPortalAttendancePageData["attendance"],
+  amendments: MechanicPortalAttendancePageData["todayAmendments"],
+) {
+  if (amendments.some((item) => item.status === "pending")) {
+    return "warning";
+  }
+
+  if (!attendance?.timeIn) {
+    return "neutral";
+  }
+
+  return attendance.timeOut ? "info" : "success";
+}
+
+function getMechanicLatestActionSummary(
+  attendance: MechanicPortalAttendancePageData["attendance"],
+  amendments: MechanicPortalAttendancePageData["todayAmendments"],
+) {
+  if (amendments.some((item) => item.status === "pending")) {
+    return "A DTR amendment is waiting for review.";
+  }
+
+  const summary = formatMechanicAttendanceState(attendance, amendments);
+
+  if (summary === "Not timed in") {
+    return "Waiting for your first punch today.";
+  }
+
+  return summary;
+}
+
+function getMechanicNetworkSummary(data: MechanicPortalAttendancePageData) {
+  if (data.ipStatus.isAllowed) {
+    const label = data.ipStatus.matchedAllowedIp?.label?.trim();
+    const ip = data.ipStatus.requestIp;
+
+    if (label && ip) {
+      return `${label} • IP ${ip}`;
+    }
+
+    if (label) {
+      return label;
+    }
+
+    if (ip) {
+      return `Approved network • IP ${ip}`;
+    }
+
+    return "Approved shop network";
+  }
+
+  return data.ipStatus.requestIp
+    ? `Current IP ${data.ipStatus.requestIp}`
+    : formatMechanicIpStatusMessage(data.ipStatus, data.settings);
 }
