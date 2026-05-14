@@ -1,16 +1,17 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Menu } from 'lucide-react';
 
-import { signOutAction } from "@/features/auth/actions/auth-actions";
-import { cn } from "@/lib/utils";
+import { signOutAction } from '@/features/auth/actions/auth-actions';
+import { cn } from '@/lib/utils';
 
 const PORTAL_NAV_ITEMS = [
-  { href: "/portal/attendance", label: "Attendance" },
-  { href: "/portal/amendments", label: "Amendments" },
-  { href: "/portal/profile", label: "Profile" },
+  { href: '/portal/attendance', label: 'Attendance' },
+  { href: '/portal/history', label: 'Calendar' },
+  { href: '/portal/amendments', label: 'Amendments' },
+  { href: '/portal/profile', label: 'Profile' },
 ] as const;
 
 export function MechanicPortalMenu() {
@@ -30,10 +31,10 @@ export function MechanicPortalMenu() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex rounded-xl px-3 py-2 text-sm transition",
+                'flex rounded-xl px-3 py-2 text-sm transition',
                 pathname === item.href
-                  ? "bg-[#081735] text-white"
-                  : "text-slate-700 hover:bg-slate-100",
+                  ? 'bg-[#081735] text-white'
+                  : 'text-slate-700 hover:bg-slate-100',
               )}
               onClick={(event) => closeMenu(event.currentTarget)}
             >
@@ -56,7 +57,7 @@ export function MechanicPortalMenu() {
 }
 
 function closeMenu(target: HTMLElement) {
-  const details = target.closest("details");
+  const details = target.closest('details');
 
   if (details instanceof HTMLDetailsElement) {
     details.open = false;

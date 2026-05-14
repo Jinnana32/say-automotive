@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { DateTime } from "luxon";
 
 import { getAuthorizedSupabaseServerClient, requireAuthenticatedStaff } from "@/lib/auth/session";
 import { getDefaultBranch } from "@/lib/branches";
@@ -15,12 +16,20 @@ import type {
   AttendanceAmendmentsPageData,
   AttendanceDevicesPageData,
   AttendanceStaffDeviceManagementItem,
+  AttendanceTimeLogSummary,
+  BranchHolidaySummary,
   DtrAmendmentSummary,
   MechanicPortalAmendmentsPageData,
   MechanicPortalAttendancePageData,
   MechanicPortalDeviceStatus,
+  MechanicPortalHistoryCalendarStatus,
+  MechanicPortalHistoryDay,
+  MechanicPortalHistoryPageData,
   MechanicPortalIpStatus,
+  StaffLeaveEntrySummary,
+  StaffScheduleSummary,
 } from "@/features/attendance/types";
+import { doesLeaveCoverDate, isScheduledWorkdayForDate } from "@/features/attendance/utils";
 import type { TableRow } from "@/types/database";
 
 type BusinessSettingsRow = Pick<
@@ -32,8 +41,12 @@ type BusinessSettingsRow = Pick<
 type AttendanceAllowedIpRow = TableRow<"attendance_allowed_ips">;
 type DtrAmendmentRow = TableRow<"dtr_amendment_requests">;
 type AttendanceRow = TableRow<"attendance">;
+type AttendanceTimeLogRow = TableRow<"attendance_time_logs">;
 type StaffNameRow = Pick<TableRow<"staff">, "id" | "first_name" | "last_name" | "role">;
 type StaffDeviceRow = TableRow<"staff_devices">;
+type StaffScheduleRow = TableRow<"staff_schedules">;
+type BranchHolidayRow = TableRow<"branch_holidays">;
+type StaffLeaveEntryRow = TableRow<"staff_leave_entries">;
 
 export async function getMechanicPortalAttendancePageData(): Promise<MechanicPortalAttendancePageData> {
   const context = await requireMechanicPortalContext();
@@ -99,6 +112,180 @@ export async function getMechanicPortalAmendmentsPageData(): Promise<MechanicPor
     settings: accessContext.settings,
     deviceStatus: accessContext.deviceStatus,
     amendments,
+  };
+}
+
+export async function getMechanicPortalHistoryPageData(
+  requestedMonth?: string,
+): Promise<MechanicPortalHistoryPageData> {
+  const context = await requireMechanicPortalContext();
+  const admin = getSupabaseAdminClient();
+  const accessContext = await getAttendanceAccessContext({
+    admin,
+    branchId: context.branchId,
+    staffId: context.staffId,
+    userId: context.userId,
+  });
+  const targetMonth = resolvePortalHistoryMonth(requestedMonth);
+  const monthStartDate = targetMonth.startOf("month").toFormat("yyyy-LL-dd");
+  const monthEndDate = targetMonth.endOf("month").toFormat("yyyy-LL-dd");
+  const todayDate = getBusinessNow().toFormat("yyyy-LL-dd");
+
+  const [
+    { data: attendanceData, error: attendanceError },
+    { data: timeLogData, error: timeLogError },
+    { data: scheduleData, error: scheduleError },
+    { data: holidayData, error: holidayError },
+    { data: leaveData, error: leaveError },
+    amendments,
+  ] = await Promise.all([
+    admin
+      .from("attendance")
+      .select("*")
+      .eq("staff_id", context.staffId)
+      .gte("attendance_date", monthStartDate)
+      .lte("attendance_date", monthEndDate)
+      .order("attendance_date", { ascending: true }),
+    admin
+      .from("attendance_time_logs")
+      .select("*")
+      .eq("staff_id", context.staffId)
+      .gte("attendance_date", monthStartDate)
+      .lte("attendance_date", monthEndDate)
+      .order("logged_at", { ascending: true }),
+    admin
+      .from("staff_schedules")
+      .select("*")
+      .eq("staff_id", context.staffId)
+      .maybeSingle(),
+    admin
+      .from("branch_holidays")
+      .select("*")
+      .eq("branch_id", accessContext.branchId)
+      .gte("holiday_date", monthStartDate)
+      .lte("holiday_date", monthEndDate)
+      .order("holiday_date", { ascending: true }),
+    admin
+      .from("staff_leave_entries")
+      .select("*")
+      .eq("branch_id", accessContext.branchId)
+      .eq("staff_id", context.staffId)
+      .lte("start_date", monthEndDate)
+      .gte("end_date", monthStartDate)
+      .order("start_date", { ascending: true }),
+    getMappedAmendments({
+      admin,
+      branchId: accessContext.branchId,
+      staffId: context.staffId,
+      startDate: monthStartDate,
+      endDate: monthEndDate,
+    }),
+  ]);
+
+  if (attendanceError) {
+    throw new Error(attendanceError.message);
+  }
+
+  if (timeLogError) {
+    throw new Error(timeLogError.message);
+  }
+
+  if (scheduleError) {
+    throw new Error(scheduleError.message);
+  }
+
+  if (holidayError) {
+    throw new Error(holidayError.message);
+  }
+
+  if (leaveError) {
+    throw new Error(leaveError.message);
+  }
+
+  const attendanceByDate = new Map(
+    ((attendanceData ?? []) as AttendanceRow[]).map((row) => [row.attendance_date, mapAttendanceRecord(row)]),
+  );
+  const timeLogsByDate = new Map<string, AttendanceTimeLogSummary[]>();
+
+  for (const row of (timeLogData ?? []) as AttendanceTimeLogRow[]) {
+    const mapped = mapAttendanceTimeLog(row);
+    const existing = timeLogsByDate.get(mapped.attendanceDate) ?? [];
+    existing.push(mapped);
+    timeLogsByDate.set(mapped.attendanceDate, existing);
+  }
+
+  const amendmentsByDate = new Map<string, DtrAmendmentSummary[]>();
+
+  for (const amendment of amendments) {
+    const existing = amendmentsByDate.get(amendment.attendanceDate) ?? [];
+    existing.push(amendment);
+    amendmentsByDate.set(amendment.attendanceDate, existing);
+  }
+
+  const schedule = scheduleData ? mapStaffSchedule(scheduleData as StaffScheduleRow) : null;
+  const branchHolidays = ((holidayData ?? []) as BranchHolidayRow[]).map((row) =>
+    mapBranchHoliday(row),
+  );
+  const holidayDateSet = new Set(branchHolidays.map((item) => item.holidayDate));
+  const leaveEntries = ((leaveData ?? []) as StaffLeaveEntryRow[]).map((row) =>
+    mapStaffLeaveEntry(row),
+  );
+
+  const days: MechanicPortalHistoryDay[] = [];
+  let cursor = targetMonth.startOf("month");
+  const monthEnd = targetMonth.endOf("month").startOf("day");
+
+  while (cursor <= monthEnd) {
+    const date = cursor.toFormat("yyyy-LL-dd");
+    const attendance = attendanceByDate.get(date) ?? null;
+    const dayAmendments = amendmentsByDate.get(date) ?? [];
+    const timeLogs = timeLogsByDate.get(date) ?? [];
+    const isFuture = date > todayDate;
+    const isBranchHoliday = holidayDateSet.has(date);
+    const leaveEntry = leaveEntries.find((item) => doesLeaveCoverDate(item, date)) ?? null;
+    const isScheduledWorkday =
+      !isFuture &&
+      !isBranchHoliday &&
+      leaveEntry === null &&
+      isScheduledWorkdayForDate(schedule, date);
+
+    days.push({
+      date,
+      attendance,
+      amendments: dayAmendments,
+      timeLogs,
+      isFuture,
+      isScheduledWorkday,
+      isBranchHoliday,
+      leaveEntry,
+      calendarStatus: deriveMechanicPortalCalendarStatus({
+        attendance,
+        amendments: dayAmendments,
+        isFuture,
+        isScheduledWorkday,
+      }),
+    });
+
+    cursor = cursor.plus({ days: 1 });
+  }
+
+  const initialSelectedDate =
+    targetMonth.hasSame(DateTime.fromISO(todayDate), "month")
+      ? todayDate
+      : days.find((item) => item.attendance || item.amendments.length > 0)?.date ?? monthStartDate;
+
+  return {
+    displayName: context.displayName,
+    todayDate,
+    month: targetMonth.toFormat("yyyy-LL"),
+    monthLabel: targetMonth.toFormat("LLLL yyyy"),
+    monthStartDate,
+    monthEndDate,
+    initialSelectedDate,
+    settings: accessContext.settings,
+    schedule,
+    branchHolidays,
+    days,
   };
 }
 
@@ -259,11 +446,15 @@ async function getMappedAmendments({
   branchId,
   staffId,
   limit,
+  startDate,
+  endDate,
 }: {
   admin: ReturnType<typeof getSupabaseAdminClient>;
   branchId: string;
   staffId?: string;
   limit?: number;
+  startDate?: string;
+  endDate?: string;
 }) {
   let amendmentQuery = admin
     .from("dtr_amendment_requests")
@@ -277,6 +468,14 @@ async function getMappedAmendments({
 
   if (typeof limit === "number") {
     amendmentQuery = amendmentQuery.limit(limit);
+  }
+
+  if (startDate) {
+    amendmentQuery = amendmentQuery.gte("attendance_date", startDate);
+  }
+
+  if (endDate) {
+    amendmentQuery = amendmentQuery.lte("attendance_date", endDate);
   }
 
   const { data: amendmentData, error: amendmentError } = await amendmentQuery;
@@ -358,6 +557,66 @@ function mapAttendanceRecord(row: AttendanceRow) {
   };
 }
 
+function mapAttendanceTimeLog(row: AttendanceTimeLogRow): AttendanceTimeLogSummary {
+  return {
+    id: row.id,
+    staffId: row.staff_id,
+    attendanceId: row.attendance_id,
+    amendmentId: row.dtr_amendment_id,
+    staffDeviceId: row.staff_device_id,
+    attendanceDate: row.attendance_date,
+    logType: row.log_type as AttendanceTimeLogSummary["logType"],
+    loggedAt: row.logged_at,
+    source: row.source as AttendanceTimeLogSummary["source"],
+    requestIp: row.request_ip,
+    isShopIpValid: row.is_shop_ip_valid,
+    isDeviceApproved: row.is_device_approved,
+    userAgent: row.user_agent,
+    createdAt: row.created_at,
+  };
+}
+
+function mapStaffSchedule(row: StaffScheduleRow): StaffScheduleSummary {
+  return {
+    id: row.id,
+    staffId: row.staff_id,
+    shiftStartTime: row.shift_start_time,
+    shiftEndTime: row.shift_end_time,
+    graceMinutes: row.grace_minutes,
+    mondayIsWorkday: row.monday_is_workday,
+    tuesdayIsWorkday: row.tuesday_is_workday,
+    wednesdayIsWorkday: row.wednesday_is_workday,
+    thursdayIsWorkday: row.thursday_is_workday,
+    fridayIsWorkday: row.friday_is_workday,
+    saturdayIsWorkday: row.saturday_is_workday,
+    sundayIsWorkday: row.sunday_is_workday,
+    notes: row.notes,
+  };
+}
+
+function mapBranchHoliday(row: BranchHolidayRow): BranchHolidaySummary {
+  return {
+    id: row.id,
+    branchId: row.branch_id,
+    holidayDate: row.holiday_date,
+    label: row.label,
+    holidayKind: row.holiday_kind as BranchHolidaySummary["holidayKind"],
+    notes: row.notes,
+  };
+}
+
+function mapStaffLeaveEntry(row: StaffLeaveEntryRow): StaffLeaveEntrySummary {
+  return {
+    id: row.id,
+    branchId: row.branch_id,
+    staffId: row.staff_id,
+    startDate: row.start_date,
+    endDate: row.end_date,
+    leaveType: row.leave_type as StaffLeaveEntrySummary["leaveType"],
+    notes: row.notes,
+  };
+}
+
 function mapAttendanceStaffDevice(
   row: StaffDeviceRow,
   staffNameMap: Map<string, StaffNameRow>,
@@ -430,4 +689,46 @@ async function requireMechanicPortalContext() {
   }
 
   return context;
+}
+
+function resolvePortalHistoryMonth(value?: string) {
+  if (value && /^\d{4}-\d{2}$/.test(value)) {
+    const parsed = DateTime.fromFormat(value, "yyyy-LL");
+
+    if (parsed.isValid) {
+      return parsed.startOf("month");
+    }
+  }
+
+  return getBusinessNow().startOf("month");
+}
+
+function deriveMechanicPortalCalendarStatus({
+  attendance,
+  amendments,
+  isFuture,
+  isScheduledWorkday,
+}: {
+  attendance: ReturnType<typeof mapAttendanceRecord> | null;
+  amendments: DtrAmendmentSummary[];
+  isFuture: boolean;
+  isScheduledWorkday: boolean;
+}): MechanicPortalHistoryCalendarStatus {
+  if (isFuture) {
+    return "none";
+  }
+
+  if (amendments.some((item) => item.status === "pending")) {
+    return "incomplete";
+  }
+
+  if (attendance) {
+    if (attendance.status === "absent" && !attendance.timeIn && !attendance.timeOut) {
+      return "absent";
+    }
+
+    return attendance.timeIn && attendance.timeOut ? "present" : "incomplete";
+  }
+
+  return isScheduledWorkday ? "absent" : "none";
 }

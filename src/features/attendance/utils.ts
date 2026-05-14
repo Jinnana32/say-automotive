@@ -589,6 +589,25 @@ export function computeExpectedWorkdaySummary({
   };
 }
 
+export function isScheduledWorkdayForDate(
+  schedule: StaffScheduleSummary | null,
+  date: string,
+) {
+  if (!schedule) {
+    return false;
+  }
+
+  const targetDate = DateTime.fromISO(date);
+
+  if (!targetDate.isValid) {
+    return false;
+  }
+
+  const matchedDay = SCHEDULE_DAY_DEFINITIONS.find((day) => day.luxonWeekday === targetDate.weekday);
+
+  return matchedDay ? schedule[matchedDay.key] : false;
+}
+
 export function matchesAttendanceStatusFilter(
   item: AttendanceRosterItem,
   statusFilter: AttendanceFilterStatus | "",

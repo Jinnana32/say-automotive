@@ -328,6 +328,38 @@ export type MechanicPortalAmendmentsPageData = {
   amendments: DtrAmendmentSummary[];
 };
 
+export type MechanicPortalHistoryCalendarStatus =
+  | "present"
+  | "incomplete"
+  | "absent"
+  | "none";
+
+export type MechanicPortalHistoryDay = {
+  date: string;
+  attendance: AttendanceRecordSummary | null;
+  amendments: DtrAmendmentSummary[];
+  timeLogs: AttendanceTimeLogSummary[];
+  isFuture: boolean;
+  isScheduledWorkday: boolean;
+  isBranchHoliday: boolean;
+  leaveEntry: StaffLeaveEntrySummary | null;
+  calendarStatus: MechanicPortalHistoryCalendarStatus;
+};
+
+export type MechanicPortalHistoryPageData = {
+  displayName: string;
+  todayDate: string;
+  month: string;
+  monthLabel: string;
+  monthStartDate: string;
+  monthEndDate: string;
+  initialSelectedDate: string;
+  settings: AttendanceAccessSettings;
+  schedule: StaffScheduleSummary | null;
+  branchHolidays: BranchHolidaySummary[];
+  days: MechanicPortalHistoryDay[];
+};
+
 export type AttendanceAmendmentsPageData = {
   pendingCount: number;
   totalCount: number;
