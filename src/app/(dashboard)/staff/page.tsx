@@ -1,15 +1,18 @@
 import Link from "next/link";
 
+import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableFilters } from "@/components/shared/data-table-filters";
+import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   TableRowActionsMenu,
   TableRowActionsMenuLink,
 } from "@/components/shared/table-row-actions-menu";
 import { listStaff } from "@/features/staff/queries/staff-queries";
+import { paginateItems } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
 
@@ -17,12 +20,14 @@ type StaffPageProps = {
   searchParams: Promise<{
     search?: string;
     role?: "owner" | "admin" | "mechanic" | "cashier" | "inventory_staff" | "service_advisor";
+    page?: string;
   }>;
 };
 
 export default async function StaffPage({ searchParams }: StaffPageProps) {
-  const { search = "", role } = await searchParams;
-  const staff = await listStaff({ search, role });
+  const { search = "", role = "", page } = await searchParams;
+  const staff = await listStaff({ search, role: role || undefined });
+  const pagination = paginateItems(staff, page);
 
   return (
     <div className="space-y-6">
@@ -36,33 +41,48 @@ export default async function StaffPage({ searchParams }: StaffPageProps) {
         }
       />
 
-      <Card className="border-border/70 shadow-sm">
-        <CardContent className="space-y-4 p-6">
-          <form className="grid gap-3 lg:grid-cols-[1fr_220px_auto]">
-            <input
-              type="search"
-              name="search"
-              defaultValue={search}
-              placeholder="Search by staff name or contact number"
-              className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            />
-            <select
-              name="role"
-              defaultValue={role ?? ""}
-              className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <option value="">All roles</option>
-              <option value="owner">Owner</option>
-              <option value="admin">Admin</option>
-              <option value="mechanic">Mechanic</option>
-              <option value="cashier">Cashier</option>
-              <option value="inventory_staff">Inventory staff</option>
-              <option value="service_advisor">Service advisor</option>
-            </select>
-            <Button type="submit">Apply filters</Button>
-          </form>
-
-          {staff.length === 0 ? (
+      <DataTableCard
+        title="Staff roster"
+        description={`${pagination.totalItems} staff record${pagination.totalItems === 1 ? "" : "s"} in the current view.`}
+        toolbar={
+          <DataTableFilters
+            key={`${search}:${role}`}
+            className="lg:grid lg:grid-cols-[minmax(0,1fr)_220px]"
+            search={{
+              value: search,
+              placeholder: "Search by staff name or contact number",
+            }}
+            filters={[
+              {
+                type: "select",
+                name: "role",
+                value: role,
+                options: [
+                  { value: "", label: "All roles" },
+                  { value: "owner", label: "Owner" },
+                  { value: "admin", label: "Admin" },
+                  { value: "mechanic", label: "Mechanic" },
+                  { value: "cashier", label: "Cashier" },
+                  { value: "inventory_staff", label: "Inventory staff" },
+                  { value: "service_advisor", label: "Service advisor" },
+                ],
+              },
+            ]}
+          />
+        }
+        contentClassName="p-0"
+        footer={
+          <DataTablePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            totalItems={pagination.totalItems}
+            totalPages={pagination.totalPages}
+            startItem={pagination.startItem}
+            endItem={pagination.endItem}
+          />
+        }
+      >
+          {pagination.totalItems === 0 ? (
             <EmptyState
               title="No staff records found"
               description="Create staff records now so attendance and mechanic assignment can be added on a stable base."
@@ -73,7 +93,7 @@ export default async function StaffPage({ searchParams }: StaffPageProps) {
               }
             />
           ) : (
-            <div className="overflow-hidden rounded-[1.25rem] border border-border/70">
+            <div className="overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -85,7 +105,7 @@ export default async function StaffPage({ searchParams }: StaffPageProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {staff.map((person) => (
+                  {pagination.items.map((person) => (
                     <TableRow key={person.id}>
                       <TableCell className="font-semibold">{person.fullName}</TableCell>
                       <TableCell className="capitalize">{person.role.replace("_", " ")}</TableCell>
@@ -105,8 +125,7 @@ export default async function StaffPage({ searchParams }: StaffPageProps) {
               </Table>
             </div>
           )}
-        </CardContent>
-      </Card>
+      </DataTableCard>
     </div>
   );
 }

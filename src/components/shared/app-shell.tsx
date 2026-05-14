@@ -12,7 +12,6 @@ import {
   type NavigationGroup,
   type NavigationIconName,
 } from "@/lib/navigation";
-import { cn } from "@/lib/utils";
 
 export function AppShell({
   children,
@@ -43,21 +42,18 @@ export function AppShell({
 }>) {
   const pathname = usePathname();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
   const activeItem = resolveActiveNavigationItem(navigationItems, pathname);
   void capabilities;
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {!isDesktopSidebarCollapsed ? (
-        <AppSidebar
-          navigationItems={navigationItems}
-          businessName={businessName}
-          businessLogoUrl={businessLogoUrl}
-          showBusinessName={showSidebarBusinessName}
-          className="hidden xl:fixed xl:inset-y-0 xl:left-0 xl:flex xl:w-72 xl:flex-col"
-        />
-      ) : null}
+      <AppSidebar
+        navigationItems={navigationItems}
+        businessName={businessName}
+        businessLogoUrl={businessLogoUrl}
+        showBusinessName={showSidebarBusinessName}
+        className="hidden xl:fixed xl:inset-y-0 xl:left-0 xl:flex xl:w-72 xl:flex-col"
+      />
       {isMobileSidebarOpen ? (
         <div className="fixed inset-0 z-40 xl:hidden" aria-hidden="true">
           <button
@@ -80,21 +76,12 @@ export function AppShell({
           showCloseButton
         />
       ) : null}
-      <div
-        className={cn(
-          "min-h-screen",
-          !isDesktopSidebarCollapsed && "xl:pl-72",
-        )}
-      >
+      <div className="min-h-screen xl:pl-72">
         <AppTopbar
           activeLabel={activeItem?.label ?? "Dashboard"}
-          activeDescription={activeItem?.description}
           userDisplayName={userDisplayName}
           userRoleLabel={userRoleLabel}
           onOpenNavigation={() => setIsMobileSidebarOpen(true)}
-          onToggleDesktopSidebar={() =>
-            setIsDesktopSidebarCollapsed((currentValue) => !currentValue)
-          }
         />
         <main className="px-4 py-6 sm:px-6 lg:px-8">
           <PageContainer>{children}</PageContainer>

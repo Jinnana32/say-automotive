@@ -97,6 +97,7 @@ export type ReportsPageData = {
 export type ReportsPrintBusinessProfile = {
   businessName: string;
   businessLogoUrl: string | null;
+  businessVatRegistrationNo: string | null;
   businessContact: string | null;
   businessEmail: string | null;
   businessAddress: string | null;

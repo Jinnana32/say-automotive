@@ -275,9 +275,13 @@ export async function getWebsitePostById(postId: string): Promise<WebsitePostFor
   };
 }
 
-export async function listWebsiteQuoteRequests(
-  status?: WebsiteQuoteRequestStatus | "",
-): Promise<WebsiteQuoteRequestListItem[]> {
+export async function listWebsiteQuoteRequests({
+  search,
+  status,
+}: {
+  search?: string;
+  status?: WebsiteQuoteRequestStatus | "";
+} = {}): Promise<WebsiteQuoteRequestListItem[]> {
   const { supabase } = await getAuthorizedSupabaseServerClient("quotations:read");
   let query = supabase
     .from("website_quote_requests")
@@ -286,6 +290,13 @@ export async function listWebsiteQuoteRequests(
 
   if (status) {
     query = query.eq("status", status);
+  }
+
+  if (search) {
+    const escapedSearch = escapeSearchTerm(search);
+    query = query.or(
+      `first_name.ilike.%${escapedSearch}%,last_name.ilike.%${escapedSearch}%,contact_number.ilike.%${escapedSearch}%,email.ilike.%${escapedSearch}%,vehicle_make.ilike.%${escapedSearch}%,vehicle_model.ilike.%${escapedSearch}%,city.ilike.%${escapedSearch}%,province.ilike.%${escapedSearch}%,service_needed.ilike.%${escapedSearch}%`,
+    );
   }
 
   const { data, error } = await query;

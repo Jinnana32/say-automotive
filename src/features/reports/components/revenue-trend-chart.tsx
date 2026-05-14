@@ -5,10 +5,10 @@ import { formatCurrency } from "@/lib/currency";
 const SVG_HEIGHT = 260;
 const SVG_WIDTH = 860;
 const PADDING = { top: 20, right: 20, bottom: 48, left: 40 };
-const REPORT_NAVY = "#061B3A";
-const REPORT_NAVY_MUTED = "#8CA3C8";
-const REPORT_RED_ACCENT = "#C81E2A";
-const REPORT_GRID = "#D9E1EC";
+const REPORT_NAVY = "#0B1F4D";
+const REPORT_NAVY_MUTED = "#B7C7E3";
+const REPORT_RED_ACCENT = "#D62828";
+const REPORT_GRID = "#E5E7EB";
 
 export function RevenueTrendChart({
   data,

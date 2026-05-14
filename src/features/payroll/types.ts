@@ -6,6 +6,7 @@ export type PayBasis = Database["public"]["Enums"]["pay_basis"];
 export type PayrollPeriodStatus = Database["public"]["Enums"]["payroll_period_status"];
 
 export type PayrollPageFilters = {
+  periodSearch: string;
   staffSearch: string;
   periodStatus: PayrollPeriodStatus | "";
 };

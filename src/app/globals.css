@@ -4,18 +4,20 @@
 
 @layer base {
   :root {
-    --brand-navy: 216 81% 13%;
-    --brand-navy-hover: 215 77% 19%;
-    --brand-red: 355 74% 45%;
-    --brand-soft: 214 68% 95%;
-    --brand-border: 213 31% 88%;
+    --brand-navy: 225 75% 17%;
+    --brand-navy-strong: 225 74% 12%;
+    --brand-navy-hover: 220 77% 19%;
+    --brand-red: 0 69% 50%;
+    --brand-red-dark: 0 72% 42%;
+    --brand-soft: 214 60% 95%;
+    --brand-border: 220 18% 91%;
     --background: 220 23% 97%;
     --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 216 81% 13%;
+    --primary: 225 75% 17%;
     --primary-foreground: 0 0% 100%;
     --secondary: 214 68% 95%;
     --secondary-foreground: 222 47% 11%;
@@ -23,7 +25,7 @@
     --muted-foreground: 215 14% 44%;
     --accent: 214 68% 95%;
     --accent-foreground: 222 47% 11%;
-    --destructive: 0 72% 51%;
+    --destructive: 0 72% 42%;
     --destructive-foreground: 0 0% 98%;
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
@@ -33,7 +35,7 @@
     --info-foreground: 0 0% 100%;
     --border: 213 31% 88%;
     --input: 213 31% 88%;
-    --ring: 216 81% 13%;
+    --ring: 225 75% 17%;
     --radius: 0.875rem;
     --font-sans: var(--font-space-grotesk), "Segoe UI", sans-serif;
     --font-display: var(--font-barlow-condensed), "Segoe UI", sans-serif;
@@ -88,7 +90,7 @@
 .report-preview-shell {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top, rgba(255, 210, 74, 0.18), transparent 28%),
+    radial-gradient(circle at top, rgba(214, 40, 40, 0.12), transparent 28%),
     linear-gradient(180deg, #eef2f8 0%, #e7edf5 100%);
 }
 

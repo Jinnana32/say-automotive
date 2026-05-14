@@ -1,9 +1,12 @@
 import Link from "next/link";
 
+import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableFilters } from "@/components/shared/data-table-filters";
+import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
+import { TableCellLink } from "@/components/shared/table-cell-link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   TableRowActionsMenu,
@@ -13,6 +16,7 @@ import { PaymentMethodBadge } from "@/features/invoices/components/invoice-statu
 import { listPayments } from "@/features/invoices/queries/invoice-queries";
 import { formatCurrency } from "@/lib/currency";
 import { formatDateTime } from "@/lib/dates";
+import { paginateItems } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
 
@@ -20,12 +24,14 @@ type PaymentsPageProps = {
   searchParams: Promise<{
     search?: string;
     paymentMethod?: "cash" | "gcash" | "card" | "bank_transfer" | "check";
+    page?: string;
   }>;
 };
 
 export default async function PaymentsPage({ searchParams }: PaymentsPageProps) {
-  const { search = "", paymentMethod = "" } = await searchParams;
+  const { search = "", paymentMethod = "", page } = await searchParams;
   const payments = await listPayments({ search, paymentMethod });
+  const pagination = paginateItems(payments, page);
 
   return (
     <div className="space-y-6">
@@ -39,32 +45,47 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
         }
       />
 
-      <Card className="border-border/70 shadow-sm">
-        <CardContent className="space-y-4 p-6">
-          <form className="grid gap-3 lg:grid-cols-[1fr_220px_auto]">
-            <input
-              type="search"
-              name="search"
-              defaultValue={search}
-              placeholder="Search by invoice or customer"
-              className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            />
-            <select
-              name="paymentMethod"
-              defaultValue={paymentMethod}
-              className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <option value="">All methods</option>
-              <option value="cash">Cash</option>
-              <option value="gcash">GCash</option>
-              <option value="card">Card</option>
-              <option value="bank_transfer">Bank transfer</option>
-              <option value="check">Check</option>
-            </select>
-            <Button type="submit">Apply filters</Button>
-          </form>
-
-          {payments.length === 0 ? (
+      <DataTableCard
+        title="Payment ledger"
+        description={`${pagination.totalItems} payment${pagination.totalItems === 1 ? "" : "s"} in the current view.`}
+        toolbar={
+          <DataTableFilters
+            key={`${search}:${paymentMethod}`}
+            className="lg:grid lg:grid-cols-[minmax(0,1fr)_220px]"
+            search={{
+              value: search,
+              placeholder: "Search by invoice or customer",
+            }}
+            filters={[
+              {
+                type: "select",
+                name: "paymentMethod",
+                value: paymentMethod,
+                options: [
+                  { value: "", label: "All methods" },
+                  { value: "cash", label: "Cash" },
+                  { value: "gcash", label: "GCash" },
+                  { value: "card", label: "Card" },
+                  { value: "bank_transfer", label: "Bank transfer" },
+                  { value: "check", label: "Check" },
+                ],
+              },
+            ]}
+          />
+        }
+        contentClassName="p-0"
+        footer={
+          <DataTablePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            totalItems={pagination.totalItems}
+            totalPages={pagination.totalPages}
+            startItem={pagination.startItem}
+            endItem={pagination.endItem}
+          />
+        }
+      >
+          {pagination.totalItems === 0 ? (
             <EmptyState
               title="No payments found"
               description="Payments will appear here once invoices start getting settled."
@@ -75,7 +96,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
               }
             />
           ) : (
-            <div className="overflow-hidden rounded-[1.25rem] border border-border/70">
+            <div className="overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -90,25 +111,43 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {payments.map((payment) => (
+                  {pagination.items.map((payment) => (
                     <TableRow key={payment.id}>
                       <TableCell>
-                        <Link href={`/payments/${payment.id}`} className="underline-offset-4 hover:underline">
+                        <TableCellLink href={`/payments/${payment.id}`} className="text-foreground">
                           {formatDateTime(payment.paidAt)}
-                        </Link>
+                        </TableCellLink>
                       </TableCell>
-                      <TableCell className="font-semibold">
-                        <Link href={`/payments/${payment.id}`} className="underline-offset-4 hover:underline">
-                          {payment.invoiceNumber}
-                        </Link>
-                      </TableCell>
-                      <TableCell>{payment.jobOrderNumber ?? "POS flow"}</TableCell>
-                      <TableCell>{payment.customerName}</TableCell>
                       <TableCell>
-                        <PaymentMethodBadge method={payment.paymentMethod} />
+                        <TableCellLink href={`/payments/${payment.id}`} className="font-semibold text-foreground">
+                          {payment.invoiceNumber}
+                        </TableCellLink>
                       </TableCell>
-                      <TableCell>{formatCurrency(payment.amount)}</TableCell>
-                      <TableCell>{payment.referenceNumber ?? "No reference"}</TableCell>
+                      <TableCell>
+                        <TableCellLink href={`/payments/${payment.id}`} className="text-foreground">
+                          {payment.jobOrderNumber ?? "POS flow"}
+                        </TableCellLink>
+                      </TableCell>
+                      <TableCell>
+                        <TableCellLink href={`/payments/${payment.id}`} className="text-foreground">
+                          {payment.customerName}
+                        </TableCellLink>
+                      </TableCell>
+                      <TableCell>
+                        <TableCellLink href={`/payments/${payment.id}`}>
+                          <PaymentMethodBadge method={payment.paymentMethod} />
+                        </TableCellLink>
+                      </TableCell>
+                      <TableCell>
+                        <TableCellLink href={`/payments/${payment.id}`} className="text-foreground">
+                          {formatCurrency(payment.amount)}
+                        </TableCellLink>
+                      </TableCell>
+                      <TableCell>
+                        <TableCellLink href={`/payments/${payment.id}`} className="text-foreground">
+                          {payment.referenceNumber ?? "No reference"}
+                        </TableCellLink>
+                      </TableCell>
                       <TableCell className="text-right">
                         <TableRowActionsMenu label={`Payment actions for ${payment.invoiceNumber}`}>
                           <TableRowActionsMenuLink
@@ -127,8 +166,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
               </Table>
             </div>
           )}
-        </CardContent>
-      </Card>
+      </DataTableCard>
     </div>
   );
 }

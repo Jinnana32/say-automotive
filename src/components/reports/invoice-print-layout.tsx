@@ -85,9 +85,9 @@ export function InvoicePrintLayout({
 
       <section className="mt-4">
         <ReportSectionHeading title="BILLING ITEMS" />
-        <div className="overflow-hidden border border-[#173c99]/20">
+        <div className="overflow-hidden border border-brand-border">
           <table className="w-full border-collapse text-[11px]">
-            <thead className="bg-[#173c99] text-white">
+            <thead className="bg-brand-navy text-white">
               <tr>
                 <th className="w-12 px-2 py-1.5 text-left font-semibold">
                   Line
@@ -153,9 +153,9 @@ export function InvoicePrintLayout({
         <div className="space-y-120">
           <div>
             <ReportSectionHeading title="PAYMENTS" />
-            <div className="overflow-hidden border border-[#173c99]/20">
+            <div className="overflow-hidden border border-brand-border">
               <table className="w-full border-collapse text-[11px]">
-                <thead className="bg-[#173c99] text-white">
+                <thead className="bg-brand-navy text-white">
                   <tr>
                     <th className="w-24 px-2 py-1.5 text-left font-semibold">
                       Date
@@ -217,7 +217,7 @@ export function InvoicePrintLayout({
 
         <div className="space-y-2">
           <ReportSectionHeading title="INVOICE SUMMARY" />
-          <div className="overflow-hidden border border-[#173c99]/20 px-3 py-3">
+          <div className="overflow-hidden border border-brand-border bg-brand-soft/35 px-3 py-3">
             <ReportTotals
               lines={[
                 { label: 'Subtotal:', value: formatCurrency(invoice.subtotal) },
@@ -242,6 +242,8 @@ export function InvoicePrintLayout({
       </section>
 
       <ReportFooter
+        businessName={businessProfile.businessName}
+        vatRegistrationNo={businessProfile.businessVatRegistrationNo}
         contactNumber={businessProfile.businessContact}
         email={businessProfile.businessEmail}
         address={businessProfile.businessAddress}

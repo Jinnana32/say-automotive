@@ -40,10 +40,12 @@ export const INITIAL_PAYROLL_FORM_ACTION_STATE: PayrollFormActionState = {
 };
 
 export function resolvePayrollPageFilters(params: {
+  periodSearch?: string;
   staffSearch?: string;
   periodStatus?: string;
 }): PayrollPageFilters {
   return {
+    periodSearch: params.periodSearch?.trim() ?? "",
     staffSearch: params.staffSearch?.trim() ?? "",
     periodStatus: isPayrollPeriodStatus(params.periodStatus) ? params.periodStatus : "",
   };

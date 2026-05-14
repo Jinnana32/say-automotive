@@ -1,12 +1,12 @@
 import Link from "next/link";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableFilters } from "@/components/shared/data-table-filters";
+import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
-import { FilterBar } from "@/components/shared/filter-bar";
 import { PageHeader } from "@/components/shared/page-header";
-import { SearchInput } from "@/components/shared/search-input";
+import { TableCellLink } from "@/components/shared/table-cell-link";
 import { Button } from "@/components/ui/button";
-import { NativeSelect } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   TableRowActionsMenu,
@@ -16,6 +16,7 @@ import { JobOrderStatusBadge } from "@/features/job-orders/components/job-order-
 import { listJobOrders } from "@/features/job-orders/queries/job-order-queries";
 import { formatCurrency } from "@/lib/currency";
 import { formatDate, formatDateTime } from "@/lib/dates";
+import { paginateItems } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
 
@@ -32,12 +33,14 @@ type JobOrdersPageProps = {
       | "paid"
       | "released"
       | "cancelled";
+    page?: string;
   }>;
 };
 
 export default async function JobOrdersPage({ searchParams }: JobOrdersPageProps) {
-  const { search = "", status = "" } = await searchParams;
+  const { search = "", status = "", page } = await searchParams;
   const jobOrders = await listJobOrders({ search, status });
+  const pagination = paginateItems(jobOrders, page);
 
   return (
     <div className="space-y-6">
@@ -53,38 +56,49 @@ export default async function JobOrdersPage({ searchParams }: JobOrdersPageProps
 
       <DataTableCard
         title="Job order board"
-        description={`${jobOrders.length} job order${jobOrders.length === 1 ? "" : "s"} in the current queue.`}
+        description={`${pagination.totalItems} job order${pagination.totalItems === 1 ? "" : "s"} in the current queue.`}
         toolbar={
-          <form>
-            <FilterBar className="lg:grid lg:grid-cols-[minmax(0,1fr)_240px_auto_auto]">
-              <SearchInput
-                type="search"
-                name="search"
-                defaultValue={search}
-                placeholder="Search job order number"
-              />
-              <NativeSelect name="status" defaultValue={status}>
-                <option value="">All statuses</option>
-                <option value="pending">Pending</option>
-                <option value="in_progress">In progress</option>
-                <option value="waiting_for_parts">Waiting for parts</option>
-                <option value="waiting_for_customer_approval">Waiting for customer approval</option>
-                <option value="completed">Completed</option>
-                <option value="ready_for_billing">Ready for billing</option>
-                <option value="paid">Paid</option>
-                <option value="released">Released</option>
-                <option value="cancelled">Cancelled</option>
-              </NativeSelect>
-              <Button type="submit">Apply</Button>
-              <Button asChild type="button" variant="ghost">
-                <Link href="/job-orders">Reset</Link>
-              </Button>
-            </FilterBar>
-          </form>
+          <DataTableFilters
+            key={`${search}:${status}`}
+            className="lg:grid lg:grid-cols-[minmax(0,1fr)_240px]"
+            search={{
+              value: search,
+              placeholder: "Search job order number",
+            }}
+            filters={[
+              {
+                type: "select",
+                name: "status",
+                value: status,
+                options: [
+                  { value: "", label: "All statuses" },
+                  { value: "pending", label: "Pending" },
+                  { value: "in_progress", label: "In progress" },
+                  { value: "waiting_for_parts", label: "Waiting for parts" },
+                  { value: "waiting_for_customer_approval", label: "Waiting for customer approval" },
+                  { value: "completed", label: "Completed" },
+                  { value: "ready_for_billing", label: "Ready for billing" },
+                  { value: "paid", label: "Paid" },
+                  { value: "released", label: "Released" },
+                  { value: "cancelled", label: "Cancelled" },
+                ],
+              },
+            ]}
+          />
+        }
+        footer={
+          <DataTablePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            totalItems={pagination.totalItems}
+            totalPages={pagination.totalPages}
+            startItem={pagination.startItem}
+            endItem={pagination.endItem}
+          />
         }
       >
 
-        {jobOrders.length === 0 ? (
+        {pagination.totalItems === 0 ? (
           <EmptyState
             title="No job orders found"
             description="Approved quotations create the operational job-order queue."
@@ -111,23 +125,49 @@ export default async function JobOrdersPage({ searchParams }: JobOrdersPageProps
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {jobOrders.map((jobOrder) => (
+                {pagination.items.map((jobOrder) => (
                   <TableRow key={jobOrder.id}>
-                    <TableCell className="font-semibold">{jobOrder.jobOrderNumber}</TableCell>
-                    <TableCell>{jobOrder.quotationNumber ?? "Manual flow"}</TableCell>
-                    <TableCell>{jobOrder.customerName}</TableCell>
-                    <TableCell>{jobOrder.vehicleLabel}</TableCell>
                     <TableCell>
-                      <JobOrderStatusBadge status={jobOrder.status} />
+                      <TableCellLink href={`/job-orders/${jobOrder.id}`} className="font-semibold text-foreground">
+                        {jobOrder.jobOrderNumber}
+                      </TableCellLink>
                     </TableCell>
                     <TableCell>
-                      {jobOrder.pendingApprovalCount > 0
-                        ? `${jobOrder.pendingApprovalCount} · ${formatCurrency(jobOrder.pendingApprovalTotal)}`
-                        : "None"}
+                      <TableCellLink href={`/job-orders/${jobOrder.id}`} className="text-foreground">
+                        {jobOrder.quotationNumber ?? "Manual flow"}
+                      </TableCellLink>
                     </TableCell>
-                    <TableCell>{formatCurrency(jobOrder.billableTotal)}</TableCell>
                     <TableCell>
-                      {jobOrder.startedAt ? formatDateTime(jobOrder.startedAt) : formatDate(jobOrder.createdAt)}
+                      <TableCellLink href={`/job-orders/${jobOrder.id}`} className="text-foreground">
+                        {jobOrder.customerName}
+                      </TableCellLink>
+                    </TableCell>
+                    <TableCell>
+                      <TableCellLink href={`/job-orders/${jobOrder.id}`} className="text-foreground">
+                        {jobOrder.vehicleLabel}
+                      </TableCellLink>
+                    </TableCell>
+                    <TableCell>
+                      <TableCellLink href={`/job-orders/${jobOrder.id}`}>
+                        <JobOrderStatusBadge status={jobOrder.status} />
+                      </TableCellLink>
+                    </TableCell>
+                    <TableCell>
+                      <TableCellLink href={`/job-orders/${jobOrder.id}`} className="text-foreground">
+                        {jobOrder.pendingApprovalCount > 0
+                          ? `${jobOrder.pendingApprovalCount} · ${formatCurrency(jobOrder.pendingApprovalTotal)}`
+                          : "None"}
+                      </TableCellLink>
+                    </TableCell>
+                    <TableCell>
+                      <TableCellLink href={`/job-orders/${jobOrder.id}`} className="text-foreground">
+                        {formatCurrency(jobOrder.billableTotal)}
+                      </TableCellLink>
+                    </TableCell>
+                    <TableCell>
+                      <TableCellLink href={`/job-orders/${jobOrder.id}`} className="text-foreground">
+                        {jobOrder.startedAt ? formatDateTime(jobOrder.startedAt) : formatDate(jobOrder.createdAt)}
+                      </TableCellLink>
                     </TableCell>
                     <TableCell className="text-right">
                       <TableRowActionsMenu label={`Job order actions for ${jobOrder.jobOrderNumber}`}>

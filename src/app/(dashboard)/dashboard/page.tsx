@@ -33,11 +33,11 @@ import { formatInventoryQuantity } from '@/features/inventory/utils';
 
 export const dynamic = 'force-dynamic';
 
-const DASHBOARD_NAVY = '#061B3A';
-const DASHBOARD_NAVY_HOVER = '#0B2A55';
+const DASHBOARD_NAVY = '#0B1F4D';
+const DASHBOARD_NAVY_HOVER = '#081735';
 const DASHBOARD_NAVY_TINT = '#EAF1FB';
-const DASHBOARD_NAVY_MUTED = '#D9E4F4';
-const DASHBOARD_RED_ACCENT = '#C81E2A';
+const DASHBOARD_NAVY_MUTED = '#CDD9EE';
+const DASHBOARD_RED_ACCENT = '#D62828';
 
 export default async function DashboardPage() {
   const dashboard = await getDashboardData();

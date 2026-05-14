@@ -26,8 +26,10 @@ const config: Config = {
         foreground: "hsl(var(--foreground))",
         brand: {
           navy: "hsl(var(--brand-navy))",
+          navyStrong: "hsl(var(--brand-navy-strong))",
           navyHover: "hsl(var(--brand-navy-hover))",
           red: "hsl(var(--brand-red))",
+          redDark: "hsl(var(--brand-red-dark))",
           soft: "hsl(var(--brand-soft))",
           border: "hsl(var(--brand-border))",
         },

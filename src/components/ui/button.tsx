@@ -10,11 +10,11 @@ const buttonVariants = cva(
       variant: {
         default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/92",
         navyPrimary:
-          "bg-brand-navy text-white shadow-[0_14px_28px_rgba(6,27,58,0.18)] hover:bg-brand-navyHover",
+          "bg-brand-navy text-white shadow-[0_14px_28px_rgba(11,31,77,0.18)] hover:bg-brand-navyHover",
         yellowPrimary:
-          "bg-[#ffd24a] text-[#10224d] shadow-[0_12px_24px_rgba(255,210,74,0.28)] hover:bg-[#ffdc72]",
+          "bg-brand-red text-white shadow-[0_14px_28px_rgba(214,40,40,0.18)] hover:bg-brand-redDark",
         bluePrimary:
-          "bg-brand-navy text-white shadow-[0_14px_28px_rgba(6,27,58,0.18)] hover:bg-brand-navyHover",
+          "bg-brand-navy text-white shadow-[0_14px_28px_rgba(11,31,77,0.18)] hover:bg-brand-navyHover",
         outlineBlue:
           "border border-brand-navy bg-white text-brand-navy hover:bg-brand-soft",
         outlineLight:

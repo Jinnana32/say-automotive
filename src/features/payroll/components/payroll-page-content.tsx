@@ -1,14 +1,12 @@
-import Link from "next/link";
-
 import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableFilters } from "@/components/shared/data-table-filters";
+import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
-import { FilterBar } from "@/components/shared/filter-bar";
 import { MetricGrid } from "@/components/shared/metric-grid";
 import { PageHeader } from "@/components/shared/page-header";
-import { SearchInput } from "@/components/shared/search-input";
 import { StatCard } from "@/components/shared/stat-card";
+import { TableCellLink } from "@/components/shared/table-cell-link";
 import { Button } from "@/components/ui/button";
-import { NativeSelect } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   TableRowActionsMenu,
@@ -28,10 +26,27 @@ import {
 } from "@/features/payroll/utils";
 import { formatCurrency } from "@/lib/currency";
 import { formatDate } from "@/lib/dates";
+import { paginateItems } from "@/lib/pagination";
 
-export function PayrollPageContent({ data }: { data: PayrollPageData }) {
-  const { filters, summary, payrollPeriods, compensationRoster, totalCompensationRosterCount, visibleCompensationRosterCount } =
-    data;
+export function PayrollPageContent({
+  data,
+  periodPage,
+  staffPage,
+}: {
+  data: PayrollPageData;
+  periodPage?: string;
+  staffPage?: string;
+}) {
+  const {
+    filters,
+    summary,
+    payrollPeriods,
+    compensationRoster,
+    totalCompensationRosterCount,
+    visibleCompensationRosterCount,
+  } = data;
+  const periodPagination = paginateItems(payrollPeriods, periodPage);
+  const compensationPagination = paginateItems(compensationRoster, staffPage);
 
   return (
     <div className="space-y-6">
@@ -78,28 +93,49 @@ export function PayrollPageContent({ data }: { data: PayrollPageData }) {
 
       <DataTableCard
         title="Payroll periods"
-        description={`${payrollPeriods.length} payroll period${payrollPeriods.length === 1 ? "" : "s"} in the current view.`}
+        description={`${periodPagination.totalItems} payroll period${
+          periodPagination.totalItems === 1 ? "" : "s"
+        } in the current view.`}
         action={<PayrollPeriodDialog />}
         toolbar={
-          <form>
-            <FilterBar className="lg:grid lg:grid-cols-[220px_auto_auto]">
-              <NativeSelect name="periodStatus" defaultValue={filters.periodStatus}>
-                <option value="">All period statuses</option>
-                {PAYROLL_PERIOD_STATUS_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </NativeSelect>
-              <Button type="submit">Apply</Button>
-              <Button asChild type="button" variant="ghost">
-                <Link href="/payroll">Reset</Link>
-              </Button>
-            </FilterBar>
-          </form>
+          <DataTableFilters
+            key={`${filters.periodSearch}:${filters.periodStatus}`}
+            className="lg:grid lg:grid-cols-[minmax(0,1fr)_220px]"
+            pageParamName="periodPage"
+            search={{
+              name: "periodSearch",
+              value: filters.periodSearch,
+              placeholder: "Search period label, notes, or date",
+            }}
+            filters={[
+              {
+                type: "select",
+                name: "periodStatus",
+                value: filters.periodStatus,
+                options: [
+                  { value: "", label: "All period statuses" },
+                  ...PAYROLL_PERIOD_STATUS_OPTIONS.map((option) => ({
+                    value: option.value,
+                    label: option.label,
+                  })),
+                ],
+              },
+            ]}
+          />
+        }
+        footer={
+          <DataTablePagination
+            page={periodPagination.page}
+            pageSize={periodPagination.pageSize}
+            totalItems={periodPagination.totalItems}
+            totalPages={periodPagination.totalPages}
+            startItem={periodPagination.startItem}
+            endItem={periodPagination.endItem}
+            pageParamName="periodPage"
+          />
         }
       >
-        {payrollPeriods.length === 0 ? (
+        {periodPagination.totalItems === 0 ? (
           <EmptyState
             title="No payroll periods yet"
             description="Create the first payroll period so attendance and compensation can be reviewed against a real coverage window."
@@ -119,16 +155,32 @@ export function PayrollPageContent({ data }: { data: PayrollPageData }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {payrollPeriods.map((period) => (
+                {periodPagination.items.map((period) => (
                   <TableRow key={period.id}>
-                    <TableCell className="font-semibold">{period.label}</TableCell>
-                    <TableCell>{formatPayrollCoverage(period.periodStartDate, period.periodEndDate)}</TableCell>
-                    <TableCell>{formatDate(period.payoutDate)}</TableCell>
                     <TableCell>
-                      <PayrollPeriodStatusBadge status={period.status} />
+                      <TableCellLink href={`/payroll/${period.id}`} className="font-semibold text-foreground">
+                        {period.label}
+                      </TableCellLink>
+                    </TableCell>
+                    <TableCell>
+                      <TableCellLink href={`/payroll/${period.id}`} className="text-foreground">
+                        {formatPayrollCoverage(period.periodStartDate, period.periodEndDate)}
+                      </TableCellLink>
+                    </TableCell>
+                    <TableCell>
+                      <TableCellLink href={`/payroll/${period.id}`} className="text-foreground">
+                        {formatDate(period.payoutDate)}
+                      </TableCellLink>
+                    </TableCell>
+                    <TableCell>
+                      <TableCellLink href={`/payroll/${period.id}`}>
+                        <PayrollPeriodStatusBadge status={period.status} />
+                      </TableCellLink>
                     </TableCell>
                     <TableCell className="max-w-[280px] text-sm text-muted-foreground">
-                      <span className="line-clamp-2">{period.notes?.trim() ? period.notes : "No notes"}</span>
+                      <TableCellLink href={`/payroll/${period.id}`} className="line-clamp-2 text-foreground">
+                        {period.notes?.trim() ? period.notes : "No notes"}
+                      </TableCellLink>
                     </TableCell>
                     <TableCell className="text-right">
                       <TableRowActionsMenu label={`Payroll period actions for ${period.label}`}>
@@ -145,25 +197,32 @@ export function PayrollPageContent({ data }: { data: PayrollPageData }) {
 
       <DataTableCard
         title="Compensation setup"
-        description={`Showing ${visibleCompensationRosterCount} of ${totalCompensationRosterCount} active staff records.`}
+        description={`Showing ${compensationPagination.totalItems} of ${totalCompensationRosterCount} active staff records.`}
         toolbar={
-          <form>
-            <FilterBar className="lg:grid lg:grid-cols-[minmax(0,1fr)_auto_auto]">
-              <SearchInput
-                type="search"
-                name="staffSearch"
-                defaultValue={filters.staffSearch}
-                placeholder="Search staff name, role, or contact number"
-              />
-              <Button type="submit">Apply</Button>
-              <Button asChild type="button" variant="ghost">
-                <Link href="/payroll">Reset</Link>
-              </Button>
-            </FilterBar>
-          </form>
+          <DataTableFilters
+            key={filters.staffSearch}
+            className="md:grid md:grid-cols-[minmax(0,1fr)]"
+            pageParamName="staffPage"
+            search={{
+              name: "staffSearch",
+              value: filters.staffSearch,
+              placeholder: "Search staff name, role, or contact number",
+            }}
+          />
+        }
+        footer={
+          <DataTablePagination
+            page={compensationPagination.page}
+            pageSize={compensationPagination.pageSize}
+            totalItems={compensationPagination.totalItems}
+            totalPages={compensationPagination.totalPages}
+            startItem={compensationPagination.startItem}
+            endItem={compensationPagination.endItem}
+            pageParamName="staffPage"
+          />
         }
       >
-        {compensationRoster.length === 0 ? (
+        {compensationPagination.totalItems === 0 ? (
           <EmptyState
             title="No staff match the current search"
             description="Try a different name or clear the compensation search filter."
@@ -184,7 +243,7 @@ export function PayrollPageContent({ data }: { data: PayrollPageData }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {compensationRoster.map((item) => (
+                {compensationPagination.items.map((item) => (
                   <TableRow key={item.staffId}>
                     <TableCell>
                       <div className="space-y-1">

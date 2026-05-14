@@ -31,7 +31,6 @@ export function QuotationPrintLayout({
       <QuotationPrintHeader
         businessName={businessProfile.businessName}
         logoSrc={businessProfile.businessLogoUrl}
-        vatRegistrationNo={businessProfile.businessVatRegistrationNo}
         quotationNumber={quotation.quotationNumber}
         quotationDate={quotation.createdAt}
       />
@@ -67,8 +66,8 @@ export function QuotationPrintLayout({
 
       {natureOfRepair ? (
         <section className="report-section-keep mt-4">
-          <div className="border border-slate-300">
-            <div className="bg-[#173c99] px-4 py-2.5 text-[10.5px] font-semibold tracking-[0.24em] text-white">
+          <div className="border border-brand-border">
+            <div className="bg-brand-navy px-4 py-2.5 text-[10.5px] font-semibold tracking-[0.24em] text-white">
               NATURE OF REPAIR
             </div>
             <div className="px-4 py-3.5 text-[11px] leading-[1.48] text-slate-800">
@@ -80,14 +79,14 @@ export function QuotationPrintLayout({
 
       <section className="mt-4">
         <div className="mb-2 flex items-center gap-3">
-          <span className="bg-[#173c99] px-3 py-1.5 text-[10.5px] font-semibold tracking-[0.24em] text-white">
+          <span className="bg-brand-navy px-3 py-1.5 text-[10.5px] font-semibold tracking-[0.24em] text-white">
             QUOTED SERVICES
           </span>
-          <span className="h-[2px] flex-1 bg-gray-100" />
+          <span className="h-[2px] flex-1 bg-brand-border" />
         </div>
-        <div className="overflow-hidden border border-slate-300">
+        <div className="overflow-hidden border border-brand-border">
           <table className="w-full border-collapse text-[11px]">
-            <thead className="bg-[#173c99] text-white">
+            <thead className="bg-brand-navy text-white">
               <tr>
                 <th className="w-10 px-3 py-2.5 text-left font-semibold">#</th>
                 <th className="px-3 py-2.5 text-left font-semibold">
@@ -114,7 +113,7 @@ export function QuotationPrintLayout({
                     >
                       <td
                         colSpan={5}
-                        className="border-t border-slate-200 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-[#173c99]"
+                        className="border-t border-slate-200 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-brand-navy"
                       >
                         {row.label}
                       </td>
@@ -170,10 +169,10 @@ export function QuotationPrintLayout({
       </section>
 
       <section className="report-section-keep mt-6">
-        <p className="text-[10.5px] font-semibold uppercase tracking-[0.26em] text-[#173c99]">
+        <p className="text-[10.5px] font-semibold uppercase tracking-[0.26em] text-brand-navy">
           APPROVAL
         </p>
-        <div className="mt-2 h-px bg-slate-300" />
+        <div className="mt-2 h-px bg-brand-border" />
         <div className="grid gap-5 pt-4 sm:grid-cols-[1.15fr_1fr_1fr]">
           <div className="text-[10.5px] leading-[1.6] text-slate-700">
             <p className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-slate-800">
@@ -214,6 +213,7 @@ export function QuotationPrintLayout({
 
       <QuotationFooter
         businessName={businessProfile.businessName}
+        vatRegistrationNo={businessProfile.businessVatRegistrationNo}
         contactNumber={businessProfile.businessContact}
         email={businessProfile.businessEmail}
         address={businessProfile.businessAddress}
@@ -225,38 +225,31 @@ export function QuotationPrintLayout({
 function QuotationPrintHeader({
   businessName,
   logoSrc,
-  vatRegistrationNo,
   quotationNumber,
   quotationDate,
 }: {
   businessName: string;
   logoSrc: string | null;
-  vatRegistrationNo: string | null;
   quotationNumber: string;
   quotationDate: string;
 }) {
   return (
-    <header className="report-section-keep border-b-2 border-slate-300 pb-3">
+    <header className="report-section-keep border-b-2 border-brand-border pb-3">
       <div className="grid gap-4 sm:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] sm:items-center">
-        <div className="flex flex-col items-start gap-2">
-          <div className="max-w-[132px] shrink-0 sm:max-w-[156px]">
+        <div className="flex items-center">
+          <div className="max-w-[170px] shrink-0 sm:max-w-[188px]">
             <img
               src={logoSrc ?? '/say-auto-care-logo.jpeg'}
               alt={businessName}
-              className="h-auto max-h-[96px] w-auto max-w-[156px] object-contain"
+              className="h-auto max-h-[102px] w-auto max-w-[188px] object-contain"
             />
           </div>
-          {vatRegistrationNo ? (
-            <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-[#c73d3d] sm:text-[9.5px]">
-              VAT Reg. No.: {vatRegistrationNo}
-            </p>
-          ) : null}
         </div>
         <div className="sm:text-right">
-          <p className="font-display text-[34px] font-semibold leading-none tracking-[0.08em] text-[#10224d] sm:text-[38px]">
+          <p className="font-display text-[34px] font-semibold leading-none tracking-[0.08em] text-brand-navy sm:text-[38px]">
             QUOTATION
           </p>
-          <div className="mt-2 h-[2px] w-32 bg-[#c73d3d] sm:ml-auto" />
+          <div className="mt-2 h-[2px] w-32 bg-brand-red sm:ml-auto" />
           <p className="mt-2 text-[10.5px] font-medium leading-[1.45] text-slate-700 sm:text-[11px]">
             {buildCompactHeaderMeta(quotationNumber, quotationDate)}
           </p>
@@ -276,10 +269,10 @@ function QuotationInfoPanel({
   return (
     <section className="report-section-keep">
       <div className="flex items-center gap-3">
-        <span className="bg-[#173c99] px-3 py-1.5 text-[10.5px] font-semibold tracking-[0.24em] text-white">
+        <span className="bg-brand-navy px-3 py-1.5 text-[10.5px] font-semibold tracking-[0.24em] text-white">
           {title}
         </span>
-        <span className="h-px flex-1 bg-gray-100" />
+        <span className="h-px flex-1 bg-brand-border" />
       </div>
       <div className="mt-3 space-y-2.5">
         {rows.map((row) => (
@@ -301,10 +294,10 @@ function QuotationInfoPanel({
 function QuotationTermsSection({ terms }: { terms: string[] }) {
   return (
     <section className="report-section-keep">
-      <p className="text-[10.5px] font-semibold uppercase tracking-[0.26em] text-[#173c99]">
+      <p className="text-[10.5px] font-semibold uppercase tracking-[0.26em] text-brand-navy">
         TERMS &amp; CONDITIONS
       </p>
-      <div className="mt-2 h-px bg-slate-300" />
+      <div className="mt-2 h-px bg-brand-border" />
       <ul className="mt-3 list-disc space-y-1.5 pl-4 text-[10.5px] leading-[1.5] text-slate-700">
         {terms.map((term) => (
           <li key={term}>{term}</li>
@@ -330,12 +323,12 @@ function QuotationTotalsPanel({
   ];
 
   return (
-    <section className="flex h-full flex-col justify-between overflow-hidden border border-slate-300 bg-[#f8fafc]">
+    <section className="flex h-full flex-col justify-between overflow-hidden border border-brand-border bg-brand-soft/35">
       <div className="flex-1 px-4 pt-4">
-        <p className="text-[10.5px] font-semibold uppercase tracking-[0.26em] text-[#173c99]">
+        <p className="text-[10.5px] font-semibold uppercase tracking-[0.26em] text-brand-navy">
           QUOTATION SUMMARY
         </p>
-        <div className="mt-2 h-px bg-slate-300" />
+        <div className="mt-2 h-px bg-brand-border" />
         <table className="mt-3 w-full border-collapse text-[11px]">
           <tbody>
             {totalLines.map((line) => (
@@ -355,7 +348,7 @@ function QuotationTotalsPanel({
         </table>
       </div>
 
-      <div className="shrink-0 border-t border-[#d5b033] bg-[#ffd24a] px-4 py-3 text-[#173c99]">
+      <div className="shrink-0 border-t-2 border-brand-red bg-brand-navy px-4 py-3 text-white">
         <div className="flex items-end justify-between gap-4">
           <span className="text-[10.5px] font-semibold uppercase tracking-[0.26em]">
             TOTAL QUOTATION
@@ -371,22 +364,27 @@ function QuotationTotalsPanel({
 
 function QuotationFooter({
   businessName,
+  vatRegistrationNo,
   contactNumber,
   email,
   address,
 }: {
   businessName: string;
+  vatRegistrationNo: string | null;
   contactNumber: string | null;
   email: string | null;
   address: string | null;
 }) {
   return (
     <footer className="mt-auto pt-5">
-      <div className="border-t-2 border-[#c73d3d] pt-3">
+      <div className="border-t-2 border-brand-red pt-3">
         <div className="flex flex-wrap items-center justify-between gap-4 px-1">
           <div className="min-w-[190px]">
-            <p className="font-display text-[12px] font-semibold uppercase tracking-[0.14em] text-[#173c99]">
+            <p className="font-display text-[12px] font-semibold uppercase tracking-[0.14em] text-brand-navy">
               {businessName}
+            </p>
+            <p className="mt-1.5 text-[9.5px] font-medium text-slate-600">
+              VAT Reg. No.: {vatRegistrationNo?.trim() || 'Not configured'}
             </p>
           </div>
           <div className="grid flex-1 gap-3 text-[10px] text-slate-700 sm:grid-cols-3">
@@ -396,9 +394,9 @@ function QuotationFooter({
           </div>
         </div>
       </div>
-      <div className="mt-3 flex items-center justify-between bg-[#173c99] px-4 py-2.5 text-[9.5px] font-semibold uppercase tracking-[0.26em] text-white">
-        <span>Thank you for choosing SAY Auto Care</span>
-        <span className="h-[3px] w-16 bg-[#ffd24a]" />
+      <div className="mt-3 flex items-center justify-between bg-brand-navy px-4 py-2.5 text-[9.5px] font-semibold uppercase tracking-[0.26em] text-white">
+        <span>{businessName}</span>
+        <span className="h-[3px] w-16 bg-brand-red" />
       </div>
     </footer>
   );

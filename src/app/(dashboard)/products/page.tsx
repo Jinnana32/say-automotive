@@ -1,10 +1,10 @@
 import Link from "next/link";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableFilters } from "@/components/shared/data-table-filters";
+import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
-import { FilterBar } from "@/components/shared/filter-bar";
 import { PageHeader } from "@/components/shared/page-header";
-import { SearchInput } from "@/components/shared/search-input";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -14,18 +14,21 @@ import {
 } from "@/components/shared/table-row-actions-menu";
 import { formatCurrency } from "@/lib/currency";
 import { listProducts } from "@/features/products/queries/product-queries";
+import { paginateItems } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
 
 type ProductsPageProps = {
   searchParams: Promise<{
     search?: string;
+    page?: string;
   }>;
 };
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-  const { search = "" } = await searchParams;
+  const { search = "", page } = await searchParams;
   const products = await listProducts(search);
+  const pagination = paginateItems(products, page);
 
   return (
     <div className="space-y-6">
@@ -41,26 +44,30 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
       <DataTableCard
         title="Product catalog"
-        description={`${products.length} product${products.length === 1 ? "" : "s"} matched.`}
+        description={`${pagination.totalItems} product${pagination.totalItems === 1 ? "" : "s"} matched.`}
         toolbar={
-          <form>
-            <FilterBar className="md:grid md:grid-cols-[minmax(0,1fr)_auto_auto]">
-              <SearchInput
-                type="search"
-                name="search"
-                defaultValue={search}
-                placeholder="Search name, SKU, barcode, or part number"
-              />
-              <Button type="submit">Apply</Button>
-              <Button asChild type="button" variant="ghost">
-                <Link href="/products">Reset</Link>
-              </Button>
-            </FilterBar>
-          </form>
+          <DataTableFilters
+            key={search}
+            className="md:grid md:grid-cols-[minmax(0,1fr)]"
+            search={{
+              value: search,
+              placeholder: "Search name, SKU, barcode, or part number",
+            }}
+          />
+        }
+        footer={
+          <DataTablePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            totalItems={pagination.totalItems}
+            totalPages={pagination.totalPages}
+            startItem={pagination.startItem}
+            endItem={pagination.endItem}
+          />
         }
       >
 
-        {products.length === 0 ? (
+        {pagination.totalItems === 0 ? (
           <EmptyState
             title="No products found"
             description="Create product catalog records before stock is received, used, or sold."
@@ -86,7 +93,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {products.map((product) => (
+                {pagination.items.map((product) => (
                   <TableRow key={product.id}>
                     <TableCell>
                       <div className="space-y-1">

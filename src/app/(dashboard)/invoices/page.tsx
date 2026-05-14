@@ -1,12 +1,12 @@
 import Link from "next/link";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableFilters } from "@/components/shared/data-table-filters";
+import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
-import { FilterBar } from "@/components/shared/filter-bar";
 import { PageHeader } from "@/components/shared/page-header";
-import { SearchInput } from "@/components/shared/search-input";
+import { TableCellLink } from "@/components/shared/table-cell-link";
 import { Button } from "@/components/ui/button";
-import { NativeSelect } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   TableRowActionsMenu,
@@ -16,6 +16,7 @@ import { InvoiceStatusBadge } from "@/features/invoices/components/invoice-statu
 import { listInvoices } from "@/features/invoices/queries/invoice-queries";
 import { formatCurrency } from "@/lib/currency";
 import { formatDate } from "@/lib/dates";
+import { paginateItems } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
 
@@ -23,12 +24,14 @@ type InvoicesPageProps = {
   searchParams: Promise<{
     search?: string;
     status?: "unpaid" | "partially_paid" | "paid" | "cancelled";
+    page?: string;
   }>;
 };
 
 export default async function InvoicesPage({ searchParams }: InvoicesPageProps) {
-  const { search = "", status = "" } = await searchParams;
+  const { search = "", status = "", page } = await searchParams;
   const invoices = await listInvoices({ search, status });
+  const pagination = paginateItems(invoices, page);
 
   return (
     <div className="space-y-6">
@@ -44,33 +47,44 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
 
       <DataTableCard
         title="Invoice register"
-        description={`${invoices.length} invoice${invoices.length === 1 ? "" : "s"} in the current view.`}
+        description={`${pagination.totalItems} invoice${pagination.totalItems === 1 ? "" : "s"} in the current view.`}
         toolbar={
-          <form>
-            <FilterBar className="lg:grid lg:grid-cols-[minmax(0,1fr)_220px_auto_auto]">
-              <SearchInput
-                type="search"
-                name="search"
-                defaultValue={search}
-                placeholder="Search invoice number"
-              />
-              <NativeSelect name="status" defaultValue={status}>
-                <option value="">All statuses</option>
-                <option value="unpaid">Unpaid</option>
-                <option value="partially_paid">Partially paid</option>
-                <option value="paid">Paid</option>
-                <option value="cancelled">Cancelled</option>
-              </NativeSelect>
-              <Button type="submit">Apply</Button>
-              <Button asChild type="button" variant="ghost">
-                <Link href="/invoices">Reset</Link>
-              </Button>
-            </FilterBar>
-          </form>
+          <DataTableFilters
+            key={`${search}:${status}`}
+            className="lg:grid lg:grid-cols-[minmax(0,1fr)_220px]"
+            search={{
+              value: search,
+              placeholder: "Search invoice number",
+            }}
+            filters={[
+              {
+                type: "select",
+                name: "status",
+                value: status,
+                options: [
+                  { value: "", label: "All statuses" },
+                  { value: "unpaid", label: "Unpaid" },
+                  { value: "partially_paid", label: "Partially paid" },
+                  { value: "paid", label: "Paid" },
+                  { value: "cancelled", label: "Cancelled" },
+                ],
+              },
+            ]}
+          />
+        }
+        footer={
+          <DataTablePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            totalItems={pagination.totalItems}
+            totalPages={pagination.totalPages}
+            startItem={pagination.startItem}
+            endItem={pagination.endItem}
+          />
         }
       >
 
-        {invoices.length === 0 ? (
+        {pagination.totalItems === 0 ? (
           <EmptyState
             title="No invoices found"
             description="Invoices are generated after a job order reaches ready for billing."
@@ -97,18 +111,48 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {invoices.map((invoice) => (
+                {pagination.items.map((invoice) => (
                   <TableRow key={invoice.id}>
-                    <TableCell className="font-semibold">{invoice.invoiceNumber}</TableCell>
-                    <TableCell>{invoice.jobOrderNumber ?? "POS flow"}</TableCell>
-                    <TableCell>{invoice.customerName}</TableCell>
-                    <TableCell>{invoice.vehicleLabel}</TableCell>
                     <TableCell>
-                      <InvoiceStatusBadge status={invoice.status} />
+                      <TableCellLink href={`/invoices/${invoice.id}`} className="font-semibold text-foreground">
+                        {invoice.invoiceNumber}
+                      </TableCellLink>
                     </TableCell>
-                    <TableCell>{formatCurrency(invoice.totalAmount)}</TableCell>
-                    <TableCell>{formatCurrency(invoice.balance)}</TableCell>
-                    <TableCell>{formatDate(invoice.invoiceDate)}</TableCell>
+                    <TableCell>
+                      <TableCellLink href={`/invoices/${invoice.id}`} className="text-foreground">
+                        {invoice.jobOrderNumber ?? "POS flow"}
+                      </TableCellLink>
+                    </TableCell>
+                    <TableCell>
+                      <TableCellLink href={`/invoices/${invoice.id}`} className="text-foreground">
+                        {invoice.customerName}
+                      </TableCellLink>
+                    </TableCell>
+                    <TableCell>
+                      <TableCellLink href={`/invoices/${invoice.id}`} className="text-foreground">
+                        {invoice.vehicleLabel}
+                      </TableCellLink>
+                    </TableCell>
+                    <TableCell>
+                      <TableCellLink href={`/invoices/${invoice.id}`}>
+                        <InvoiceStatusBadge status={invoice.status} />
+                      </TableCellLink>
+                    </TableCell>
+                    <TableCell>
+                      <TableCellLink href={`/invoices/${invoice.id}`} className="text-foreground">
+                        {formatCurrency(invoice.totalAmount)}
+                      </TableCellLink>
+                    </TableCell>
+                    <TableCell>
+                      <TableCellLink href={`/invoices/${invoice.id}`} className="text-foreground">
+                        {formatCurrency(invoice.balance)}
+                      </TableCellLink>
+                    </TableCell>
+                    <TableCell>
+                      <TableCellLink href={`/invoices/${invoice.id}`} className="text-foreground">
+                        {formatDate(invoice.invoiceDate)}
+                      </TableCellLink>
+                    </TableCell>
                     <TableCell className="text-right">
                       <TableRowActionsMenu label={`Invoice actions for ${invoice.invoiceNumber}`}>
                         <TableRowActionsMenuLink

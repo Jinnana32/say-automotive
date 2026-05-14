@@ -99,9 +99,9 @@ export function JobOrderPrintLayout({
 
       <section className="mt-4">
         <ReportSectionHeading title="WORK ITEMS" />
-        <div className="overflow-hidden border border-[#173c99]/20">
+        <div className="overflow-hidden border border-brand-border">
           <table className="w-full border-collapse text-[11px]">
-            <thead className="bg-[#173c99] text-white">
+            <thead className="bg-brand-navy text-white">
               <tr>
                 <th className="w-16 px-2 py-1.5 text-left font-semibold">
                   Type
@@ -186,9 +186,9 @@ export function JobOrderPrintLayout({
 
       <section className="mt-4">
         <ReportSectionHeading title="PARTS USAGE" />
-        <div className="overflow-hidden border border-[#173c99]/20">
+        <div className="overflow-hidden border border-brand-border">
           <table className="w-full border-collapse text-[11px]">
-            <thead className="bg-[#173c99] text-white">
+            <thead className="bg-brand-navy text-white">
               <tr>
                 <th className="px-2 py-1.5 text-left font-semibold">Part</th>
                 <th className="w-16 px-2 py-1.5 text-right font-semibold">
@@ -262,9 +262,9 @@ export function JobOrderPrintLayout({
         <div className="space-y-20">
           <div>
             <ReportSectionHeading title="MECHANICS" />
-            <div className="overflow-hidden border border-[#173c99]/20">
+            <div className="overflow-hidden border border-brand-border">
               <table className="w-full border-collapse text-[11px]">
-                <thead className="bg-[#173c99] text-white">
+                <thead className="bg-brand-navy text-white">
                   <tr>
                     <th className="px-2 py-1.5 text-left font-semibold">
                       Name
@@ -304,7 +304,7 @@ export function JobOrderPrintLayout({
         {!hidePrices ? (
           <div className="justify-self-end space-y-2">
             <ReportSectionHeading title="JOB ORDER SUMMARY" />
-            <div className="overflow-hidden border border-[#173c99]/20 px-3 py-3">
+            <div className="overflow-hidden border border-brand-border bg-brand-soft/35 px-3 py-3">
               <ReportTotals
                 lines={[
                   {
@@ -353,6 +353,8 @@ export function JobOrderPrintLayout({
       </section>
 
       <ReportFooter
+        businessName={businessProfile.businessName}
+        vatRegistrationNo={businessProfile.businessVatRegistrationNo}
         contactNumber={businessProfile.businessContact}
         email={businessProfile.businessEmail}
         address={businessProfile.businessAddress}

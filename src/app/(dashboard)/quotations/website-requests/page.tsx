@@ -1,31 +1,35 @@
 import Link from "next/link";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableFilters } from "@/components/shared/data-table-filters";
+import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
-import { FilterBar } from "@/components/shared/filter-bar";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
-import { NativeSelect } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDateTime } from "@/lib/dates";
 import { listWebsiteQuoteRequests } from "@/features/website/queries/website-queries";
 import { getWebsiteQuoteRequestTone } from "@/features/website/utils";
 import { WebsiteQuoteRequestRowActions } from "@/features/website/components/website-quote-request-row-actions";
+import { paginateItems } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
 
 type WebsiteQuoteRequestsPageProps = {
   searchParams: Promise<{
+    search?: string;
     status?: "new" | "reviewed" | "contacted" | "quoted" | "closed";
+    page?: string;
   }>;
 };
 
 export default async function WebsiteQuoteRequestsPage({
   searchParams,
 }: WebsiteQuoteRequestsPageProps) {
-  const { status = "" } = await searchParams;
-  const requests = await listWebsiteQuoteRequests(status);
+  const { search = "", status = "", page } = await searchParams;
+  const requests = await listWebsiteQuoteRequests({ search, status });
+  const pagination = paginateItems(requests, page);
 
   return (
     <div className="space-y-6">
@@ -41,27 +45,44 @@ export default async function WebsiteQuoteRequestsPage({
 
       <DataTableCard
         title="Lead queue"
-        description={`${requests.length} request${requests.length === 1 ? "" : "s"} in the current view.`}
+        description={`${pagination.totalItems} request${pagination.totalItems === 1 ? "" : "s"} in the current view.`}
         toolbar={
-          <form>
-            <FilterBar className="lg:grid lg:grid-cols-[220px_auto_auto]">
-              <NativeSelect name="status" defaultValue={status}>
-                <option value="">All statuses</option>
-                <option value="new">New</option>
-                <option value="reviewed">Reviewed</option>
-                <option value="contacted">Contacted</option>
-                <option value="quoted">Quoted</option>
-                <option value="closed">Closed</option>
-              </NativeSelect>
-              <Button type="submit">Apply</Button>
-              <Button asChild type="button" variant="ghost">
-                <Link href="/quotations/website-requests">Reset</Link>
-              </Button>
-            </FilterBar>
-          </form>
+          <DataTableFilters
+            key={`${search}:${status}`}
+            className="lg:grid lg:grid-cols-[minmax(0,1fr)_220px]"
+            search={{
+              value: search,
+              placeholder: "Search customer, email, vehicle, city, or service",
+            }}
+            filters={[
+              {
+                type: "select",
+                name: "status",
+                value: status,
+                options: [
+                  { value: "", label: "All statuses" },
+                  { value: "new", label: "New" },
+                  { value: "reviewed", label: "Reviewed" },
+                  { value: "contacted", label: "Contacted" },
+                  { value: "quoted", label: "Quoted" },
+                  { value: "closed", label: "Closed" },
+                ],
+              },
+            ]}
+          />
+        }
+        footer={
+          <DataTablePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            totalItems={pagination.totalItems}
+            totalPages={pagination.totalPages}
+            startItem={pagination.startItem}
+            endItem={pagination.endItem}
+          />
         }
       >
-        {requests.length === 0 ? (
+        {pagination.totalItems === 0 ? (
           <EmptyState
             title="No website quote requests"
             description="Public quote requests will appear here once the website form is live."
@@ -81,7 +102,7 @@ export default async function WebsiteQuoteRequestsPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {requests.map((request) => (
+                {pagination.items.map((request) => (
                   <TableRow key={request.id}>
                     <TableCell>
                       <div className="space-y-1">

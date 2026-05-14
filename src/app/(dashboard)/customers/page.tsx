@@ -1,11 +1,11 @@
 import Link from "next/link";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableFilters } from "@/components/shared/data-table-filters";
+import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
-import { FilterBar } from "@/components/shared/filter-bar";
 import { FormStatusMessage } from "@/components/shared/form-status";
 import { PageHeader } from "@/components/shared/page-header";
-import { SearchInput } from "@/components/shared/search-input";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { TableCellLink } from "@/components/shared/table-cell-link";
 import { Button } from "@/components/ui/button";
@@ -14,19 +14,22 @@ import { CustomerRowActions } from "@/features/customers/components/customer-row
 import { listCustomers } from "@/features/customers/queries/customer-queries";
 import { requireAuthenticatedStaff } from "@/lib/auth/session";
 import { formatDate } from "@/lib/dates";
+import { paginateItems } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
 
 type CustomersPageProps = {
   searchParams: Promise<{
     search?: string;
+    page?: string;
     error?: string;
   }>;
 };
 
 export default async function CustomersPage({ searchParams }: CustomersPageProps) {
-  const { search = "", error } = await searchParams;
+  const { search = "", page, error } = await searchParams;
   const [customers, session] = await Promise.all([listCustomers(search), requireAuthenticatedStaff()]);
+  const pagination = paginateItems(customers, page);
   const canManageCustomers = session.capabilities.includes("customers:write");
 
   return (
@@ -45,25 +48,29 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
 
       <DataTableCard
         title="Customer directory"
-        description={`${customers.length} record${customers.length === 1 ? "" : "s"} in the workshop database.`}
+        description={`${pagination.totalItems} record${pagination.totalItems === 1 ? "" : "s"} in the workshop database.`}
         toolbar={
-          <form>
-            <FilterBar className="md:grid md:grid-cols-[minmax(0,1fr)_auto_auto]">
-              <SearchInput
-                type="search"
-                name="search"
-                defaultValue={search}
-                placeholder="Search customer, mobile number, or email"
-              />
-              <Button type="submit">Apply</Button>
-              <Button asChild type="button" variant="ghost">
-                <Link href="/customers">Reset</Link>
-              </Button>
-            </FilterBar>
-          </form>
+          <DataTableFilters
+            key={search}
+            className="md:grid md:grid-cols-[minmax(0,1fr)]"
+            search={{
+              value: search,
+              placeholder: "Search customer, mobile number, or email",
+            }}
+          />
+        }
+        footer={
+          <DataTablePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            totalItems={pagination.totalItems}
+            totalPages={pagination.totalPages}
+            startItem={pagination.startItem}
+            endItem={pagination.endItem}
+          />
         }
       >
-        {customers.length === 0 ? (
+        {pagination.totalItems === 0 ? (
           <EmptyState
             title="No customers found"
             description="Add the first customer to start linking vehicles and workshop documents."
@@ -87,7 +94,7 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {customers.map((customer) => (
+                {pagination.items.map((customer) => (
                   <TableRow key={customer.id}>
                     <TableCell>
                       <TableCellLink href={`/customers/${customer.id}`}>

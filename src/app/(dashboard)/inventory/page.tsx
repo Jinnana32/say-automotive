@@ -1,13 +1,14 @@
 import Link from "next/link";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableFilters } from "@/components/shared/data-table-filters";
+import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
 import { MetricGrid } from "@/components/shared/metric-grid";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { InventoryFilterToolbar } from "@/features/inventory/components/inventory-filter-toolbar";
 import { InventoryMovementDialog } from "@/features/inventory/components/inventory-movement-dialog";
 import { InventorySettingsDialog } from "@/features/inventory/components/inventory-settings-dialog";
 import {
@@ -25,6 +26,7 @@ import {
 } from "@/features/inventory/utils";
 import { formatCurrency } from "@/lib/currency";
 import { formatDateTime } from "@/lib/dates";
+import { paginateItems } from "@/lib/pagination";
 import {
   TableRowActionsMenu,
   TableRowActionsMenuButton,
@@ -37,16 +39,26 @@ type InventoryPageProps = {
     search?: string;
     stockState?: InventoryStockFilterState;
     movementType?: InventoryMovementType;
+    stockPage?: string;
+    movementPage?: string;
   }>;
 };
 
 export default async function InventoryPage({ searchParams }: InventoryPageProps) {
-  const { search = "", stockState = "all", movementType = "" } = await searchParams;
+  const {
+    search = "",
+    stockState = "all",
+    movementType = "",
+    stockPage,
+    movementPage,
+  } = await searchParams;
   const inventory = await getInventoryDashboardData({
     search,
     stockState,
     movementType,
   });
+  const stockPagination = paginateItems(inventory.stocks, stockPage);
+  const movementPagination = paginateItems(inventory.movements, movementPage);
 
   return (
     <div className="space-y-6">
@@ -92,18 +104,61 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
 
       <DataTableCard
         title="Stock balances"
-        description="Search the active catalog and review stock health before making adjustments."
+        description={`${stockPagination.totalItems} product${
+          stockPagination.totalItems === 1 ? "" : "s"
+        } in the current stock view.`}
         contentClassName="p-0"
         toolbar={
-          <InventoryFilterToolbar
-            key={`${search}::${stockState}::${movementType}`}
-            search={search}
-            stockState={stockState}
-            movementType={movementType}
+          <DataTableFilters
+            key={`${search}:${stockState}:${movementType}`}
+            className="lg:grid lg:grid-cols-[minmax(0,1fr)_220px_220px]"
+            pageParamName="stockPage"
+            search={{
+              value: search,
+              placeholder: "Search product name, SKU, or barcode",
+            }}
+            filters={[
+              {
+                type: "select",
+                name: "stockState",
+                value: stockState,
+                options: [
+                  { value: "all", label: "All stock states" },
+                  { value: "low", label: "Low stock" },
+                  { value: "out", label: "No stock" },
+                  { value: "missing", label: "Missing stock record" },
+                ],
+              },
+              {
+                type: "select",
+                name: "movementType",
+                value: movementType,
+                options: [
+                  { value: "", label: "All movement types" },
+                  { value: "stock_in", label: formatInventoryMovementType("stock_in") },
+                  { value: "adjustment", label: formatInventoryMovementType("adjustment") },
+                  { value: "damaged", label: formatInventoryMovementType("damaged") },
+                  { value: "service_usage", label: formatInventoryMovementType("service_usage") },
+                  { value: "pos_sale", label: formatInventoryMovementType("pos_sale") },
+                  { value: "return", label: formatInventoryMovementType("return") },
+                ],
+              },
+            ]}
+          />
+        }
+        footer={
+          <DataTablePagination
+            page={stockPagination.page}
+            pageSize={stockPagination.pageSize}
+            totalItems={stockPagination.totalItems}
+            totalPages={stockPagination.totalPages}
+            startItem={stockPagination.startItem}
+            endItem={stockPagination.endItem}
+            pageParamName="stockPage"
           />
         }
       >
-        {inventory.stocks.length === 0 ? (
+        {stockPagination.totalItems === 0 ? (
           <div className="p-5">
             <EmptyState
               title="No inventory matches the current filters"
@@ -127,7 +182,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {inventory.stocks.map((stock) => (
+                {stockPagination.items.map((stock) => (
                   <TableRow key={stock.productId}>
                     <TableCell>
                       <div>
@@ -185,10 +240,23 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
 
       <DataTableCard
         title="Recent stock movements"
-        description="Append-only ledger of every inventory change with before and after quantity."
+        description={`${movementPagination.totalItems} movement${
+          movementPagination.totalItems === 1 ? "" : "s"
+        } matched the current search and movement filters.`}
         contentClassName="p-0"
+        footer={
+          <DataTablePagination
+            page={movementPagination.page}
+            pageSize={movementPagination.pageSize}
+            totalItems={movementPagination.totalItems}
+            totalPages={movementPagination.totalPages}
+            startItem={movementPagination.startItem}
+            endItem={movementPagination.endItem}
+            pageParamName="movementPage"
+          />
+        }
       >
-        {inventory.movements.length === 0 ? (
+        {movementPagination.totalItems === 0 ? (
           <div className="p-5">
             <EmptyState
               title="No movement history found"
@@ -209,7 +277,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {inventory.movements.map((movement) => (
+                {movementPagination.items.map((movement) => (
                   <TableRow key={movement.id}>
                     <TableCell>{formatDateTime(movement.createdAt)}</TableCell>
                     <TableCell>

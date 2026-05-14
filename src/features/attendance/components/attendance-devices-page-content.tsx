@@ -1,12 +1,18 @@
-import Link from "next/link";
+"use client";
 
+import Link from "next/link";
+import { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
+
+import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableFilters } from "@/components/shared/data-table-filters";
+import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
 import { MetricGrid } from "@/components/shared/metric-grid";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AttendanceDeviceRowActions } from "@/features/attendance/components/attendance-device-row-actions";
 import {
@@ -16,12 +22,42 @@ import {
 import type { AttendanceDevicesPageData } from "@/features/attendance/types";
 import { formatStaffRoleLabel } from "@/features/attendance/utils";
 import { formatDateTime } from "@/lib/dates";
+import { paginateItems } from "@/lib/pagination";
 
 export function AttendanceDevicesPageContent({
   data,
 }: {
   data: AttendanceDevicesPageData;
 }) {
+  const searchParams = useSearchParams();
+  const search = searchParams.get("search")?.trim().toLowerCase() ?? "";
+  const status = searchParams.get("status") ?? "";
+  const filteredDevices = useMemo(
+    () =>
+      data.devices.filter((device) => {
+        if (status && device.status !== status) {
+          return false;
+        }
+
+        if (!search) {
+          return true;
+        }
+
+        return [
+          device.staffName,
+          formatStaffRoleLabel(device.staffRole),
+          device.deviceName ?? "",
+          device.userAgent ?? "",
+          device.lastIp ?? "",
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(search);
+      }),
+    [data.devices, search, status],
+  );
+  const pagination = paginateItems(filteredDevices, searchParams.get("page") ?? undefined);
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -53,85 +89,120 @@ export function AttendanceDevicesPageContent({
         />
       </MetricGrid>
 
-      <Card className="border-border/70 shadow-sm">
-        <CardContent className="p-0">
-          {data.devices.length === 0 ? (
-            <div className="p-6">
-              <EmptyState
-                title="No mechanic devices registered yet"
-                description="A device record is created automatically when a mechanic opens the portal with a new browser or phone."
-              />
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Mechanic</TableHead>
-                    <TableHead>Device</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>First seen</TableHead>
-                    <TableHead>Last seen</TableHead>
-                    <TableHead>Last IP</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data.devices.map((device) => (
-                    <TableRow key={device.id}>
-                      <TableCell>
-                        <div className="space-y-1">
-                          <p className="font-medium text-foreground">{device.staffName}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {formatStaffRoleLabel(device.staffRole)}
+      <DataTableCard
+        title="Registered devices"
+        description={`${pagination.totalItems} device${pagination.totalItems === 1 ? "" : "s"} in the current view.`}
+        contentClassName="p-0"
+        toolbar={
+          <DataTableFilters
+            key={`${search}:${status}`}
+            className="lg:grid lg:grid-cols-[minmax(0,1fr)_220px]"
+            search={{
+              value: searchParams.get("search") ?? "",
+              placeholder: "Search mechanic, device, browser, or IP",
+            }}
+            filters={[
+              {
+                type: "select",
+                name: "status",
+                value: status,
+                options: [
+                  { value: "", label: "All statuses" },
+                  { value: "pending", label: "Pending" },
+                  { value: "approved", label: "Approved" },
+                  { value: "revoked", label: "Revoked" },
+                ],
+              },
+            ]}
+          />
+        }
+        footer={
+          <DataTablePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            totalItems={pagination.totalItems}
+            totalPages={pagination.totalPages}
+            startItem={pagination.startItem}
+            endItem={pagination.endItem}
+          />
+        }
+      >
+        {pagination.totalItems === 0 ? (
+          <div className="p-6">
+            <EmptyState
+              title="No mechanic devices registered yet"
+              description="A device record is created automatically when a mechanic opens the portal with a new browser or phone."
+            />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Mechanic</TableHead>
+                  <TableHead>Device</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>First seen</TableHead>
+                  <TableHead>Last seen</TableHead>
+                  <TableHead>Last IP</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pagination.items.map((device) => (
+                  <TableRow key={device.id}>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <p className="font-medium text-foreground">{device.staffName}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {formatStaffRoleLabel(device.staffRole)}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="space-y-1">
+                      <p className="font-medium text-foreground">
+                        {device.deviceName?.trim() || "Unnamed device"}
+                      </p>
+                      <p className="max-w-[360px] line-clamp-2 text-sm text-muted-foreground">
+                        {device.userAgent ?? "Unknown browser"}
+                      </p>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-2">
+                        <StatusBadge tone={getStaffDeviceStatusTone(device.status)}>
+                          {formatStaffDeviceStatusLabel(device.status)}
+                        </StatusBadge>
+                        {device.approvedAt ? (
+                          <p className="text-xs text-muted-foreground">
+                            Approved {formatDateTime(device.approvedAt)}
                           </p>
-                        </div>
-                      </TableCell>
-                      <TableCell className="space-y-1">
-                        <p className="font-medium text-foreground">
-                          {device.deviceName?.trim() || "Unnamed device"}
-                        </p>
-                        <p className="max-w-[360px] line-clamp-2 text-sm text-muted-foreground">
-                          {device.userAgent ?? "Unknown browser"}
-                        </p>
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-2">
-                          <StatusBadge tone={getStaffDeviceStatusTone(device.status)}>
-                            {formatStaffDeviceStatusLabel(device.status)}
-                          </StatusBadge>
-                          {device.approvedAt ? (
-                            <p className="text-xs text-muted-foreground">
-                              Approved {formatDateTime(device.approvedAt)}
-                            </p>
-                          ) : null}
-                          {device.revokedAt ? (
-                            <p className="text-xs text-muted-foreground">
-                              Revoked {formatDateTime(device.revokedAt)}
-                            </p>
-                          ) : null}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {formatDateTime(device.firstSeenAt)}
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {formatDateTime(device.lastSeenAt)}
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {device.lastIp ?? "Unavailable"}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <AttendanceDeviceRowActions device={device} />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                        ) : null}
+                        {device.revokedAt ? (
+                          <p className="text-xs text-muted-foreground">
+                            Revoked {formatDateTime(device.revokedAt)}
+                          </p>
+                        ) : null}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {formatDateTime(device.firstSeenAt)}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {formatDateTime(device.lastSeenAt)}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {device.lastIp ?? "Unavailable"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <AttendanceDeviceRowActions device={device} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </DataTableCard>
     </div>
   );
 }

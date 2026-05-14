@@ -1,27 +1,32 @@
 import Link from "next/link";
 
+import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableFilters } from "@/components/shared/data-table-filters";
+import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   TableRowActionsMenu,
   TableRowActionsMenuLink,
 } from "@/components/shared/table-row-actions-menu";
 import { listSuppliers } from "@/features/suppliers/queries/supplier-queries";
+import { paginateItems } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
 
 type SuppliersPageProps = {
   searchParams: Promise<{
     search?: string;
+    page?: string;
   }>;
 };
 
 export default async function SuppliersPage({ searchParams }: SuppliersPageProps) {
-  const { search = "" } = await searchParams;
+  const { search = "", page } = await searchParams;
   const suppliers = await listSuppliers(search);
+  const pagination = paginateItems(suppliers, page);
 
   return (
     <div className="space-y-6">
@@ -35,20 +40,32 @@ export default async function SuppliersPage({ searchParams }: SuppliersPageProps
         }
       />
 
-      <Card className="border-border/70 shadow-sm">
-        <CardContent className="space-y-4 p-6">
-          <form className="grid gap-3 md:grid-cols-[1fr_auto]">
-            <input
-              type="search"
-              name="search"
-              defaultValue={search}
-              placeholder="Search by supplier, contact person, or contact number"
-              className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            />
-            <Button type="submit">Search</Button>
-          </form>
-
-          {suppliers.length === 0 ? (
+      <DataTableCard
+        title="Supplier directory"
+        description={`${pagination.totalItems} supplier${pagination.totalItems === 1 ? "" : "s"} matched.`}
+        toolbar={
+          <DataTableFilters
+            key={search}
+            className="md:grid md:grid-cols-[minmax(0,1fr)]"
+            search={{
+              value: search,
+              placeholder: "Search by supplier, contact person, or contact number",
+            }}
+          />
+        }
+        contentClassName="p-0"
+        footer={
+          <DataTablePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            totalItems={pagination.totalItems}
+            totalPages={pagination.totalPages}
+            startItem={pagination.startItem}
+            endItem={pagination.endItem}
+          />
+        }
+      >
+          {pagination.totalItems === 0 ? (
             <EmptyState
               title="No suppliers found"
               description="Create supplier records now so product procurement references are clean later."
@@ -59,7 +76,7 @@ export default async function SuppliersPage({ searchParams }: SuppliersPageProps
               }
             />
           ) : (
-            <div className="overflow-hidden rounded-[1.25rem] border border-border/70">
+            <div className="overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -71,7 +88,7 @@ export default async function SuppliersPage({ searchParams }: SuppliersPageProps
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {suppliers.map((supplier) => (
+                  {pagination.items.map((supplier) => (
                     <TableRow key={supplier.id}>
                       <TableCell>
                         <div className="space-y-1">
@@ -101,8 +118,7 @@ export default async function SuppliersPage({ searchParams }: SuppliersPageProps
               </Table>
             </div>
           )}
-        </CardContent>
-      </Card>
+      </DataTableCard>
     </div>
   );
 }

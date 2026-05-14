@@ -69,6 +69,7 @@ export type InvoicePrintDetail = InvoiceDetail & {
 export type InvoicePrintBusinessProfile = {
   businessName: string;
   businessLogoUrl: string | null;
+  businessVatRegistrationNo: string | null;
   businessContact: string | null;
   businessEmail: string | null;
   businessAddress: string | null;
@@ -121,6 +122,7 @@ export type PaymentDetail = PaymentListItem & {
 export type PaymentPrintBusinessProfile = {
   businessName: string;
   businessLogoUrl: string | null;
+  businessVatRegistrationNo: string | null;
   businessContact: string | null;
   businessEmail: string | null;
   businessAddress: string | null;

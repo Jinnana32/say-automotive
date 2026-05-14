@@ -17,7 +17,7 @@ export const getReportsPrintDocument = cache(
     const { supabase } = await getAuthorizedSupabaseServerClient("reports:read");
     const { data: settingsRows, error } = await supabase
       .from("business_settings")
-      .select("business_name, business_logo_path, business_contact, business_email, business_address, updated_at")
+      .select("business_name, business_logo_path, business_vat_registration_no, business_contact, business_email, business_address, updated_at")
       .limit(1);
 
     if (error) {
@@ -31,6 +31,7 @@ export const getReportsPrintDocument = cache(
       businessProfile: {
         businessName: settings?.business_name ?? "SAY Auto Care Center",
         businessLogoUrl: buildBusinessLogoUrl(settings?.business_logo_path ?? null, settings?.updated_at ?? null),
+        businessVatRegistrationNo: settings?.business_vat_registration_no ?? null,
         businessContact: settings?.business_contact ?? null,
         businessEmail: settings?.business_email ?? null,
         businessAddress: settings?.business_address ?? null,

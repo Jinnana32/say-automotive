@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
+import { DataTableFilters } from "@/components/shared/data-table-filters";
+import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
-import { SearchInput } from "@/components/shared/search-input";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { NativeSelect } from "@/components/ui/native-select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AttendanceApprovalButton } from "@/features/attendance/components/attendance-approval-button";
@@ -39,13 +40,16 @@ import {
   getDefaultAttendanceDate,
 } from "@/features/attendance/utils";
 import { formatDate } from "@/lib/dates";
+import { paginateItems } from "@/lib/pagination";
 
 export function AttendancePageContent({ data }: { data: AttendancePageData }) {
+  const searchParams = useSearchParams();
   const { leaveManagement, rosterData } = data;
   const { branchHoliday, filters, lockedPeriod, roster, summary, totalMatchingStaff, visibleCount } =
     rosterData;
   const today = getDefaultAttendanceDate();
   const showingFilteredRoster = visibleCount !== totalMatchingStaff;
+  const rosterPagination = paginateItems(roster, searchParams.get("rosterPage") ?? undefined);
   const summaryCards = [
     {
       label: "Recorded",
@@ -127,50 +131,56 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
 
           <Card className="border-border/70 shadow-sm">
             <CardContent className="space-y-4 p-6">
-              <form className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_220px_220px_180px_auto_auto]">
-                <SearchInput
-                  type="search"
-                  name="search"
-                  defaultValue={filters.search}
-                  placeholder="Search by staff name or contact number"
-                />
-                <NativeSelect name="role" defaultValue={filters.role}>
-                  <option value="">All roles</option>
-                  {ATTENDANCE_ROLE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </NativeSelect>
-                <NativeSelect name="status" defaultValue={filters.status}>
-                  <option value="">All attendance states</option>
-                  {ATTENDANCE_FILTER_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </NativeSelect>
-                <input
-                  type="date"
-                  name="date"
-                  defaultValue={filters.date}
-                  className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm shadow-slate-950/[0.02] transition-colors focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/25"
-                />
-                <Button type="submit">Apply filters</Button>
-                <Button asChild variant="outline">
-                  <Link href="/attendance">Reset</Link>
-                </Button>
-              </form>
+              <DataTableFilters
+                key={`${filters.search}:${filters.role}:${filters.status}:${filters.date}`}
+                className="xl:grid xl:grid-cols-[minmax(0,1fr)_220px_220px_180px]"
+                pageParamName="rosterPage"
+                search={{
+                  value: filters.search,
+                  placeholder: "Search by staff name or contact number",
+                }}
+                filters={[
+                  {
+                    type: "select",
+                    name: "role",
+                    value: filters.role,
+                    options: [
+                      { value: "", label: "All roles" },
+                      ...ATTENDANCE_ROLE_OPTIONS.map((option) => ({
+                        value: option.value,
+                        label: option.label,
+                      })),
+                    ],
+                  },
+                  {
+                    type: "select",
+                    name: "status",
+                    value: filters.status,
+                    options: [
+                      { value: "", label: "All attendance states" },
+                      ...ATTENDANCE_FILTER_OPTIONS.map((option) => ({
+                        value: option.value,
+                        label: option.label,
+                      })),
+                    ],
+                  },
+                  {
+                    type: "date",
+                    name: "date",
+                    value: filters.date,
+                  },
+                ]}
+              />
 
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/70 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
                 <p>
-                  Showing {visibleCount} staff member{visibleCount === 1 ? "" : "s"}
+                  Showing {rosterPagination.totalItems} staff member{rosterPagination.totalItems === 1 ? "" : "s"}
                   {showingFilteredRoster ? ` out of ${totalMatchingStaff} matching staff.` : "."}
                 </p>
                 <p>{summary.totalStaff} active staff included in this day&apos;s roster.</p>
               </div>
 
-              {roster.length === 0 ? (
+              {rosterPagination.totalItems === 0 ? (
                 <EmptyState
                   title="No attendance roster found"
                   description="Try a different date or clear the current filters. Active staff will appear here even when no attendance has been recorded yet."
@@ -192,7 +202,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {roster.map((item) => (
+                      {rosterPagination.items.map((item) => (
                         <TableRow key={item.staffId}>
                           <TableCell>
                             <div className="space-y-1">
@@ -309,6 +319,16 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                   </Table>
                 </div>
               )}
+
+              <DataTablePagination
+                page={rosterPagination.page}
+                pageSize={rosterPagination.pageSize}
+                totalItems={rosterPagination.totalItems}
+                totalPages={rosterPagination.totalPages}
+                startItem={rosterPagination.startItem}
+                endItem={rosterPagination.endItem}
+                pageParamName="rosterPage"
+              />
             </CardContent>
           </Card>
         </TabsContent>

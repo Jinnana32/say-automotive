@@ -1,9 +1,11 @@
 import Link from "next/link";
 
+import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableFilters } from "@/components/shared/data-table-filters";
+import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   TableRowActionsMenu,
@@ -11,18 +13,21 @@ import {
 } from "@/components/shared/table-row-actions-menu";
 import { formatCurrency } from "@/lib/currency";
 import { listServices } from "@/features/services/queries/service-queries";
+import { paginateItems } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
 
 type ServicesPageProps = {
   searchParams: Promise<{
     search?: string;
+    page?: string;
   }>;
 };
 
 export default async function ServicesPage({ searchParams }: ServicesPageProps) {
-  const { search = "" } = await searchParams;
+  const { search = "", page } = await searchParams;
   const services = await listServices(search);
+  const pagination = paginateItems(services, page);
 
   return (
     <div className="space-y-6">
@@ -36,20 +41,32 @@ export default async function ServicesPage({ searchParams }: ServicesPageProps) 
         }
       />
 
-      <Card className="border-border/70 shadow-sm">
-        <CardContent className="space-y-4 p-6">
-          <form className="grid gap-3 md:grid-cols-[1fr_auto]">
-            <input
-              type="search"
-              name="search"
-              defaultValue={search}
-              placeholder="Search by service name or category"
-              className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            />
-            <Button type="submit">Search</Button>
-          </form>
-
-          {services.length === 0 ? (
+      <DataTableCard
+        title="Service catalog"
+        description={`${pagination.totalItems} service${pagination.totalItems === 1 ? "" : "s"} matched.`}
+        toolbar={
+          <DataTableFilters
+            key={search}
+            className="md:grid md:grid-cols-[minmax(0,1fr)]"
+            search={{
+              value: search,
+              placeholder: "Search by service name or category",
+            }}
+          />
+        }
+        contentClassName="p-0"
+        footer={
+          <DataTablePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            totalItems={pagination.totalItems}
+            totalPages={pagination.totalPages}
+            startItem={pagination.startItem}
+            endItem={pagination.endItem}
+          />
+        }
+      >
+          {pagination.totalItems === 0 ? (
             <EmptyState
               title="No services found"
               description="Create service catalog entries before assembling quotations or billing labor."
@@ -60,7 +77,7 @@ export default async function ServicesPage({ searchParams }: ServicesPageProps) 
               }
             />
           ) : (
-            <div className="overflow-hidden rounded-[1.25rem] border border-border/70">
+            <div className="overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -73,7 +90,7 @@ export default async function ServicesPage({ searchParams }: ServicesPageProps) 
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {services.map((service) => (
+                  {pagination.items.map((service) => (
                     <TableRow key={service.id}>
                       <TableCell>
                         <div className="space-y-1">
@@ -105,8 +122,7 @@ export default async function ServicesPage({ searchParams }: ServicesPageProps) 
               </Table>
             </div>
           )}
-        </CardContent>
-      </Card>
+      </DataTableCard>
     </div>
   );
 }

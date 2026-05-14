@@ -66,7 +66,7 @@ export function PaymentPrintLayout({
         <div className="space-y-4">
           <div>
             <ReportSectionHeading title="PAYMENT NOTES" />
-            <div className="overflow-hidden border border-[#173c99]/20 px-3 py-2">
+            <div className="overflow-hidden border border-brand-border bg-brand-soft/25 px-3 py-2">
               <p className="font-semibold text-slate-800">Payment Notes</p>
               <p className="mt-1">{payment.notes || "No notes recorded for this payment."}</p>
             </div>
@@ -83,7 +83,7 @@ export function PaymentPrintLayout({
 
         <div className="justify-self-end space-y-2">
           <ReportSectionHeading title="PAYMENT SUMMARY" />
-          <div className="overflow-hidden border border-[#173c99]/20 px-3 py-3">
+          <div className="overflow-hidden border border-brand-border bg-brand-soft/35 px-3 py-3">
             <ReportTotals
               lines={[
                 { label: "Invoice Total:", value: formatCurrency(payment.invoiceTotalAmount) },
@@ -98,6 +98,8 @@ export function PaymentPrintLayout({
       </section>
 
       <ReportFooter
+        businessName={businessProfile.businessName}
+        vatRegistrationNo={businessProfile.businessVatRegistrationNo}
         contactNumber={businessProfile.businessContact}
         email={businessProfile.businessEmail}
         address={businessProfile.businessAddress}

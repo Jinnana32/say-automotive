@@ -57,9 +57,9 @@ export function ReportsPrintLayout({
           title="Period Performance"
           description="These metrics are affected by the selected report window."
         />
-        <div className="mt-2 overflow-hidden border border-slate-300">
+        <div className="mt-2 overflow-hidden border border-brand-border">
           <table className="w-full border-collapse text-[11px]">
-            <thead className="bg-slate-100">
+            <thead className="bg-brand-navy text-white">
               <tr>
                 <th className="px-2 py-1.5 text-left font-semibold">Metric</th>
                 <th className="px-2 py-1.5 text-left font-semibold">Supporting Note</th>
@@ -203,12 +203,12 @@ export function ReportsPrintLayout({
           title="Recent Stock Movements"
           description="Most recent inventory movement entries included for operations context."
         />
-        <div className="mt-2 overflow-hidden border border-slate-300">
+        <div className="mt-2 overflow-hidden border border-brand-border">
           {stockMovementRows.length === 0 ? (
             <p className="px-3 py-3 text-sm text-slate-500">No stock movements recorded yet.</p>
           ) : (
             <table className="w-full border-collapse text-[11px]">
-              <thead className="bg-slate-100">
+              <thead className="bg-brand-navy text-white">
                 <tr>
                   <th className="px-2 py-1.5 text-left font-semibold">Product</th>
                   <th className="w-28 px-2 py-1.5 text-left font-semibold">Movement</th>
@@ -237,6 +237,8 @@ export function ReportsPrintLayout({
       </section>
 
       <ReportFooter
+        businessName={businessProfile.businessName}
+        vatRegistrationNo={businessProfile.businessVatRegistrationNo}
         contactNumber={businessProfile.businessContact}
         email={businessProfile.businessEmail}
         address={businessProfile.businessAddress}
@@ -274,8 +276,9 @@ function SectionHeading({
 }) {
   return (
     <div>
-      <h2 className="font-display text-[18px] font-semibold uppercase text-slate-950">{title}</h2>
-      <p className="mt-1 text-[10px] text-slate-600">{description}</p>
+      <h2 className="font-display text-[18px] font-semibold uppercase text-brand-navy">{title}</h2>
+      <div className="mt-1 h-[2px] w-20 bg-brand-red" />
+      <p className="mt-1.5 text-[10px] text-slate-600">{description}</p>
     </div>
   );
 }
@@ -298,12 +301,12 @@ function TableSection({
   return (
     <div>
       <SectionHeading title={title} description={description} />
-      <div className="mt-2 overflow-hidden border border-slate-300">
+      <div className="mt-2 overflow-hidden border border-brand-border">
         {rows.length === 0 ? (
           <p className="px-3 py-3 text-sm text-slate-500">{emptyMessage ?? "No data available."}</p>
         ) : (
           <table className="w-full border-collapse text-[11px]">
-            <thead className="bg-slate-100">
+            <thead className="bg-brand-navy text-white">
               <tr>
                 {columns.map((column, index) => (
                   <th

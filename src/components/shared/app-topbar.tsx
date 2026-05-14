@@ -10,18 +10,14 @@ import { Input } from '@/components/ui/input';
 
 export function AppTopbar({
   activeLabel,
-  activeDescription,
   userDisplayName,
   userRoleLabel,
   onOpenNavigation,
-  onToggleDesktopSidebar,
 }: {
   activeLabel: string;
-  activeDescription?: string;
   userDisplayName: string;
   userRoleLabel: string;
   onOpenNavigation?: () => void;
-  onToggleDesktopSidebar?: () => void;
 }) {
   const router = useRouter();
   const searchInputBaseId = useId();
@@ -55,10 +51,10 @@ export function AppTopbar({
               <Menu className="size-4" />
             </Button>
             <div className="min-w-0">
+              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-primary/75">
+                Workspace
+              </p>
               <p className="text-lg font-semibold tracking-[-0.02em] text-foreground">{activeLabel}</p>
-              {activeDescription ? (
-                <p className="mt-1 text-xs text-muted-foreground">{activeDescription}</p>
-              ) : null}
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -78,28 +74,9 @@ export function AppTopbar({
           />
         </div>
 
-        <div className="hidden items-center gap-6 xl:flex">
-          <div className="flex min-w-0 shrink-0 items-start gap-3 pr-2">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="mt-0.5 shrink-0 rounded-2xl border border-border/70 bg-background shadow-sm"
-              onClick={onToggleDesktopSidebar}
-              aria-label="Toggle sidebar"
-            >
-              <Menu className="size-4" />
-            </Button>
-            <div className="min-w-0">
-              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-primary/75">Workspace</p>
-              <p className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-foreground">{activeLabel}</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {activeDescription ?? `${userDisplayName} · ${userRoleLabel}`}
-              </p>
-            </div>
-          </div>
-          <div className="flex min-w-0 flex-1 items-center gap-4">
-            <div className="mx-auto w-full max-w-2xl">
+        <div className="hidden items-center justify-between gap-6 xl:flex">
+          <div className="min-w-0 flex-1">
+            <div className="w-full max-w-2xl">
               <GlobalSearchForm
                 inputId={`${searchInputBaseId}-desktop`}
                 value={searchQuery}

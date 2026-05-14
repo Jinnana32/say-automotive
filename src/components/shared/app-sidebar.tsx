@@ -60,7 +60,7 @@ const ICONS: Record<
   settings: Settings2,
 };
 
-const SIDEBAR_ACTIVE_NAVY = '#061B3A';
+const SIDEBAR_ACTIVE_NAVY = '#0B1F4D';
 
 export function AppSidebar({
   navigationItems,
@@ -240,13 +240,13 @@ export function AppSidebar({
                             'group flex items-center gap-3 rounded-2xl px-3 py-3 text-[0.95rem] transition-all',
                             isActive
                               ? 'text-white shadow-sm'
-                              : 'text-slate-600 hover:bg-slate-100 hover:text-[#061B3A]',
+                              : 'text-slate-600 hover:bg-slate-100 hover:text-brand-navy',
                           )}
                           style={
                             isActive
                               ? {
                                   backgroundColor: SIDEBAR_ACTIVE_NAVY,
-                                  boxShadow: '0 16px 28px -22px rgba(6, 27, 58, 0.8)',
+                                  boxShadow: '0 16px 28px -22px rgba(11, 31, 77, 0.8)',
                                 }
                               : undefined
                           }
@@ -256,7 +256,7 @@ export function AppSidebar({
                               'flex size-9 shrink-0 items-center justify-center rounded-xl transition-colors',
                               isActive
                                 ? 'bg-white/15 text-white'
-                                : 'bg-slate-100 text-slate-500 group-hover:bg-white group-hover:text-[#061B3A]',
+                                : 'bg-slate-100 text-slate-500 group-hover:bg-white group-hover:text-brand-navy',
                             )}
                           >
                             <Icon className="size-4" />

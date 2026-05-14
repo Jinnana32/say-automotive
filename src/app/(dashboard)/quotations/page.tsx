@@ -1,13 +1,12 @@
 import Link from "next/link";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableFilters } from "@/components/shared/data-table-filters";
+import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
-import { FilterBar } from "@/components/shared/filter-bar";
 import { PageHeader } from "@/components/shared/page-header";
-import { SearchInput } from "@/components/shared/search-input";
-import { StatusBadge } from "@/components/shared/status-badge";
+import { TableCellLink } from "@/components/shared/table-cell-link";
 import { Button } from "@/components/ui/button";
-import { NativeSelect } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   TableRowActionsMenu,
@@ -18,6 +17,7 @@ import { formatCurrency } from "@/lib/currency";
 import { formatDate } from "@/lib/dates";
 import { QuotationStatusBadge } from "@/features/quotations/components/quotation-status-badge";
 import { listQuotations } from "@/features/quotations/queries/quotation-queries";
+import { paginateItems } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
 
@@ -25,12 +25,14 @@ type QuotationsPageProps = {
   searchParams: Promise<{
     search?: string;
     status?: "draft" | "pending_approval" | "approved" | "rejected" | "expired";
+    page?: string;
   }>;
 };
 
 export default async function QuotationsPage({ searchParams }: QuotationsPageProps) {
-  const { search = "", status = "" } = await searchParams;
+  const { search = "", status = "", page } = await searchParams;
   const quotations = await listQuotations({ search, status });
+  const pagination = paginateItems(quotations, page);
 
   return (
     <div className="space-y-6">
@@ -51,34 +53,45 @@ export default async function QuotationsPage({ searchParams }: QuotationsPagePro
 
       <DataTableCard
         title="Quotation queue"
-        description={`${quotations.length} quotation${quotations.length === 1 ? "" : "s"} in the current view.`}
+        description={`${pagination.totalItems} quotation${pagination.totalItems === 1 ? "" : "s"} in the current view.`}
         toolbar={
-          <form>
-            <FilterBar className="lg:grid lg:grid-cols-[minmax(0,1fr)_220px_auto_auto]">
-              <SearchInput
-                type="search"
-                name="search"
-                defaultValue={search}
-                placeholder="Search quotation number"
-              />
-              <NativeSelect name="status" defaultValue={status}>
-                <option value="">All statuses</option>
-                <option value="draft">Draft</option>
-                <option value="pending_approval">Pending approval</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
-                <option value="expired">Expired</option>
-              </NativeSelect>
-              <Button type="submit">Apply</Button>
-              <Button asChild type="button" variant="ghost">
-                <Link href="/quotations">Reset</Link>
-              </Button>
-            </FilterBar>
-          </form>
+          <DataTableFilters
+            key={`${search}:${status}`}
+            className="lg:grid lg:grid-cols-[minmax(0,1fr)_220px]"
+            search={{
+              value: search,
+              placeholder: "Search quotation number",
+            }}
+            filters={[
+              {
+                type: "select",
+                name: "status",
+                value: status,
+                options: [
+                  { value: "", label: "All statuses" },
+                  { value: "draft", label: "Draft" },
+                  { value: "pending_approval", label: "Pending approval" },
+                  { value: "approved", label: "Approved" },
+                  { value: "rejected", label: "Rejected" },
+                  { value: "expired", label: "Expired" },
+                ],
+              },
+            ]}
+          />
+        }
+        footer={
+          <DataTablePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            totalItems={pagination.totalItems}
+            totalPages={pagination.totalPages}
+            startItem={pagination.startItem}
+            endItem={pagination.endItem}
+          />
         }
       >
 
-        {quotations.length === 0 ? (
+        {pagination.totalItems === 0 ? (
           <EmptyState
             title="No quotations found"
             description="Create a quotation after customer and vehicle records exist."
@@ -103,16 +116,38 @@ export default async function QuotationsPage({ searchParams }: QuotationsPagePro
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {quotations.map((quotation) => (
+                {pagination.items.map((quotation) => (
                   <TableRow key={quotation.id}>
-                    <TableCell className="font-semibold">{quotation.quotationNumber}</TableCell>
-                    <TableCell>{quotation.customerName}</TableCell>
-                    <TableCell>{quotation.vehicleLabel}</TableCell>
                     <TableCell>
-                      <QuotationStatusBadge status={quotation.status} />
+                      <TableCellLink href={`/quotations/${quotation.id}`} className="font-semibold text-foreground">
+                        {quotation.quotationNumber}
+                      </TableCellLink>
                     </TableCell>
-                    <TableCell>{formatCurrency(quotation.totalAmount)}</TableCell>
-                    <TableCell>{formatDate(quotation.createdAt)}</TableCell>
+                    <TableCell>
+                      <TableCellLink href={`/quotations/${quotation.id}`} className="text-foreground">
+                        {quotation.customerName}
+                      </TableCellLink>
+                    </TableCell>
+                    <TableCell>
+                      <TableCellLink href={`/quotations/${quotation.id}`} className="text-foreground">
+                        {quotation.vehicleLabel}
+                      </TableCellLink>
+                    </TableCell>
+                    <TableCell>
+                      <TableCellLink href={`/quotations/${quotation.id}`}>
+                        <QuotationStatusBadge status={quotation.status} />
+                      </TableCellLink>
+                    </TableCell>
+                    <TableCell>
+                      <TableCellLink href={`/quotations/${quotation.id}`} className="text-foreground">
+                        {formatCurrency(quotation.totalAmount)}
+                      </TableCellLink>
+                    </TableCell>
+                    <TableCell>
+                      <TableCellLink href={`/quotations/${quotation.id}`} className="text-foreground">
+                        {formatDate(quotation.createdAt)}
+                      </TableCellLink>
+                    </TableCell>
                     <TableCell className="text-right">
                       <TableRowActionsMenu label={`Quotation actions for ${quotation.quotationNumber}`}>
                         <TableRowActionsMenuLink

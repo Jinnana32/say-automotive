@@ -137,6 +137,7 @@ export type JobOrderPrintDetail = JobOrderDetail & {
 export type JobOrderPrintBusinessProfile = {
   businessName: string;
   businessLogoUrl: string | null;
+  businessVatRegistrationNo: string | null;
   businessContact: string | null;
   businessEmail: string | null;
   businessAddress: string | null;

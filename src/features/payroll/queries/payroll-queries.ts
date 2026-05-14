@@ -90,9 +90,21 @@ export async function getPayrollPageData(filters: PayrollPageFilters): Promise<P
     scheduleRows.map((row) => [row.staff_id, mapStaffSchedule(row)]),
   );
   const payrollPeriods = ((periodData ?? []) as PayrollPeriodRow[]).map(mapPayrollPeriod);
-  const filteredPeriods = filters.periodStatus
-    ? payrollPeriods.filter((period) => period.status === filters.periodStatus)
-    : payrollPeriods;
+  const periodSearch = filters.periodSearch.trim().toLowerCase();
+  const filteredPeriods = payrollPeriods.filter((period) => {
+    if (filters.periodStatus && period.status !== filters.periodStatus) {
+      return false;
+    }
+
+    if (!periodSearch) {
+      return true;
+    }
+
+    return [period.label, period.notes ?? "", period.periodStartDate, period.periodEndDate, period.payoutDate]
+      .join(" ")
+      .toLowerCase()
+      .includes(periodSearch);
+  });
   const compensationRosterBase = staffRows.map<PayrollCompensationRosterItem>((staffMember) => ({
     staffId: staffMember.id,
     fullName: `${staffMember.first_name} ${staffMember.last_name}`.trim(),

@@ -6,6 +6,7 @@ export function DataTableCard({
   description,
   action,
   toolbar,
+  footer,
   children,
   className,
   contentClassName,
@@ -14,6 +15,7 @@ export function DataTableCard({
   description?: string;
   action?: React.ReactNode;
   toolbar?: React.ReactNode;
+  footer?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
   contentClassName?: string;
@@ -28,6 +30,7 @@ export function DataTableCard({
     >
       {toolbar ? <div className="border-b border-border/70 p-4">{toolbar}</div> : null}
       <div className={cn("p-4", contentClassName)}>{children}</div>
+      {footer}
     </SectionCard>
   );
 }
