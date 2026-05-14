@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 import { AlertTriangle, X } from "lucide-react";
 import { createPortal } from "react-dom";
 
@@ -20,8 +20,10 @@ export function ConfirmActionDialog({
   confirmLabel = "Confirm",
   cancelLabel = "Cancel",
   confirmVariant = "destructive",
+  open,
+  onOpenChange,
 }: {
-  trigger: (controls: { openDialog: () => void }) => React.ReactNode;
+  trigger?: (controls: { openDialog: () => void }) => React.ReactNode;
   title: string;
   description: string;
   action: (formData: FormData) => void | Promise<void>;
@@ -29,10 +31,24 @@ export function ConfirmActionDialog({
   confirmLabel?: string;
   cancelLabel?: string;
   confirmVariant?: ButtonProps["variant"];
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const titleId = useId();
   const descriptionId = useId();
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = open !== undefined;
+  const isOpen = isControlled ? open : internalOpen;
+
+  const setDialogOpen = useCallback(
+    (nextOpen: boolean) => {
+      if (!isControlled) {
+        setInternalOpen(nextOpen);
+      }
+      onOpenChange?.(nextOpen);
+    },
+    [isControlled, onOpenChange],
+  );
 
   useEffect(() => {
     if (!isOpen) {
@@ -44,7 +60,7 @@ export function ConfirmActionDialog({
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setIsOpen(false);
+        setDialogOpen(false);
       }
     }
 
@@ -54,18 +70,18 @@ export function ConfirmActionDialog({
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen]);
+  }, [isOpen, setDialogOpen]);
 
   return (
     <>
-      {trigger({
-        openDialog: () => setIsOpen(true),
+      {trigger?.({
+        openDialog: () => setDialogOpen(true),
       })}
       {isOpen
         ? createPortal(
             <div
               className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/45 px-4 py-6 backdrop-blur-[2px]"
-              onMouseDown={() => setIsOpen(false)}
+              onMouseDown={() => setDialogOpen(false)}
             >
               <div
                 role="dialog"
@@ -94,7 +110,7 @@ export function ConfirmActionDialog({
                     size="sm"
                     variant="ghost"
                     className="size-8 p-0"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => setDialogOpen(false)}
                     aria-label="Close dialog"
                   >
                     <X className="size-4" />
@@ -104,7 +120,7 @@ export function ConfirmActionDialog({
                 <form
                   action={action}
                   className="space-y-5 px-6 py-5"
-                  onSubmit={() => setIsOpen(false)}
+                  onSubmit={() => setDialogOpen(false)}
                 >
                   {fields.map((field) => (
                     <input
@@ -124,7 +140,7 @@ export function ConfirmActionDialog({
                       autoFocus
                       type="button"
                       variant="outline"
-                      onClick={() => setIsOpen(false)}
+                      onClick={() => setDialogOpen(false)}
                     >
                       {cancelLabel}
                     </Button>

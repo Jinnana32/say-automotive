@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { EmptyState } from "@/components/shared/empty-state";
 import { DataTableCard } from "@/components/shared/data-table-card";
@@ -8,7 +8,6 @@ import { MetricGrid } from "@/components/shared/metric-grid";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -22,6 +21,7 @@ import {
 import { AttendanceAccessSettingsForm } from "@/features/attendance/components/attendance-access-settings-form";
 import { AttendanceAllowedIpForm } from "@/features/attendance/components/attendance-allowed-ip-form";
 import { AttendanceAllowedIpRowActions } from "@/features/attendance/components/attendance-allowed-ip-row-actions";
+import { AttendanceDevicesPageContent } from "@/features/attendance/components/attendance-devices-page-content";
 import { BranchHolidayDialog } from "@/features/attendance/components/branch-holiday-dialog";
 import { BranchHolidayRowActions } from "@/features/attendance/components/branch-holiday-row-actions";
 import type { TimekeepingCalendarPageData } from "@/features/attendance/types";
@@ -33,36 +33,41 @@ export function TimekeepingCalendarPageContent({
 }: {
   data: TimekeepingCalendarPageData;
 }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const today = getBusinessNow().toFormat("yyyy-LL-dd");
   const upcomingHolidayCount = data.holidays.filter(
     (holiday) => holiday.holidayDate >= today,
   ).length;
+  const activeTab = (() => {
+    const tab = searchParams.get("tab");
+
+    if (tab === "devices" || tab === "holidays") {
+      return tab;
+    }
+
+    return "access";
+  })();
+
+  function updateTab(nextTab: string) {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (nextTab === "access") {
+      params.delete("tab");
+    } else {
+      params.set("tab", nextTab);
+    }
+
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Timekeeping"
-        description="Manage branch attendance rules and branch holiday calendars. Use the tabs below to switch between network access controls and non-working dates."
-        actions={
-          <>
-            <Button asChild variant="outline">
-              <Link href="/attendance/devices">
-                Review devices
-                {data.pendingDeviceCount > 0
-                  ? ` (${data.pendingDeviceCount})`
-                  : ""}
-              </Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/attendance/amendments">
-                Review DTR amendments
-                {data.pendingAmendmentCount > 0
-                  ? ` (${data.pendingAmendmentCount})`
-                  : ""}
-              </Link>
-            </Button>
-          </>
-        }
+        description="Manage branch attendance rules, device approvals, and holiday calendars from one place."
       />
 
       <MetricGrid className="xl:grid-cols-4">
@@ -92,9 +97,18 @@ export function TimekeepingCalendarPageContent({
         />
       </MetricGrid>
 
-      <Tabs defaultValue="access" className="space-y-6">
+      <Tabs
+        defaultValue="access"
+        value={activeTab}
+        onValueChange={updateTab}
+        className="space-y-6"
+      >
         <TabsList className="w-fit">
           <TabsTrigger value="access">Access & IP</TabsTrigger>
+          <TabsTrigger value="devices">
+            Review devices
+            {data.pendingDeviceCount > 0 ? ` (${data.pendingDeviceCount})` : ""}
+          </TabsTrigger>
           <TabsTrigger value="holidays">Branch holidays</TabsTrigger>
         </TabsList>
 
@@ -220,6 +234,14 @@ export function TimekeepingCalendarPageContent({
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="devices" className="space-y-6">
+          <AttendanceDevicesPageContent
+            data={data.devicesReview}
+            embedded
+            paramPrefix="device"
+          />
         </TabsContent>
 
         <TabsContent value="holidays" className="space-y-6">

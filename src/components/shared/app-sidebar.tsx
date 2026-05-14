@@ -124,7 +124,7 @@ export function AppSidebar({
         className,
       )}
     >
-      <div className="flex h-full flex-col px-4 py-4">
+      <div className="flex h-full flex-col px-3.5 py-4">
         <div
           className={cn(
             'flex items-start justify-between gap-3 border-b border-border/70',
@@ -157,13 +157,13 @@ export function AppSidebar({
                 </div>
               </div>
             ) : (
-              <div className="flex min-h-[4.1rem] w-full items-center py-1 pl-1 pr-2">
+              <div className="flex min-h-[3.55rem] w-full items-center py-0.5 pl-0.5 pr-1.5">
                 <Image
                   src={businessLogoUrl ?? '/say-auto-care-logo.jpeg'}
                   alt={businessName}
                   width={520}
                   height={140}
-                  className="h-auto w-full max-w-[14.75rem] object-contain object-left"
+                  className="h-auto w-full max-w-[11.75rem] object-contain object-left"
                   priority
                 />
               </div>

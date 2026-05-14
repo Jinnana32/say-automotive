@@ -8,8 +8,6 @@ export type JobOrderPrintWorkLine = {
   quantityLabel: string;
   unitPrice: number;
   total: number;
-  approvalStatus: JobOrderItemDetail["approvalStatus"];
-  usageStatus: JobOrderItemDetail["usageStatus"];
   isAdditional: boolean;
 };
 
@@ -21,7 +19,6 @@ export type JobOrderPrintPartsUsageLine = {
   returnedQuantity: string;
   remainingQuantity: string;
   stockAvailability: string;
-  usageStatus: JobOrderItemDetail["usageStatus"];
 };
 
 export type JobOrderPrintBreakdown = {
@@ -44,8 +41,6 @@ export function buildJobOrderPrintBreakdown(
     quantityLabel: trimNumeric(item.quantity),
     unitPrice: item.unitPrice,
     total: item.total,
-    approvalStatus: item.approvalStatus,
-    usageStatus: item.usageStatus,
     isAdditional: item.isAdditional,
   }));
 
@@ -76,7 +71,6 @@ export function buildJobOrderPrintBreakdown(
       returnedQuantity: trimNumeric(item.inventoryTracking?.returnedQuantity ?? 0),
       remainingQuantity: trimNumeric(item.inventoryTracking?.remainingUsageQuantity ?? item.quantity),
       stockAvailability: formatStockAvailability(item),
-      usageStatus: item.usageStatus,
     }));
 
   return {

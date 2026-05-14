@@ -10,6 +10,7 @@ import { StatCard } from "@/components/shared/stat-card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { InventoryMovementDialog } from "@/features/inventory/components/inventory-movement-dialog";
+import { InventoryStockRowActions } from "@/features/inventory/components/inventory-stock-row-actions";
 import { InventorySettingsDialog } from "@/features/inventory/components/inventory-settings-dialog";
 import {
   InventoryMovementTypeBadge,
@@ -27,10 +28,6 @@ import {
 import { formatCurrency } from "@/lib/currency";
 import { formatDateTime } from "@/lib/dates";
 import { paginateItems } from "@/lib/pagination";
-import {
-  TableRowActionsMenu,
-  TableRowActionsMenuButton,
-} from "@/components/shared/table-row-actions-menu";
 
 export const dynamic = "force-dynamic";
 
@@ -208,27 +205,18 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
                       {formatCurrency(stock.quantityOnHand * stock.costPrice)}
                     </TableCell>
                     <TableCell className="text-right">
-                      <TableRowActionsMenu label={`Inventory actions for ${stock.productName}`}>
-                        <InventoryMovementDialog
-                          prefilledProduct={{
-                            id: stock.productId,
-                            label: stock.productName,
-                            sku: stock.sku,
-                            quantityOnHand: stock.quantityOnHand,
-                            availableQuantity: stock.availableQuantity,
-                            reorderLevel: stock.reorderLevel,
-                            shelfLocation: stock.shelfLocation,
-                            hasStockRecord: stock.hasStockRecord,
-                          }}
-                          lockProduct
-                          trigger={({ openDialog }) => (
-                            <TableRowActionsMenuButton
-                              label="Adjust stock"
-                              onSelect={openDialog}
-                            />
-                          )}
-                        />
-                      </TableRowActionsMenu>
+                      <InventoryStockRowActions
+                        product={{
+                          id: stock.productId,
+                          label: stock.productName,
+                          sku: stock.sku,
+                          quantityOnHand: stock.quantityOnHand,
+                          availableQuantity: stock.availableQuantity,
+                          reorderLevel: stock.reorderLevel,
+                          shelfLocation: stock.shelfLocation,
+                          hasStockRecord: stock.hasStockRecord,
+                        }}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

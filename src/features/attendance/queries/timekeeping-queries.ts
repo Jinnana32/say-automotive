@@ -8,6 +8,7 @@ import type {
   BranchHolidaySummary,
   TimekeepingCalendarPageData,
 } from "@/features/attendance/types";
+import { getAttendanceDevicesPageData } from "@/features/attendance/queries/attendance-amendment-queries";
 import type { TableRow } from "@/types/database";
 
 type BusinessSettingsRow = TableRow<"business_settings">;
@@ -49,6 +50,7 @@ export async function getTimekeepingCalendarPageData(): Promise<TimekeepingCalen
     { count: pendingAmendmentCount, error: pendingAmendmentError },
     { data: staffData, error: staffError },
     { data: staffDeviceData, error: staffDeviceError },
+    devicesReview,
   ] = await Promise.all([
     supabase
       .from("business_settings")
@@ -72,6 +74,7 @@ export async function getTimekeepingCalendarPageData(): Promise<TimekeepingCalen
       .eq("status", "pending"),
     admin.from("staff").select("id").eq("branch_id", branchId),
     admin.from("staff_devices").select("staff_id, status").order("created_at", { ascending: false }),
+    getAttendanceDevicesPageData(),
   ]);
 
   if (settingsError) {
@@ -118,6 +121,7 @@ export async function getTimekeepingCalendarPageData(): Promise<TimekeepingCalen
     pendingAmendmentCount: pendingAmendmentCount ?? 0,
     pendingDeviceCount,
     holidays: ((holidayData ?? []) as BranchHolidayRow[]).map(mapBranchHoliday),
+    devicesReview,
   };
 }
 

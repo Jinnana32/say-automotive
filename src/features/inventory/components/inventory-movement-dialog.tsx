@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUpDown } from "lucide-react";
 
 import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
 import { IconActionButton } from "@/components/shared/icon-action";
 import { ModalDialog } from "@/components/shared/modal-dialog";
 import { SubmitButton } from "@/components/shared/submit-button";
+import { TableRowActionsMenuButton } from "@/components/shared/table-row-actions-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,15 +48,19 @@ export function InventoryMovementDialog({
   triggerMode = "button",
   triggerLabel,
   triggerText,
-  trigger,
+  showTrigger = true,
+  open,
+  onOpenChange,
 }: {
   products?: InventoryProductOption[];
   prefilledProduct?: InventoryProductOption;
   lockProduct?: boolean;
-  triggerMode?: "button" | "icon" | "quiet";
+  triggerMode?: "button" | "icon" | "quiet" | "menu-item";
   triggerLabel?: string;
   triggerText?: string;
-  trigger?: (controls: { openDialog: () => void }) => React.ReactNode;
+  showTrigger?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const [state, formAction] = useActionState(
     submitInventoryMovementAction,
@@ -106,36 +111,44 @@ export function InventoryMovementDialog({
     (prefilledProduct
       ? `Record movement for ${prefilledProduct.label}`
       : "Record movement");
+  const previousOpenRef = useRef(false);
 
-  function resetDialogState() {
+  const resetDialogState = useCallback(() => {
     setMovementMode("stock_in");
     setProductId(initialProductId);
     setValues({
       quantity: "",
       notes: "",
     });
-  }
+  }, [initialProductId, setValues]);
 
-  return (
-    <ModalDialog
-      title="Record stock movement"
-      description="Run one stock adjustment from a single admin form instead of leaving the inventory page."
-      size="lg"
-      trigger={({ openDialog }) => {
+  useEffect(() => {
+    const isOpen = open ?? false;
+
+    if (isOpen && !previousOpenRef.current) {
+      resetDialogState();
+    }
+
+    previousOpenRef.current = isOpen;
+  }, [open, resetDialogState]);
+
+  const resolvedTrigger = showTrigger
+    ? ({ openDialog }: { openDialog: () => void }) => {
         const handleOpen = () => {
           resetDialogState();
           openDialog();
         };
-
-        if (trigger) {
-          return trigger({ openDialog: handleOpen });
-        }
 
         return triggerMode === "icon" ? (
           <IconActionButton
             label={resolvedTriggerLabel}
             icon={ArrowUpDown}
             onClick={handleOpen}
+          />
+        ) : triggerMode === "menu-item" ? (
+          <TableRowActionsMenuButton
+            label={triggerText ?? "Adjust stock"}
+            onSelect={handleOpen}
           />
         ) : triggerMode === "quiet" ? (
           <Button
@@ -158,7 +171,17 @@ export function InventoryMovementDialog({
             Record movement
           </Button>
         );
-      }}
+      }
+    : undefined;
+
+  return (
+    <ModalDialog
+      title="Record stock movement"
+      description="Run one stock adjustment from a single admin form instead of leaving the inventory page."
+      size="lg"
+      open={open}
+      onOpenChange={onOpenChange}
+      trigger={resolvedTrigger}
     >
       {({ closeDialog }) => (
         <form action={formAction} className="space-y-5">

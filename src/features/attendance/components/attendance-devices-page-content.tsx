@@ -26,12 +26,19 @@ import { paginateItems } from "@/lib/pagination";
 
 export function AttendanceDevicesPageContent({
   data,
+  embedded = false,
+  paramPrefix = "device",
 }: {
   data: AttendanceDevicesPageData;
+  embedded?: boolean;
+  paramPrefix?: string;
 }) {
   const searchParams = useSearchParams();
-  const search = searchParams.get("search")?.trim().toLowerCase() ?? "";
-  const status = searchParams.get("status") ?? "";
+  const searchParamName = embedded ? `${paramPrefix}Search` : "search";
+  const statusParamName = embedded ? `${paramPrefix}Status` : "status";
+  const pageParamName = embedded ? `${paramPrefix}Page` : "page";
+  const search = searchParams.get(searchParamName)?.trim().toLowerCase() ?? "";
+  const status = searchParams.get(statusParamName) ?? "";
   const filteredDevices = useMemo(
     () =>
       data.devices.filter((device) => {
@@ -56,19 +63,21 @@ export function AttendanceDevicesPageContent({
       }),
     [data.devices, search, status],
   );
-  const pagination = paginateItems(filteredDevices, searchParams.get("page") ?? undefined);
+  const pagination = paginateItems(filteredDevices, searchParams.get(pageParamName) ?? undefined);
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Attendance Devices"
-        description="Approve or revoke the phones and browsers mechanics are allowed to use for on-site time-in and time-out."
-        actions={
-          <Button asChild variant="outline">
-            <Link href="/settings/timekeeping">Timekeeping settings</Link>
-          </Button>
-        }
-      />
+      {embedded ? null : (
+        <PageHeader
+          title="Attendance Devices"
+          description="Approve or revoke the phones and browsers mechanics are allowed to use for on-site time-in and time-out."
+          actions={
+            <Button asChild variant="outline">
+              <Link href="/settings/timekeeping">Timekeeping settings</Link>
+            </Button>
+          }
+        />
+      )}
 
       <MetricGrid className="xl:grid-cols-3">
         <StatCard
@@ -98,13 +107,15 @@ export function AttendanceDevicesPageContent({
             key={`${search}:${status}`}
             className="lg:grid lg:grid-cols-[minmax(0,1fr)_220px]"
             search={{
-              value: searchParams.get("search") ?? "",
+              name: searchParamName,
+              value: searchParams.get(searchParamName) ?? "",
               placeholder: "Search mechanic, device, browser, or IP",
             }}
+            pageParamName={pageParamName}
             filters={[
               {
                 type: "select",
-                name: "status",
+                name: statusParamName,
                 value: status,
                 options: [
                   { value: "", label: "All statuses" },
@@ -124,6 +135,7 @@ export function AttendanceDevicesPageContent({
             totalPages={pagination.totalPages}
             startItem={pagination.startItem}
             endItem={pagination.endItem}
+            pageParamName={pageParamName}
           />
         }
       >

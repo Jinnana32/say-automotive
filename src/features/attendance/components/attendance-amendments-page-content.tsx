@@ -32,12 +32,19 @@ import { paginateItems } from "@/lib/pagination";
 
 export function AttendanceAmendmentsPageContent({
   data,
+  embedded = false,
+  paramPrefix = "amendment",
 }: {
   data: AttendanceAmendmentsPageData;
+  embedded?: boolean;
+  paramPrefix?: string;
 }) {
   const searchParams = useSearchParams();
-  const search = searchParams.get("search")?.trim().toLowerCase() ?? "";
-  const status = searchParams.get("status") ?? "";
+  const searchParamName = embedded ? `${paramPrefix}Search` : "search";
+  const statusParamName = embedded ? `${paramPrefix}Status` : "status";
+  const pageParamName = embedded ? `${paramPrefix}Page` : "page";
+  const search = searchParams.get(searchParamName)?.trim().toLowerCase() ?? "";
+  const status = searchParams.get(statusParamName) ?? "";
   const filteredAmendments = useMemo(
     () =>
       data.amendments.filter((amendment) => {
@@ -63,19 +70,21 @@ export function AttendanceAmendmentsPageContent({
       }),
     [data.amendments, search, status],
   );
-  const pagination = paginateItems(filteredAmendments, searchParams.get("page") ?? undefined);
+  const pagination = paginateItems(filteredAmendments, searchParams.get(pageParamName) ?? undefined);
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="DTR Amendments"
-        description="Review blocked punches, missed time entries, and final attendance corrections before payroll relies on the record."
-        actions={
-          <Button asChild variant="outline">
-            <Link href="/settings/timekeeping">Timekeeping settings</Link>
-          </Button>
-        }
-      />
+      {embedded ? null : (
+        <PageHeader
+          title="DTR Amendments"
+          description="Review blocked punches, missed time entries, and final attendance corrections before payroll relies on the record."
+          actions={
+            <Button asChild variant="outline">
+              <Link href="/settings/timekeeping">Timekeeping settings</Link>
+            </Button>
+          }
+        />
+      )}
 
       <MetricGrid className="xl:grid-cols-3">
         <StatCard
@@ -107,13 +116,15 @@ export function AttendanceAmendmentsPageContent({
             key={`${search}:${status}`}
             className="lg:grid lg:grid-cols-[minmax(0,1fr)_220px]"
             search={{
-              value: searchParams.get("search") ?? "",
+              name: searchParamName,
+              value: searchParams.get(searchParamName) ?? "",
               placeholder: "Search staff, reason, IP, or amendment type",
             }}
+            pageParamName={pageParamName}
             filters={[
               {
                 type: "select",
-                name: "status",
+                name: statusParamName,
                 value: status,
                 options: [
                   { value: "", label: "All statuses" },
@@ -133,6 +144,7 @@ export function AttendanceAmendmentsPageContent({
             totalPages={pagination.totalPages}
             startItem={pagination.startItem}
             endItem={pagination.endItem}
+            pageParamName={pageParamName}
           />
         }
       >

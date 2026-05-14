@@ -52,7 +52,7 @@ export function AppShell({
         businessName={businessName}
         businessLogoUrl={businessLogoUrl}
         showBusinessName={showSidebarBusinessName}
-        className="hidden xl:fixed xl:inset-y-0 xl:left-0 xl:flex xl:w-72 xl:flex-col"
+        className="hidden xl:fixed xl:inset-y-0 xl:left-0 xl:flex xl:w-[15.5rem] xl:flex-col"
       />
       {isMobileSidebarOpen ? (
         <div className="fixed inset-0 z-40 xl:hidden" aria-hidden="true">
@@ -70,13 +70,13 @@ export function AppShell({
           businessName={businessName}
           businessLogoUrl={businessLogoUrl}
           showBusinessName={showSidebarBusinessName}
-          className="fixed inset-y-0 left-0 z-50 flex w-[19rem] max-w-[calc(100vw-2rem)] flex-col shadow-2xl xl:hidden"
+          className="fixed inset-y-0 left-0 z-50 flex w-[17rem] max-w-[calc(100vw-2rem)] flex-col shadow-2xl xl:hidden"
           onNavigate={() => setIsMobileSidebarOpen(false)}
           onClose={() => setIsMobileSidebarOpen(false)}
           showCloseButton
         />
       ) : null}
-      <div className="min-h-screen xl:pl-72">
+      <div className="min-h-screen xl:pl-[15.5rem]">
         <AppTopbar
           activeLabel={activeItem?.label ?? "Dashboard"}
           userDisplayName={userDisplayName}

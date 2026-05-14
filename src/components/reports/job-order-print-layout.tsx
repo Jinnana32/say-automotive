@@ -122,12 +122,6 @@ export function JobOrderPrintLayout({
                     </th>
                   </>
                 ) : null}
-                <th className="w-24 px-2 py-1.5 text-left font-semibold">
-                  Approval
-                </th>
-                <th className="w-20 px-2 py-1.5 text-left font-semibold">
-                  Usage
-                </th>
               </tr>
             </thead>
             <tbody>
@@ -161,18 +155,12 @@ export function JobOrderPrintLayout({
                         </td>
                       </>
                     ) : null}
-                    <td className="px-2 py-1.5 align-top">
-                      {formatStatusLabel(item.approvalStatus)}
-                    </td>
-                    <td className="px-2 py-1.5 align-top">
-                      {formatStatusLabel(item.usageStatus)}
-                    </td>
                   </tr>
                 ))
               ) : (
                 <tr className="border-t border-slate-200">
                   <td
-                    colSpan={hidePrices ? 5 : 7}
+                    colSpan={hidePrices ? 3 : 5}
                     className="px-2 py-3 text-center text-slate-500"
                   >
                     No work items recorded.
@@ -206,9 +194,6 @@ export function JobOrderPrintLayout({
                 <th className="w-20 px-2 py-1.5 text-right font-semibold">
                   Avail.
                 </th>
-                <th className="w-20 px-2 py-1.5 text-left font-semibold">
-                  Status
-                </th>
               </tr>
             </thead>
             <tbody>
@@ -236,15 +221,12 @@ export function JobOrderPrintLayout({
                     <td className="px-2 py-1.5 text-right align-top">
                       {item.stockAvailability}
                     </td>
-                    <td className="px-2 py-1.5 align-top">
-                      {formatStatusLabel(item.usageStatus)}
-                    </td>
                   </tr>
                 ))
               ) : (
                 <tr className="border-t border-slate-200">
                   <td
-                    colSpan={7}
+                    colSpan={6}
                     className="px-2 py-3 text-center text-slate-500"
                   >
                     No parts tracked on this job order.
@@ -416,8 +398,4 @@ function formatMileage(value: number | null) {
 
 function optionalDate(value: string | null) {
   return value ? formatDateTime(value) : '—';
-}
-
-function formatStatusLabel(value: string) {
-  return toTitleCaseWords(value.replaceAll('_', ' '));
 }

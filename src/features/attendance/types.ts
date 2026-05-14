@@ -204,6 +204,27 @@ export type AttendanceRosterData = {
   lockedPeriod: AttendanceDateLockSummary | null;
 };
 
+export type AttendanceCalendarStatus = "complete" | "attention" | "absent" | "none";
+
+export type AttendanceCalendarDaySummary = {
+  date: string;
+  status: AttendanceCalendarStatus;
+  staffCount: number;
+  recordedCount: number;
+  approvedCount: number;
+  attentionCount: number;
+  absentCount: number;
+};
+
+export type AttendanceCalendarMonthData = {
+  month: string;
+  monthLabel: string;
+  monthStartDate: string;
+  monthEndDate: string;
+  selectedDate: string;
+  days: AttendanceCalendarDaySummary[];
+};
+
 export type AttendanceFormValues = {
   staffId: string;
   attendanceDate: string;
@@ -266,6 +287,7 @@ export type TimekeepingCalendarPageData = {
   pendingAmendmentCount: number;
   pendingDeviceCount: number;
   holidays: BranchHolidaySummary[];
+  devicesReview: AttendanceDevicesPageData;
 };
 
 export type ApprovedLeaveManagementData = {
@@ -275,6 +297,9 @@ export type ApprovedLeaveManagementData = {
 
 export type AttendancePageData = {
   rosterData: AttendanceRosterData;
+  attendanceData: AttendanceRosterData;
+  attendanceCalendar: AttendanceCalendarMonthData;
+  amendmentsReview: AttendanceAmendmentsPageData;
   leaveManagement: ApprovedLeaveManagementData;
 };
 

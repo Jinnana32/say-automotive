@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Clock3 } from "lucide-react";
 
 import { IconActionButton } from "@/components/shared/icon-action";
@@ -17,6 +17,9 @@ export function AttendanceEntryDialog({
   attendance,
   disabled = false,
   trigger,
+  showTrigger = true,
+  open,
+  onOpenChange,
 }: {
   staffId: string;
   staffName: string;
@@ -24,15 +27,25 @@ export function AttendanceEntryDialog({
   attendance: AttendanceRecordSummary | null;
   disabled?: boolean;
   trigger?: (controls: { openDialog: () => void }) => React.ReactNode;
+  showTrigger?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const [dialogInstance, setDialogInstance] = useState(0);
+  const previousOpenRef = useRef(false);
 
-  return (
-    <ModalDialog
-      title="Attendance entry"
-      description={`Review or update ${staffName}'s record for ${formatDate(attendanceDate)}.`}
-      size="lg"
-      trigger={({ openDialog }) =>
+  useEffect(() => {
+    const isOpen = open ?? false;
+
+    if (isOpen && !previousOpenRef.current) {
+      setDialogInstance((currentValue) => currentValue + 1);
+    }
+
+    previousOpenRef.current = isOpen;
+  }, [open]);
+
+  const resolvedTrigger = showTrigger
+    ? ({ openDialog }: { openDialog: () => void }) =>
         trigger ? (
           trigger({
             openDialog: () => {
@@ -51,7 +64,16 @@ export function AttendanceEntryDialog({
             }}
           />
         )
-      }
+    : undefined;
+
+  return (
+    <ModalDialog
+      title="Attendance entry"
+      description={`Review or update ${staffName}'s record for ${formatDate(attendanceDate)}.`}
+      size="lg"
+      open={open}
+      onOpenChange={onOpenChange}
+      trigger={resolvedTrigger}
     >
       {({ closeDialog }) => (
         <AttendanceForm

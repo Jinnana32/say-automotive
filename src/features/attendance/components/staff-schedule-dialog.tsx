@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CalendarClock } from "lucide-react";
 
 import { IconActionButton } from "@/components/shared/icon-action";
@@ -14,20 +14,33 @@ export function StaffScheduleDialog({
   staffName,
   schedule,
   trigger,
+  showTrigger = true,
+  open,
+  onOpenChange,
 }: {
   staffId: string;
   staffName: string;
   schedule: StaffScheduleSummary | null;
   trigger?: (controls: { openDialog: () => void }) => React.ReactNode;
+  showTrigger?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const [dialogInstance, setDialogInstance] = useState(0);
+  const previousOpenRef = useRef(false);
 
-  return (
-    <ModalDialog
-      title="Work schedule"
-      description={`Configure the expected weekly schedule for ${staffName}.`}
-      size="lg"
-      trigger={({ openDialog }) =>
+  useEffect(() => {
+    const isOpen = open ?? false;
+
+    if (isOpen && !previousOpenRef.current) {
+      setDialogInstance((currentValue) => currentValue + 1);
+    }
+
+    previousOpenRef.current = isOpen;
+  }, [open]);
+
+  const resolvedTrigger = showTrigger
+    ? ({ openDialog }: { openDialog: () => void }) =>
         trigger ? (
           trigger({
             openDialog: () => {
@@ -45,7 +58,16 @@ export function StaffScheduleDialog({
             }}
           />
         )
-      }
+    : undefined;
+
+  return (
+    <ModalDialog
+      title="Work schedule"
+      description={`Configure the expected weekly schedule for ${staffName}.`}
+      size="lg"
+      open={open}
+      onOpenChange={onOpenChange}
+      trigger={resolvedTrigger}
     >
       {({ closeDialog }) => (
         <StaffScheduleForm

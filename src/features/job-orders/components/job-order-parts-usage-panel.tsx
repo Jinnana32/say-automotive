@@ -4,7 +4,6 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { SectionCard } from "@/components/shared/section-card";
 import { Badge } from "@/components/ui/badge";
 import { JobOrderPartUsageForm } from "@/features/job-orders/components/job-order-part-usage-form";
-import { JobOrderUsageBadge } from "@/features/job-orders/components/job-order-status-badge";
 import type {
   JobOrderDetailTab,
   JobOrderItemDetail,
@@ -69,14 +68,13 @@ export function JobOrderPartsUsagePanel({
                   className="overflow-hidden rounded-2xl border border-border/70 bg-card [&_summary::-webkit-details-marker]:hidden"
                 >
                   <summary className="flex cursor-pointer list-none items-center gap-3 p-4">
-                    <div className="grid flex-1 gap-3 md:grid-cols-[minmax(0,2.2fr)_repeat(5,minmax(0,0.8fr))]">
+                    <div className="grid flex-1 gap-3 md:grid-cols-[minmax(0,2.2fr)_repeat(4,minmax(0,0.8fr))]">
                       <SummaryCell
                         label="Part"
                         value={item.description}
                         hint={`${formatQuantity(item.quantity)} planned · ${item.isAdditional ? "Extra line" : "Quoted line"}`}
                       >
                         <div className="mt-2 flex flex-wrap items-center gap-2">
-                          <JobOrderUsageBadge status={item.usageStatus} />
                           {tracking?.isLowStock ? <Badge variant="warning">Low stock</Badge> : null}
                           {tracking && !tracking.hasStockRecord ? (
                             <Badge variant="destructive">No stock</Badge>
@@ -103,10 +101,6 @@ export function JobOrderPartsUsagePanel({
                             ? formatQuantity(tracking.availableQuantity)
                             : "Not set"
                         }
-                      />
-                      <SummaryCell
-                        label="Status"
-                        value={tracking?.hasStockRecord ? "Trackable" : "Needs stock"}
                         hint={tracking?.shelfLocation ? `Shelf ${tracking.shelfLocation}` : "No shelf set"}
                       />
                     </div>

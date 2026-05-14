@@ -37,11 +37,7 @@ import { JobOrderDetailsForm } from '@/features/job-orders/components/job-order-
 import { JobOrderItemApprovalAction } from '@/features/job-orders/components/job-order-item-approval-action';
 import { JobOrderItemEditDialog } from '@/features/job-orders/components/job-order-item-edit-dialog';
 import { JobOrderPartsUsagePanel } from '@/features/job-orders/components/job-order-parts-usage-panel';
-import {
-  JobOrderApprovalBadge,
-  JobOrderStatusBadge,
-  JobOrderUsageBadge,
-} from '@/features/job-orders/components/job-order-status-badge';
+import { JobOrderStatusBadge } from '@/features/job-orders/components/job-order-status-badge';
 import { JobOrderStatusDialog } from '@/features/job-orders/components/job-order-status-dialog';
 import type {
   JobOrderDetail,
@@ -53,7 +49,7 @@ import { CreateInvoiceForm } from '@/features/invoices/components/create-invoice
 import { InvoiceStatusBadge } from '@/features/invoices/components/invoice-status-badge';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/currency';
-import { formatDate, formatDateTime } from '@/lib/dates';
+import { formatDateTime } from '@/lib/dates';
 
 export function JobOrderDetailPage({
   jobOrder,
@@ -413,8 +409,6 @@ export function JobOrderDetailPage({
                       <TableHead>Line</TableHead>
                       <TableHead>Description</TableHead>
                       <TableHead>Type</TableHead>
-                      <TableHead>Approval</TableHead>
-                      <TableHead>Usage</TableHead>
                       <TableHead>Total</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -453,12 +447,6 @@ export function JobOrderDetailPage({
                         <TableCell className="capitalize">
                           {item.itemType}
                         </TableCell>
-                        <TableCell>
-                          <JobOrderApprovalBadge status={item.approvalStatus} />
-                        </TableCell>
-                        <TableCell>
-                          <JobOrderUsageBadge status={item.usageStatus} />
-                        </TableCell>
                         <TableCell>{formatCurrency(item.total)}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex flex-col items-end gap-2">
@@ -467,12 +455,6 @@ export function JobOrderDetailPage({
                                 jobOrderId={jobOrder.id}
                                 item={item}
                                 redirectTab={activeTab}
-                                trigger={({ openDialog }) => (
-                                  <TableRowActionsMenuButton
-                                    label="Edit work item"
-                                    onSelect={openDialog}
-                                  />
-                                )}
                               />
                             ) : null}
 
@@ -496,15 +478,7 @@ export function JobOrderDetailPage({
                                   tone="destructive"
                                 />
                               </TableRowActionsMenu>
-                            ) : (
-                              <span className="text-sm text-muted-foreground">
-                                {item.approvedAt
-                                  ? `Approved ${formatDate(item.approvedAt)}`
-                                  : item.rejectedAt
-                                    ? `Rejected ${formatDate(item.rejectedAt)}`
-                                    : 'No action'}
-                              </span>
-                            )}
+                            ) : null}
                           </div>
                         </TableCell>
                       </TableRow>
