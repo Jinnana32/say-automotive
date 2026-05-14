@@ -3,7 +3,7 @@ import { CheckCheck, Undo2 } from "lucide-react";
 import { useId } from "react";
 
 import { Button } from "@/components/ui/button";
-import { setAttendanceApprovalAction } from "@/features/attendance/actions/attendance-actions";
+import { submitAttendanceApprovalAction } from "@/features/attendance/actions/attendance-approval-actions";
 
 export function AttendanceApprovalButton({
   attendanceId,
@@ -19,14 +19,8 @@ export function AttendanceApprovalButton({
   const label = isApproved ? "Remove attendance approval" : "Approve attendance";
   const formId = useId();
 
-  async function submitApprovalAction(formData: FormData) {
-    "use server";
-
-    await setAttendanceApprovalAction(undefined, formData);
-  }
-
   return (
-    <form id={formId} action={submitApprovalAction}>
+    <form id={formId} action={submitAttendanceApprovalAction}>
       <input type="hidden" name="attendanceId" value={attendanceId} />
       <input type="hidden" name="approvalAction" value={isApproved ? "unapprove" : "approve"} />
       {trigger ? (

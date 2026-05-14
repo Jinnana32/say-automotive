@@ -5,6 +5,10 @@ import { formatCurrency } from "@/lib/currency";
 const SVG_HEIGHT = 260;
 const SVG_WIDTH = 860;
 const PADDING = { top: 20, right: 20, bottom: 48, left: 40 };
+const REPORT_NAVY = "#061B3A";
+const REPORT_NAVY_MUTED = "#8CA3C8";
+const REPORT_RED_ACCENT = "#C81E2A";
+const REPORT_GRID = "#D9E1EC";
 
 export function RevenueTrendChart({
   data,
@@ -55,8 +59,8 @@ export function RevenueTrendChart({
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
-          <LegendSwatch color="#1d4ed8" label="Vehicles released" />
-          <LegendSwatch color="#f59e0b" label="Payments collected" />
+          <LegendSwatch color={REPORT_NAVY_MUTED} label="Vehicles released" />
+          <LegendSwatch color={REPORT_NAVY} label="Payments collected" />
         </div>
 
         {data.length === 0 ? (
@@ -78,7 +82,7 @@ export function RevenueTrendChart({
                     x2={SVG_WIDTH - PADDING.right}
                     y1={y}
                     y2={y}
-                    stroke="#e2e8f0"
+                    stroke={REPORT_GRID}
                     strokeDasharray="4 4"
                   />
                 );
@@ -92,8 +96,8 @@ export function RevenueTrendChart({
                     width={point.barWidth}
                     height={Math.max(point.releasedHeight, 2)}
                     rx="6"
-                    fill="#1d4ed8"
-                    opacity="0.85"
+                    fill={REPORT_NAVY_MUTED}
+                    opacity="0.95"
                   />
                   {point.showLabel ? (
                     <text
@@ -110,14 +114,14 @@ export function RevenueTrendChart({
 
               {revenuePath ? (
                 <>
-                  <path d={revenuePath} fill="none" stroke="#f59e0b" strokeWidth="3" />
+                  <path d={revenuePath} fill="none" stroke={REPORT_NAVY} strokeWidth="3" />
                   {points.map((point) => (
                     <circle
                       key={`${point.key}-circle`}
                       cx={point.x}
                       cy={point.revenueY}
                       r="4"
-                      fill="#f59e0b"
+                      fill={REPORT_RED_ACCENT}
                     />
                   ))}
                 </>

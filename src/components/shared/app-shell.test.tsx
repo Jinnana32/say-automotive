@@ -52,10 +52,39 @@ describe("AppShell", () => {
 
     expect(screen.queryByRole("button", { name: "Close navigation menu" })).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Open navigation menu" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Toggle sidebar" })[0]);
 
     expect(screen.getByRole("link", { name: /Quick Access/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Close navigation menu" })).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "Customers" }).length).toBeGreaterThan(0);
+  });
+
+  it("can show the business name block in the sidebar when enabled", () => {
+    render(
+      <AppShell
+        navigationItems={[
+          {
+            href: "/dashboard",
+            label: "Dashboard",
+            description: "Overview of shop activity",
+            group: "Overview",
+            iconName: "dashboard",
+          },
+        ]}
+        userDisplayName="Alex"
+        userRoleLabel="Administrator"
+        capabilities={[]}
+        businessName="SAY Auto Care Center"
+        businessLogoUrl={null}
+        showSidebarBusinessName
+      >
+        <div>Dashboard content</div>
+      </AppShell>,
+    );
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Toggle sidebar" })[0]);
+
+    expect(screen.getByText("SAY Auto Care Center")).toBeInTheDocument();
+    expect(screen.getByText("Workshop administration")).toBeInTheDocument();
   });
 });

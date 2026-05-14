@@ -3,6 +3,8 @@ import { DASHBOARD_NAV_ITEMS } from "@/lib/navigation";
 import { requireAuthenticatedStaff } from "@/lib/auth/session";
 import { getBusinessBranding } from "@/features/settings/queries/settings-queries";
 
+const SHOW_SIDEBAR_BUSINESS_NAME = false;
+
 const ROLE_LABELS = {
   owner: "Owner",
   admin: "Administrator",
@@ -33,6 +35,7 @@ export default async function DashboardLayout({
       capabilities={context.capabilities}
       businessName={branding.businessName}
       businessLogoUrl={branding.businessLogoUrl}
+      showSidebarBusinessName={SHOW_SIDEBAR_BUSINESS_NAME}
     >
       {children}
     </AppShell>

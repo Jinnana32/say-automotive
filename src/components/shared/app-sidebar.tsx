@@ -15,7 +15,6 @@ import {
   ReceiptText,
   Settings2,
   ShoppingCart,
-  ShieldCheck,
   ScanSearch,
   HandCoins,
   Truck,
@@ -28,7 +27,6 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { signOutAction } from '@/features/auth/actions/auth-actions';
 import {
   navigationItemMatchesPath,
   resolveActiveNavigationItem,
@@ -62,12 +60,13 @@ const ICONS: Record<
   settings: Settings2,
 };
 
+const SIDEBAR_ACTIVE_NAVY = '#061B3A';
+
 export function AppSidebar({
   navigationItems,
-  userDisplayName,
-  userRoleLabel,
   businessName,
   businessLogoUrl,
+  showBusinessName = false,
   className,
   onNavigate,
   onClose,
@@ -81,10 +80,9 @@ export function AppSidebar({
     showInSidebar?: boolean;
     showAsMobileShortcut?: boolean;
   }>;
-  userDisplayName: string;
-  userRoleLabel: string;
   businessName: string;
   businessLogoUrl: string | null;
+  showBusinessName?: boolean;
   className?: string;
   onNavigate?: () => void;
   onClose?: () => void;
@@ -122,34 +120,61 @@ export function AppSidebar({
   return (
     <aside
       className={cn(
-        'border-r border-border bg-card/95 backdrop-blur',
+        'border-r border-border/70 bg-background/95 shadow-[inset_-1px_0_0_rgba(15,23,42,0.04)] backdrop-blur',
         className,
       )}
     >
-      <div className="flex h-full flex-col px-4 py-5">
-        <div className="flex items-center justify-between gap-3 border-b border-border/80 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/90 p-1.5 shadow-sm">
-              <Image
-                src={businessLogoUrl ?? "/say-auto-care-logo.jpeg"}
-                alt={businessName}
-                width={240}
-                height={192}
-                className="h-14 w-auto rounded-sm object-contain sm:h-16"
-                priority
-              />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">{businessName}</p>
-              <p className="text-xs text-muted-foreground">Administration</p>
-            </div>
+      <div className="flex h-full flex-col px-4 py-4">
+        <div
+          className={cn(
+            'flex items-start justify-between gap-3 border-b border-border/70',
+            showBusinessName ? 'pb-4' : 'pb-3',
+          )}
+        >
+          <div className="min-w-0 flex-1">
+            {showBusinessName ? (
+              <div className="flex items-center gap-3">
+                <div className="flex size-16 shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-white p-2 shadow-sm">
+                  <Image
+                    src={businessLogoUrl ?? '/say-auto-care-logo.jpeg'}
+                    alt={businessName}
+                    width={120}
+                    height={120}
+                    className="max-h-12 w-auto object-contain"
+                    priority
+                  />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-primary/70">
+                    SAY Auto Care
+                  </p>
+                  <p className="mt-1 truncate text-base font-semibold tracking-[-0.02em] text-foreground">
+                    {businessName}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Workshop administration
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex min-h-[4.1rem] w-full items-center py-1 pl-1 pr-2">
+                <Image
+                  src={businessLogoUrl ?? '/say-auto-care-logo.jpeg'}
+                  alt={businessName}
+                  width={520}
+                  height={140}
+                  className="h-auto w-full max-w-[14.75rem] object-contain object-left"
+                  priority
+                />
+              </div>
+            )}
           </div>
           {showCloseButton ? (
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="shrink-0 lg:hidden"
+              className="shrink-0 rounded-2xl border border-border/70 bg-background xl:hidden"
               onClick={onClose}
               aria-label="Close navigation menu"
             >
@@ -158,12 +183,12 @@ export function AppSidebar({
           ) : null}
         </div>
 
-        <nav className="mt-5 flex-1 overflow-y-auto pr-1">
+        <nav className="mt-3 flex-1 overflow-y-auto pr-1">
           <div className="space-y-5">
             {Object.entries(groupedItems)
               .filter(([, items]) => items.length > 0)
               .map(([group, items]) => (
-                <div key={group} className="space-y-1.5">
+                <div key={group} className="space-y-2">
                   {showCloseButton &&
                   group === 'Overview' &&
                   mobileShortcutItems.length > 0 ? (
@@ -176,14 +201,18 @@ export function AppSidebar({
                             key={item.href}
                             href={item.href}
                             onClick={onNavigate}
-                            className="flex w-full items-center gap-3 rounded-2xl border border-primary/20 bg-primary/10 px-3 py-3 text-left text-sm font-semibold text-primary shadow-sm transition-colors hover:bg-primary/15"
+                            className="flex w-full items-center gap-3 rounded-3xl px-3.5 py-3 text-left text-[0.95rem] font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5"
+                            style={{
+                              backgroundColor: SIDEBAR_ACTIVE_NAVY,
+                              boxShadow: '0 18px 32px -22px rgba(6, 27, 58, 0.75)',
+                            }}
                           >
-                            <div className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                            <div className="flex size-10 items-center justify-center rounded-2xl bg-white/15">
                               <Icon className="size-4" />
                             </div>
                             <div className="min-w-0">
                               <p>{item.label}</p>
-                              <p className="mt-0.5 text-xs font-medium text-primary/80">
+                              <p className="mt-0.5 text-[0.8rem] font-medium text-primary-foreground/80">
                                 Pull up customer and vehicle records fast
                               </p>
                             </div>
@@ -192,10 +221,10 @@ export function AppSidebar({
                       })}
                     </div>
                   ) : null}
-                  <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  <p className="px-3 text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-muted-foreground/90">
                     {group}
                   </p>
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     {items.map((item) => {
                       const Icon = ICONS[item.iconName];
                       const isActive =
@@ -208,14 +237,31 @@ export function AppSidebar({
                           href={item.href}
                           onClick={onNavigate}
                           className={cn(
-                            'flex items-center gap-3 rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors',
+                            'group flex items-center gap-3 rounded-2xl px-3 py-3 text-[0.95rem] transition-all',
                             isActive
-                              ? 'border-primary/20 bg-primary/10 text-primary shadow-sm'
-                              : 'border-transparent text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground',
+                              ? 'text-white shadow-sm'
+                              : 'text-slate-600 hover:bg-slate-100 hover:text-[#061B3A]',
                           )}
-                        >
-                          <Icon className="size-4" />
-                          <span>{item.label}</span>
+                          style={
+                            isActive
+                              ? {
+                                  backgroundColor: SIDEBAR_ACTIVE_NAVY,
+                                  boxShadow: '0 16px 28px -22px rgba(6, 27, 58, 0.8)',
+                                }
+                              : undefined
+                          }
+                          >
+                            <span
+                            className={cn(
+                              'flex size-9 shrink-0 items-center justify-center rounded-xl transition-colors',
+                              isActive
+                                ? 'bg-white/15 text-white'
+                                : 'bg-slate-100 text-slate-500 group-hover:bg-white group-hover:text-[#061B3A]',
+                            )}
+                          >
+                            <Icon className="size-4" />
+                          </span>
+                          <span className="truncate font-medium leading-none">{item.label}</span>
                         </Link>
                       );
                     })}
@@ -225,22 +271,9 @@ export function AppSidebar({
           </div>
         </nav>
 
-        <div className="mt-4 rounded-2xl border border-border/80 bg-muted/25 p-3">
-          <p className="text-sm font-medium text-foreground">
-            {userDisplayName}
-          </p>
-          <p className="mt-1 text-xs uppercase tracking-[0.14em] text-muted-foreground">
-            {userRoleLabel}
-          </p>
-          <form action={signOutAction} className="mt-3">
-            <Button
-              type="submit"
-              variant="outline"
-              className="w-full justify-center"
-            >
-              Sign out
-            </Button>
-          </form>
+        <div className="mt-5 border-t border-border/60 px-3 pt-4">
+          <p className="text-sm font-medium text-slate-700">SAY Auto Care Admin</p>
+          <p className="mt-1 text-xs text-slate-500">© 2023 All rights reserved.</p>
         </div>
       </div>
     </aside>

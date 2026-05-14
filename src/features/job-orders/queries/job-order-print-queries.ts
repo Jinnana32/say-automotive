@@ -54,7 +54,7 @@ export const getJobOrderPrintDocument = cache(
         .maybeSingle(),
       supabase
         .from("business_settings")
-        .select("business_name, business_logo_path, business_contact, business_email, business_address")
+        .select("business_name, business_logo_path, business_contact, business_email, business_address, updated_at")
         .eq("branch_id", support.branch_id)
         .maybeSingle(),
       support.created_by
@@ -101,7 +101,10 @@ export const getJobOrderPrintDocument = cache(
       },
       businessProfile: {
         businessName: businessSettings?.business_name ?? "SAY Auto Care Center",
-        businessLogoUrl: buildBusinessLogoUrl(businessSettings?.business_logo_path ?? null),
+        businessLogoUrl: buildBusinessLogoUrl(
+          businessSettings?.business_logo_path ?? null,
+          businessSettings?.updated_at ?? null,
+        ),
         businessContact: businessSettings?.business_contact ?? null,
         businessEmail: businessSettings?.business_email ?? null,
         businessAddress: businessSettings?.business_address ?? null,

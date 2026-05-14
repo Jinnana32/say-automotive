@@ -33,6 +33,12 @@ import { formatInventoryQuantity } from '@/features/inventory/utils';
 
 export const dynamic = 'force-dynamic';
 
+const DASHBOARD_NAVY = '#061B3A';
+const DASHBOARD_NAVY_HOVER = '#0B2A55';
+const DASHBOARD_NAVY_TINT = '#EAF1FB';
+const DASHBOARD_NAVY_MUTED = '#D9E4F4';
+const DASHBOARD_RED_ACCENT = '#C81E2A';
+
 export default async function DashboardPage() {
   const dashboard = await getDashboardData();
 
@@ -42,7 +48,7 @@ export default async function DashboardPage() {
         title="Operations dashboard"
         description="Live workshop, billing, and stock activity in one operational view."
         actions={
-          <Button asChild>
+          <Button asChild variant="navyPrimary">
             <Link href="/job-orders">Open job orders</Link>
           </Button>
         }
@@ -100,56 +106,6 @@ export default async function DashboardPage() {
           }
         />
       </MetricGrid>
-
-      <div className="grid gap-6 xl:grid-cols-[1.35fr_0.95fr]">
-        <SectionCard
-          title="Collections trend"
-          description="Monthly payment intake across the last six months."
-        >
-          {dashboard.revenueTrend.length === 0 ? (
-            <EmptyState
-              title="No payment trend yet"
-              description="Once invoice payments are recorded, monthly collections will appear here."
-            />
-          ) : (
-            <TrendBars
-              data={dashboard.revenueTrend}
-              valueFormatter={(value) => formatCurrency(value)}
-              footerLabel="Total collected"
-              footerValue={formatCurrency(
-                dashboard.revenueTrend.reduce(
-                  (sum, item) => sum + item.value,
-                  0,
-                ),
-              )}
-            />
-          )}
-        </SectionCard>
-
-        <SectionCard
-          title="Service throughput"
-          description="Completed operational work entering billing or release flow."
-        >
-          {dashboard.serviceTrend.length === 0 ? (
-            <EmptyState
-              title="No service trend yet"
-              description="Once job orders progress through execution, service throughput will appear here."
-            />
-          ) : (
-            <TrendBars
-              data={dashboard.serviceTrend}
-              valueFormatter={(value) => `${value} jobs`}
-              footerLabel="Completed jobs"
-              footerValue={String(
-                dashboard.serviceTrend.reduce(
-                  (sum, item) => sum + item.value,
-                  0,
-                ),
-              )}
-            />
-          )}
-        </SectionCard>
-      </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
         <SectionCard
@@ -265,6 +221,56 @@ export default async function DashboardPage() {
         </SectionCard>
       </div>
 
+      <div className="grid gap-6 xl:grid-cols-[1.35fr_0.95fr]">
+        <SectionCard
+          title="Collections trend"
+          description="Monthly payment intake across the last six months."
+        >
+          {dashboard.revenueTrend.length === 0 ? (
+            <EmptyState
+              title="No payment trend yet"
+              description="Once invoice payments are recorded, monthly collections will appear here."
+            />
+          ) : (
+            <TrendBars
+              data={dashboard.revenueTrend}
+              valueFormatter={(value) => formatCurrency(value)}
+              footerLabel="Total collected"
+              footerValue={formatCurrency(
+                dashboard.revenueTrend.reduce(
+                  (sum, item) => sum + item.value,
+                  0,
+                ),
+              )}
+            />
+          )}
+        </SectionCard>
+
+        <SectionCard
+          title="Service throughput"
+          description="Completed operational work entering billing or release flow."
+        >
+          {dashboard.serviceTrend.length === 0 ? (
+            <EmptyState
+              title="No service trend yet"
+              description="Once job orders progress through execution, service throughput will appear here."
+            />
+          ) : (
+            <TrendBars
+              data={dashboard.serviceTrend}
+              valueFormatter={(value) => `${value} jobs`}
+              footerLabel="Completed jobs"
+              footerValue={String(
+                dashboard.serviceTrend.reduce(
+                  (sum, item) => sum + item.value,
+                  0,
+                ),
+              )}
+            />
+          )}
+        </SectionCard>
+      </div>
+
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <SectionCard
           title="Inventory alerts"
@@ -373,30 +379,52 @@ function TrendBars({
   footerValue: string;
 }) {
   const maxValue = Math.max(...data.map((item) => item.value), 1);
+  const currentPeriodIndex = data.length - 1;
 
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-6 gap-3">
-        {data.map((item) => (
-          <div key={item.label} className="flex flex-col items-center gap-2">
-            <div className="flex h-40 w-full items-end rounded-2xl bg-muted/40 p-2">
+        {data.map((item, index) => {
+          const isCurrentPeriod = index === currentPeriodIndex;
+          const isEmphasized = item.value === maxValue && item.value > 0;
+          const barColor = isCurrentPeriod
+            ? DASHBOARD_NAVY
+            : isEmphasized
+              ? DASHBOARD_NAVY_HOVER
+              : DASHBOARD_NAVY_MUTED;
+
+          return (
+            <div key={item.label} className="flex flex-col items-center gap-2">
               <div
-                className="w-full rounded-xl bg-primary/85"
-                style={{
-                  height: `${Math.max((item.value / maxValue) * 100, item.value > 0 ? 10 : 4)}%`,
-                }}
-              />
+                className="flex h-40 w-full items-end rounded-2xl border border-[#D9E1EC] p-2"
+                style={{ backgroundColor: DASHBOARD_NAVY_TINT }}
+              >
+                <div
+                  className="relative w-full overflow-hidden rounded-xl"
+                  style={{
+                    backgroundColor: barColor,
+                    height: `${Math.max((item.value / maxValue) * 100, item.value > 0 ? 10 : 4)}%`,
+                  }}
+                >
+                  {isCurrentPeriod && item.value > 0 ? (
+                    <div
+                      className="absolute inset-x-0 top-0 h-1 rounded-t-xl"
+                      style={{ backgroundColor: DASHBOARD_RED_ACCENT }}
+                    />
+                  ) : null}
+                </div>
+              </div>
+              <div className="space-y-0.5 text-center">
+                <p className="text-xs font-medium text-foreground">
+                  {item.label}
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  {valueFormatter(item.value)}
+                </p>
+              </div>
             </div>
-            <div className="space-y-0.5 text-center">
-              <p className="text-xs font-medium text-foreground">
-                {item.label}
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                {valueFormatter(item.value)}
-              </p>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       <div className="flex items-center justify-between rounded-xl border border-border/80 bg-muted/20 px-4 py-3">
         <p className="text-sm text-muted-foreground">{footerLabel}</p>

@@ -24,6 +24,13 @@ const config: Config = {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        brand: {
+          navy: "hsl(var(--brand-navy))",
+          navyHover: "hsl(var(--brand-navy-hover))",
+          red: "hsl(var(--brand-red))",
+          soft: "hsl(var(--brand-soft))",
+          border: "hsl(var(--brand-border))",
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",

@@ -34,16 +34,8 @@ export type BusinessBranding = {
   businessLogoUrl: string | null;
 };
 
-export type SettingsAuditEntry = {
-  id: string;
-  action: string;
-  entityType: string;
-  createdAt: string;
-};
-
 export type SettingsPageData = {
   branchName: string;
   settings: BusinessSettingsValues;
   documentSequences: SettingsDocumentSequence[];
-  recentAuditEntries: SettingsAuditEntry[];
 };

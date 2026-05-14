@@ -68,7 +68,7 @@ export function GlobalLoadingOverlayProvider({
             aria-live="polite"
             className="w-full max-w-sm rounded-3xl border border-border/70 bg-background px-6 py-5 text-center shadow-2xl shadow-slate-950/15"
           >
-            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-[#173c99]/10 text-[#173c99]">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-brand-navy/10 text-brand-navy">
               <Loader2 className="size-5 animate-spin" />
             </div>
             <div className="mt-4 space-y-1">

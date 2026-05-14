@@ -4,19 +4,24 @@
 
 @layer base {
   :root {
+    --brand-navy: 216 81% 13%;
+    --brand-navy-hover: 215 77% 19%;
+    --brand-red: 355 74% 45%;
+    --brand-soft: 214 68% 95%;
+    --brand-border: 213 31% 88%;
     --background: 220 23% 97%;
     --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 220 79% 46%;
+    --primary: 216 81% 13%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 18% 95%;
+    --secondary: 214 68% 95%;
     --secondary-foreground: 222 47% 11%;
-    --muted: 220 18% 95%;
+    --muted: 214 68% 95%;
     --muted-foreground: 215 14% 44%;
-    --accent: 214 42% 95%;
+    --accent: 214 68% 95%;
     --accent-foreground: 222 47% 11%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
@@ -26,9 +31,9 @@
     --warning-foreground: 0 0% 100%;
     --info: 200 92% 42%;
     --info-foreground: 0 0% 100%;
-    --border: 220 18% 89%;
-    --input: 220 18% 89%;
-    --ring: 220 79% 46%;
+    --border: 213 31% 88%;
+    --input: 213 31% 88%;
+    --ring: 216 81% 13%;
     --radius: 0.875rem;
     --font-sans: var(--font-space-grotesk), "Segoe UI", sans-serif;
     --font-display: var(--font-barlow-condensed), "Segoe UI", sans-serif;

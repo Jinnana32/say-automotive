@@ -189,6 +189,22 @@ export const DASHBOARD_NAV_ITEMS: ReadonlyArray<{
     iconName: "website",
   },
   {
+    href: "/settings/timekeeping",
+    label: "Timekeeping",
+    description: "Attendance calendar and shop timekeeping rules.",
+    capability: "settings:read",
+    group: "System",
+    iconName: "attendance",
+  },
+  {
+    href: "/settings/vehicle-lookups",
+    label: "Vehicle lookups",
+    description: "Internal make, model, and option references.",
+    capability: "settings:read",
+    group: "System",
+    iconName: "vehicles",
+  },
+  {
     href: "/settings",
     label: "Settings",
     description: "Business rules and preferences.",

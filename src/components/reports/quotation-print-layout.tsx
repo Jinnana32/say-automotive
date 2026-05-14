@@ -238,24 +238,19 @@ function QuotationPrintHeader({
   return (
     <header className="report-section-keep border-b-2 border-slate-300 pb-3">
       <div className="grid gap-4 sm:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] sm:items-center">
-        <div className="flex items-center gap-3">
-          <div className="max-w-[92px] shrink-0 sm:max-w-[108px]">
+        <div className="flex flex-col items-start gap-2">
+          <div className="max-w-[132px] shrink-0 sm:max-w-[156px]">
             <img
               src={logoSrc ?? '/say-auto-care-logo.jpeg'}
               alt={businessName}
-              className="h-auto max-h-[84px] w-auto max-w-[132px] object-contain sm:max-h-[96px] sm:max-w-[148px]"
+              className="h-auto max-h-[96px] w-auto max-w-[156px] object-contain"
             />
           </div>
-          <div className="min-w-0">
-            <p className="font-display text-[14px] font-semibold uppercase tracking-[0.18em] text-[#173c99] sm:text-[15px]">
-              {businessName}
+          {vatRegistrationNo ? (
+            <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-[#c73d3d] sm:text-[9.5px]">
+              VAT Reg. No.: {vatRegistrationNo}
             </p>
-            {vatRegistrationNo ? (
-              <p className="mt-1 text-[9px] font-semibold uppercase tracking-[0.22em] text-[#c73d3d] sm:text-[9.5px]">
-                VAT Reg. No.: {vatRegistrationNo}
-              </p>
-            ) : null}
-          </div>
+          ) : null}
         </div>
         <div className="sm:text-right">
           <p className="font-display text-[34px] font-semibold leading-none tracking-[0.08em] text-[#10224d] sm:text-[38px]">

@@ -12,6 +12,7 @@ import {
   type NavigationGroup,
   type NavigationIconName,
 } from "@/lib/navigation";
+import { cn } from "@/lib/utils";
 
 export function AppShell({
   children,
@@ -21,6 +22,7 @@ export function AppShell({
   capabilities,
   businessName,
   businessLogoUrl,
+  showSidebarBusinessName = false,
 }: Readonly<{
   children: React.ReactNode;
   navigationItems: ReadonlyArray<{
@@ -37,23 +39,27 @@ export function AppShell({
   capabilities: readonly AppCapability[];
   businessName: string;
   businessLogoUrl: string | null;
+  showSidebarBusinessName?: boolean;
 }>) {
   const pathname = usePathname();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
   const activeItem = resolveActiveNavigationItem(navigationItems, pathname);
+  void capabilities;
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppSidebar
-        navigationItems={navigationItems}
-        userDisplayName={userDisplayName}
-        userRoleLabel={userRoleLabel}
-        businessName={businessName}
-        businessLogoUrl={businessLogoUrl}
-        className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-64 lg:flex-col"
-      />
+    <div className="min-h-screen bg-slate-50">
+      {!isDesktopSidebarCollapsed ? (
+        <AppSidebar
+          navigationItems={navigationItems}
+          businessName={businessName}
+          businessLogoUrl={businessLogoUrl}
+          showBusinessName={showSidebarBusinessName}
+          className="hidden xl:fixed xl:inset-y-0 xl:left-0 xl:flex xl:w-72 xl:flex-col"
+        />
+      ) : null}
       {isMobileSidebarOpen ? (
-        <div className="fixed inset-0 z-40 lg:hidden" aria-hidden="true">
+        <div className="fixed inset-0 z-40 xl:hidden" aria-hidden="true">
           <button
             type="button"
             className="absolute inset-0 bg-foreground/35"
@@ -65,24 +71,30 @@ export function AppShell({
       {isMobileSidebarOpen ? (
         <AppSidebar
           navigationItems={navigationItems}
-          userDisplayName={userDisplayName}
-          userRoleLabel={userRoleLabel}
           businessName={businessName}
           businessLogoUrl={businessLogoUrl}
-          className="fixed inset-y-0 left-0 z-50 flex w-[18rem] max-w-[calc(100vw-2rem)] flex-col shadow-2xl lg:hidden"
+          showBusinessName={showSidebarBusinessName}
+          className="fixed inset-y-0 left-0 z-50 flex w-[19rem] max-w-[calc(100vw-2rem)] flex-col shadow-2xl xl:hidden"
           onNavigate={() => setIsMobileSidebarOpen(false)}
           onClose={() => setIsMobileSidebarOpen(false)}
           showCloseButton
         />
       ) : null}
-      <div className="min-h-screen lg:pl-64">
+      <div
+        className={cn(
+          "min-h-screen",
+          !isDesktopSidebarCollapsed && "xl:pl-72",
+        )}
+      >
         <AppTopbar
           activeLabel={activeItem?.label ?? "Dashboard"}
           activeDescription={activeItem?.description}
           userDisplayName={userDisplayName}
           userRoleLabel={userRoleLabel}
-          capabilities={capabilities}
           onOpenNavigation={() => setIsMobileSidebarOpen(true)}
+          onToggleDesktopSidebar={() =>
+            setIsDesktopSidebarCollapsed((currentValue) => !currentValue)
+          }
         />
         <main className="px-4 py-6 sm:px-6 lg:px-8">
           <PageContainer>{children}</PageContainer>

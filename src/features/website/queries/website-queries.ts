@@ -45,7 +45,7 @@ export const getWebsiteShellData = cache(async (): Promise<WebsiteShellData> => 
 
   const { data: settings, error: settingsError } = await supabase
     .from("business_settings")
-    .select("business_name, business_address, business_contact, business_logo_path")
+    .select("business_name, business_address, business_contact, business_logo_path, updated_at")
     .eq("branch_id", branch.id)
     .maybeSingle();
 
@@ -55,7 +55,7 @@ export const getWebsiteShellData = cache(async (): Promise<WebsiteShellData> => 
 
   return {
     businessName: settings?.business_name ?? branch.name,
-    businessLogoUrl: buildBusinessLogoUrl(settings?.business_logo_path ?? null),
+    businessLogoUrl: buildBusinessLogoUrl(settings?.business_logo_path ?? null, settings?.updated_at ?? null),
     branchName: branch.name,
     address: settings?.business_address ?? null,
     contactNumber: settings?.business_contact ?? null,

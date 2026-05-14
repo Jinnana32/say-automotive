@@ -2,7 +2,6 @@ import type { TableRow } from "@/types/database";
 
 import type {
   BusinessSettingsValues,
-  SettingsAuditEntry,
   SettingsDocumentSequence,
   SettingsDocumentSequenceKey,
 } from "@/features/settings/types";
@@ -10,7 +9,6 @@ import { buildBusinessLogoUrl } from "@/lib/storage";
 
 type BusinessSettingsRow = TableRow<"business_settings">;
 type DocumentSequenceRow = TableRow<"document_sequences">;
-type AuditLogRow = Pick<TableRow<"audit_logs">, "id" | "action" | "entity_type" | "created_at">;
 
 const DOCUMENT_SEQUENCE_LABELS: Record<SettingsDocumentSequenceKey, string> = {
   quotation: "Quotation numbers",
@@ -24,7 +22,7 @@ export function mapBusinessSettingsRowToValues(
 ): BusinessSettingsValues {
   return {
     businessName: row.business_name,
-    businessLogoUrl: buildBusinessLogoUrl(row.business_logo_path),
+    businessLogoUrl: buildBusinessLogoUrl(row.business_logo_path, row.updated_at),
     businessAddress: row.business_address ?? "",
     businessContact: row.business_contact ?? "",
     businessEmail: row.business_email ?? "",
@@ -49,14 +47,5 @@ export function mapDocumentSequenceRowToItem(
     prefix: row.prefix,
     padding: row.padding,
     lastValue: Number(row.last_value),
-  };
-}
-
-export function mapAuditLogRowToEntry(row: AuditLogRow): SettingsAuditEntry {
-  return {
-    id: row.id,
-    action: row.action,
-    entityType: row.entity_type,
-    createdAt: row.created_at,
   };
 }

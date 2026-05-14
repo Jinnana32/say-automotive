@@ -60,7 +60,7 @@ export async function updateBusinessProfileSettingsAction(
       return { status: "error", message: fileValidationError };
     }
 
-    const uploadPath = buildBusinessLogoObjectKey(branch.id);
+    const uploadPath = buildBusinessLogoObjectKey(branch.id, businessLogoFile.name);
     const { error: uploadError } = await supabase.storage
       .from(BUSINESS_ASSETS_BUCKET)
       .upload(uploadPath, businessLogoFile, {

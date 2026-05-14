@@ -262,11 +262,20 @@ export type TimekeepingCalendarPageData = {
   attendanceAccessSettings: AttendanceAccessSettings;
   allowedIpAddresses: AttendanceAllowedIpSummary[];
   currentDetectedIp: string | null;
+  observedRequestIp: string | null;
   pendingAmendmentCount: number;
   pendingDeviceCount: number;
   holidays: BranchHolidaySummary[];
-  leaveEntries: StaffLeaveManagementItem[];
+};
+
+export type ApprovedLeaveManagementData = {
   activeStaff: TimekeepingCalendarStaffOption[];
+  leaveEntries: StaffLeaveManagementItem[];
+};
+
+export type AttendancePageData = {
+  rosterData: AttendanceRosterData;
+  leaveManagement: ApprovedLeaveManagementData;
 };
 
 export type AttendanceEntryActionState = {
