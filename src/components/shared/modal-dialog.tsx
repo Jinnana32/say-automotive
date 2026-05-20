@@ -70,7 +70,7 @@ export function ModalDialog({
       {isOpen
         ? createPortal(
             <div
-              className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/45 px-4 py-6 backdrop-blur-[2px]"
+              className="fixed inset-0 z-[120] flex items-start justify-center overflow-y-auto bg-slate-950/45 px-4 py-4 backdrop-blur-[2px] sm:items-center sm:py-6"
               onMouseDown={() => setDialogOpen(false)}
             >
               <div
@@ -79,7 +79,7 @@ export function ModalDialog({
                 aria-labelledby={titleId}
                 aria-describedby={description ? descriptionId : undefined}
                 className={cn(
-                  "w-full rounded-3xl border border-border/70 bg-background shadow-2xl shadow-slate-950/15",
+                  "flex max-h-[calc(100dvh-2rem)] w-full flex-col overflow-hidden rounded-3xl border border-border/70 bg-background shadow-2xl shadow-slate-950/15 sm:max-h-[calc(100dvh-3rem)]",
                   size === "md"
                     ? "max-w-lg"
                     : size === "lg"
@@ -111,7 +111,9 @@ export function ModalDialog({
                   </Button>
                 </div>
 
-                <div className="px-6 py-5">{children({ closeDialog: () => setDialogOpen(false) })}</div>
+                <div className="min-h-0 overflow-y-auto overscroll-contain px-6 py-5">
+                  {children({ closeDialog: () => setDialogOpen(false) })}
+                </div>
               </div>
             </div>,
             document.body,

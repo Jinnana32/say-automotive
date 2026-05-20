@@ -15,9 +15,13 @@ import type {
   WebsiteQuoteRequestStatus,
   WebsiteShellData,
 } from "@/features/website/types";
+import {
+  isUuidLike,
+  resolveWebsiteProductRouteSegment,
+} from "@/features/website/utils";
 import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
-import { buildBusinessLogoUrl } from "@/lib/storage";
+import { buildBusinessLogoUrl, resolveProductImageUrl } from "@/lib/storage";
 import type { TableRow } from "@/types/database";
 
 type ProductRow = TableRow<"products">;
@@ -130,14 +134,9 @@ export async function listFeaturedWebsiteProducts(limitCount = 6) {
 
 export async function getWebsiteProductBySlug(slug: string) {
   const supabase = getSupabaseAdminClient();
+  const routeSegment = slug.trim();
   const [{ data, error }, dictionaries] = await Promise.all([
-    supabase
-      .from("products")
-      .select("*")
-      .eq("website_slug", slug)
-      .eq("website_visible", true)
-      .eq("status", "active")
-      .maybeSingle(),
+    buildWebsiteProductLookupQuery(supabase, routeSegment),
     getWebsiteReferenceDictionaries(),
   ]);
 
@@ -145,11 +144,13 @@ export async function getWebsiteProductBySlug(slug: string) {
     throw new Error(error.message);
   }
 
-  if (!data) {
+  const matchedProduct = ((data ?? []) as ProductRow[])[0] ?? null;
+
+  if (!matchedProduct) {
     return null;
   }
 
-  return mapProductRowToWebsiteCatalogProduct(data as ProductRow, dictionaries);
+  return mapProductRowToWebsiteCatalogProduct(matchedProduct, dictionaries);
 }
 
 export async function listPublishedWebsitePosts(limitCount?: number): Promise<WebsitePostListItem[]> {
@@ -459,7 +460,10 @@ function mapProductRowToWebsiteCatalogProduct(
   return {
     id: row.id,
     name: row.name,
-    slug: row.website_slug ?? row.id,
+    slug: resolveWebsiteProductRouteSegment({
+      id: row.id,
+      websiteSlug: row.website_slug,
+    }),
     productType: row.product_type,
     categoryName: row.category_id ? dictionaries.categories.get(row.category_id) ?? null : null,
     brandName: row.brand_id ? dictionaries.brands.get(row.brand_id) ?? null : null,
@@ -468,7 +472,12 @@ function mapProductRowToWebsiteCatalogProduct(
     badge: row.website_badge,
     shortDescription: row.website_short_description,
     description: row.description,
-    imageUrl: row.website_image_url,
+    imageUrl: resolveProductImageUrl({
+      productImagePath: row.product_image_path,
+      productImageUrl: row.product_image_url,
+      websiteImageUrl: row.website_image_url,
+      cacheBust: row.updated_at,
+    }),
     isFeatured: row.website_featured,
     sortOrder: row.website_sort_order,
   };
@@ -493,4 +502,26 @@ function mapWebsitePostRowToItem(row: WebsitePostRow): WebsitePostListItem {
 
 function escapeSearchTerm(value: string) {
   return value.replaceAll(",", "\\,");
+}
+
+function buildWebsiteProductLookupQuery(
+  supabase: ReturnType<typeof getSupabaseAdminClient>,
+  routeSegment: string,
+) {
+  let query = supabase
+    .from("products")
+    .select("*")
+    .eq("website_visible", true)
+    .eq("status", "active")
+    .order("updated_at", { ascending: false })
+    .limit(2);
+
+  if (isUuidLike(routeSegment)) {
+    const escapedRouteSegment = routeSegment.replaceAll(",", "\\,");
+    return query.or(
+      `id.eq.${escapedRouteSegment},website_slug.eq.${escapedRouteSegment}`,
+    );
+  }
+
+  return query.eq("website_slug", routeSegment);
 }
