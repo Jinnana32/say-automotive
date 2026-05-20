@@ -6,7 +6,9 @@ import {
   calculateJobOrderBillableTotal,
   calculateJobOrderPendingApprovalCount,
   calculateJobOrderPendingApprovalTotal,
+  canGenerateJobOrderInvoice,
   canEditJobOrderItems,
+  canReleaseJobOrderVehicle,
   getAllowedJobOrderStatusTransitions,
   getJobOrderChecklistStatus,
   groupJobOrderChecklistItems,
@@ -90,14 +92,79 @@ describe("job order utils", () => {
 
   it("returns the operationally allowed next statuses", () => {
     expect(getAllowedJobOrderStatusTransitions("pending")).toEqual(["in_progress", "cancelled"]);
-    expect(getAllowedJobOrderStatusTransitions("completed")).toEqual(["ready_for_billing"]);
+    expect(getAllowedJobOrderStatusTransitions("waiting_for_parts")).toEqual([
+      "in_progress",
+      "cancelled",
+    ]);
+    expect(getAllowedJobOrderStatusTransitions("completed")).toEqual([]);
     expect(getAllowedJobOrderStatusTransitions("released")).toEqual([]);
+  });
+
+  it("keeps legacy ready-for-billing records able to reach completion", () => {
+    expect(getAllowedJobOrderStatusTransitions("ready_for_billing")).toEqual(["completed"]);
   });
 
   it("allows work item editing until the job order is finalized", () => {
     expect(canEditJobOrderItems("pending")).toBe(true);
     expect(canEditJobOrderItems("in_progress")).toBe(true);
     expect(canEditJobOrderItems("released")).toBe(false);
+  });
+
+  it("allows invoice generation after completion or release when none exists yet", () => {
+    expect(canGenerateJobOrderInvoice("completed", null)).toBe(true);
+    expect(canGenerateJobOrderInvoice("ready_for_billing", null)).toBe(true);
+    expect(canGenerateJobOrderInvoice("released", null)).toBe(true);
+    expect(canGenerateJobOrderInvoice("completed", "invoice-1")).toBe(false);
+  });
+
+  it("supports vehicle release without invoice only when branch settings allow it", () => {
+    expect(
+      canReleaseJobOrderVehicle({
+        status: "in_progress",
+        invoiceId: null,
+        invoiceStatus: null,
+        allowReleaseWithBalance: false,
+        requireFullPaymentBeforeRelease: true,
+        requireInvoiceBeforeVehicleRelease: false,
+        releasedAt: null,
+      }),
+    ).toBe(true);
+
+    expect(
+      canReleaseJobOrderVehicle({
+        status: "completed",
+        invoiceId: null,
+        invoiceStatus: null,
+        allowReleaseWithBalance: false,
+        requireFullPaymentBeforeRelease: true,
+        requireInvoiceBeforeVehicleRelease: false,
+        releasedAt: null,
+      }),
+    ).toBe(true);
+
+    expect(
+      canReleaseJobOrderVehicle({
+        status: "completed",
+        invoiceId: null,
+        invoiceStatus: null,
+        allowReleaseWithBalance: false,
+        requireFullPaymentBeforeRelease: true,
+        requireInvoiceBeforeVehicleRelease: true,
+        releasedAt: null,
+      }),
+    ).toBe(false);
+
+    expect(
+      canReleaseJobOrderVehicle({
+        status: "completed",
+        invoiceId: "invoice-1",
+        invoiceStatus: "partially_paid",
+        allowReleaseWithBalance: false,
+        requireFullPaymentBeforeRelease: true,
+        requireInvoiceBeforeVehicleRelease: false,
+        releasedAt: null,
+      }),
+    ).toBe(false);
   });
 
   it("builds checklist summaries from actionable and blocked items", () => {

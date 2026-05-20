@@ -22,6 +22,8 @@ export type BusinessSettingsValues = {
   receiptFooter: string;
   defaultTaxRate: string;
   allowPartialPayments: boolean;
+  requireInvoiceBeforeJobCompletion: boolean;
+  requireInvoiceBeforeVehicleRelease: boolean;
   allowReleaseWithBalance: boolean;
   requireFullPaymentBeforeRelease: boolean;
   requireAdditionalItemPreApproval: boolean;

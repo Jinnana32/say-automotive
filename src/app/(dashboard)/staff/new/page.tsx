@@ -18,6 +18,7 @@ export default async function NewStaffPage() {
         initialValues={{
           firstName: "",
           lastName: "",
+          documentTitle: "",
           role: "mechanic",
           contactNumber: "",
           address: "",

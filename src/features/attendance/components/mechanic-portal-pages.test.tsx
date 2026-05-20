@@ -173,6 +173,7 @@ describe("mechanic portal pages", () => {
 
     expect(screen.getByText("Today's Attendance")).toBeInTheDocument();
     expect(screen.getByText("Timed In")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Clock Out" })).toBeInTheDocument();
     expect(screen.getByText("Verification Status")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Request Time Correction" })).toBeInTheDocument();
     expect(screen.getByText("Recent Requests")).toBeInTheDocument();
@@ -193,19 +194,18 @@ describe("mechanic portal pages", () => {
     pathname = "/portal/history";
     render(
       <>
-        <MechanicPortalHeaderCard
-          displayName="Jerick B. Tayona"
-          businessLogoUrl="https://example.com/business-logo.png"
-        />
+        <MechanicPortalHeaderCard displayName="Jerick B. Tayona" />
         <MechanicPortalBottomNav />
       </>,
     );
 
+    expect(screen.getByLabelText("Mechanic identity")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Portal branding")).not.toBeInTheDocument();
     expect(screen.getByText("Jerick B. Tayona")).toBeInTheDocument();
-    expect(screen.getByText("Mechanic - SAY Auto Care Center")).toBeInTheDocument();
-    expect(screen.getByAltText("SAY Auto Care Center")).toHaveAttribute(
+    expect(screen.getByText("Mechanic • SAY Auto Care Center")).toBeInTheDocument();
+    expect(screen.getByAltText("SAY Auto Care Center shield")).toHaveAttribute(
       "src",
-      "https://example.com/business-logo.png",
+      "/say-auto-care-shield.svg",
     );
     expect(screen.getAllByRole("link", { name: /History/i }).length).toBeGreaterThan(0);
   });

@@ -1,12 +1,12 @@
+import Script from "next/script";
 import { redirect } from "next/navigation";
 
-import { getDefaultBranch } from "@/lib/branches";
 import { requireAuthenticatedStaff } from "@/lib/auth/session";
-import { buildBusinessLogoUrl } from "@/lib/storage";
-import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { MechanicPortalBottomNav } from "@/features/attendance/components/mechanic-portal-bottom-nav";
+import { MechanicPortalClientGuard } from "@/features/attendance/components/mechanic-portal-client-guard";
 import { MechanicPortalDeviceBootstrap } from "@/features/attendance/components/mechanic-portal-device-bootstrap";
 import { MechanicPortalHeaderCard } from "@/features/attendance/components/mechanic-portal-header-card";
+import { getMechanicPortalClientGuardScript } from "@/features/attendance/mechanic-portal-client-guard";
 
 export default async function MechanicPortalLayout({
   children,
@@ -19,35 +19,21 @@ export default async function MechanicPortalLayout({
     redirect("/dashboard");
   }
 
-  const branchId = context.branchId ?? (await getDefaultBranch()).id;
-  const admin = getSupabaseAdminClient();
-  const { data: businessSettings, error: businessSettingsError } = await admin
-    .from("business_settings")
-    .select("business_logo_path, updated_at")
-    .eq("branch_id", branchId)
-    .maybeSingle();
-
-  if (businessSettingsError) {
-    throw new Error(businessSettingsError.message);
-  }
-
-  const businessLogoUrl = buildBusinessLogoUrl(
-    businessSettings?.business_logo_path ?? null,
-    businessSettings?.updated_at ?? null,
-  );
-
   return (
-    <div className="min-h-screen bg-[#F5F7FB] px-4 py-5 md:py-6">
-      <div className="mx-auto max-w-[30rem] space-y-4 pb-24 md:space-y-5 md:pb-6">
-        <MechanicPortalDeviceBootstrap />
-        <MechanicPortalHeaderCard
-          displayName={context.displayName}
-          businessLogoUrl={businessLogoUrl}
-        />
+    <>
+      <Script id="mechanic-portal-jsonrpc-guard" strategy="beforeInteractive">
+        {getMechanicPortalClientGuardScript()}
+      </Script>
+      <div className="min-h-screen bg-[#F5F7FB] px-4 pb-5 pt-3 md:pb-6 md:pt-4">
+        <div className="mx-auto max-w-[30rem] space-y-3 pb-24 md:space-y-4 md:pb-6">
+          <MechanicPortalClientGuard />
+          <MechanicPortalDeviceBootstrap />
+          <MechanicPortalHeaderCard displayName={context.displayName} />
 
-        {children}
+          {children}
+        </div>
+        <MechanicPortalBottomNav />
       </div>
-      <MechanicPortalBottomNav />
-    </div>
+    </>
   );
 }

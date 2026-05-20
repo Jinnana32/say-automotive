@@ -1,4 +1,4 @@
-import { ArrowRight, ChevronsRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { SubmitButton } from "@/components/shared/submit-button";
 import { cn } from "@/lib/utils";
@@ -32,7 +32,7 @@ export function MechanicPortalSlideAction({
           <span className="truncate text-base font-semibold text-white">
             {children}
           </span>
-          <ChevronsRight className="size-5 shrink-0 text-white/80" />
+          <ArrowRight className="size-5 shrink-0 text-white/85" />
         </span>
       </span>
     </SubmitButton>

@@ -337,6 +337,8 @@ export type Database = {
           id: number;
           branch_id: string;
           allow_partial_payments: boolean;
+          require_invoice_before_job_completion: boolean;
+          require_invoice_before_vehicle_release: boolean;
           allow_release_with_balance: boolean;
           require_full_payment_before_release: boolean;
           require_additional_item_preapproval: boolean;
@@ -360,6 +362,8 @@ export type Database = {
           id?: number;
           branch_id: string;
           allow_partial_payments?: boolean;
+          require_invoice_before_job_completion?: boolean;
+          require_invoice_before_vehicle_release?: boolean;
           allow_release_with_balance?: boolean;
           require_full_payment_before_release?: boolean;
           require_additional_item_preapproval?: boolean;
@@ -1555,6 +1559,7 @@ export type Database = {
           branch_id: string | null;
           first_name: string;
           last_name: string;
+          document_title: string | null;
           contact_number: string | null;
           address: string | null;
           role: Database["public"]["Enums"]["staff_role"];
@@ -1573,6 +1578,7 @@ export type Database = {
           branch_id?: string | null;
           first_name: string;
           last_name: string;
+          document_title?: string | null;
           contact_number?: string | null;
           address?: string | null;
           role: Database["public"]["Enums"]["staff_role"];

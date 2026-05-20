@@ -77,6 +77,21 @@ export function StaffForm({
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="documentTitle">Document title / Print title</Label>
+              <Input
+                id="documentTitle"
+                name="documentTitle"
+                value={values.documentTitle}
+                onChange={(event) => updateFormValue("documentTitle", event.target.value)}
+                placeholder="Shown on print/PDF documents"
+              />
+              <p className="text-xs text-muted-foreground">
+                Optional. Customer-facing documents use this instead of the internal staff role.
+              </p>
+              <FieldError errors={state.fieldErrors} name="documentTitle" />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
               <select
                 id="status"

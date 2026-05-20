@@ -1,9 +1,10 @@
 import { cache } from "react";
 
 import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { buildPreparedByProfile } from "@/lib/auth/prepared-by";
+import { isMissingStaffDocumentTitleColumnError } from "@/features/staff/document-title-compat";
 import { getInvoiceById } from "@/features/invoices/queries/invoice-queries";
 import type { InvoicePrintDocument } from "@/features/invoices/types";
-import { toTitleCaseWords } from "@/features/job-orders/utils";
 import { buildBusinessLogoUrl } from "@/lib/storage";
 
 export const getInvoicePrintDocument = cache(
@@ -46,6 +47,14 @@ export const getInvoicePrintDocument = cache(
 
     const branchId = sourceResult.data?.branch_id ?? null;
 
+    const preparedByResultPromise = invoiceSupport?.created_by
+      ? supabase
+          .from("staff")
+          .select("first_name, last_name, role, document_title")
+          .eq("linked_user_id", invoiceSupport.created_by)
+          .maybeSingle()
+      : Promise.resolve({ data: null, error: null });
+
     const [
       { data: customer, error: customerError },
       { data: vehicle, error: vehicleError },
@@ -73,13 +82,7 @@ export const getInvoicePrintDocument = cache(
             .eq("branch_id", branchId)
             .maybeSingle()
         : Promise.resolve({ data: null, error: null }),
-      invoiceSupport?.created_by
-        ? supabase
-            .from("staff")
-            .select("first_name, last_name, role")
-            .eq("linked_user_id", invoiceSupport.created_by)
-            .maybeSingle()
-        : Promise.resolve({ data: null, error: null }),
+      preparedByResultPromise,
     ]);
 
     if (customerError) {
@@ -94,11 +97,38 @@ export const getInvoicePrintDocument = cache(
       throw new Error(settingsError.message);
     }
 
-    if (preparedByResult.error) {
-      throw new Error(preparedByResult.error.message);
-    }
+    let preparedBy = preparedByResult.data;
 
-    const preparedBy = preparedByResult.data;
+    if (preparedByResult.error) {
+      if (!isMissingStaffDocumentTitleColumnError(preparedByResult.error)) {
+        throw new Error(preparedByResult.error.message);
+      }
+
+      const { data: fallbackPreparedBy, error: fallbackPreparedByError } = await supabase
+        .from("staff")
+        .select("first_name, last_name, role")
+        .eq("linked_user_id", invoiceSupport?.created_by ?? "")
+        .maybeSingle();
+
+      if (fallbackPreparedByError) {
+        throw new Error(fallbackPreparedByError.message);
+      }
+
+      preparedBy = fallbackPreparedBy
+        ? {
+            ...fallbackPreparedBy,
+            document_title: null,
+          }
+        : null;
+    }
+    const preparedByProfile = preparedBy
+      ? buildPreparedByProfile({
+          displayName: `${preparedBy.first_name} ${preparedBy.last_name}`.trim(),
+          email: null,
+          role: preparedBy.role,
+          documentTitle: preparedBy.document_title,
+        })
+      : null;
 
     return {
       invoice: {
@@ -110,10 +140,8 @@ export const getInvoicePrintDocument = cache(
         vehicleYear: vehicle?.year ?? null,
         vehiclePlateNumber: vehicle?.plate_number ?? null,
         vehicleVin: vehicle?.vin ?? null,
-        preparedByName: preparedBy
-          ? `${preparedBy.first_name} ${preparedBy.last_name}`.trim()
-          : null,
-        preparedByTitle: preparedBy ? toTitleCaseWords(preparedBy.role.replaceAll("_", " ")) : null,
+        preparedByName: preparedByProfile?.name ?? null,
+        preparedByTitle: preparedByProfile?.title ?? null,
       },
       businessProfile: {
         businessName: businessSettings?.business_name ?? "SAY Auto Care Center",

@@ -7,16 +7,31 @@ export type PreparedByProfile = {
 };
 
 export function buildPreparedByProfile(
-  context: Pick<AuthenticatedStaffContext, "displayName" | "email" | "role">,
+  context: Pick<
+    AuthenticatedStaffContext,
+    "displayName" | "email" | "role" | "documentTitle"
+  >,
 ): PreparedByProfile {
   return {
     name: resolvePreparedByName(context),
-    title: formatStaffRoleTitle(context.role),
+    title: resolvePreparedByTitle(context),
   };
 }
 
 export function formatStaffRoleTitle(role: StaffRole) {
   return role.replaceAll("_", " ").replace(/\b\w/g, (match) => match.toUpperCase());
+}
+
+export function resolvePreparedByTitle(
+  context: Pick<AuthenticatedStaffContext, "role" | "documentTitle">,
+) {
+  const documentTitle = context.documentTitle?.trim();
+
+  if (documentTitle) {
+    return documentTitle;
+  }
+
+  return formatStaffRoleTitle(context.role);
 }
 
 function resolvePreparedByName(

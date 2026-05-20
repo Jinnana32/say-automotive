@@ -21,6 +21,7 @@ export type StaffFormValues = {
   staffId?: string;
   firstName: string;
   lastName: string;
+  documentTitle: string;
   role: StaffRole;
   contactNumber: string;
   address: string;

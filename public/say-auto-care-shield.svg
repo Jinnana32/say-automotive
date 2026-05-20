@@ -1,0 +1,6 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M32 4L53 12V30C53 43.5 43.8 55.6 32 60C20.2 55.6 11 43.5 11 30V12L32 4Z" fill="#0B1F4D"/>
+  <path d="M32 10L47 15.8V29.4C47 39.5 40.2 48.2 32 51.8C23.8 48.2 17 39.5 17 29.4V15.8L32 10Z" fill="#112B67"/>
+  <path d="M18 18H46L40.2 26H23.8L18 18Z" fill="#D62828"/>
+  <text x="32" y="41" text-anchor="middle" fill="white" font-size="17" font-weight="800" font-style="italic" font-family="Arial, sans-serif" letter-spacing="-0.8">SAY</text>
+</svg>

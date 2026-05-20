@@ -27,8 +27,48 @@ const FINAL_ITEM_LOCKED_STATUSES: JobOrderStatus[] = [
 
 const DETAIL_LOCKED_STATUSES: JobOrderStatus[] = ["released", "cancelled"];
 
+export const JOB_ORDER_STATUS_WORKFLOW: JobOrderStatus[] = [
+  "pending",
+  "waiting_for_parts",
+  "waiting_for_customer_approval",
+  "in_progress",
+  "completed",
+  "released",
+  "cancelled",
+];
+
+const JOB_ORDER_STATUS_LABELS: Record<JobOrderStatus, string> = {
+  pending: "Pending",
+  in_progress: "In Progress",
+  waiting_for_parts: "Waiting for Parts",
+  waiting_for_customer_approval: "Waiting for Customer Approval",
+  completed: "Completed",
+  ready_for_billing: "Ready for Billing",
+  paid: "Paid",
+  released: "Released",
+  cancelled: "Cancelled",
+};
+
+const JOB_ORDER_STATUS_DESCRIPTIONS: Record<JobOrderStatus, string> = {
+  pending: "Job created but work has not started.",
+  in_progress: "Vehicle is currently being worked on.",
+  waiting_for_parts: "Work is paused while waiting for parts availability.",
+  waiting_for_customer_approval:
+    "Work is paused while waiting for customer approval on additional items.",
+  ready_for_billing:
+    "Work is staged for billing or adviser review before the final handoff.",
+  completed: "Work is finished and the vehicle is ready for release or billing follow-up.",
+  paid: "The invoice is fully settled and ready for customer release.",
+  released: "Vehicle has been released to the customer.",
+  cancelled: "Job order has been cancelled and is no longer active.",
+};
+
 export function formatJobOrderStatus(status: JobOrderStatus) {
-  return status.replaceAll("_", " ");
+  return JOB_ORDER_STATUS_LABELS[status] ?? status.replaceAll("_", " ");
+}
+
+export function getJobOrderStatusDescription(status: JobOrderStatus) {
+  return JOB_ORDER_STATUS_DESCRIPTIONS[status];
 }
 
 export function toTitleCaseWords(value: string) {
@@ -41,18 +81,31 @@ export function resolveJobOrderDetailTab(value: string | undefined): JobOrderDet
     : "overview";
 }
 
-export function getAllowedJobOrderStatusTransitions(status: JobOrderStatus): JobOrderStatus[] {
+export function getAllowedJobOrderStatusTransitions(
+  status: JobOrderStatus,
+  options?: {
+    invoiceId?: string | null;
+    requireInvoiceBeforeJobCompletion?: boolean;
+  },
+): JobOrderStatus[] {
   switch (status) {
     case "pending":
       return ["in_progress", "cancelled"];
     case "in_progress":
-      return ["waiting_for_parts", "waiting_for_customer_approval", "completed", "cancelled"];
+      return [
+        "waiting_for_parts",
+        "waiting_for_customer_approval",
+        "completed",
+        "cancelled",
+      ];
     case "waiting_for_parts":
-      return ["in_progress", "waiting_for_customer_approval", "cancelled"];
+      return ["in_progress", "cancelled"];
     case "waiting_for_customer_approval":
-      return ["in_progress", "waiting_for_parts", "cancelled"];
+      return ["in_progress", "cancelled"];
     case "completed":
-      return ["ready_for_billing"];
+      return [];
+    case "ready_for_billing":
+      return ["completed"];
     default:
       return [];
   }
@@ -83,21 +136,42 @@ export function canResolveAdditionalItems(status: JobOrderStatus) {
 }
 
 export function canGenerateJobOrderInvoice(status: JobOrderStatus, invoiceId: string | null) {
-  return status === "ready_for_billing" && invoiceId === null;
+  return ["completed", "ready_for_billing", "released"].includes(status) && invoiceId === null;
 }
 
 export function canReleaseJobOrderVehicle(params: {
   status: JobOrderStatus;
   invoiceId: string | null;
   invoiceStatus: "unpaid" | "partially_paid" | "paid" | "cancelled" | null;
+  allowReleaseWithBalance: boolean;
+  requireFullPaymentBeforeRelease: boolean;
+  requireInvoiceBeforeVehicleRelease: boolean;
   releasedAt: string | null;
 }) {
-  return (
-    params.invoiceId !== null &&
-    params.invoiceStatus !== "cancelled" &&
+  const eligibleStatus =
+    ["in_progress", "completed", "ready_for_billing", "paid"].includes(params.status) &&
     params.status !== "released" &&
-    params.releasedAt === null
-  );
+    params.releasedAt === null;
+
+  if (!eligibleStatus) {
+    return false;
+  }
+
+  const hasActiveInvoice =
+    params.invoiceId !== null && params.invoiceStatus !== null && params.invoiceStatus !== "cancelled";
+
+  if (!hasActiveInvoice) {
+    return !params.requireInvoiceBeforeVehicleRelease;
+  }
+
+  if (
+    params.invoiceStatus !== "paid" &&
+    (params.requireFullPaymentBeforeRelease || !params.allowReleaseWithBalance)
+  ) {
+    return false;
+  }
+
+  return true;
 }
 
 export function calculateJobOrderBillableTotal(items: JobOrderItemDetail[]) {
@@ -132,6 +206,8 @@ export function mapJobOrderDetailCapabilities(
   detail: Omit<JobOrderDetail, keyof ReturnType<typeof buildJobOrderDetailCapabilities>>,
   params: {
     canUpdateChecklistRole: boolean;
+    canUpdateStatusRole: boolean;
+    canManageBillingRole: boolean;
   },
 ) {
   return {
@@ -140,8 +216,14 @@ export function mapJobOrderDetailCapabilities(
       status: detail.status,
       invoiceId: detail.invoiceId,
       invoiceStatus: detail.invoiceStatus,
+      allowReleaseWithBalance: detail.allowReleaseWithBalance,
+      requireFullPaymentBeforeRelease: detail.requireFullPaymentBeforeRelease,
+      requireInvoiceBeforeJobCompletion: detail.requireInvoiceBeforeJobCompletion,
+      requireInvoiceBeforeVehicleRelease: detail.requireInvoiceBeforeVehicleRelease,
       releasedAt: detail.releasedAt,
       canUpdateChecklistRole: params.canUpdateChecklistRole,
+      canUpdateStatusRole: params.canUpdateStatusRole,
+      canManageBillingRole: params.canManageBillingRole,
     }),
   };
 }
@@ -261,8 +343,14 @@ function buildJobOrderDetailCapabilities(params: {
   status: JobOrderStatus;
   invoiceId: string | null;
   invoiceStatus: "unpaid" | "partially_paid" | "paid" | "cancelled" | null;
+  allowReleaseWithBalance: boolean;
+  requireFullPaymentBeforeRelease: boolean;
+  requireInvoiceBeforeJobCompletion: boolean;
+  requireInvoiceBeforeVehicleRelease: boolean;
   releasedAt: string | null;
   canUpdateChecklistRole: boolean;
+  canUpdateStatusRole: boolean;
+  canManageBillingRole: boolean;
 }) {
   return {
     canEditDetails: canEditJobOrderDetails(params.status),
@@ -272,14 +360,28 @@ function buildJobOrderDetailCapabilities(params: {
     canResolveAdditionalItems: canResolveAdditionalItems(params.status),
     canUpdateChecklist:
       params.canUpdateChecklistRole && canUpdateJobOrderChecklist(params.status),
-    canGenerateInvoice: canGenerateJobOrderInvoice(params.status, params.invoiceId),
-    canReleaseVehicle: canReleaseJobOrderVehicle({
-      status: params.status,
-      invoiceId: params.invoiceId,
-      invoiceStatus: params.invoiceStatus,
-      releasedAt: params.releasedAt,
-    }),
-    availableNextStatuses: getAllowedJobOrderStatusTransitions(params.status),
+    canUpdateStatus: params.canUpdateStatusRole,
+    canGenerateInvoice:
+      params.canManageBillingRole &&
+      canGenerateJobOrderInvoice(params.status, params.invoiceId),
+    canReleaseVehicle:
+      params.canManageBillingRole &&
+      canReleaseJobOrderVehicle({
+        status: params.status,
+        invoiceId: params.invoiceId,
+        invoiceStatus: params.invoiceStatus,
+        allowReleaseWithBalance: params.allowReleaseWithBalance,
+        requireFullPaymentBeforeRelease: params.requireFullPaymentBeforeRelease,
+        requireInvoiceBeforeVehicleRelease: params.requireInvoiceBeforeVehicleRelease,
+        releasedAt: params.releasedAt,
+      }),
+    availableNextStatuses: params.canUpdateStatusRole
+      ? getAllowedJobOrderStatusTransitions(params.status, {
+          invoiceId: params.invoiceId,
+          requireInvoiceBeforeJobCompletion:
+            params.requireInvoiceBeforeJobCompletion,
+        })
+      : [],
   };
 }
 function roundQuantity(value: number) {

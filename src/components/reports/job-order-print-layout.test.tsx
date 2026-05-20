@@ -37,6 +37,10 @@ const documentFixture: JobOrderPrintDocument = {
     inspectionNotes: "Inspect pads and rotors.",
     diagnosis: "Front pads worn out.",
     workPerformed: "Replace front pads and test drive.",
+    allowReleaseWithBalance: false,
+    requireFullPaymentBeforeRelease: true,
+    requireInvoiceBeforeJobCompletion: false,
+    requireInvoiceBeforeVehicleRelease: false,
     invoiceId: null,
     invoiceNumber: null,
     invoiceStatus: null,
@@ -50,6 +54,7 @@ const documentFixture: JobOrderPrintDocument = {
     canAddAdditionalItems: true,
     canResolveAdditionalItems: true,
     canUpdateChecklist: true,
+    canUpdateStatus: true,
     canGenerateInvoice: false,
     canReleaseVehicle: false,
     availableNextStatuses: ["waiting_for_parts", "waiting_for_customer_approval", "completed", "cancelled"],
@@ -178,9 +183,8 @@ describe("JobOrderPrintLayout", () => {
 
     expect(screen.getByText("Services / Labor")).toBeInTheDocument();
     expect(screen.getByText("Parts / Products")).toBeInTheDocument();
-    expect(screen.getByText("Checklist: Open")).toBeInTheDocument();
-    expect(screen.getByText("Checklist: Completed")).toBeInTheDocument();
-    expect(screen.getByText("Checklist: Rejected")).toBeInTheDocument();
+    expect(screen.queryByText("Type")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Checklist:/)).not.toBeInTheDocument();
     expect(screen.getAllByText("☐").length).toBeGreaterThan(0);
     expect(screen.getByText("☑")).toBeInTheDocument();
   });

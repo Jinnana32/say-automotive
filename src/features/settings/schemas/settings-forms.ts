@@ -24,6 +24,8 @@ export const businessProfileSettingsSchema = z.object({
 
 export const operationalRulesSettingsSchema = z.object({
   allowPartialPayments: z.boolean(),
+  requireInvoiceBeforeJobCompletion: z.boolean(),
+  requireInvoiceBeforeVehicleRelease: z.boolean(),
   allowReleaseWithBalance: z.boolean(),
   requireFullPaymentBeforeRelease: z.boolean(),
   requireAdditionalItemPreApproval: z.boolean(),
@@ -65,6 +67,11 @@ export function parseBusinessProfileSettingsFormData(formData: FormData) {
 export function parseOperationalRulesSettingsFormData(formData: FormData) {
   return {
     allowPartialPayments: readCheckbox(formData, "allowPartialPayments"),
+    requireInvoiceBeforeJobCompletion: readCheckbox(formData, "requireInvoiceBeforeJobCompletion"),
+    requireInvoiceBeforeVehicleRelease: readCheckbox(
+      formData,
+      "requireInvoiceBeforeVehicleRelease",
+    ),
     allowReleaseWithBalance: readCheckbox(formData, "allowReleaseWithBalance"),
     requireFullPaymentBeforeRelease: readCheckbox(formData, "requireFullPaymentBeforeRelease"),
     requireAdditionalItemPreApproval: readCheckbox(formData, "requireAdditionalItemPreApproval"),

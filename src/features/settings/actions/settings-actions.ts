@@ -140,6 +140,10 @@ export async function updateOperationalRulesSettingsAction(
 
   const payload = {
     allow_partial_payments: parsed.data.allowPartialPayments,
+    require_invoice_before_job_completion:
+      parsed.data.requireInvoiceBeforeJobCompletion,
+    require_invoice_before_vehicle_release:
+      parsed.data.requireInvoiceBeforeVehicleRelease,
     allow_release_with_balance: parsed.data.allowReleaseWithBalance,
     require_full_payment_before_release: parsed.data.requireFullPaymentBeforeRelease,
     require_additional_item_preapproval: parsed.data.requireAdditionalItemPreApproval,
@@ -163,6 +167,10 @@ export async function updateOperationalRulesSettingsAction(
     userId: context.userId,
     beforeData: {
       allow_partial_payments: currentSettings.allow_partial_payments,
+      require_invoice_before_job_completion:
+        currentSettings.require_invoice_before_job_completion,
+      require_invoice_before_vehicle_release:
+        currentSettings.require_invoice_before_vehicle_release,
       allow_release_with_balance: currentSettings.allow_release_with_balance,
       require_full_payment_before_release:
         currentSettings.require_full_payment_before_release,

@@ -30,6 +30,8 @@ export function mapBusinessSettingsRowToValues(
     receiptFooter: row.receipt_footer ?? "",
     defaultTaxRate: String(row.default_tax_rate),
     allowPartialPayments: row.allow_partial_payments,
+    requireInvoiceBeforeJobCompletion: row.require_invoice_before_job_completion,
+    requireInvoiceBeforeVehicleRelease: row.require_invoice_before_vehicle_release,
     allowReleaseWithBalance: row.allow_release_with_balance,
     requireFullPaymentBeforeRelease: row.require_full_payment_before_release,
     requireAdditionalItemPreApproval: row.require_additional_item_preapproval,

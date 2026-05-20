@@ -366,11 +366,11 @@ export function getMechanicPortalPrimaryActionLabel(
   const nextLogType = getMechanicPortalPrimaryLogType(attendance);
 
   if (nextLogType === "time_in") {
-    return "Time In";
+    return "Clock In";
   }
 
   if (nextLogType === "time_out") {
-    return "Time Out";
+    return "Clock Out";
   }
 
   return "Attendance complete";

@@ -21,6 +21,7 @@ export function mapStaffRowToFormValues(row: StaffRow): StaffFormValues {
     staffId: row.id,
     firstName: row.first_name,
     lastName: row.last_name,
+    documentTitle: row.document_title ?? "",
     role: row.role,
     contactNumber: row.contact_number ?? "",
     address: row.address ?? "",

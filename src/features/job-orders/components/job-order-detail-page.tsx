@@ -39,7 +39,7 @@ import { JobOrderItemApprovalAction } from '@/features/job-orders/components/job
 import { JobOrderItemEditDialog } from '@/features/job-orders/components/job-order-item-edit-dialog';
 import { JobOrderPartsUsagePanel } from '@/features/job-orders/components/job-order-parts-usage-panel';
 import { JobOrderStatusBadge } from '@/features/job-orders/components/job-order-status-badge';
-import { JobOrderStatusDialog } from '@/features/job-orders/components/job-order-status-dialog';
+import { JobOrderStatusWorkflow } from '@/features/job-orders/components/job-order-status-workflow';
 import type {
   JobOrderDetail,
   JobOrderDetailTab,
@@ -135,6 +135,8 @@ export function JobOrderDetailPage({
         </div>
       </div>
 
+      <JobOrderStatusWorkflow jobOrder={jobOrder} redirectTab={activeTab} />
+
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <SummaryCard
           title="Customer & vehicle"
@@ -181,16 +183,9 @@ export function JobOrderDetailPage({
         >
           <div className="mt-3 flex items-center gap-2">
             <JobOrderStatusBadge status={jobOrder.status} />
-            {jobOrder.availableNextStatuses.length > 0 ? (
-              <JobOrderStatusDialog
-                jobOrderId={jobOrder.id}
-                currentStatus={jobOrder.status}
-                availableNextStatuses={jobOrder.availableNextStatuses}
-                redirectTab={activeTab}
-              />
-            ) : null}
           </div>
-          {jobOrder.availableNextStatuses.length === 0 ? (
+          {jobOrder.availableNextStatuses.length === 0 &&
+          !jobOrder.canReleaseVehicle ? (
             <p className="mt-2 text-xs leading-5 text-muted-foreground">
               No status changes available for this job order.
             </p>
@@ -221,8 +216,16 @@ export function JobOrderDetailPage({
           lines={[
             jobOrder.invoiceId
               ? `Paid ${formatCurrency(jobOrder.invoicePaidAmount ?? 0)} of ${formatCurrency(jobOrder.invoiceTotalAmount ?? 0)}`
-              : 'Generate after the job is ready for billing.',
-            `Balance ${formatCurrency(jobOrder.invoiceBalance ?? 0)}`,
+              : jobOrder.requireInvoiceBeforeJobCompletion ||
+                  jobOrder.requireInvoiceBeforeVehicleRelease
+                ? 'Generate before the branch-required completion or release checkpoint.'
+                : 'Invoice generation is optional after the work is billable.',
+            jobOrder.invoiceId
+              ? `Balance ${formatCurrency(jobOrder.invoiceBalance ?? 0)}`
+              : jobOrder.requireInvoiceBeforeJobCompletion ||
+                  jobOrder.requireInvoiceBeforeVehicleRelease
+                ? 'Status workflow will flag when an invoice is required.'
+                : 'Operational completion can continue without invoice.',
           ]}
         />
         <SummaryCard
@@ -375,17 +378,36 @@ export function JobOrderDetailPage({
                 ) : jobOrder.canGenerateInvoice ? (
                   <div className="space-y-3">
                     <p className="text-sm text-muted-foreground">
-                      This job order is ready for billing and does not have an
-                      invoice yet.
+                      {jobOrder.requireInvoiceBeforeJobCompletion ||
+                      jobOrder.requireInvoiceBeforeVehicleRelease
+                        ? 'No invoice generated yet. Generate one now to satisfy the current branch completion or release rules.'
+                        : 'No invoice generated yet. This job order can still move through completion or release because invoice generation is optional for this branch.'}
                     </p>
                     <CreateInvoiceForm jobOrderId={jobOrder.id} />
+                    <p className="text-xs leading-5 text-muted-foreground">
+                      {jobOrder.requireInvoiceBeforeJobCompletion ||
+                      jobOrder.requireInvoiceBeforeVehicleRelease
+                        ? 'Once the invoice exists, continue the workflow from the status bar above.'
+                        : 'You can also continue the workflow from the status bar above and come back here later if billing is still needed.'}
+                    </p>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">
-                    Move the job order to{' '}
-                    <span className="font-medium">ready for billing</span>{' '}
-                    before generating an invoice.
-                  </p>
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      {jobOrder.requireInvoiceBeforeJobCompletion ||
+                      jobOrder.requireInvoiceBeforeVehicleRelease
+                        ? 'Invoice generation is required for at least one downstream workflow step on this branch.'
+                        : 'Invoice generation is optional for this branch. Operational completion and release can continue without an invoice when the status workflow allows it.'}
+                    </p>
+                    <p className="text-xs leading-5 text-muted-foreground">
+                      {jobOrder.status === 'pending' ||
+                      jobOrder.status === 'in_progress' ||
+                      jobOrder.status === 'waiting_for_parts' ||
+                      jobOrder.status === 'waiting_for_customer_approval'
+                        ? 'Move the job order to Ready for Billing or Completed before generating an invoice.'
+                        : 'Use the status workflow above to continue without invoice, or return here once the job reaches a billable stage.'}
+                    </p>
+                  </div>
                 )}
               </div>
             </div>

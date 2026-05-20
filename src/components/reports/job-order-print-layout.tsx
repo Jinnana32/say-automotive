@@ -257,9 +257,8 @@ function WorkItemsSection({
           <thead className="bg-brand-navy text-white">
             <tr>
               <th className="w-10 px-2 py-1.25 text-center font-semibold">Done</th>
-              <th className="w-16 px-2 py-1.25 text-left font-semibold">Type</th>
               <th className="px-2 py-1.25 text-left font-semibold">Description</th>
-              <th className="w-20 px-2 py-1.25 text-right font-semibold">Qty</th>
+              <th className="w-[52px] px-2 py-1.25 text-right font-semibold">Qty</th>
               {!hidePrices ? (
                 <>
                   <th className="w-24 px-2 py-1.25 text-right font-semibold">
@@ -278,7 +277,7 @@ function WorkItemsSection({
                 row.kind === "group" ? (
                   <tr key={row.key} className="border-t border-slate-200 bg-brand-soft/40">
                     <td
-                      colSpan={hidePrices ? 4 : 6}
+                      colSpan={hidePrices ? 3 : 5}
                       className="px-2 py-1.25 text-left text-[9.75px] font-semibold uppercase tracking-[0.12em] text-brand-navy"
                     >
                       {row.label}
@@ -289,23 +288,22 @@ function WorkItemsSection({
                     <td className="px-2 py-1.25 text-center align-top">
                       <ChecklistGlyph completed={row.item.checklistCompleted} />
                     </td>
-                    <td className="px-2 py-1.25 align-top uppercase text-slate-700">
-                      {row.item.itemType}
-                    </td>
                     <td className="px-2 py-1.25 align-top">
                       <p className="leading-[1.28]">{row.item.description}</p>
-                      <div className="mt-0.5 space-y-0.5 text-[9.75px] leading-[1.25] text-slate-500">
-                        <p>Checklist: {row.item.checklistStatusLabel}</p>
-                        {row.item.isAdditional ? <p>Additional item</p> : null}
-                        {row.item.checklistCompleted && row.item.checklistCheckedAt ? (
-                          <p>
-                            Completed {formatDateTime(row.item.checklistCheckedAt)}
-                            {row.item.checklistCheckedByName
-                              ? ` • ${row.item.checklistCheckedByName}`
-                              : ""}
-                          </p>
-                        ) : null}
-                      </div>
+                      {row.item.isAdditional ||
+                      (row.item.checklistCompleted && row.item.checklistCheckedAt) ? (
+                        <div className="mt-0.5 space-y-0.5 text-[9.75px] leading-[1.25] text-slate-500">
+                          {row.item.isAdditional ? <p>Additional item</p> : null}
+                          {row.item.checklistCompleted && row.item.checklistCheckedAt ? (
+                            <p>
+                              Completed {formatDateTime(row.item.checklistCheckedAt)}
+                              {row.item.checklistCheckedByName
+                                ? ` • ${row.item.checklistCheckedByName}`
+                                : ""}
+                            </p>
+                          ) : null}
+                        </div>
+                      ) : null}
                     </td>
                     <td className="px-2 py-1.25 text-right align-top">
                       {row.item.quantityLabel}
@@ -326,7 +324,7 @@ function WorkItemsSection({
             ) : (
               <tr className="border-t border-slate-200">
                 <td
-                  colSpan={hidePrices ? 4 : 6}
+                  colSpan={hidePrices ? 3 : 5}
                   className="px-2 py-2.5 text-center text-slate-500"
                 >
                   No work items recorded.

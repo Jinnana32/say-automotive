@@ -141,7 +141,7 @@ export function MechanicPortalAttendancePage({
             {nextLogType ? <input type="hidden" name="logType" value={nextLogType} /> : null}
 
             <MechanicPortalSlideAction pendingLabel="Saving..." disabled={!canPunch}>
-              {nextLogType ? `Slide to ${actionLabel}` : actionLabel}
+              {actionLabel}
             </MechanicPortalSlideAction>
 
             {!data.ipStatus.isAllowed || !data.deviceStatus.isApproved ? (

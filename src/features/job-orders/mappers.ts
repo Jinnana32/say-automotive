@@ -154,9 +154,17 @@ export function mapJobOrderDetail(params: {
     paid_amount: number;
     balance: number;
   } | null;
+  settings: {
+    allow_release_with_balance: boolean;
+    require_full_payment_before_release: boolean;
+    require_invoice_before_job_completion: boolean;
+    require_invoice_before_vehicle_release: boolean;
+  } | null;
   items: JobOrderItemDetail[];
   mechanics: JobOrderMechanicAssignment[];
   canUpdateChecklistRole: boolean;
+  canUpdateStatusRole: boolean;
+  canManageBillingRole: boolean;
 }): JobOrderDetail {
   const listItem = mapJobOrderRowToListItem({
     row: params.row,
@@ -176,6 +184,14 @@ export function mapJobOrderDetail(params: {
       inspectionNotes: params.row.inspection_notes,
       diagnosis: params.row.diagnosis,
       workPerformed: params.row.work_performed,
+      allowReleaseWithBalance:
+        params.settings?.allow_release_with_balance ?? false,
+      requireFullPaymentBeforeRelease:
+        params.settings?.require_full_payment_before_release ?? true,
+      requireInvoiceBeforeJobCompletion:
+        params.settings?.require_invoice_before_job_completion ?? false,
+      requireInvoiceBeforeVehicleRelease:
+        params.settings?.require_invoice_before_vehicle_release ?? false,
       invoiceId: params.invoice?.id ?? null,
       invoiceNumber: params.invoice?.invoice_number ?? null,
       invoiceStatus: params.invoice?.status ?? null,
@@ -188,6 +204,8 @@ export function mapJobOrderDetail(params: {
     },
     {
       canUpdateChecklistRole: params.canUpdateChecklistRole,
+      canUpdateStatusRole: params.canUpdateStatusRole,
+      canManageBillingRole: params.canManageBillingRole,
     },
   );
 }

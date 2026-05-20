@@ -38,6 +38,13 @@ type InvoiceSummaryRow = Pick<
   TableRow<"invoices">,
   "id" | "invoice_number" | "status" | "total_amount" | "paid_amount" | "balance"
 >;
+type BusinessSettingsRow = Pick<
+  TableRow<"business_settings">,
+  | "allow_release_with_balance"
+  | "require_full_payment_before_release"
+  | "require_invoice_before_job_completion"
+  | "require_invoice_before_vehicle_release"
+>;
 type StaffRow = Pick<TableRow<"staff">, "id" | "first_name" | "last_name">;
 type ProductRow = Pick<TableRow<"products">, "id" | "name" | "sku" | "selling_price">;
 type ProductInventoryRow = Pick<TableRow<"products">, "id" | "reorder_level" | "shelf_location">;
@@ -166,6 +173,18 @@ export const getJobOrderById = cache(async (jobOrderId: string): Promise<JobOrde
   }
 
   const jobOrderRow = jobOrder as JobOrderRow;
+  const { data: settings, error: settingsError } = await supabase
+    .from("business_settings")
+    .select(
+      "allow_release_with_balance, require_full_payment_before_release, require_invoice_before_job_completion, require_invoice_before_vehicle_release",
+    )
+    .eq("branch_id", jobOrderRow.branch_id)
+    .maybeSingle();
+
+  if (settingsError) {
+    throw new Error(settingsError.message);
+  }
+
   const itemRows = (items ?? []) as JobOrderItemRow[];
   const mechanicRows = (mechanics ?? []) as JobOrderMechanicRow[];
   const usageRows = (usages ?? []) as JobOrderPartUsageRow[];
@@ -233,6 +252,7 @@ export const getJobOrderById = cache(async (jobOrderId: string): Promise<JobOrde
       ? quotationMap.get(jobOrderRow.quotation_id) ?? null
       : null,
     invoice: (invoice as InvoiceSummaryRow | null) ?? null,
+    settings: (settings as BusinessSettingsRow | null) ?? null,
     items: itemDetails,
     mechanics: mechanicRows.map((row) =>
       mapJobOrderMechanicRowToAssignment(
@@ -241,6 +261,8 @@ export const getJobOrderById = cache(async (jobOrderId: string): Promise<JobOrde
       ),
     ),
     canUpdateChecklistRole: context.capabilities.includes("job_orders:write"),
+    canUpdateStatusRole: context.capabilities.includes("job_orders:write"),
+    canManageBillingRole: context.capabilities.includes("invoices:write"),
   });
 });
 

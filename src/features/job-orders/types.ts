@@ -107,6 +107,10 @@ export type JobOrderDetail = JobOrderListItem & {
   inspectionNotes: string | null;
   diagnosis: string | null;
   workPerformed: string | null;
+  allowReleaseWithBalance: boolean;
+  requireFullPaymentBeforeRelease: boolean;
+  requireInvoiceBeforeJobCompletion: boolean;
+  requireInvoiceBeforeVehicleRelease: boolean;
   invoiceId: string | null;
   invoiceNumber: string | null;
   invoiceStatus: "unpaid" | "partially_paid" | "paid" | "cancelled" | null;
@@ -122,6 +126,7 @@ export type JobOrderDetail = JobOrderListItem & {
   canAddAdditionalItems: boolean;
   canResolveAdditionalItems: boolean;
   canUpdateChecklist: boolean;
+  canUpdateStatus: boolean;
   canGenerateInvoice: boolean;
   canReleaseVehicle: boolean;
   availableNextStatuses: JobOrderStatus[];

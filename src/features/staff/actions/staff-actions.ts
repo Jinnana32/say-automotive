@@ -5,7 +5,28 @@ import { revalidatePath } from "next/cache";
 
 import { applyBranchFilter, getBranchScopedServerClient } from "@/lib/branches";
 import { INITIAL_FORM_ACTION_STATE, toFormActionState, type FormActionState } from "@/lib/forms";
+import { isMissingStaffDocumentTitleColumnError } from "@/features/staff/document-title-compat";
 import { parseStaffFormData, staffFormSchema } from "@/features/staff/schemas/staff-form-schema";
+import type { TableInsert } from "@/types/database";
+
+type StaffSavePayload = Pick<
+  TableInsert<"staff">,
+  | "branch_id"
+  | "first_name"
+  | "last_name"
+  | "document_title"
+  | "role"
+  | "contact_number"
+  | "address"
+  | "sss_number"
+  | "philhealth_number"
+  | "tin_number"
+  | "emergency_contact_name"
+  | "emergency_contact_number"
+  | "status"
+>;
+
+type LegacyStaffSavePayload = Omit<StaffSavePayload, "document_title">;
 
 export async function createStaffAction(
   _prevState: FormActionState = INITIAL_FORM_ACTION_STATE,
@@ -38,6 +59,7 @@ async function saveStaff(formData: FormData): Promise<FormActionState> {
     branch_id: branchId,
     first_name: values.firstName,
     last_name: values.lastName,
+    document_title: normalizeNullable(values.documentTitle),
     role: values.role,
     contact_number: normalizeNullable(values.contactNumber),
     address: normalizeNullable(values.address),
@@ -49,11 +71,21 @@ async function saveStaff(formData: FormData): Promise<FormActionState> {
     status: values.status,
   };
 
-  const operation = values.staffId
-    ? supabase.from("staff").update(payload).eq("id", values.staffId).select("id").single()
-    : supabase.from("staff").insert(payload).select("id").single();
+  let { error } = await executeStaffSaveOperation({
+    supabase,
+    staffId: values.staffId,
+    payload,
+  });
 
-  const { error } = await operation;
+  if (error && isMissingStaffDocumentTitleColumnError(error)) {
+    const { document_title: _documentTitle, ...fallbackPayload } = payload;
+    const retryResult = await executeStaffSaveOperation({
+      supabase,
+      staffId: values.staffId,
+      payload: fallbackPayload,
+    });
+    error = retryResult.error;
+  }
 
   if (error) {
     return { status: "error", message: error.message };
@@ -89,4 +121,18 @@ async function getExistingStaffBranchId(
   }
 
   return data.branch_id;
+}
+
+async function executeStaffSaveOperation({
+  supabase,
+  staffId,
+  payload,
+}: {
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"];
+  staffId?: string;
+  payload: StaffSavePayload | LegacyStaffSavePayload;
+}) {
+  return staffId
+    ? supabase.from("staff").update(payload).eq("id", staffId).select("id").single()
+    : supabase.from("staff").insert(payload).select("id").single();
 }

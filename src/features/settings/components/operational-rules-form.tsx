@@ -22,6 +22,10 @@ export function OperationalRulesForm({
   );
   const { values, updateFormValue } = useFormValues({
     allowPartialPayments: initialValues.allowPartialPayments,
+    requireInvoiceBeforeJobCompletion:
+      initialValues.requireInvoiceBeforeJobCompletion,
+    requireInvoiceBeforeVehicleRelease:
+      initialValues.requireInvoiceBeforeVehicleRelease,
     allowReleaseWithBalance: initialValues.allowReleaseWithBalance,
     requireFullPaymentBeforeRelease: initialValues.requireFullPaymentBeforeRelease,
     requireAdditionalItemPreApproval: initialValues.requireAdditionalItemPreApproval,
@@ -44,6 +48,24 @@ export function OperationalRulesForm({
             description="Enable invoices and POS sales to be recorded with a remaining balance."
             checked={values.allowPartialPayments}
             onCheckedChange={(checked) => updateFormValue("allowPartialPayments", checked)}
+          />
+          <RuleToggle
+            name="requireInvoiceBeforeJobCompletion"
+            title="Require invoice before job completion"
+            description="Keep job orders from moving into Completed until an invoice has been generated."
+            checked={values.requireInvoiceBeforeJobCompletion}
+            onCheckedChange={(checked) =>
+              updateFormValue("requireInvoiceBeforeJobCompletion", checked)
+            }
+          />
+          <RuleToggle
+            name="requireInvoiceBeforeVehicleRelease"
+            title="Require invoice before vehicle release"
+            description="Block vehicle release when no invoice has been generated for the job order."
+            checked={values.requireInvoiceBeforeVehicleRelease}
+            onCheckedChange={(checked) =>
+              updateFormValue("requireInvoiceBeforeVehicleRelease", checked)
+            }
           />
           <RuleToggle
             name="allowReleaseWithBalance"

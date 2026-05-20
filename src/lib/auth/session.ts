@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { redirect } from "next/navigation";
 
+import { isMissingStaffDocumentTitleColumnError } from "@/features/staff/document-title-compat";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type { TableRow } from "@/types/database";
 import {
@@ -18,6 +19,7 @@ export type AuthenticatedStaffContext = {
   staffId: string;
   role: StaffRole;
   displayName: string;
+  documentTitle: string | null;
   branchId: string | null;
   capabilities: readonly AppCapability[];
 };
@@ -47,14 +49,35 @@ export const getAppSessionState = cache(async (): Promise<AppSessionState> => {
     return { status: "anonymous" };
   }
 
-  const { data: staff, error: staffError } = await supabase
+  const { data: staffWithDocumentTitle, error: staffWithDocumentTitleError } = await supabase
     .from("staff")
-    .select("id, first_name, last_name, branch_id, role, status")
+    .select("id, first_name, last_name, document_title, branch_id, role, status")
     .eq("linked_user_id", user.id)
     .maybeSingle();
 
-  if (staffError) {
-    throw new Error(staffError.message);
+  let staff = staffWithDocumentTitle;
+
+  if (staffWithDocumentTitleError) {
+    if (!isMissingStaffDocumentTitleColumnError(staffWithDocumentTitleError)) {
+      throw new Error(staffWithDocumentTitleError.message);
+    }
+
+    const { data: fallbackStaff, error: fallbackStaffError } = await supabase
+      .from("staff")
+      .select("id, first_name, last_name, branch_id, role, status")
+      .eq("linked_user_id", user.id)
+      .maybeSingle();
+
+    if (fallbackStaffError) {
+      throw new Error(fallbackStaffError.message);
+    }
+
+    staff = fallbackStaff
+      ? {
+          ...fallbackStaff,
+          document_title: null,
+        }
+      : null;
   }
 
   if (!staff || staff.status !== "active") {
@@ -110,7 +133,7 @@ const getAuthorizedSupabaseServerClientCached = cache(
 
 function mapStaffContext(userId: string, email: string | null, staff: Pick<
   StaffRow,
-  "id" | "first_name" | "last_name" | "branch_id" | "role"
+  "id" | "first_name" | "last_name" | "document_title" | "branch_id" | "role"
 >): AuthenticatedStaffContext {
   return {
     userId,
@@ -118,6 +141,7 @@ function mapStaffContext(userId: string, email: string | null, staff: Pick<
     staffId: staff.id,
     role: staff.role,
     displayName: `${staff.first_name} ${staff.last_name}`.trim(),
+    documentTitle: staff.document_title,
     branchId: staff.branch_id,
     capabilities: getRoleCapabilities(staff.role),
   };

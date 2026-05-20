@@ -15,6 +15,10 @@ import type {
 import type { TableInsert, TableRow } from "@/types/database";
 
 type StaffDeviceRow = TableRow<"staff_devices">;
+type StaffDeviceInsertResult =
+  | { kind: "inserted"; device: StaffDeviceRow }
+  | { kind: "existing"; device: StaffDeviceRow }
+  | { kind: "other_staff" };
 
 export async function resolveMechanicPortalDeviceStatus({
   admin,
@@ -82,25 +86,33 @@ export async function resolveMechanicPortalDeviceStatus({
       revoked_at: null,
       revoked_by_staff_id: null,
     };
-    const { data: insertedDevice, error: insertError } = await admin
-      .from("staff_devices")
-      .insert(payload)
-      .select("*")
-      .single();
+    const insertResult = await insertPendingDeviceWithConflictRecovery({
+      admin,
+      payload,
+      deviceIdHash,
+      staffId,
+    });
 
-    if (insertError) {
-      throw new Error(insertError.message);
+    if (insertResult.kind === "other_staff") {
+      return {
+        status: "registered_to_other_staff",
+        hasDeviceToken: true,
+        isApproved: false,
+        currentDevice: null,
+      };
     }
 
-    currentDevice = insertedDevice as StaffDeviceRow;
+    currentDevice = insertResult.device;
 
-    await writeAuditLog(admin, {
-      action: "Registered pending mechanic attendance device",
-      entityType: "staff_device",
-      entityId: currentDevice.id,
-      userId: userIdForAudit ?? null,
-      afterData: currentDevice,
-    });
+    if (insertResult.kind === "inserted") {
+      await writeAuditLog(admin, {
+        action: "Registered pending mechanic attendance device",
+        entityType: "staff_device",
+        entityId: currentDevice.id,
+        userId: userIdForAudit ?? null,
+        afterData: currentDevice,
+      });
+    }
   } else {
     const knownDevice = existingDevice;
     const updatePayload = {
@@ -164,4 +176,60 @@ function ensureIso(value: string | null) {
   }
 
   return value;
+}
+
+async function insertPendingDeviceWithConflictRecovery({
+  admin,
+  payload,
+  deviceIdHash,
+  staffId,
+}: {
+  admin: DatabaseClient;
+  payload: TableInsert<"staff_devices">;
+  deviceIdHash: string;
+  staffId: string;
+}): Promise<StaffDeviceInsertResult> {
+  const { data: insertedDevice, error: insertError } = await admin
+    .from("staff_devices")
+    .insert(payload)
+    .select("*")
+    .single();
+
+  if (!insertError) {
+    return {
+      kind: "inserted",
+      device: insertedDevice as StaffDeviceRow,
+    };
+  }
+
+  if (insertError.code !== "23505") {
+    throw new Error(insertError.message);
+  }
+
+  const { data: conflictedDeviceData, error: conflictedDeviceError } = await admin
+    .from("staff_devices")
+    .select("*")
+    .eq("device_id_hash", deviceIdHash)
+    .maybeSingle();
+
+  if (conflictedDeviceError) {
+    throw new Error(conflictedDeviceError.message);
+  }
+
+  if (!conflictedDeviceData) {
+    throw new Error(insertError.message);
+  }
+
+  const conflictedDevice = conflictedDeviceData as StaffDeviceRow;
+
+  if (conflictedDevice.staff_id !== staffId) {
+    return {
+      kind: "other_staff",
+    };
+  }
+
+  return {
+    kind: "existing",
+    device: conflictedDevice,
+  };
 }

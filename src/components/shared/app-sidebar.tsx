@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   BarChart3,
@@ -29,6 +28,7 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { BrandLogo } from '@/components/shared/brand-logo';
 import {
   navigationItemMatchesPath,
   resolveActiveNavigationItem,
@@ -147,28 +147,29 @@ export function AppSidebar({
         >
           <div className="min-w-0 flex-1">
             {collapsed ? (
-              <div className="flex min-h-[3.55rem] items-center justify-center py-0.5">
-                <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-white p-2 shadow-sm">
-                  <Image
-                    src={businessLogoUrl ?? '/say-auto-care-logo.jpeg'}
-                    alt={businessName}
-                    width={120}
-                    height={120}
-                    className="max-h-10 w-auto object-contain"
-                    priority
-                  />
-                </div>
+              <div className="flex min-h-[3.35rem] items-center justify-center py-0.5">
+                <BrandLogo
+                  markSrc="/say-auto-care-shield.png"
+                  alt={`${businessName} mark`}
+                  variant="mark"
+                  width={52}
+                  height={52}
+                  className="size-[2.9rem] object-contain"
+                  priority
+                  fallbackClassName="size-[2.9rem]"
+                />
               </div>
             ) : showBusinessName ? (
-              <div className="flex items-center gap-3">
-                <div className="flex size-16 shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-white p-2 shadow-sm">
-                  <Image
-                    src={businessLogoUrl ?? '/say-auto-care-logo.jpeg'}
+              <div className="flex items-start gap-3">
+                <div className="flex min-h-[3.25rem] shrink-0 items-center py-0.5">
+                  <BrandLogo
+                    src={businessLogoUrl}
                     alt={businessName}
-                    width={120}
-                    height={120}
-                    className="max-h-12 w-auto object-contain"
+                    width={220}
+                    height={66}
+                    className="h-auto w-[10.75rem] object-contain object-left mix-blend-multiply"
                     priority
+                    fallbackClassName="w-[10.75rem]"
                   />
                 </div>
                 <div className="min-w-0">
@@ -184,14 +185,15 @@ export function AppSidebar({
                 </div>
               </div>
             ) : (
-              <div className="flex min-h-[3.55rem] w-full items-center py-0.5 pl-0.5 pr-1.5">
-                <Image
-                  src={businessLogoUrl ?? '/say-auto-care-logo.jpeg'}
+              <div className="flex min-h-[3.25rem] w-full items-center py-0.5 pl-0.5 pr-1">
+                <BrandLogo
+                  src={businessLogoUrl}
                   alt={businessName}
                   width={520}
                   height={140}
-                  className="h-auto w-full max-w-[11.75rem] object-contain object-left"
+                  className="h-auto w-full max-w-[12.5rem] object-contain object-left mix-blend-multiply"
                   priority
+                  fallbackClassName="w-full max-w-[12.5rem]"
                 />
               </div>
             )}

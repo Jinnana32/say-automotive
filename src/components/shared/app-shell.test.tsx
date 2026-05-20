@@ -11,6 +11,13 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
+vi.mock("next/image", () => ({
+  default: ({
+    priority: _priority,
+    ...props
+  }: Record<string, unknown>) => <img {...props} />,
+}));
+
 vi.mock("@/features/auth/actions/auth-actions", () => ({
   signOutAction: vi.fn(),
 }));
@@ -65,6 +72,7 @@ describe("AppShell", () => {
 
     expect(screen.getByRole("button", { name: "Expand sidebar" })).toBeInTheDocument();
     expect(screen.queryByText("Customers")).not.toBeInTheDocument();
+    expect(screen.getByAltText("SAY Auto Care Center mark")).toBeInTheDocument();
   });
 
   it("opens mobile navigation from the topbar menu button", () => {
