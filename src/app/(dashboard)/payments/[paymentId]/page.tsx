@@ -8,6 +8,7 @@ import { SectionCard } from "@/components/shared/section-card";
 import { Button } from "@/components/ui/button";
 import { InvoiceStatusBadge, PaymentMethodBadge } from "@/features/invoices/components/invoice-status-badge";
 import { getPaymentById } from "@/features/invoices/queries/invoice-queries";
+import { formatInvoiceStatus, formatPaymentMethod } from "@/features/invoices/utils";
 import { formatCurrency } from "@/lib/currency";
 import { formatDate, formatDateTime } from "@/lib/dates";
 
@@ -39,7 +40,7 @@ export default async function PaymentDetailPage({ params }: PaymentDetailPagePro
 
       <PageHeader
         title="Payment Receipt"
-        description={`${payment.customerName} • ${formatCurrency(payment.amount)} via ${formatLabel(payment.paymentMethod)}`}
+        description={`${payment.customerName} • ${formatCurrency(payment.amount)} via ${formatPaymentMethod(payment.paymentMethod)}`}
         actions={
           <>
             <Button asChild variant="outlineBlue">
@@ -66,7 +67,7 @@ export default async function PaymentDetailPage({ params }: PaymentDetailPagePro
         <DetailSummaryItem label="Invoice" value={payment.invoiceNumber} hint={formatDate(payment.invoiceDate)} />
         <DetailSummaryItem
           label="Invoice status"
-          value={formatLabel(payment.invoiceStatus)}
+          value={formatInvoiceStatus(payment.invoiceStatus)}
           hint={`Balance after payment ${formatCurrency(payment.invoiceBalanceAfterPayment)}`}
           badge={<InvoiceStatusBadge status={payment.invoiceStatus} />}
         />
@@ -74,7 +75,7 @@ export default async function PaymentDetailPage({ params }: PaymentDetailPagePro
         <DetailSummaryItem label="Vehicle" value={payment.vehicleLabel} hint={payment.vehiclePlateNumber ?? payment.vehicleVin ?? "No plate or VIN"} />
         <DetailSummaryItem
           label="Payment method"
-          value={formatLabel(payment.paymentMethod)}
+          value={formatPaymentMethod(payment.paymentMethod)}
           hint={payment.referenceNumber ?? "No reference number"}
           badge={<PaymentMethodBadge method={payment.paymentMethod} />}
         />

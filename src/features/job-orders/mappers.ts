@@ -45,8 +45,13 @@ export function mapJobOrderPartUsageToEntry(params: {
 export function mapJobOrderItemRowToDetail(params: {
   row: JobOrderItemRow;
   inventoryTracking?: JobOrderItemInventoryTracking | null;
+  checklistCheckedByName?: string | null;
 }): JobOrderItemDetail {
-  const { row, inventoryTracking = null } = params;
+  const {
+    row,
+    inventoryTracking = null,
+    checklistCheckedByName = null,
+  } = params;
 
   return {
     id: row.id,
@@ -62,6 +67,10 @@ export function mapJobOrderItemRowToDetail(params: {
     isAdditional: row.is_additional,
     approvalStatus: row.approval_status,
     usageStatus: row.usage_status,
+    checklistCompleted: row.checklist_completed,
+    checklistCheckedAt: row.checklist_checked_at,
+    checklistCheckedByStaffId: row.checklist_checked_by_staff_id,
+    checklistCheckedByName,
     approvedAt: row.approved_at,
     rejectedAt: row.rejected_at,
     inventoryTracking,
@@ -147,6 +156,7 @@ export function mapJobOrderDetail(params: {
   } | null;
   items: JobOrderItemDetail[];
   mechanics: JobOrderMechanicAssignment[];
+  canUpdateChecklistRole: boolean;
 }): JobOrderDetail {
   const listItem = mapJobOrderRowToListItem({
     row: params.row,
@@ -157,24 +167,29 @@ export function mapJobOrderDetail(params: {
     items: params.items,
   });
 
-  return mapJobOrderDetailCapabilities({
-    ...listItem,
-    mileageIn: params.row.mileage_in,
-    mileageOut: params.row.mileage_out,
-    customerConcern: params.row.customer_concern,
-    inspectionNotes: params.row.inspection_notes,
-    diagnosis: params.row.diagnosis,
-    workPerformed: params.row.work_performed,
-    invoiceId: params.invoice?.id ?? null,
-    invoiceNumber: params.invoice?.invoice_number ?? null,
-    invoiceStatus: params.invoice?.status ?? null,
-    invoiceTotalAmount: params.invoice?.total_amount ?? null,
-    invoicePaidAmount: params.invoice?.paid_amount ?? null,
-    invoiceBalance: params.invoice?.balance ?? null,
-    items: params.items,
-    mechanics: params.mechanics,
-    rejectedAdditionalTotal: calculateJobOrderRejectedAdditionalTotal(params.items),
-  });
+  return mapJobOrderDetailCapabilities(
+    {
+      ...listItem,
+      mileageIn: params.row.mileage_in,
+      mileageOut: params.row.mileage_out,
+      customerConcern: params.row.customer_concern,
+      inspectionNotes: params.row.inspection_notes,
+      diagnosis: params.row.diagnosis,
+      workPerformed: params.row.work_performed,
+      invoiceId: params.invoice?.id ?? null,
+      invoiceNumber: params.invoice?.invoice_number ?? null,
+      invoiceStatus: params.invoice?.status ?? null,
+      invoiceTotalAmount: params.invoice?.total_amount ?? null,
+      invoicePaidAmount: params.invoice?.paid_amount ?? null,
+      invoiceBalance: params.invoice?.balance ?? null,
+      items: params.items,
+      mechanics: params.mechanics,
+      rejectedAdditionalTotal: calculateJobOrderRejectedAdditionalTotal(params.items),
+    },
+    {
+      canUpdateChecklistRole: params.canUpdateChecklistRole,
+    },
+  );
 }
 
 export function mapStaffRowToMechanicOption(row: Pick<StaffRow, "id" | "first_name" | "last_name">): JobOrderMechanicOption {

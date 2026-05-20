@@ -1,6 +1,6 @@
 import { cache } from "react";
 
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { applyBranchFilter, getBranchScopedServerClient } from "@/lib/branches";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type { TableRow } from "@/types/database";
 import { mapVehicleDetail, mapVehicleRowToListItem } from "@/features/vehicles/mappers";
@@ -13,8 +13,11 @@ export async function listVehicles(filters?: {
   search?: string;
   customerId?: string;
 }): Promise<VehicleListItem[]> {
-  const { supabase } = await getAuthorizedSupabaseServerClient("vehicles:read");
-  let query = supabase.from("vehicles").select("*").order("created_at", { ascending: false });
+  const { branchScope, supabase } = await getBranchScopedServerClient("vehicles:read");
+  let query = applyBranchFilter(
+    supabase.from("vehicles").select("*").order("created_at", { ascending: false }),
+    branchScope.selectedBranchId,
+  );
 
   if (filters?.customerId) {
     query = query.eq("customer_id", filters.customerId);
@@ -43,8 +46,13 @@ export async function listVehicles(filters?: {
 }
 
 export const getVehicleById = cache(async (vehicleId: string): Promise<VehicleDetail | null> => {
-  const { supabase } = await getAuthorizedSupabaseServerClient("vehicles:read");
-  const { data, error } = await supabase.from("vehicles").select("*").eq("id", vehicleId).maybeSingle();
+  const { branchScope, supabase } = await getBranchScopedServerClient("vehicles:read");
+  const { data, error } = await applyBranchFilter(
+    supabase.from("vehicles").select("*"),
+    branchScope.selectedBranchId,
+  )
+    .eq("id", vehicleId)
+    .maybeSingle();
 
   if (error) {
     throw new Error(error.message);

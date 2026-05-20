@@ -7,8 +7,7 @@ import {
   completePosSaleSchema,
   parseCompletePosSaleFormData,
 } from "@/features/pos/schemas/pos-form-schema";
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
-import { getDefaultBranch } from "@/lib/branches";
+import { getBranchScopedServerClient } from "@/lib/branches";
 import { getBusinessNow } from "@/lib/dates";
 import { INITIAL_FORM_ACTION_STATE, toFormActionState, type FormActionState } from "@/lib/forms";
 
@@ -22,12 +21,9 @@ export async function completePosSaleAction(
     return toFormActionState(parsed.error);
   }
 
-  const [branch, { context, supabase }] = await Promise.all([
-    getDefaultBranch(),
-    getAuthorizedSupabaseServerClient("pos:write"),
-  ]);
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("pos:write");
   const { data, error } = await supabase.rpc("complete_pos_sale", {
-    p_branch_id: branch.id,
+    p_branch_id: branchScope.writeBranchId,
     p_items: parsed.data.items,
     p_customer_id: parsed.data.customerId ?? null,
     p_discount: Number(parsed.data.discount),

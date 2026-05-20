@@ -21,6 +21,7 @@ export function AppShell({
   capabilities,
   businessName,
   businessLogoUrl,
+  branchScope,
   showSidebarBusinessName = false,
 }: Readonly<{
   children: React.ReactNode;
@@ -38,6 +39,16 @@ export function AppShell({
   capabilities: readonly AppCapability[];
   businessName: string;
   businessLogoUrl: string | null;
+  branchScope: {
+    canAccessAllBranches: boolean;
+    accessibleBranches: Array<{
+      id: string;
+      code: string;
+      name: string;
+    }>;
+    selectedBranchId: string | null;
+    selectedBranchLabel: string;
+  };
   showSidebarBusinessName?: boolean;
 }>) {
   const pathname = usePathname();
@@ -52,7 +63,7 @@ export function AppShell({
         businessName={businessName}
         businessLogoUrl={businessLogoUrl}
         showBusinessName={showSidebarBusinessName}
-        className="hidden xl:fixed xl:inset-y-0 xl:left-0 xl:flex xl:w-[15.5rem] xl:flex-col"
+        className="no-print hidden xl:fixed xl:inset-y-0 xl:left-0 xl:flex xl:w-[15.5rem] xl:flex-col"
       />
       {isMobileSidebarOpen ? (
         <div className="fixed inset-0 z-40 xl:hidden" aria-hidden="true">
@@ -70,19 +81,22 @@ export function AppShell({
           businessName={businessName}
           businessLogoUrl={businessLogoUrl}
           showBusinessName={showSidebarBusinessName}
-          className="fixed inset-y-0 left-0 z-50 flex w-[17rem] max-w-[calc(100vw-2rem)] flex-col shadow-2xl xl:hidden"
+          className="no-print fixed inset-y-0 left-0 z-50 flex w-[17rem] max-w-[calc(100vw-2rem)] flex-col shadow-2xl xl:hidden"
           onNavigate={() => setIsMobileSidebarOpen(false)}
           onClose={() => setIsMobileSidebarOpen(false)}
           showCloseButton
         />
       ) : null}
       <div className="min-h-screen xl:pl-[15.5rem]">
-        <AppTopbar
-          activeLabel={activeItem?.label ?? "Dashboard"}
-          userDisplayName={userDisplayName}
-          userRoleLabel={userRoleLabel}
-          onOpenNavigation={() => setIsMobileSidebarOpen(true)}
-        />
+        <div className="no-print">
+          <AppTopbar
+            activeLabel={activeItem?.label ?? "Dashboard"}
+            userDisplayName={userDisplayName}
+            userRoleLabel={userRoleLabel}
+            branchScope={branchScope}
+            onOpenNavigation={() => setIsMobileSidebarOpen(true)}
+          />
+        </div>
         <main className="px-4 py-6 sm:px-6 lg:px-8">
           <PageContainer>{children}</PageContainer>
         </main>

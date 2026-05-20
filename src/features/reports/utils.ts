@@ -1,5 +1,7 @@
 import { DateTime } from "luxon";
 
+import { formatPaymentMethod } from "@/features/invoices/utils";
+import type { PaymentMethod } from "@/features/invoices/types";
 import type {
   PaymentMethodBreakdownItem,
   ReportGroupBy,
@@ -142,9 +144,9 @@ export function buildStatusBreakdown<T extends string>(rows: T[]): StatusBreakdo
     .sort((left, right) => right.count - left.count || left.label.localeCompare(right.label));
 }
 
-export function buildPaymentMethodBreakdown<T extends string>(
+export function buildPaymentMethodBreakdown(
   rows: {
-    paymentMethod: T;
+    paymentMethod: PaymentMethod;
     amount: number;
   }[],
 ): PaymentMethodBreakdownItem[] {
@@ -160,7 +162,7 @@ export function buildPaymentMethodBreakdown<T extends string>(
 
   return [...summary.entries()]
     .map(([label, value]) => ({
-      label: label.replaceAll("_", " "),
+      label: formatPaymentMethod(label as PaymentMethod),
       amount: value.amount,
       count: value.count,
     }))

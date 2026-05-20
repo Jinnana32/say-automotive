@@ -1,7 +1,6 @@
 import { DateTime } from "luxon";
 
-import { getDefaultBranch } from "@/lib/branches";
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { getBranchScopedServerClient } from "@/lib/branches";
 import type { StaffRole } from "@/lib/auth/permissions";
 import type {
   AttendanceCalendarMonthData,
@@ -27,7 +26,7 @@ import type { TableRow } from "@/types/database";
 
 type StaffAttendanceRosterRow = Pick<
   TableRow<"staff">,
-  "id" | "first_name" | "last_name" | "role" | "status" | "contact_number"
+  "id" | "branch_id" | "first_name" | "last_name" | "role" | "status" | "contact_number"
 >;
 type AttendanceRow = TableRow<"attendance">;
 type StaffScheduleRow = TableRow<"staff_schedules">;
@@ -48,15 +47,18 @@ export async function getAttendanceRosterData(
     excludeRoles?: StaffRole[];
   } = {},
 ): Promise<AttendanceRosterData> {
-  const { context, supabase } = await getAuthorizedSupabaseServerClient("attendance:read");
-  const branchId = context.branchId ?? (await getDefaultBranch()).id;
+  const { branchScope, supabase } = await getBranchScopedServerClient("attendance:read");
+  const branchId = branchScope.selectedBranchId;
   let staffQuery = supabase
     .from("staff")
-    .select("id, first_name, last_name, role, status, contact_number")
-    .eq("branch_id", branchId)
+    .select("id, branch_id, first_name, last_name, role, status, contact_number")
     .eq("status", "active")
     .order("last_name", { ascending: true })
     .order("first_name", { ascending: true });
+
+  if (branchId) {
+    staffQuery = staffQuery.eq("branch_id", branchId);
+  }
 
   for (const role of options.excludeRoles ?? []) {
     staffQuery = staffQuery.neq("role", role);
@@ -94,13 +96,20 @@ export async function getAttendanceRosterData(
       await Promise.all([
         supabase.from("attendance").select("*").eq("attendance_date", filters.date).in("staff_id", staffIds),
         supabase.from("staff_schedules").select("*").in("staff_id", staffIds),
-        supabase
-          .from("staff_leave_entries")
-          .select("*")
-          .eq("branch_id", branchId)
-          .lte("start_date", filters.date)
-          .gte("end_date", filters.date)
-          .in("staff_id", staffIds),
+        (() => {
+          let query = supabase
+            .from("staff_leave_entries")
+            .select("*")
+            .lte("start_date", filters.date)
+            .gte("end_date", filters.date)
+            .in("staff_id", staffIds);
+
+          if (branchId) {
+            query = query.eq("branch_id", branchId);
+          }
+
+          return query;
+        })(),
       ]);
 
     if (attendanceError) {
@@ -121,7 +130,7 @@ export async function getAttendanceRosterData(
   }
 
   const [lockedPeriod, branchHoliday] = await Promise.all([
-    getAttendanceDateLock(filters.date, supabase),
+    getAttendanceDateLock(filters.date, branchId, supabase),
     getBranchHolidayForDate({
       attendanceDate: filters.date,
       branchId,
@@ -176,22 +185,27 @@ export async function getAttendanceCalendarMonthData({
   selectedDate: string;
   requestedMonth?: string;
 }): Promise<AttendanceCalendarMonthData> {
-  const { context, supabase } = await getAuthorizedSupabaseServerClient("attendance:read");
-  const branchId = context.branchId ?? (await getDefaultBranch()).id;
+  const { branchScope, supabase } = await getBranchScopedServerClient("attendance:read");
+  const branchId = branchScope.selectedBranchId;
   const targetMonth = resolveAttendanceCalendarMonth(selectedDate, requestedMonth);
   const monthStartDate = targetMonth.startOf("month").toFormat("yyyy-LL-dd");
   const monthEndDate = targetMonth.endOf("month").toFormat("yyyy-LL-dd");
   const todayDate = getDefaultAttendanceDate();
 
-  const { data: staffRows, error: staffError } = await supabase
+  let staffQuery = supabase
     .from("staff")
-    .select("id, first_name, last_name, role, status, contact_number")
-    .eq("branch_id", branchId)
+    .select("id, branch_id, first_name, last_name, role, status, contact_number")
     .eq("status", "active")
     .neq("role", "admin")
     .neq("role", "owner")
     .order("last_name", { ascending: true })
     .order("first_name", { ascending: true });
+
+  if (branchId) {
+    staffQuery = staffQuery.eq("branch_id", branchId);
+  }
+
+  const { data: staffRows, error: staffError } = await staffQuery;
 
   if (staffError) {
     throw new Error(staffError.message);
@@ -205,13 +219,20 @@ export async function getAttendanceCalendarMonthData({
   let amendmentRows: DtrAmendmentRow[] = [];
 
   const [{ data: holidayData, error: holidayError }] = await Promise.all([
-    supabase
-      .from("branch_holidays")
-      .select("*")
-      .eq("branch_id", branchId)
-      .gte("holiday_date", monthStartDate)
-      .lte("holiday_date", monthEndDate)
-      .order("holiday_date", { ascending: true }),
+    (() => {
+      let query = supabase
+        .from("branch_holidays")
+        .select("*")
+        .gte("holiday_date", monthStartDate)
+        .lte("holiday_date", monthEndDate)
+        .order("holiday_date", { ascending: true });
+
+      if (branchId) {
+        query = query.eq("branch_id", branchId);
+      }
+
+      return query;
+    })(),
   ]);
 
   if (holidayError) {
@@ -232,21 +253,35 @@ export async function getAttendanceCalendarMonthData({
         .lte("attendance_date", monthEndDate)
         .in("staff_id", staffIds),
       supabase.from("staff_schedules").select("*").in("staff_id", staffIds),
-      supabase
-        .from("staff_leave_entries")
-        .select("*")
-        .eq("branch_id", branchId)
-        .lte("start_date", monthEndDate)
-        .gte("end_date", monthStartDate)
-        .in("staff_id", staffIds),
-      supabase
-        .from("dtr_amendment_requests")
-        .select("staff_id, attendance_date, status")
-        .eq("branch_id", branchId)
-        .eq("status", "pending")
-        .gte("attendance_date", monthStartDate)
-        .lte("attendance_date", monthEndDate)
-        .in("staff_id", staffIds),
+      (() => {
+        let query = supabase
+          .from("staff_leave_entries")
+          .select("*")
+          .lte("start_date", monthEndDate)
+          .gte("end_date", monthStartDate)
+          .in("staff_id", staffIds);
+
+        if (branchId) {
+          query = query.eq("branch_id", branchId);
+        }
+
+        return query;
+      })(),
+      (() => {
+        let query = supabase
+          .from("dtr_amendment_requests")
+          .select("staff_id, attendance_date, status")
+          .eq("status", "pending")
+          .gte("attendance_date", monthStartDate)
+          .lte("attendance_date", monthEndDate)
+          .in("staff_id", staffIds);
+
+        if (branchId) {
+          query = query.eq("branch_id", branchId);
+        }
+
+        return query;
+      })(),
     ]);
 
     if (attendanceError) {
@@ -280,7 +315,9 @@ export async function getAttendanceCalendarMonthData({
   const leaveEntriesByStaffId = new Map<string, StaffLeaveEntrySummary[]>();
   const pendingAmendmentsByStaffDate = new Map<string, number>();
   const holidayDateSet = new Set(
-    ((holidayData ?? []) as BranchHolidayRow[]).map((row) => row.holiday_date),
+    ((holidayData ?? []) as BranchHolidayRow[]).map((row) =>
+      buildBranchHolidayKey(row.branch_id, row.holiday_date),
+    ),
   );
 
   for (const leaveRow of leaveEntryRows) {
@@ -305,7 +342,6 @@ export async function getAttendanceCalendarMonthData({
   while (cursor <= monthEnd) {
     const date = cursor.toFormat("yyyy-LL-dd");
     const isFuture = date > todayDate;
-    const isBranchHoliday = holidayDateSet.has(date);
     let staffCount = 0;
     let recordedCount = 0;
     let approvedCount = 0;
@@ -320,6 +356,7 @@ export async function getAttendanceCalendarMonthData({
         attendanceByStaffDate.get(buildAttendanceCalendarKey(staffMember.id, date)) ?? null;
       const hasPendingAmendment =
         (pendingAmendmentsByStaffDate.get(buildAttendanceCalendarKey(staffMember.id, date)) ?? 0) > 0;
+      const isBranchHoliday = holidayDateSet.has(buildBranchHolidayKey(staffMember.branch_id, date));
       const isScheduledWorkday =
         !isFuture &&
         !isBranchHoliday &&
@@ -477,12 +514,18 @@ function deriveAttendanceCalendarStatus({
 
 async function getAttendanceDateLock(
   attendanceDate: string,
-  supabase: Awaited<ReturnType<typeof getAuthorizedSupabaseServerClient>>["supabase"],
+  branchId: string | null,
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
 ): Promise<AttendanceDateLockSummary | null> {
+  if (!branchId) {
+    return null;
+  }
+
   const { data, error } = await supabase
     .from("payroll_periods")
     .select("id, label, status")
     .in("status", ["processing", "finalized"])
+    .eq("branch_id", branchId)
     .lte("period_start_date", attendanceDate)
     .gte("period_end_date", attendanceDate)
     .order("period_start_date", { ascending: false })
@@ -512,9 +555,13 @@ async function getBranchHolidayForDate({
   supabase,
 }: {
   attendanceDate: string;
-  branchId: string;
-  supabase: Awaited<ReturnType<typeof getAuthorizedSupabaseServerClient>>["supabase"];
+  branchId: string | null;
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"];
 }) {
+  if (!branchId) {
+    return null;
+  }
+
   const { data, error } = await supabase
     .from("branch_holidays")
     .select("*")
@@ -546,4 +593,8 @@ function resolveAttendanceCalendarMonth(selectedDate: string, requestedMonth?: s
 
 function buildAttendanceCalendarKey(staffId: string, attendanceDate: string) {
   return `${staffId}:${attendanceDate}`;
+}
+
+function buildBranchHolidayKey(branchId: string | null, attendanceDate: string) {
+  return `${branchId ?? "none"}:${attendanceDate}`;
 }

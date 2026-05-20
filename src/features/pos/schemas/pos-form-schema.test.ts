@@ -48,17 +48,17 @@ describe("pos form schema", () => {
     expect(parsed.success).toBe(false);
   });
 
-  it("rejects money inputs beyond two decimal places", () => {
+  it("accepts four-decimal money inputs and the other payment method", () => {
     const parsed = completePosSaleSchema.safeParse({
       customerId: undefined,
-      discount: "0.123",
-      paymentAmount: "100.00",
-      paymentMethod: "cash",
+      discount: "0.1234",
+      paymentAmount: "100.0001",
+      paymentMethod: "other",
       referenceNumber: "",
       notes: "",
       items: [{ productId: "34c25057-b0f8-4da0-9a27-c1792efa2ebd", quantity: 1 }],
     });
 
-    expect(parsed.success).toBe(false);
+    expect(parsed.success).toBe(true);
   });
 });

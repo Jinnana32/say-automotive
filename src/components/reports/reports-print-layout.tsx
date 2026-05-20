@@ -1,5 +1,6 @@
 import { ReportFooter } from "@/components/reports/report-footer";
 import { ReportHeader } from "@/components/reports/report-header";
+import { PrintDocumentLayout } from "@/components/reports/print-document-layout";
 import type { ReportsPrintDocument } from "@/features/reports/types";
 import { formatPrintCurrency } from "@/lib/currency";
 import { formatDateTime } from "@/lib/dates";
@@ -29,14 +30,26 @@ export function ReportsPrintLayout({
   const omittedStockMovementCount = Math.max(0, reports.recentStockMovements.length - stockMovementRows.length);
 
   return (
-    <article className="flex min-h-[297mm] flex-col bg-white px-[12mm] py-[10mm] text-[11px] leading-[1.35] text-slate-900">
-      <ReportHeader
-        businessName={businessProfile.businessName}
-        documentTitle="Business Reports"
-        documentMeta={`Preset: ${reports.filters.preset.replaceAll("-", " ")} • Period: ${reports.filters.periodLabel}`}
-        logoSrc={businessProfile.businessLogoUrl ?? undefined}
-      />
-
+    <PrintDocumentLayout
+      className="leading-[1.35]"
+      header={
+        <ReportHeader
+          businessName={businessProfile.businessName}
+          documentTitle="Business Reports"
+          documentMeta={`Preset: ${reports.filters.preset.replaceAll("-", " ")} • Period: ${reports.filters.periodLabel}`}
+          logoSrc={businessProfile.businessLogoUrl ?? undefined}
+        />
+      }
+      footer={
+        <ReportFooter
+          businessName={businessProfile.businessName}
+          vatRegistrationNo={businessProfile.businessVatRegistrationNo}
+          contactNumber={businessProfile.businessContact}
+          email={businessProfile.businessEmail}
+          address={businessProfile.businessAddress}
+        />
+      }
+    >
       <section className="report-section-keep mt-5 grid gap-x-8 gap-y-2 sm:grid-cols-2">
         <MetadataColumn
           items={[
@@ -229,21 +242,13 @@ export function ReportsPrintLayout({
             </table>
           )}
         </div>
-        {omittedStockMovementCount > 0 ? (
+      {omittedStockMovementCount > 0 ? (
           <p className="mt-2 text-[10px] text-slate-600">
             Showing the 8 most recent stock movements for print readability.
           </p>
         ) : null}
       </section>
-
-      <ReportFooter
-        businessName={businessProfile.businessName}
-        vatRegistrationNo={businessProfile.businessVatRegistrationNo}
-        contactNumber={businessProfile.businessContact}
-        email={businessProfile.businessEmail}
-        address={businessProfile.businessAddress}
-      />
-    </article>
+    </PrintDocumentLayout>
   );
 }
 

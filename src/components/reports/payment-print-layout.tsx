@@ -1,10 +1,12 @@
 import { ReportFooter } from "@/components/reports/report-footer";
 import { ReportHeader } from "@/components/reports/report-header";
+import { PrintDocumentLayout } from "@/components/reports/print-document-layout";
 import { ReportSectionHeading } from "@/components/reports/report-section-heading";
 import { ReportSignatureBlock } from "@/components/reports/report-signature-block";
 import { ReportTotals } from "@/components/reports/report-totals";
 import type { PaymentPrintDocument } from "@/features/invoices/types";
-import { formatCurrency } from "@/lib/currency";
+import { formatPrintCurrency } from "@/lib/currency";
+import { formatInvoiceStatus, formatPaymentMethod } from "@/features/invoices/utils";
 import { formatDocumentDate, formatDateTime } from "@/lib/dates";
 
 export function PaymentPrintLayout({
@@ -16,14 +18,26 @@ export function PaymentPrintLayout({
   const sourceLabel = payment.jobOrderNumber ?? payment.saleNumber ?? "Direct sale";
 
   return (
-    <article className="flex min-h-[297mm] flex-col bg-white px-[12mm] py-[10mm] text-[11px] leading-[1.35] text-slate-900">
-      <ReportHeader
-        businessName={businessProfile.businessName}
-        documentTitle="Payment Receipt"
-        documentMeta={`Invoice No.: ${payment.invoiceNumber} • Paid At: ${formatDocumentDate(payment.paidAt)}`}
-        logoSrc={businessProfile.businessLogoUrl ?? undefined}
-      />
-
+    <PrintDocumentLayout
+      className="leading-[1.35]"
+      header={
+        <ReportHeader
+          businessName={businessProfile.businessName}
+          documentTitle="Payment Receipt"
+          documentMeta={`Invoice No.: ${payment.invoiceNumber} • Paid At: ${formatDocumentDate(payment.paidAt)}`}
+          logoSrc={businessProfile.businessLogoUrl ?? undefined}
+        />
+      }
+      footer={
+        <ReportFooter
+          businessName={businessProfile.businessName}
+          vatRegistrationNo={businessProfile.businessVatRegistrationNo}
+          contactNumber={businessProfile.businessContact}
+          email={businessProfile.businessEmail}
+          address={businessProfile.businessAddress}
+        />
+      }
+    >
       <section className="report-section-keep mt-5 grid gap-x-8 gap-y-2 sm:grid-cols-2">
         <MetadataColumn
           items={[
@@ -36,7 +50,7 @@ export function PaymentPrintLayout({
         <MetadataColumn
           items={[
             { label: "Payment Date", value: formatDocumentDate(payment.paidAt) },
-            { label: "Method", value: formatLabel(payment.paymentMethod) },
+            { label: "Method", value: formatPaymentMethod(payment.paymentMethod) },
             { label: "Address", value: payment.customerAddress || "—" },
             { label: "Car Model & Year", value: formatVehicleModel(payment) },
           ]}
@@ -55,7 +69,7 @@ export function PaymentPrintLayout({
         <MetadataColumn
           items={[
             { label: "Paid At", value: formatDateTime(payment.paidAt) },
-            { label: "Invoice Status", value: formatLabel(payment.invoiceStatus) },
+            { label: "Invoice Status", value: formatInvoiceStatus(payment.invoiceStatus) },
             { label: "VIN", value: payment.vehicleVin || "—" },
             { label: "Receiver Role", value: payment.receivedByTitle ? formatLabel(payment.receivedByTitle) : "—" },
           ]}
@@ -86,10 +100,10 @@ export function PaymentPrintLayout({
           <div className="overflow-hidden border border-brand-border bg-brand-soft/35 px-3 py-3">
             <ReportTotals
               lines={[
-                { label: "Invoice Total:", value: formatCurrency(payment.invoiceTotalAmount) },
-                { label: "Balance Before:", value: formatCurrency(payment.invoiceBalanceBeforePayment) },
-                { label: "Payment Amount:", value: formatCurrency(payment.amount), emphasized: true },
-                { label: "Balance After:", value: formatCurrency(payment.invoiceBalanceAfterPayment) },
+                { label: "Invoice Total:", value: formatPrintCurrency(payment.invoiceTotalAmount) },
+                { label: "Balance Before:", value: formatPrintCurrency(payment.invoiceBalanceBeforePayment) },
+                { label: "Payment Amount:", value: formatPrintCurrency(payment.amount), emphasized: true },
+                { label: "Balance After:", value: formatPrintCurrency(payment.invoiceBalanceAfterPayment) },
               ]}
               className="justify-self-end"
             />
@@ -97,14 +111,7 @@ export function PaymentPrintLayout({
         </div>
       </section>
 
-      <ReportFooter
-        businessName={businessProfile.businessName}
-        vatRegistrationNo={businessProfile.businessVatRegistrationNo}
-        contactNumber={businessProfile.businessContact}
-        email={businessProfile.businessEmail}
-        address={businessProfile.businessAddress}
-      />
-    </article>
+    </PrintDocumentLayout>
   );
 }
 

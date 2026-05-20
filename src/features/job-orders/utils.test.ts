@@ -2,11 +2,14 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildJobOrderItemInventoryTracking,
+  calculateJobOrderChecklistSummary,
   calculateJobOrderBillableTotal,
   calculateJobOrderPendingApprovalCount,
   calculateJobOrderPendingApprovalTotal,
-  getAllowedJobOrderStatusTransitions,
   canEditJobOrderItems,
+  getAllowedJobOrderStatusTransitions,
+  getJobOrderChecklistStatus,
+  groupJobOrderChecklistItems,
 } from "@/features/job-orders/utils";
 
 const items = [
@@ -24,6 +27,10 @@ const items = [
     isAdditional: false,
     approvalStatus: "not_required" as const,
     usageStatus: "planned" as const,
+    checklistCompleted: false,
+    checklistCheckedAt: null,
+    checklistCheckedByStaffId: null,
+    checklistCheckedByName: null,
     approvedAt: null,
     rejectedAt: null,
     inventoryTracking: null,
@@ -42,6 +49,10 @@ const items = [
     isAdditional: true,
     approvalStatus: "pending" as const,
     usageStatus: "planned" as const,
+    checklistCompleted: false,
+    checklistCheckedAt: null,
+    checklistCheckedByStaffId: null,
+    checklistCheckedByName: null,
     approvedAt: null,
     rejectedAt: null,
     inventoryTracking: null,
@@ -60,6 +71,10 @@ const items = [
     isAdditional: true,
     approvalStatus: "approved" as const,
     usageStatus: "planned" as const,
+    checklistCompleted: true,
+    checklistCheckedAt: "2026-05-20T08:00:00.000Z",
+    checklistCheckedByStaffId: "staff-1",
+    checklistCheckedByName: "Alex Mechanic",
     approvedAt: null,
     rejectedAt: null,
     inventoryTracking: null,
@@ -83,6 +98,45 @@ describe("job order utils", () => {
     expect(canEditJobOrderItems("pending")).toBe(true);
     expect(canEditJobOrderItems("in_progress")).toBe(true);
     expect(canEditJobOrderItems("released")).toBe(false);
+  });
+
+  it("builds checklist summaries from actionable and blocked items", () => {
+    expect(calculateJobOrderChecklistSummary(items)).toEqual({
+      requiredCount: 2,
+      completedCount: 1,
+      blockedCount: 1,
+      allRequiredCompleted: false,
+    });
+  });
+
+  it("groups checklist items into labor and parts sections", () => {
+    expect(groupJobOrderChecklistItems(items)).toEqual([
+      {
+        key: "service-labor",
+        label: "Services / Labor",
+        items: [items[0], items[2]],
+      },
+      {
+        key: "parts-products",
+        label: "Parts / Products",
+        items: [items[1]],
+      },
+    ]);
+  });
+
+  it("derives checklist labels without affecting approval logic", () => {
+    expect(getJobOrderChecklistStatus(items[0])).toMatchObject({
+      label: "Open",
+      actionable: true,
+    });
+    expect(getJobOrderChecklistStatus(items[1])).toMatchObject({
+      label: "Pending approval",
+      actionable: false,
+    });
+    expect(getJobOrderChecklistStatus(items[2])).toMatchObject({
+      label: "Completed",
+      actionable: true,
+    });
   });
 
   it("builds inventory tracking from usage history and stock state", () => {

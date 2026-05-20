@@ -5,10 +5,18 @@ import { AppShell } from "@/components/shared/app-shell";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/dashboard",
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 vi.mock("@/features/auth/actions/auth-actions", () => ({
   signOutAction: vi.fn(),
+}));
+
+vi.mock("@/components/shared/branch-scope-selector", () => ({
+  BranchScopeSelector: () => <div>Branch scope selector</div>,
 }));
 
 describe("AppShell", () => {
@@ -45,6 +53,12 @@ describe("AppShell", () => {
         capabilities={[]}
         businessName="SAY Auto Care Center"
         businessLogoUrl={null}
+        branchScope={{
+          canAccessAllBranches: false,
+          accessibleBranches: [],
+          selectedBranchId: "branch-main",
+          selectedBranchLabel: "Main Branch",
+        }}
       >
         <div>Dashboard content</div>
       </AppShell>,
@@ -76,6 +90,12 @@ describe("AppShell", () => {
         capabilities={[]}
         businessName="SAY Auto Care Center"
         businessLogoUrl={null}
+        branchScope={{
+          canAccessAllBranches: false,
+          accessibleBranches: [],
+          selectedBranchId: "branch-main",
+          selectedBranchLabel: "Main Branch",
+        }}
         showSidebarBusinessName
       >
         <div>Dashboard content</div>
@@ -84,7 +104,7 @@ describe("AppShell", () => {
 
     fireEvent.click(screen.getAllByRole("button", { name: "Toggle sidebar" })[0]);
 
-    expect(screen.getByText("SAY Auto Care Center")).toBeInTheDocument();
-    expect(screen.getByText("Workshop administration")).toBeInTheDocument();
+    expect(screen.getAllByText("SAY Auto Care Center").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Workshop administration").length).toBeGreaterThan(0);
   });
 });

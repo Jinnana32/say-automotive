@@ -31,6 +31,17 @@ export const inventoryMovementSchema = z
         path: ["quantity"],
       });
     }
+
+    if (
+      (value.movementMode === "recount" || value.movementMode === "damaged") &&
+      !value.notes.trim()
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Notes are required for recount and damaged stock adjustments.",
+        path: ["notes"],
+      });
+    }
   });
 
 export const receiveInventoryStockSchema = z.object({
@@ -54,7 +65,11 @@ export const reconcileInventoryStockSchema = z.object({
       (value) => Number.isFinite(Number(value)) && Number(value) >= 0,
       "Counted quantity must be zero or greater.",
     ),
-  notes: z.string().trim().max(500, "Notes are too long."),
+  notes: z
+    .string()
+    .trim()
+    .min(1, "Notes are required for recount adjustments.")
+    .max(500, "Notes are too long."),
 });
 
 export const markInventoryStockDamagedSchema = z.object({
@@ -66,7 +81,11 @@ export const markInventoryStockDamagedSchema = z.object({
       (value) => Number.isFinite(Number(value)) && Number(value) > 0,
       "Damaged quantity must be greater than zero.",
     ),
-  notes: z.string().trim().max(500, "Notes are too long."),
+  notes: z
+    .string()
+    .trim()
+    .min(1, "Notes are required when marking stock as damaged.")
+    .max(500, "Notes are too long."),
 });
 
 export const updateInventoryStockSettingsSchema = z.object({

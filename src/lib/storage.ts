@@ -30,3 +30,28 @@ export function buildBusinessLogoUrl(objectPath: string | null, cacheBust?: stri
 
   return buildPublicStorageUrl(BUSINESS_ASSETS_BUCKET, objectPath, cacheBust);
 }
+
+export function buildProductImageUrl(objectPath: string | null, cacheBust?: string | null) {
+  if (!objectPath) {
+    return null;
+  }
+
+  return buildPublicStorageUrl(BUSINESS_ASSETS_BUCKET, objectPath, cacheBust);
+}
+
+export function resolveProductImageUrl(params: {
+  productImagePath?: string | null;
+  productImageUrl?: string | null;
+  websiteImageUrl?: string | null;
+  cacheBust?: string | null;
+}) {
+  if (params.productImagePath) {
+    return buildProductImageUrl(params.productImagePath, params.cacheBust);
+  }
+
+  if (params.productImageUrl) {
+    return params.productImageUrl;
+  }
+
+  return params.websiteImageUrl ?? null;
+}

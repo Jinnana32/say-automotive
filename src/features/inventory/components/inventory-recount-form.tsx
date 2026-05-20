@@ -19,7 +19,7 @@ export function InventoryRecountForm({ products }: { products: InventoryProductO
     reconcileInventoryStockAction,
     INITIAL_FORM_ACTION_STATE,
   );
-  const [productId, setProductId] = useState(products[0]?.id ?? "");
+  const [productId, setProductId] = useState("");
   const { values, updateFormValue } = useFormValues({
     countedQuantity: "",
     notes: "",
@@ -74,7 +74,7 @@ export function InventoryRecountForm({ products }: { products: InventoryProductO
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="recountNotes">Notes</Label>
+            <Label htmlFor="recountNotes">Notes (required)</Label>
             <Textarea id="recountNotes" name="notes" value={values.notes} onChange={(event) => updateFormValue("notes", event.target.value)} />
             <FieldError errors={state.fieldErrors} name="notes" />
           </div>

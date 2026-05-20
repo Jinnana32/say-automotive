@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { submitInventoryMovementAction } from "@/features/inventory/actions/inventory-actions";
 import type { InventoryMovementAdminMode, InventoryProductOption } from "@/features/inventory/types";
 import { formatInventoryQuantity } from "@/features/inventory/utils";
+import { QuickCreateProductDialog } from "@/features/products/components/quick-create-product-dialog";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 import { useFormValues } from "@/lib/use-form-values";
 
@@ -49,6 +50,7 @@ export function InventoryMovementDialog({
   triggerLabel,
   triggerText,
   showTrigger = true,
+  canCreateProducts = false,
   open,
   onOpenChange,
 }: {
@@ -59,6 +61,7 @@ export function InventoryMovementDialog({
   triggerLabel?: string;
   triggerText?: string;
   showTrigger?: boolean;
+  canCreateProducts?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }) {
@@ -66,9 +69,8 @@ export function InventoryMovementDialog({
     submitInventoryMovementAction,
     INITIAL_FORM_ACTION_STATE,
   );
-  const availableProducts = useMemo(
+  const [productOptions, setProductOptions] = useState<InventoryProductOption[]>(
     () => (prefilledProduct ? [prefilledProduct] : products ?? []),
-    [prefilledProduct, products],
   );
   const initialProductId = prefilledProduct?.id ?? "";
   const [movementMode, setMovementMode] = useState<InventoryMovementAdminMode>("stock_in");
@@ -78,9 +80,13 @@ export function InventoryMovementDialog({
     notes: "",
   });
 
+  useEffect(() => {
+    setProductOptions(prefilledProduct ? [prefilledProduct] : products ?? []);
+  }, [prefilledProduct, products]);
+
   const selectedProduct = useMemo(
-    () => availableProducts.find((product) => product.id === productId) ?? null,
-    [availableProducts, productId],
+    () => productOptions.find((product) => product.id === productId) ?? null,
+    [productId, productOptions],
   );
   const movementMeta =
     INVENTORY_MOVEMENT_MODES.find((mode) => mode.value === movementMode) ??
@@ -220,7 +226,7 @@ export function InventoryMovementDialog({
                 onChange={(event) => setProductId(event.target.value)}
               >
                 <option value="">Select product</option>
-                {availableProducts.map((product) => (
+                {productOptions.map((product) => (
                   <option key={product.id} value={product.id}>
                     {product.label}
                     {product.sku ? ` (${product.sku})` : ""}
@@ -231,6 +237,28 @@ export function InventoryMovementDialog({
                 <p className="text-xs text-muted-foreground">
                   Product is locked to the inventory row you launched from.
                 </p>
+              ) : canCreateProducts ? (
+                <div className="pt-1">
+                  <QuickCreateProductDialog
+                    triggerLabel="Add new product"
+                    onCreated={(product) => {
+                      setProductOptions((current) => [
+                        ...current,
+                        {
+                          id: product.id,
+                          label: product.label,
+                          sku: product.sku,
+                          quantityOnHand: 0,
+                          availableQuantity: 0,
+                          reorderLevel: product.reorderLevel,
+                          shelfLocation: product.shelfLocation,
+                          hasStockRecord: false,
+                        },
+                      ]);
+                      setProductId(product.id);
+                    }}
+                  />
+                </div>
               ) : null}
               <FieldError errors={state.fieldErrors} name="productId" />
             </div>
@@ -271,13 +299,23 @@ export function InventoryMovementDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="inventoryMovementNotes">Notes</Label>
+              <Label htmlFor="inventoryMovementNotes">
+                Notes
+                {movementMode === "recount" || movementMode === "damaged"
+                  ? " (required)"
+                  : ""}
+              </Label>
               <Textarea
                 id="inventoryMovementNotes"
                 name="notes"
                 value={values.notes}
                 onChange={(event) => updateFormValue("notes", event.target.value)}
               />
+              <p className="text-xs text-muted-foreground">
+                {movementMode === "recount" || movementMode === "damaged"
+                  ? "Explain why the branch stock is being adjusted."
+                  : "Optional receiving note such as supplier delivery or transfer details."}
+              </p>
               <FieldError errors={state.fieldErrors} name="notes" />
             </div>
           </div>

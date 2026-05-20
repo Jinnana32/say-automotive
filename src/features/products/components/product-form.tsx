@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 
 import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 import { useFormValues } from "@/lib/use-form-values";
 import { createProductAction, updateProductAction } from "@/features/products/actions/product-actions";
+import { ProductImage } from "@/features/products/components/product-image";
 import type { ProductFormValues, ReferenceOption } from "@/features/products/types";
 import { MONEY_INPUT_STEP } from "@/lib/currency";
 
@@ -23,6 +24,7 @@ export function ProductForm({
   brands,
   suppliers,
   units,
+  initialImagePreviewUrl = null,
 }: {
   mode: "create" | "edit";
   initialValues: ProductFormValues;
@@ -30,15 +32,44 @@ export function ProductForm({
   brands: ReferenceOption[];
   suppliers: ReferenceOption[];
   units: ReferenceOption[];
+  initialImagePreviewUrl?: string | null;
 }) {
   const [state, formAction] = useActionState(
     mode === "create" ? createProductAction : updateProductAction,
     INITIAL_FORM_ACTION_STATE,
   );
   const { values, updateFormValue } = useFormValues(initialValues);
+  const [uploadedImagePreviewUrl, setUploadedImagePreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (uploadedImagePreviewUrl) {
+        URL.revokeObjectURL(uploadedImagePreviewUrl);
+      }
+    };
+  }, [uploadedImagePreviewUrl]);
+
+  const resolvedPreviewImageUrl = useMemo(() => {
+    if (uploadedImagePreviewUrl) {
+      return uploadedImagePreviewUrl;
+    }
+
+    if (values.productImageUrl.trim()) {
+      return values.productImageUrl.trim();
+    }
+
+    return initialValues.productImageUrl.trim() === values.productImageUrl.trim()
+      ? initialImagePreviewUrl
+      : null;
+  }, [
+    initialImagePreviewUrl,
+    initialValues.productImageUrl,
+    uploadedImagePreviewUrl,
+    values.productImageUrl,
+  ]);
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="space-y-6" encType="multipart/form-data">
       {initialValues.productId ? <input type="hidden" name="productId" value={initialValues.productId} /> : null}
 
       <Card className="border-border/70 shadow-sm">
@@ -158,6 +189,59 @@ export function ProductForm({
                 <option value="inactive">Inactive</option>
               </select>
               <FieldError errors={state.fieldErrors} name="status" />
+            </div>
+          </div>
+
+          <div className="grid gap-6 rounded-2xl border border-border/70 bg-muted/20 p-5 lg:grid-cols-[220px_minmax(0,1fr)]">
+            <div className="space-y-3">
+              <div>
+                <h3 className="font-semibold">Product photo</h3>
+                <p className="text-sm text-muted-foreground">
+                  Use a real product shot for faster lookup in POS and catalog maintenance.
+                </p>
+              </div>
+              <ProductImage
+                src={resolvedPreviewImageUrl}
+                alt={values.name || "Product photo preview"}
+                className="aspect-square w-full max-w-[220px]"
+                imageClassName="aspect-square"
+              />
+            </div>
+
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="productImage">Upload photo</Label>
+                <Input
+                  id="productImage"
+                  name="productImage"
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] ?? null;
+
+                    if (uploadedImagePreviewUrl) {
+                      URL.revokeObjectURL(uploadedImagePreviewUrl);
+                    }
+
+                    setUploadedImagePreviewUrl(file ? URL.createObjectURL(file) : null);
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">
+                  PNG, JPG, or WEBP up to 5 MB. Uploading a file overrides the external image URL.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="productImageUrl">External image URL</Label>
+                <Input
+                  id="productImageUrl"
+                  name="productImageUrl"
+                  value={values.productImageUrl}
+                  placeholder="https://..."
+                  onChange={(event) => updateFormValue("productImageUrl", event.target.value)}
+                />
+                <FieldError errors={state.fieldErrors} name="productImageUrl" />
+              </div>
             </div>
           </div>
 

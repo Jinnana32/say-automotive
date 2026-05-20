@@ -1,4 +1,5 @@
 import type { JobOrderItemDetail, JobOrderPrintDetail } from "@/features/job-orders/types";
+import { getJobOrderChecklistStatus } from "@/features/job-orders/utils";
 import { roundCurrency } from "@/lib/currency";
 
 export type JobOrderPrintWorkLine = {
@@ -9,6 +10,10 @@ export type JobOrderPrintWorkLine = {
   unitPrice: number;
   total: number;
   isAdditional: boolean;
+  checklistCompleted: boolean;
+  checklistStatusLabel: string;
+  checklistCheckedAt: string | null;
+  checklistCheckedByName: string | null;
 };
 
 export type JobOrderPrintPartsUsageLine = {
@@ -19,6 +24,7 @@ export type JobOrderPrintPartsUsageLine = {
   returnedQuantity: string;
   remainingQuantity: string;
   stockAvailability: string;
+  usageStatus: JobOrderItemDetail["usageStatus"];
 };
 
 export type JobOrderPrintBreakdown = {
@@ -42,6 +48,10 @@ export function buildJobOrderPrintBreakdown(
     unitPrice: item.unitPrice,
     total: item.total,
     isAdditional: item.isAdditional,
+    checklistCompleted: item.checklistCompleted,
+    checklistStatusLabel: getJobOrderChecklistStatus(item).label,
+    checklistCheckedAt: item.checklistCheckedAt,
+    checklistCheckedByName: item.checklistCheckedByName,
   }));
 
   const acceptedItems = jobOrder.items.filter((item) => item.approvalStatus !== "rejected");
@@ -71,6 +81,7 @@ export function buildJobOrderPrintBreakdown(
       returnedQuantity: trimNumeric(item.inventoryTracking?.returnedQuantity ?? 0),
       remainingQuantity: trimNumeric(item.inventoryTracking?.remainingUsageQuantity ?? item.quantity),
       stockAvailability: formatStockAvailability(item),
+      usageStatus: item.usageStatus,
     }));
 
   return {

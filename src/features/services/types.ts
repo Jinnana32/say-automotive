@@ -21,3 +21,10 @@ export type ServiceFormValues = {
   estimatedDurationMinutes: string;
   status: ServiceStatus;
 };
+
+export type ServiceInlineCreateResult = {
+  id: string;
+  label: string;
+  category: string | null;
+  unitPrice: number;
+};

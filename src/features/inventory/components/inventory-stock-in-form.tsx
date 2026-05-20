@@ -19,7 +19,7 @@ export function InventoryStockInForm({ products }: { products: InventoryProductO
     receiveInventoryStockAction,
     INITIAL_FORM_ACTION_STATE,
   );
-  const [productId, setProductId] = useState(products[0]?.id ?? "");
+  const [productId, setProductId] = useState("");
   const { values, updateFormValue } = useFormValues({
     quantity: "",
     notes: "",

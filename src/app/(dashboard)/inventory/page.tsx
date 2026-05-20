@@ -64,7 +64,10 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
         description="Stock administration, stock health, and the movement ledger."
         actions={
           <>
-            <InventoryMovementDialog products={inventory.productOptions} />
+            <InventoryMovementDialog
+              products={inventory.productOptions}
+              canCreateProducts={inventory.permissions.canCreateProducts}
+            />
             <InventorySettingsDialog products={inventory.productOptions} />
             <Button asChild variant="outline">
               <Link href="/products">Review products</Link>
@@ -216,6 +219,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
                           shelfLocation: stock.shelfLocation,
                           hasStockRecord: stock.hasStockRecord,
                         }}
+                        canCreateProducts={inventory.permissions.canCreateProducts}
                       />
                     </TableCell>
                   </TableRow>

@@ -1,6 +1,7 @@
 import { cache } from "react";
 
 import type { AppCapability } from "@/lib/auth/permissions";
+import { applyBranchFilter, getBranchScope } from "@/lib/branches";
 import { requireAuthenticatedStaff } from "@/lib/auth/session";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type { TableRow } from "@/types/database";
@@ -63,11 +64,13 @@ type StaffRow = Pick<TableRow<"staff">, "id" | "first_name" | "last_name">;
 export const listServiceHistoryByVehicleIds = cache(async (vehicleIds: string[]) => {
   const context = await requireAuthenticatedStaff();
   const supabase = await getSupabaseServerClient();
+  const branchScope = await getBranchScope();
 
   return listServiceHistoryByVehicleIdsForContext({
     supabase,
     capabilities: context.capabilities,
     vehicleIds,
+    branchId: branchScope.selectedBranchId,
   });
 });
 
@@ -75,6 +78,7 @@ export async function listServiceHistoryByVehicleIdsForContext(params: {
   supabase: Awaited<ReturnType<typeof getSupabaseServerClient>>;
   capabilities: readonly AppCapability[];
   vehicleIds: string[];
+  branchId?: string | null;
 }): Promise<ServiceHistoryEntry[]> {
   if (params.vehicleIds.length === 0 || !params.capabilities.includes("job_orders:read")) {
     return [];
@@ -85,16 +89,22 @@ export async function listServiceHistoryByVehicleIdsForContext(params: {
 
   const [{ data: vehicles, error: vehiclesError }, { data: jobOrders, error: jobOrdersError }] =
     await Promise.all([
-      params.supabase
-        .from("vehicles")
-        .select("id, make, model, year, plate_number")
-        .in("id", params.vehicleIds),
-      params.supabase
-        .from("job_orders")
-        .select(
-          "id, job_order_number, customer_id, vehicle_id, quotation_id, status, created_at, started_at, completed_at, released_at, mileage_in, mileage_out, customer_concern, inspection_notes, diagnosis, work_performed",
-        )
-        .in("vehicle_id", params.vehicleIds),
+      applyBranchFilter(
+        params.supabase
+          .from("vehicles")
+          .select("id, make, model, year, plate_number")
+          .in("id", params.vehicleIds),
+        params.branchId ?? null,
+      ),
+      applyBranchFilter(
+        params.supabase
+          .from("job_orders")
+          .select(
+            "id, job_order_number, customer_id, vehicle_id, quotation_id, status, created_at, started_at, completed_at, released_at, mileage_in, mileage_out, customer_concern, inspection_notes, diagnosis, work_performed",
+          )
+          .in("vehicle_id", params.vehicleIds),
+        params.branchId ?? null,
+      ),
     ]);
 
   if (vehiclesError) {

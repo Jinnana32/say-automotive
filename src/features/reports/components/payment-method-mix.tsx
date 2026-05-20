@@ -28,7 +28,7 @@ export function PaymentMethodMix({
               <div key={item.label} className="space-y-2">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-medium capitalize text-foreground">{item.label}</p>
+                    <p className="font-medium text-foreground">{item.label}</p>
                     <p className="text-sm text-muted-foreground">{item.count} payment record{item.count === 1 ? "" : "s"}</p>
                   </div>
                   <p className="font-semibold text-foreground">{formatCurrency(item.amount)}</p>

@@ -3,8 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
-import { getDefaultBranch } from "@/lib/branches";
+import { applyBranchFilter, getBranchScopedServerClient } from "@/lib/branches";
 import { INITIAL_FORM_ACTION_STATE, toFormActionState, type FormActionState } from "@/lib/forms";
 import {
   parseQuotationFormData,
@@ -33,7 +32,7 @@ export async function updateQuotationAction(
 
 export async function approveQuotationAction(formData: FormData) {
   const quotationId = readRequiredId(formData, "quotationId");
-  const { context, supabase } = await getAuthorizedSupabaseServerClient("quotations:write");
+  const { context, supabase } = await getBranchScopedServerClient("quotations:write");
   const { error } = await supabase.rpc("approve_quotation_to_job_order", {
     p_quotation_id: quotationId,
     p_user_id: context.userId,
@@ -50,10 +49,11 @@ export async function approveQuotationAction(formData: FormData) {
 
 export async function rejectQuotationAction(formData: FormData) {
   const quotationId = readRequiredId(formData, "quotationId");
-  const { supabase } = await getAuthorizedSupabaseServerClient("quotations:write");
-  const { data: quotation, error: fetchError } = await supabase
-    .from("quotations")
-    .select("status")
+  const { branchScope, supabase } = await getBranchScopedServerClient("quotations:write");
+  const { data: quotation, error: fetchError } = await applyBranchFilter(
+    supabase.from("quotations").select("status"),
+    branchScope.selectedBranchId,
+  )
     .eq("id", quotationId)
     .maybeSingle();
 
@@ -69,14 +69,14 @@ export async function rejectQuotationAction(formData: FormData) {
     throw new Error("Approved quotations cannot be rejected.");
   }
 
-  const { error } = await supabase
-    .from("quotations")
-    .update({
+  const { error } = await applyBranchFilter(
+    supabase.from("quotations").update({
       status: "rejected",
       rejected_at: new Date().toISOString(),
       approved_at: null,
-    })
-    .eq("id", quotationId);
+    }),
+    branchScope.selectedBranchId,
+  ).eq("id", quotationId);
 
   if (error) {
     throw new Error(error.message);
@@ -94,10 +94,10 @@ async function saveQuotation(formData: FormData): Promise<FormActionState> {
   }
 
   const values = parsed.data;
-  const [{ id: branchId }, { context, supabase }] = await Promise.all([
-    getDefaultBranch(),
-    getAuthorizedSupabaseServerClient("quotations:write"),
-  ]);
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("quotations:write");
+  const branchId = values.quotationId
+    ? await getExistingQuotationBranchId(supabase, branchScope.selectedBranchId, values.quotationId)
+    : branchScope.writeBranchId;
   const subtotal = calculateQuotationSubtotal(values.items);
   const discount = toNumeric(values.discount);
   const tax = toNumeric(values.tax);
@@ -160,4 +160,27 @@ function revalidateQuotationPaths(quotationId: string) {
   revalidatePath(`/quotations/${quotationId}`);
   revalidatePath(`/quotations/${quotationId}/edit`);
   revalidatePath("/dashboard");
+}
+
+async function getExistingQuotationBranchId(
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
+  selectedBranchId: string | null,
+  quotationId: string,
+) {
+  const { data, error } = await applyBranchFilter(
+    supabase.from("quotations").select("branch_id"),
+    selectedBranchId,
+  )
+    .eq("id", quotationId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data?.branch_id) {
+    throw new Error("Quotation does not exist.");
+  }
+
+  return data.branch_id;
 }

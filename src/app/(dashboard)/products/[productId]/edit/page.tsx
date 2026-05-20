@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { ProductForm } from "@/features/products/components/product-form";
 import { mapProductRowToFormValues } from "@/features/products/mappers";
 import { getProductFormOptions, getProductById } from "@/features/products/queries/product-queries";
+import { resolveProductImageUrl } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,12 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
         suppliers={options.suppliers}
         units={options.units}
         initialValues={mapProductRowToFormValues(product)}
+        initialImagePreviewUrl={resolveProductImageUrl({
+          productImagePath: product.product_image_path,
+          productImageUrl: product.product_image_url,
+          websiteImageUrl: product.website_image_url,
+          cacheBust: product.updated_at,
+        })}
       />
     </div>
   );

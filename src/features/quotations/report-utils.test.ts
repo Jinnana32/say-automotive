@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { buildQuotationPrintBreakdown } from "@/features/quotations/report-utils";
+import {
+  buildQuotationPrintBreakdown,
+  resolveQuotationPrintMode,
+} from "@/features/quotations/report-utils";
 import type { QuotationDetail } from "@/features/quotations/types";
 
 describe("buildQuotationPrintBreakdown", () => {
@@ -76,5 +79,45 @@ describe("buildQuotationPrintBreakdown", () => {
     expect(result.totalParts).toBe(500);
     expect(result.totalLabor).toBe(1300);
     expect(result.grandTotal).toBe(1700);
+    expect(result.visibleTotal).toBe(1700);
+  });
+
+  it("returns mode-specific visible totals for parts-only and labor-only printing", () => {
+    const quotation = {
+      items: [
+        {
+          id: "part-line",
+          lineNumber: 1,
+          itemType: "product",
+          productId: "product-1",
+          serviceId: null,
+          description: "Brake Fluid",
+          quantity: 1,
+          unitLabel: "btl",
+          unitPrice: 350,
+          total: 350,
+        },
+        {
+          id: "labor-line",
+          lineNumber: 2,
+          itemType: "labor",
+          productId: null,
+          serviceId: null,
+          description: "Brake Cleaning",
+          quantity: 1,
+          unitLabel: null,
+          unitPrice: 450,
+          total: 450,
+        },
+      ],
+      discount: 50,
+      tax: 0,
+      totalAmount: 750,
+    } satisfies Pick<QuotationDetail, "items" | "discount" | "tax" | "totalAmount">;
+
+    expect(buildQuotationPrintBreakdown(quotation, "parts").visibleTotal).toBe(350);
+    expect(buildQuotationPrintBreakdown(quotation, "labor").visibleTotal).toBe(450);
+    expect(resolveQuotationPrintMode("parts")).toBe("parts");
+    expect(resolveQuotationPrintMode("unknown")).toBe("full");
   });
 });

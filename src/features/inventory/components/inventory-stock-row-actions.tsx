@@ -11,8 +11,10 @@ import type { InventoryProductOption } from "@/features/inventory/types";
 
 export function InventoryStockRowActions({
   product,
+  canCreateProducts = false,
 }: {
   product: InventoryProductOption;
+  canCreateProducts?: boolean;
 }) {
   const [isAdjustOpen, setIsAdjustOpen] = useState(false);
 
@@ -24,6 +26,7 @@ export function InventoryStockRowActions({
       <InventoryMovementDialog
         prefilledProduct={product}
         lockProduct
+        canCreateProducts={canCreateProducts}
         showTrigger={false}
         open={isAdjustOpen}
         onOpenChange={setIsAdjustOpen}

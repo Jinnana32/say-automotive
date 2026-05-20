@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { applyBranchFilter, getBranchScopedServerClient } from "@/lib/branches";
 import { getBusinessNow } from "@/lib/dates";
 import type { TableRow } from "@/types/database";
 
@@ -76,7 +76,7 @@ export type DashboardData = {
 };
 
 export async function getDashboardData(): Promise<DashboardData> {
-  const { context, supabase } = await getAuthorizedSupabaseServerClient("dashboard:view");
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("dashboard:view");
 
   const [
     totalCustomers,
@@ -86,19 +86,33 @@ export async function getDashboardData(): Promise<DashboardData> {
     lowStockItems,
     unpaidInvoicesCount,
   ] = await Promise.all([
-    getExactCount(supabase.from("customers").select("*", { count: "exact", head: true })),
-    getExactCount(supabase.from("vehicles").select("*", { count: "exact", head: true })),
+    getExactCount(
+      applyBranchFilter(
+        supabase.from("customers").select("*", { count: "exact", head: true }),
+        branchScope.selectedBranchId,
+      ),
+    ),
+    getExactCount(
+      applyBranchFilter(
+        supabase.from("vehicles").select("*", { count: "exact", head: true }),
+        branchScope.selectedBranchId,
+      ),
+    ),
     context.capabilities.includes("quotations:read")
       ? getExactCount(
-          supabase
+          applyBranchFilter(
+            supabase
             .from("quotations")
             .select("*", { count: "exact", head: true })
             .in("status", ["draft", "pending_approval"]),
+            branchScope.selectedBranchId,
+          ),
         )
       : Promise.resolve(0),
     context.capabilities.includes("job_orders:read")
       ? getExactCount(
-          supabase
+          applyBranchFilter(
+            supabase
             .from("job_orders")
             .select("*", { count: "exact", head: true })
             .in("status", [
@@ -109,18 +123,23 @@ export async function getDashboardData(): Promise<DashboardData> {
               "completed",
               "ready_for_billing",
             ]),
+            branchScope.selectedBranchId,
+          ),
         )
       : Promise.resolve(0),
     context.capabilities.includes("inventory:read")
-      ? getInventoryLowStockCount(supabase)
+      ? getInventoryLowStockCount(supabase, branchScope.selectedBranchId)
       : Promise.resolve(0),
     context.capabilities.includes("invoices:read")
       ? getExactCount(
-          supabase
+          applyBranchFilter(
+            supabase
             .from("invoices")
             .select("*", { count: "exact", head: true })
             .gt("balance", 0)
             .neq("status", "cancelled"),
+            branchScope.selectedBranchId,
+          ),
         )
       : Promise.resolve(0),
   ]);
@@ -128,22 +147,22 @@ export async function getDashboardData(): Promise<DashboardData> {
   const [recentQuotations, recentJobOrders, inventoryAlerts, unpaidInvoices, revenueTrend, serviceTrend] =
     await Promise.all([
       context.capabilities.includes("quotations:read")
-        ? getRecentQuotations(supabase)
+        ? getRecentQuotations(supabase, branchScope.selectedBranchId)
         : Promise.resolve([]),
       context.capabilities.includes("job_orders:read")
-        ? getRecentJobOrders(supabase)
+        ? getRecentJobOrders(supabase, branchScope.selectedBranchId)
         : Promise.resolve([]),
       context.capabilities.includes("inventory:read")
-        ? getInventoryAlerts(supabase)
+        ? getInventoryAlerts(supabase, branchScope.selectedBranchId)
         : Promise.resolve([]),
       context.capabilities.includes("invoices:read")
-        ? getUnpaidInvoices(supabase)
+        ? getUnpaidInvoices(supabase, branchScope.selectedBranchId)
         : Promise.resolve([]),
       context.capabilities.includes("payments:read")
-        ? getRevenueTrend(supabase)
+        ? getRevenueTrend(supabase, branchScope.selectedBranchId)
         : Promise.resolve([]),
       context.capabilities.includes("job_orders:read")
-        ? getServiceTrend(supabase)
+        ? getServiceTrend(supabase, branchScope.selectedBranchId)
         : Promise.resolve([]),
     ]);
 
@@ -166,13 +185,17 @@ export async function getDashboardData(): Promise<DashboardData> {
 }
 
 async function getRecentQuotations(
-  supabase: Awaited<ReturnType<typeof getAuthorizedSupabaseServerClient>>["supabase"],
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
+  branchId: string | null,
 ) {
-  const { data, error } = await supabase
+  const { data, error } = await applyBranchFilter(
+    supabase
     .from("quotations")
     .select("id, quotation_number, customer_id, status, total_amount, created_at")
     .order("created_at", { ascending: false })
-    .limit(5);
+    .limit(5),
+    branchId,
+  );
 
   if (error) {
     throw new Error(error.message);
@@ -195,13 +218,17 @@ async function getRecentQuotations(
 }
 
 async function getRecentJobOrders(
-  supabase: Awaited<ReturnType<typeof getAuthorizedSupabaseServerClient>>["supabase"],
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
+  branchId: string | null,
 ) {
-  const { data, error } = await supabase
+  const { data, error } = await applyBranchFilter(
+    supabase
     .from("job_orders")
     .select("id, job_order_number, customer_id, vehicle_id, status, created_at")
     .order("created_at", { ascending: false })
-    .limit(5);
+    .limit(5),
+    branchId,
+  );
 
   if (error) {
     throw new Error(error.message);
@@ -230,14 +257,18 @@ async function getRecentJobOrders(
 }
 
 async function getInventoryAlerts(
-  supabase: Awaited<ReturnType<typeof getAuthorizedSupabaseServerClient>>["supabase"],
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
+  branchId: string | null,
 ) {
-  const { data, error } = await supabase
+  const { data, error } = await applyBranchFilter(
+    supabase
     .from("inventory_stocks")
     .select("product_id, available_quantity, reorder_level")
     .not("reorder_level", "is", null)
     .order("available_quantity", { ascending: true })
-    .limit(8);
+    .limit(8),
+    branchId,
+  );
 
   if (error) {
     throw new Error(error.message);
@@ -261,15 +292,19 @@ async function getInventoryAlerts(
 }
 
 async function getUnpaidInvoices(
-  supabase: Awaited<ReturnType<typeof getAuthorizedSupabaseServerClient>>["supabase"],
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
+  branchId: string | null,
 ) {
-  const { data, error } = await supabase
+  const { data, error } = await applyBranchFilter(
+    supabase
     .from("invoices")
     .select("id, invoice_number, customer_id, status, balance")
     .gt("balance", 0)
     .neq("status", "cancelled")
     .order("balance", { ascending: false })
-    .limit(5);
+    .limit(5),
+    branchId,
+  );
 
   if (error) {
     throw new Error(error.message);
@@ -293,13 +328,17 @@ async function getUnpaidInvoices(
 }
 
 async function getRevenueTrend(
-  supabase: Awaited<ReturnType<typeof getAuthorizedSupabaseServerClient>>["supabase"],
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
+  branchId: string | null,
 ) {
   const start = getBusinessNow().startOf("month").minus({ months: 5 });
-  const { data, error } = await supabase
+  const { data, error } = await applyBranchFilter(
+    supabase
     .from("payments")
     .select("amount, paid_at")
-    .gte("paid_at", start.toUTC().toISO());
+    .gte("paid_at", start.toUTC().toISO()),
+    branchId,
+  );
 
   if (error) {
     throw new Error(error.message);
@@ -317,14 +356,18 @@ async function getRevenueTrend(
 }
 
 async function getServiceTrend(
-  supabase: Awaited<ReturnType<typeof getAuthorizedSupabaseServerClient>>["supabase"],
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
+  branchId: string | null,
 ) {
   const start = getBusinessNow().startOf("month").minus({ months: 5 });
-  const { data, error } = await supabase
+  const { data, error } = await applyBranchFilter(
+    supabase
     .from("job_orders")
     .select("id, created_at, status")
     .gte("created_at", start.toUTC().toISO())
-    .in("status", ["completed", "ready_for_billing", "paid", "released"]);
+    .in("status", ["completed", "ready_for_billing", "paid", "released"]),
+    branchId,
+  );
 
   if (error) {
     throw new Error(error.message);
@@ -356,7 +399,7 @@ function buildMonthlySeries(
 }
 
 async function getCustomerNameMap(
-  supabase: Awaited<ReturnType<typeof getAuthorizedSupabaseServerClient>>["supabase"],
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
   customerIds: string[],
 ) {
   const uniqueIds = [...new Set(customerIds)];
@@ -375,7 +418,7 @@ async function getCustomerNameMap(
 }
 
 async function getVehicleLabelMap(
-  supabase: Awaited<ReturnType<typeof getAuthorizedSupabaseServerClient>>["supabase"],
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
   vehicleIds: string[],
 ) {
   const uniqueIds = [...new Set(vehicleIds)];
@@ -402,7 +445,7 @@ async function getVehicleLabelMap(
 }
 
 async function getProductMap(
-  supabase: Awaited<ReturnType<typeof getAuthorizedSupabaseServerClient>>["supabase"],
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
   productIds: string[],
 ) {
   const uniqueIds = [...new Set(productIds)];
@@ -421,12 +464,16 @@ async function getProductMap(
 }
 
 async function getInventoryLowStockCount(
-  supabase: Awaited<ReturnType<typeof getAuthorizedSupabaseServerClient>>["supabase"],
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
+  branchId: string | null,
 ) {
-  const { data, error } = await supabase
+  const { data, error } = await applyBranchFilter(
+    supabase
     .from("inventory_stocks")
     .select("available_quantity, reorder_level")
-    .not("reorder_level", "is", null);
+    .not("reorder_level", "is", null),
+    branchId,
+  );
 
   if (error) {
     throw new Error(error.message);

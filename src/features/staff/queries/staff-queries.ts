@@ -1,6 +1,6 @@
 import { cache } from "react";
 
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { applyBranchFilter, getBranchScopedServerClient } from "@/lib/branches";
 import { mapStaffRowToListItem } from "@/features/staff/mappers";
 import type { StaffListItem } from "@/features/staff/types";
 import type { TableRow } from "@/types/database";
@@ -11,8 +11,11 @@ export async function listStaff(filters?: {
   search?: string;
   role?: StaffRow["role"];
 }): Promise<StaffListItem[]> {
-  const { supabase } = await getAuthorizedSupabaseServerClient("staff:read");
-  let query = supabase.from("staff").select("*").order("last_name", { ascending: true });
+  const { branchScope, supabase } = await getBranchScopedServerClient("staff:read");
+  let query = applyBranchFilter(
+    supabase.from("staff").select("*").order("last_name", { ascending: true }),
+    branchScope.selectedBranchId,
+  );
 
   if (filters?.role) {
     query = query.eq("role", filters.role);
@@ -35,8 +38,13 @@ export async function listStaff(filters?: {
 }
 
 export const getStaffById = cache(async (staffId: string) => {
-  const { supabase } = await getAuthorizedSupabaseServerClient("staff:read");
-  const { data, error } = await supabase.from("staff").select("*").eq("id", staffId).maybeSingle();
+  const { branchScope, supabase } = await getBranchScopedServerClient("staff:read");
+  const { data, error } = await applyBranchFilter(
+    supabase.from("staff").select("*"),
+    branchScope.selectedBranchId,
+  )
+    .eq("id", staffId)
+    .maybeSingle();
 
   if (error) {
     throw new Error(error.message);

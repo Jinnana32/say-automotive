@@ -19,11 +19,11 @@ export const productFormSchema = z.object({
   costPrice: z
     .string()
     .trim()
-    .refine(isNonNegativeMoneyInput, "Cost price must be zero or greater with up to 2 decimal places."),
+    .refine(isNonNegativeMoneyInput, "Cost price must be zero or greater with up to 4 decimal places."),
   sellingPrice: z
     .string()
     .trim()
-    .refine(isNonNegativeMoneyInput, "Selling price must be zero or greater with up to 2 decimal places."),
+    .refine(isNonNegativeMoneyInput, "Selling price must be zero or greater with up to 4 decimal places."),
   reorderLevel: z
     .string()
     .trim()
@@ -40,6 +40,10 @@ export const productFormSchema = z.object({
     .trim()
     .refine((value) => Number.isInteger(Number(value)) && Number(value) >= 0, "Website sort order must be a whole number zero or greater."),
   websiteSlug: z.string().trim(),
+  productImageUrl: z
+    .string()
+    .trim()
+    .refine((value) => !value || /^https?:\/\//i.test(value), "Enter a full image URL."),
   websiteImageUrl: z
     .string()
     .trim()
@@ -88,6 +92,7 @@ export function parseProductFormData(formData: FormData): ProductFormValues {
     websiteFeatured: readBoolean(formData, "websiteFeatured"),
     websiteSortOrder: readString(formData, "websiteSortOrder"),
     websiteSlug: readString(formData, "websiteSlug"),
+    productImageUrl: readString(formData, "productImageUrl"),
     websiteImageUrl: readString(formData, "websiteImageUrl"),
     websiteShortDescription: readString(formData, "websiteShortDescription"),
     websiteBadge: readString(formData, "websiteBadge"),

@@ -19,7 +19,7 @@ export function InventoryDamageForm({ products }: { products: InventoryProductOp
     markInventoryStockDamagedAction,
     INITIAL_FORM_ACTION_STATE,
   );
-  const [productId, setProductId] = useState(products[0]?.id ?? "");
+  const [productId, setProductId] = useState("");
   const { values, updateFormValue } = useFormValues({
     quantity: "",
     notes: "",
@@ -72,7 +72,7 @@ export function InventoryDamageForm({ products }: { products: InventoryProductOp
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="damageNotes">Notes</Label>
+            <Label htmlFor="damageNotes">Notes (required)</Label>
             <Textarea id="damageNotes" name="notes" value={values.notes} onChange={(event) => updateFormValue("notes", event.target.value)} />
             <FieldError errors={state.fieldErrors} name="notes" />
           </div>

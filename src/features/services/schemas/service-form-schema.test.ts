@@ -29,12 +29,12 @@ describe("serviceFormSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("rejects labor prices beyond two decimal places", () => {
+  it("rejects labor prices beyond four decimal places", () => {
     const result = serviceFormSchema.safeParse({
       name: "Oil Change",
       category: "Maintenance",
       description: "",
-      laborPrice: "500.123",
+      laborPrice: "500.12345",
       estimatedDurationMinutes: "45",
       status: "active",
     });

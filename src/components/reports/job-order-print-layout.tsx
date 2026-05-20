@@ -1,5 +1,8 @@
+import { Fragment } from 'react';
+
 import { ReportFooter } from '@/components/reports/report-footer';
 import { ReportHeader } from '@/components/reports/report-header';
+import { PrintDocumentLayout } from '@/components/reports/print-document-layout';
 import { ReportSectionHeading } from '@/components/reports/report-section-heading';
 import { ReportSignatureBlock } from '@/components/reports/report-signature-block';
 import { ReportTotals } from '@/components/reports/report-totals';
@@ -21,16 +24,42 @@ export function JobOrderPrintLayout({
 }) {
   const { jobOrder, businessProfile } = document;
   const breakdown = buildJobOrderPrintBreakdown(jobOrder);
+  const workLineGroups = [
+    {
+      key: "services-labor",
+      label: "Services / Labor",
+      items: breakdown.workLines.filter(
+        (item) => item.itemType === "service" || item.itemType === "labor",
+      ),
+    },
+    {
+      key: "parts-products",
+      label: "Parts / Products",
+      items: breakdown.workLines.filter((item) => item.itemType === "product"),
+    },
+  ].filter((group) => group.items.length > 0);
 
   return (
-    <article className="flex min-h-[297mm] flex-col bg-white px-[12mm] py-[10mm] text-[11px] leading-[1.35] text-slate-900">
-      <ReportHeader
-        businessName={businessProfile.businessName}
-        documentTitle="Job Order"
-        documentMeta={`Job Order No.: ${jobOrder.jobOrderNumber} • Date: ${formatDocumentDate(jobOrder.createdAt)}`}
-        logoSrc={businessProfile.businessLogoUrl ?? undefined}
-      />
-
+    <PrintDocumentLayout
+      className="leading-[1.35]"
+      header={
+        <ReportHeader
+          businessName={businessProfile.businessName}
+          documentTitle="Job Order"
+          documentMeta={`Job Order No.: ${jobOrder.jobOrderNumber} • Date: ${formatDocumentDate(jobOrder.createdAt)}`}
+          logoSrc={businessProfile.businessLogoUrl ?? undefined}
+        />
+      }
+      footer={
+        <ReportFooter
+          businessName={businessProfile.businessName}
+          vatRegistrationNo={businessProfile.businessVatRegistrationNo}
+          contactNumber={businessProfile.businessContact}
+          email={businessProfile.businessEmail}
+          address={businessProfile.businessAddress}
+        />
+      }
+    >
       <section className="report-section-keep mt-5 grid gap-x-8 gap-y-2 sm:grid-cols-2">
         <MetadataColumn
           items={[
@@ -103,6 +132,9 @@ export function JobOrderPrintLayout({
           <table className="w-full border-collapse text-[11px]">
             <thead className="bg-brand-navy text-white">
               <tr>
+                <th className="w-10 px-2 py-1.5 text-center font-semibold">
+                  Done
+                </th>
                 <th className="w-16 px-2 py-1.5 text-left font-semibold">
                   Type
                 </th>
@@ -125,42 +157,64 @@ export function JobOrderPrintLayout({
               </tr>
             </thead>
             <tbody>
-              {breakdown.workLines.length > 0 ? (
-                breakdown.workLines.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="report-row-avoid border-t border-slate-200"
-                  >
-                    <td className="px-2 py-1.5 align-top uppercase text-slate-700">
-                      {item.itemType}
-                    </td>
-                    <td className="px-2 py-1.5 align-top">
-                      <p>{item.description}</p>
-                      {item.isAdditional ? (
-                        <p className="text-[10px] text-slate-500">
-                          Additional item
-                        </p>
-                      ) : null}
-                    </td>
-                    <td className="px-2 py-1.5 text-right align-top">
-                      {item.quantityLabel}
-                    </td>
-                    {!hidePrices ? (
-                      <>
-                        <td className="px-2 py-1.5 text-right align-top">
-                          {formatPrintCurrencyNumber(item.unitPrice)}
+              {workLineGroups.length > 0 ? (
+                workLineGroups.map((group) => (
+                  <Fragment key={group.key}>
+                    <tr className="border-t border-slate-200 bg-brand-soft/40">
+                      <td
+                        colSpan={hidePrices ? 4 : 6}
+                        className="px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-navy"
+                      >
+                        {group.label}
+                      </td>
+                    </tr>
+                    {group.items.map((item) => (
+                      <tr
+                        key={item.id}
+                        className="report-row-avoid border-t border-slate-200"
+                      >
+                        <td className="px-2 py-1.5 text-center align-top">
+                          <ChecklistGlyph completed={item.checklistCompleted} />
+                        </td>
+                        <td className="px-2 py-1.5 align-top uppercase text-slate-700">
+                          {item.itemType}
+                        </td>
+                        <td className="px-2 py-1.5 align-top">
+                          <p>{item.description}</p>
+                          <div className="mt-1 space-y-0.5 text-[10px] text-slate-500">
+                            <p>Checklist: {item.checklistStatusLabel}</p>
+                            {item.isAdditional ? <p>Additional item</p> : null}
+                            {item.checklistCompleted && item.checklistCheckedAt ? (
+                              <p>
+                                Completed {formatDateTime(item.checklistCheckedAt)}
+                                {item.checklistCheckedByName
+                                  ? ` • ${item.checklistCheckedByName}`
+                                  : ""}
+                              </p>
+                            ) : null}
+                          </div>
                         </td>
                         <td className="px-2 py-1.5 text-right align-top">
-                          {formatPrintCurrencyNumber(item.total)}
+                          {item.quantityLabel}
                         </td>
-                      </>
-                    ) : null}
-                  </tr>
+                        {!hidePrices ? (
+                          <>
+                            <td className="px-2 py-1.5 text-right align-top">
+                              {formatPrintCurrencyNumber(item.unitPrice)}
+                            </td>
+                            <td className="px-2 py-1.5 text-right align-top">
+                              {formatPrintCurrencyNumber(item.total)}
+                            </td>
+                          </>
+                        ) : null}
+                      </tr>
+                    ))}
+                  </Fragment>
                 ))
               ) : (
                 <tr className="border-t border-slate-200">
                   <td
-                    colSpan={hidePrices ? 3 : 5}
+                    colSpan={hidePrices ? 4 : 6}
                     className="px-2 py-3 text-center text-slate-500"
                   >
                     No work items recorded.
@@ -334,14 +388,7 @@ export function JobOrderPrintLayout({
         )}
       </section>
 
-      <ReportFooter
-        businessName={businessProfile.businessName}
-        vatRegistrationNo={businessProfile.businessVatRegistrationNo}
-        contactNumber={businessProfile.businessContact}
-        email={businessProfile.businessEmail}
-        address={businessProfile.businessAddress}
-      />
-    </article>
+    </PrintDocumentLayout>
   );
 }
 
@@ -398,4 +445,15 @@ function formatMileage(value: number | null) {
 
 function optionalDate(value: string | null) {
   return value ? formatDateTime(value) : '—';
+}
+
+function ChecklistGlyph({ completed }: { completed: boolean }) {
+  return (
+    <span
+      aria-label={completed ? "Completed" : "Open"}
+      className="inline-flex min-w-[14px] items-center justify-center text-[12px] leading-none"
+    >
+      {completed ? "☑" : "☐"}
+    </span>
+  );
 }

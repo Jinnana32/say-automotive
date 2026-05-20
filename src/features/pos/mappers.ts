@@ -1,5 +1,6 @@
 import type { TableRow } from "@/types/database";
 
+import { resolveProductImageUrl } from "@/lib/storage";
 import type {
   PosCustomerOption,
   PosProductOption,
@@ -9,7 +10,18 @@ import type {
 type CustomerRow = Pick<TableRow<"customers">, "id" | "display_name">;
 type ProductRow = Pick<
   TableRow<"products">,
-  "id" | "name" | "sku" | "barcode" | "unit_id" | "selling_price" | "reorder_level" | "shelf_location"
+  | "id"
+  | "name"
+  | "sku"
+  | "barcode"
+  | "unit_id"
+  | "selling_price"
+  | "reorder_level"
+  | "shelf_location"
+  | "product_image_path"
+  | "product_image_url"
+  | "website_image_url"
+  | "updated_at"
 >;
 type UnitRow = Pick<TableRow<"units">, "id" | "name" | "abbreviation">;
 type StockRow = Pick<
@@ -43,6 +55,12 @@ export function mapProductRowToPosOption(
     name: row.name,
     sku: row.sku,
     barcode: row.barcode,
+    imageUrl: resolveProductImageUrl({
+      productImagePath: row.product_image_path,
+      productImageUrl: row.product_image_url,
+      websiteImageUrl: row.website_image_url,
+      cacheBust: row.updated_at,
+    }),
     unitLabel: params.unitLabel,
     sellingPrice: row.selling_price,
     availableQuantity,

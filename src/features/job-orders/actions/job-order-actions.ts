@@ -7,10 +7,12 @@ import {
   additionalJobOrderItemSchema,
   jobOrderDetailsSchema,
   jobOrderItemEditSchema,
+  jobOrderChecklistStateSchema,
   jobOrderStatusTransitionSchema,
   jobOrderPartUsageSchema,
   mechanicAssignmentSchema,
   parseAdditionalJobOrderItemFormData,
+  parseJobOrderChecklistStateFormData,
   parseJobOrderDetailsFormData,
   parseJobOrderItemEditFormData,
   parseJobOrderPartUsageFormData,
@@ -309,6 +311,91 @@ export async function setJobOrderItemApprovalAction(formData: FormData) {
   redirect(buildJobOrderRedirectPath(jobOrderId, redirectTab));
 }
 
+export async function setJobOrderItemChecklistStateAction(formData: FormData) {
+  const parsed = jobOrderChecklistStateSchema.safeParse(
+    parseJobOrderChecklistStateFormData(formData),
+  );
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid checklist request.");
+  }
+
+  const values = parsed.data;
+  const redirectTab = resolveJobOrderDetailTab(readOptionalValue(formData, "redirectTab"));
+  const nextChecklistCompleted = values.checklistCompleted === "true";
+  const { context, supabase } = await getAuthorizedSupabaseServerClient("job_orders:write");
+  const { data: beforeItem, error: beforeError } = await supabase
+    .from("job_order_items")
+    .select(
+      "id, job_order_id, description, approval_status, checklist_completed, checklist_checked_at, checklist_checked_by_staff_id",
+    )
+    .eq("id", values.jobOrderItemId)
+    .maybeSingle();
+
+  if (beforeError) {
+    throw new Error(beforeError.message);
+  }
+
+  if (!beforeItem) {
+    throw new Error("Job order item does not exist.");
+  }
+
+  if (beforeItem.job_order_id !== values.jobOrderId) {
+    throw new Error("Job order item does not belong to the selected job order.");
+  }
+
+  const { error } = await supabase.rpc("set_job_order_item_checklist_state", {
+    p_job_order_item_id: values.jobOrderItemId,
+    p_checklist_completed: nextChecklistCompleted,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const { data: afterItem, error: afterError } = await supabase
+    .from("job_order_items")
+    .select(
+      "id, job_order_id, description, approval_status, checklist_completed, checklist_checked_at, checklist_checked_by_staff_id",
+    )
+    .eq("id", values.jobOrderItemId)
+    .maybeSingle();
+
+  if (afterError) {
+    throw new Error(afterError.message);
+  }
+
+  await writeAuditLog(supabase, {
+    action: nextChecklistCompleted
+      ? "Completed job order checklist item"
+      : "Reopened job order checklist item",
+    entityType: "job_order_item",
+    entityId: values.jobOrderItemId,
+    userId: context.userId,
+    beforeData: beforeItem
+      ? {
+          description: beforeItem.description,
+          approval_status: beforeItem.approval_status,
+          checklist_completed: beforeItem.checklist_completed,
+          checklist_checked_at: beforeItem.checklist_checked_at,
+          checklist_checked_by_staff_id: beforeItem.checklist_checked_by_staff_id,
+        }
+      : null,
+    afterData: afterItem
+      ? {
+          description: afterItem.description,
+          approval_status: afterItem.approval_status,
+          checklist_completed: afterItem.checklist_completed,
+          checklist_checked_at: afterItem.checklist_checked_at,
+          checklist_checked_by_staff_id: afterItem.checklist_checked_by_staff_id,
+        }
+      : null,
+  });
+
+  revalidateJobOrderPaths(values.jobOrderId);
+  redirect(buildJobOrderRedirectPath(values.jobOrderId, redirectTab));
+}
+
 function readRequiredValue(formData: FormData, key: string) {
   const value = formData.get(key);
 
@@ -327,6 +414,7 @@ function readOptionalValue(formData: FormData, key: string) {
 function revalidateJobOrderPaths(jobOrderId: string) {
   revalidatePath("/job-orders");
   revalidatePath(`/job-orders/${jobOrderId}`);
+  revalidatePath(`/job-orders/${jobOrderId}/print`);
   revalidatePath("/dashboard");
 }
 

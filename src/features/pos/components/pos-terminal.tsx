@@ -14,6 +14,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { completePosSaleAction } from "@/features/pos/actions/pos-actions";
 import type { PosCartItem, PosTerminalData } from "@/features/pos/types";
+import { PAYMENT_METHOD_OPTIONS, type PaymentMethod } from "@/features/invoices/types";
+import { ProductImage } from "@/features/products/components/product-image";
+import { QuickCreateProductDialog } from "@/features/products/components/quick-create-product-dialog";
 import {
   addProductToCart,
   calculatePosSubtotal,
@@ -40,10 +43,11 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
   const [search, setSearch] = useState("");
   const [customerId, setCustomerId] = useState("");
   const [discount, setDiscount] = useState(formatMoneyInputValue(0));
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "gcash" | "card" | "bank_transfer" | "check">("cash");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentTouched, setPaymentTouched] = useState(false);
   const [items, setItems] = useState<PosCartItem[]>([]);
+  const [productCatalog, setProductCatalog] = useState(terminal.products);
 
   const subtotal = calculatePosSubtotal(items);
   const discountValue = toNumericInput(discount);
@@ -57,7 +61,7 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
     terminal.config.allowPartialPayments && paymentTouched
       ? paymentAmount
       : formatMoneyInputValue(total);
-  const filteredProducts = terminal.products.filter((product) => {
+  const filteredProducts = productCatalog.filter((product) => {
     const needle = search.trim().toLowerCase();
 
     if (!needle) {
@@ -91,7 +95,33 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="productSearch">Search products</Label>
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="productSearch">Search products</Label>
+                {terminal.permissions.canCreateProducts ? (
+                  <QuickCreateProductDialog
+                    triggerLabel="Add new product"
+                    onCreated={(product) => {
+                      setProductCatalog((current) => [
+                        ...current,
+                        {
+                          id: product.id,
+                          name: product.label,
+                          sku: product.sku,
+                          barcode: product.barcode,
+                          imageUrl: product.productImageUrl,
+                          unitLabel: product.unitLabel,
+                          sellingPrice: product.unitPrice,
+                          availableQuantity: 0,
+                          reorderLevel: product.reorderLevel,
+                          shelfLocation: product.shelfLocation,
+                          isLowStock: true,
+                        },
+                      ]);
+                      setSearch(product.label);
+                    }}
+                  />
+                ) : null}
+              </div>
               <Input
                 id="productSearch"
                 value={search}
@@ -121,22 +151,30 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
                       key={product.id}
                       className="flex flex-col gap-4 rounded-[1.25rem] border border-border/70 bg-muted/20 p-4 md:flex-row md:items-start md:justify-between"
                     >
-                      <div className="space-y-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="font-semibold">{product.name}</p>
-                          {product.isLowStock ? <Badge variant="warning">Low stock</Badge> : null}
-                          {product.availableQuantity <= 0 ? (
-                            <Badge variant="destructive">Out of stock</Badge>
-                          ) : null}
+                      <div className="flex gap-4">
+                        <ProductImage
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className="hidden size-16 shrink-0 md:flex"
+                          fallbackLabel="Photo"
+                        />
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="font-semibold">{product.name}</p>
+                            {product.isLowStock ? <Badge variant="warning">Low stock</Badge> : null}
+                            {product.availableQuantity <= 0 ? (
+                              <Badge variant="destructive">Out of stock</Badge>
+                            ) : null}
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {product.sku ?? "No SKU"}
+                            {product.barcode ? ` · ${product.barcode}` : ""}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {product.unitLabel} · Shelf {product.shelfLocation ?? "Not set"} · Available{" "}
+                            {product.availableQuantity}
+                          </p>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          {product.sku ?? "No SKU"}
-                          {product.barcode ? ` · ${product.barcode}` : ""}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {product.unitLabel} · Shelf {product.shelfLocation ?? "Not set"} · Available{" "}
-                          {product.availableQuantity}
-                        </p>
                       </div>
 
                       <div className="flex items-center gap-3">
@@ -327,22 +365,15 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
                     name="paymentMethod"
                     value={paymentMethod}
                     onChange={(event) =>
-                      setPaymentMethod(
-                        event.target.value as
-                          | "cash"
-                          | "gcash"
-                          | "card"
-                          | "bank_transfer"
-                          | "check",
-                      )
+                      setPaymentMethod(event.target.value as PaymentMethod)
                     }
                     className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    <option value="cash">Cash</option>
-                    <option value="gcash">GCash</option>
-                    <option value="card">Card</option>
-                    <option value="bank_transfer">Bank transfer</option>
-                    <option value="check">Check</option>
+                    {PAYMENT_METHOD_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </select>
                   <FieldError errors={state.fieldErrors} name="paymentMethod" />
                 </div>

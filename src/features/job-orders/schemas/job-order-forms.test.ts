@@ -36,7 +36,7 @@ describe("job order forms", () => {
     expect(parsed.success).toBe(false);
   });
 
-  it("rejects additional item unit prices beyond two decimal places", () => {
+  it("rejects additional item unit prices beyond four decimal places", () => {
     const parsed = additionalJobOrderItemSchema.safeParse({
       jobOrderId: "34c25057-b0f8-4da0-9a27-c1792efa2ebd",
       itemType: "labor",
@@ -44,7 +44,7 @@ describe("job order forms", () => {
       serviceId: "",
       description: "Brake pads",
       quantity: "1",
-      unitPrice: "1200.123",
+      unitPrice: "1200.12345",
     });
 
     expect(parsed.success).toBe(false);

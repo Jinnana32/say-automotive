@@ -11,7 +11,7 @@ export const serviceFormSchema = z.object({
   laborPrice: z
     .string()
     .trim()
-    .refine(isNonNegativeMoneyInput, "Labor price must be zero or greater with up to 2 decimal places."),
+    .refine(isNonNegativeMoneyInput, "Labor price must be zero or greater with up to 4 decimal places."),
   estimatedDurationMinutes: z
     .string()
     .trim()

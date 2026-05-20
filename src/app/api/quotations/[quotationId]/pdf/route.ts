@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 
+import { resolveQuotationPrintMode } from "@/features/quotations/report-utils";
 import { getQuotationPrintDocument } from "@/features/quotations/queries/quotation-print-queries";
 import { renderInternalUrlToPdf } from "@/lib/reports/pdf";
 
@@ -14,6 +15,7 @@ type QuotationPdfRouteContext = {
 
 export async function GET(request: NextRequest, context: QuotationPdfRouteContext) {
   const { quotationId } = await context.params;
+  const mode = resolveQuotationPrintMode(request.nextUrl.searchParams.get("mode"));
   const document = await getQuotationPrintDocument(quotationId);
 
   if (!document) {
@@ -22,11 +24,14 @@ export async function GET(request: NextRequest, context: QuotationPdfRouteContex
 
   try {
     const printUrl = new URL(`/quotations/${quotationId}/print`, request.nextUrl.origin);
+    if (mode !== "full") {
+      printUrl.searchParams.set("mode", mode);
+    }
     const pdfBuffer = await renderInternalUrlToPdf({
       url: printUrl.toString(),
       cookieHeader: request.headers.get("cookie"),
     });
-    const filename = `SAY-Quotation-${document.quotation.quotationNumber}.pdf`;
+    const filename = `SAY-Quotation-${document.quotation.quotationNumber}${mode === "full" ? "" : `-${mode}`}.pdf`;
 
     return new Response(Buffer.from(pdfBuffer), {
       headers: {

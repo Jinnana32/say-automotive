@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { applyBranchFilter, getBranchScopedServerClient } from "@/lib/branches";
 import { INITIAL_FORM_ACTION_STATE, toFormActionState, type FormActionState } from "@/lib/forms";
 import {
   parseVehicleFormData,
@@ -31,10 +31,13 @@ export async function deleteVehicleAction(formData: FormData) {
     redirect("/vehicles?error=Invalid vehicle request.");
   }
 
-  const { supabase } = await getAuthorizedSupabaseServerClient("vehicles:write");
-  const { data: vehicle, error: vehicleError } = await supabase
+  const { branchScope, supabase } = await getBranchScopedServerClient("vehicles:write");
+  const { data: vehicle, error: vehicleError } = await applyBranchFilter(
+    supabase
     .from("vehicles")
-    .select("id, customer_id, make, model, plate_number")
+    .select("id, customer_id, make, model, plate_number"),
+    branchScope.selectedBranchId,
+  )
     .eq("id", vehicleId)
     .maybeSingle();
 
@@ -46,7 +49,10 @@ export async function deleteVehicleAction(formData: FormData) {
     redirect("/vehicles?error=Vehicle record not found.");
   }
 
-  const { error } = await supabase.from("vehicles").delete().eq("id", vehicleId);
+  const { error } = await applyBranchFilter(
+    supabase.from("vehicles").delete(),
+    branchScope.selectedBranchId,
+  ).eq("id", vehicleId);
 
   if (error) {
     redirect(`/vehicles?error=${encodeURIComponent(toVehicleDeleteErrorMessage(error.message))}`);
@@ -65,17 +71,32 @@ async function saveVehicle(formData: FormData): Promise<FormActionState> {
   }
 
   const values = parsed.data;
-  const { supabase } = await getAuthorizedSupabaseServerClient("vehicles:write");
+  const { branchScope, supabase } = await getBranchScopedServerClient("vehicles:write");
+  const branchId = values.vehicleId
+    ? await getExistingVehicleBranchId(supabase, branchScope.selectedBranchId, values.vehicleId)
+    : branchScope.writeBranchId;
   const normalizedPlateNumber = normalizeNullableUpper(values.plateNumber);
   const normalizedVin = normalizeNullableUpper(values.vin);
   const existingVehicleId = values.vehicleId ?? null;
 
   const [plateConflict, vinConflict] = await Promise.all([
     normalizedPlateNumber
-      ? getVehicleConflictByField(supabase, "plate_number", normalizedPlateNumber, existingVehicleId)
+      ? getVehicleConflictByField(
+          supabase,
+          branchId,
+          "plate_number",
+          normalizedPlateNumber,
+          existingVehicleId,
+        )
       : Promise.resolve({ data: null, error: null }),
     normalizedVin
-      ? getVehicleConflictByField(supabase, "vin", normalizedVin, existingVehicleId)
+      ? getVehicleConflictByField(
+          supabase,
+          branchId,
+          "vin",
+          normalizedVin,
+          existingVehicleId,
+        )
       : Promise.resolve({ data: null, error: null }),
   ]);
 
@@ -108,6 +129,7 @@ async function saveVehicle(formData: FormData): Promise<FormActionState> {
   }
 
   const payload = {
+    branch_id: branchId,
     customer_id: values.customerId,
     make: values.make,
     model: values.model,
@@ -124,7 +146,13 @@ async function saveVehicle(formData: FormData): Promise<FormActionState> {
   };
 
   const operation = values.vehicleId
-    ? supabase.from("vehicles").update(payload).eq("id", values.vehicleId).select("id, customer_id").single()
+    ? applyBranchFilter(
+        supabase.from("vehicles").update(payload),
+        branchScope.selectedBranchId,
+      )
+        .eq("id", values.vehicleId)
+        .select("id, customer_id")
+        .single()
     : supabase.from("vehicles").insert(payload).select("id, customer_id").single();
 
   const { data, error } = await operation;
@@ -155,12 +183,13 @@ function normalizeNullableUpper(value: string) {
 }
 
 function getVehicleConflictByField(
-  supabase: Awaited<ReturnType<typeof getAuthorizedSupabaseServerClient>>["supabase"],
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
+  branchId: string,
   field: "plate_number" | "vin",
   value: string,
   vehicleId: string | null,
 ) {
-  let query = supabase.from("vehicles").select("id").eq(field, value);
+  let query = supabase.from("vehicles").select("id").eq("branch_id", branchId).eq(field, value);
 
   if (vehicleId) {
     query = query.neq("id", vehicleId);
@@ -183,4 +212,27 @@ function toVehicleDeleteErrorMessage(message: string) {
   }
 
   return message;
+}
+
+async function getExistingVehicleBranchId(
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
+  selectedBranchId: string | null,
+  vehicleId: string,
+) {
+  const { data, error } = await applyBranchFilter(
+    supabase.from("vehicles").select("branch_id"),
+    selectedBranchId,
+  )
+    .eq("id", vehicleId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data?.branch_id) {
+    throw new Error("Vehicle record does not exist.");
+  }
+
+  return data.branch_id;
 }

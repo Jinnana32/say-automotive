@@ -9,6 +9,8 @@ export type QuotationStatus =
   | "expired";
 
 export type QuotationItemType = "product" | "service" | "labor";
+export const QUOTATION_PRINT_MODE_VALUES = ["full", "parts", "labor"] as const;
+export type QuotationPrintMode = (typeof QUOTATION_PRINT_MODE_VALUES)[number];
 
 export type QuotationListItem = {
   id: string;
@@ -104,6 +106,10 @@ export type QuotationFormOptions = {
   vehicles: QuotationVehicleOption[];
   products: QuotationProductOption[];
   services: QuotationServiceOption[];
+  permissions: {
+    canCreateProducts: boolean;
+    canCreateServices: boolean;
+  };
 };
 
 export type QuotationCreateFlowOptions = QuotationFormOptions & {

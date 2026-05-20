@@ -22,11 +22,13 @@ import {
   InvoiceStatusBadge,
   PaymentMethodBadge,
 } from '@/features/invoices/components/invoice-status-badge';
+import { CancelInvoiceDialog } from '@/features/invoices/components/cancel-invoice-dialog';
 import { RecordPaymentForm } from '@/features/invoices/components/record-payment-form';
 import { ReleaseVehicleForm } from '@/features/invoices/components/release-vehicle-form';
 import { getInvoiceById } from '@/features/invoices/queries/invoice-queries';
 import { formatCurrency } from '@/lib/currency';
 import { formatDate, formatDateTime } from '@/lib/dates';
+import { requireAuthenticatedStaff } from '@/lib/auth/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,6 +42,7 @@ export default async function InvoiceDetailPage({
   params,
 }: InvoiceDetailPageProps) {
   const { invoiceId } = await params;
+  const viewer = await requireAuthenticatedStaff();
   const invoice = await getInvoiceById(invoiceId);
   const printHref = `/invoices/${invoiceId}/print`;
   const downloadHref = `/api/invoices/${invoiceId}/pdf`;
@@ -104,7 +107,9 @@ export default async function InvoiceDetailPage({
           label="Invoice status"
           value={invoice.status.replaceAll('_', ' ')}
           hint={
-            invoice.releasedAt
+            invoice.cancelledAt
+              ? `Cancelled ${formatDateTime(invoice.cancelledAt)}`
+              : invoice.releasedAt
               ? `Vehicle released ${formatDateTime(invoice.releasedAt)}`
               : 'Billing and release rules are enforced from the final balance.'
           }
@@ -133,12 +138,37 @@ export default async function InvoiceDetailPage({
           label="Remaining balance"
           value={formatCurrency(invoice.balance)}
           hint={
-            invoice.balance > 0
+            invoice.status === 'cancelled'
+              ? 'Cancelled invoices are removed from active receivables.'
+              : invoice.balance > 0
               ? 'Vehicle release stays blocked until balance rules are satisfied.'
               : 'Balance cleared.'
           }
         />
       </DetailSummaryGrid>
+
+      {invoice.status === 'cancelled' ? (
+        <SectionCard
+          title="Cancellation record"
+          description="This invoice was voided without deleting the billing document."
+        >
+          <div className="grid gap-4 md:grid-cols-2">
+            <MetadataItem
+              label="Cancelled at"
+              value={
+                invoice.cancelledAt
+                  ? formatDateTime(invoice.cancelledAt)
+                  : 'Not recorded'
+              }
+            />
+            <MetadataItem
+              label="Reason"
+              value={invoice.cancellationReason ?? 'No reason recorded'}
+              className="md:col-span-2"
+            />
+          </div>
+        </SectionCard>
+      ) : null}
 
       <section className="grid gap-6 2xl:grid-cols-[1.15fr_0.85fr]">
         <div className="space-y-6">
@@ -223,6 +253,24 @@ export default async function InvoiceDetailPage({
         </div>
 
         <div className="space-y-6">
+          {(viewer.role === 'owner' || viewer.role === 'admin') &&
+          invoice.canCancel ? (
+            <SectionCard
+              title="Cancel invoice"
+              description="Use this only for unpaid service invoices that need to be voided without deleting the record."
+            >
+              <div className="space-y-4">
+                <div className="rounded-xl border border-border/70 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
+                  Cancellation is blocked once payments exist, the vehicle has been released, or the invoice came from a POS sale.
+                </div>
+                <CancelInvoiceDialog
+                  invoiceId={invoice.id}
+                  invoiceNumber={invoice.invoiceNumber}
+                />
+              </div>
+            </SectionCard>
+          ) : null}
+
           {invoice.canRecordPayment ? (
             <SectionCard
               title="Record payment"
@@ -254,6 +302,25 @@ export default async function InvoiceDetailPage({
           ) : null}
         </div>
       </section>
+    </div>
+  );
+}
+
+function MetadataItem({
+  label,
+  value,
+  className,
+}: {
+  label: string;
+  value: string;
+  className?: string;
+}) {
+  return (
+    <div className={className}>
+      <p className="text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+        {label}
+      </p>
+      <p className="mt-2 text-sm text-foreground">{value}</p>
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import type { TableRow } from "@/types/database";
 
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
-import { getDefaultBranch } from "@/lib/branches";
+import { getBranchScopedServerClient, getMainBranch } from "@/lib/branches";
 import { buildBusinessLogoUrl } from "@/lib/storage";
 import {
   mapBusinessSettingsRowToValues,
@@ -13,12 +12,12 @@ type BusinessSettingsRow = TableRow<"business_settings">;
 type DocumentSequenceRow = TableRow<"document_sequences">;
 
 export async function getBusinessBranding(branchId?: string | null): Promise<BusinessBranding> {
-  const branch = branchId ? { id: branchId } : await getDefaultBranch();
-  const { supabase } = await getAuthorizedSupabaseServerClient("settings:read");
+  const fallbackBranch = branchId ? { id: branchId } : await getMainBranch();
+  const { supabase } = await getBranchScopedServerClient("settings:read");
   const { data, error } = await supabase
     .from("business_settings")
     .select("business_name, business_logo_path, updated_at")
-    .eq("branch_id", branch.id)
+    .eq("branch_id", fallbackBranch.id)
     .maybeSingle();
 
   if (error) {
@@ -26,7 +25,7 @@ export async function getBusinessBranding(branchId?: string | null): Promise<Bus
   }
 
   if (!data) {
-    throw new Error("Business settings are not configured for the default branch.");
+    throw new Error("Business settings are not configured for the selected branch.");
   }
 
   return {
@@ -36,8 +35,8 @@ export async function getBusinessBranding(branchId?: string | null): Promise<Bus
 }
 
 export async function getSettingsPageData(): Promise<SettingsPageData> {
-  const branch = await getDefaultBranch();
-  const { supabase } = await getAuthorizedSupabaseServerClient("settings:read");
+  const { branchScope, supabase } = await getBranchScopedServerClient("settings:read");
+  const branchId = branchScope.writeBranchId;
   const [
     { data: settings, error: settingsError },
     { data: documentSequences, error: documentSequenceError },
@@ -45,11 +44,12 @@ export async function getSettingsPageData(): Promise<SettingsPageData> {
     supabase
       .from("business_settings")
       .select("*")
-      .eq("branch_id", branch.id)
+      .eq("branch_id", branchId)
       .maybeSingle(),
     supabase
       .from("document_sequences")
       .select("*")
+      .eq("branch_id", branchId)
       .in("key", ["quotation", "job_order", "invoice", "sale"])
       .order("key", { ascending: true }),
   ]);
@@ -63,11 +63,11 @@ export async function getSettingsPageData(): Promise<SettingsPageData> {
   }
 
   if (!settings) {
-    throw new Error("Business settings are not configured for the default branch.");
+    throw new Error("Business settings are not configured for the selected branch.");
   }
 
   return {
-    branchName: branch.name,
+    branchName: branchScope.selectedBranch?.name ?? branchScope.selectedBranchLabel,
     settings: mapBusinessSettingsRowToValues(settings as BusinessSettingsRow),
     documentSequences: ((documentSequences ?? []) as DocumentSequenceRow[]).map(
       mapDocumentSequenceRowToItem,

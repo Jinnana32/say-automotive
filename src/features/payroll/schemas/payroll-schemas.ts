@@ -15,14 +15,14 @@ const moneyField = z
   .trim()
   .min(1, "This amount is required.")
   .refine(isNonNegativeMoneyInput, {
-    message: "Enter a valid amount with up to 2 decimal places.",
+    message: "Enter a valid amount with up to 4 decimal places.",
   });
 
 const optionalMoneyField = z
   .string()
   .trim()
   .refine((value) => value.length === 0 || isNonNegativeMoneyInput(value), {
-    message: "Enter a valid amount with up to 2 decimal places.",
+    message: "Enter a valid amount with up to 4 decimal places.",
   });
 
 export const compensationProfileSchema = z.object({

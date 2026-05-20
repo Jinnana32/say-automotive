@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useId, useState } from "react";
 import { AlertTriangle, X } from "lucide-react";
 import { createPortal } from "react-dom";
@@ -22,6 +23,8 @@ export function ConfirmActionDialog({
   confirmVariant = "destructive",
   open,
   onOpenChange,
+  closeOnSubmit = true,
+  children,
 }: {
   trigger?: (controls: { openDialog: () => void }) => React.ReactNode;
   title: string;
@@ -33,6 +36,8 @@ export function ConfirmActionDialog({
   confirmVariant?: ButtonProps["variant"];
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  closeOnSubmit?: boolean;
+  children?: ReactNode;
 }) {
   const titleId = useId();
   const descriptionId = useId();
@@ -120,7 +125,11 @@ export function ConfirmActionDialog({
                 <form
                   action={action}
                   className="space-y-5 px-6 py-5"
-                  onSubmit={() => setDialogOpen(false)}
+                  onSubmit={() => {
+                    if (closeOnSubmit) {
+                      setDialogOpen(false);
+                    }
+                  }}
                 >
                   {fields.map((field) => (
                     <input
@@ -130,6 +139,8 @@ export function ConfirmActionDialog({
                       value={field.value}
                     />
                   ))}
+
+                  {children}
 
                   <div className="rounded-2xl border border-border/70 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
                     This action may be blocked if the record is already linked to operational data.

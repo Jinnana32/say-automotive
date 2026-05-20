@@ -14,6 +14,7 @@ import {
 } from "@/components/shared/table-row-actions-menu";
 import { PaymentMethodBadge } from "@/features/invoices/components/invoice-status-badge";
 import { listPayments } from "@/features/invoices/queries/invoice-queries";
+import { PAYMENT_METHOD_OPTIONS, type PaymentMethod } from "@/features/invoices/types";
 import { formatCurrency } from "@/lib/currency";
 import { formatDateTime } from "@/lib/dates";
 import { paginateItems } from "@/lib/pagination";
@@ -23,7 +24,7 @@ export const dynamic = "force-dynamic";
 type PaymentsPageProps = {
   searchParams: Promise<{
     search?: string;
-    paymentMethod?: "cash" | "gcash" | "card" | "bank_transfer" | "check";
+    paymentMethod?: PaymentMethod | "";
     page?: string;
   }>;
 };
@@ -63,11 +64,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
                 value: paymentMethod,
                 options: [
                   { value: "", label: "All methods" },
-                  { value: "cash", label: "Cash" },
-                  { value: "gcash", label: "GCash" },
-                  { value: "card", label: "Card" },
-                  { value: "bank_transfer", label: "Bank transfer" },
-                  { value: "check", label: "Check" },
+                  ...PAYMENT_METHOD_OPTIONS,
                 ],
               },
             ]}

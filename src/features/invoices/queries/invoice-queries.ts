@@ -1,6 +1,6 @@
 import { cache } from "react";
 
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { applyBranchFilter, getBranchScopedServerClient } from "@/lib/branches";
 import { roundCurrency } from "@/lib/currency";
 import type { TableRow } from "@/types/database";
 
@@ -35,8 +35,11 @@ export async function listInvoices(filters?: {
   search?: string;
   status?: InvoiceRow["status"] | "";
 }): Promise<InvoiceListItem[]> {
-  const { supabase } = await getAuthorizedSupabaseServerClient("invoices:read");
-  let query = supabase.from("invoices").select("*").order("invoice_date", { ascending: false });
+  const { branchScope, supabase } = await getBranchScopedServerClient("invoices:read");
+  let query = applyBranchFilter(
+    supabase.from("invoices").select("*").order("invoice_date", { ascending: false }),
+    branchScope.selectedBranchId,
+  );
 
   if (filters?.status) {
     query = query.eq("status", filters.status);
@@ -87,23 +90,31 @@ export async function listInvoices(filters?: {
 }
 
 export const getInvoiceById = cache(async (invoiceId: string): Promise<InvoiceDetail | null> => {
-  const { supabase } = await getAuthorizedSupabaseServerClient("invoices:read");
+  const { branchScope, supabase } = await getBranchScopedServerClient("invoices:read");
   const [
     { data: invoice, error: invoiceError },
     { data: items, error: itemsError },
     { data: payments, error: paymentsError },
   ] = await Promise.all([
-    supabase.from("invoices").select("*").eq("id", invoiceId).maybeSingle(),
+    applyBranchFilter(
+      supabase.from("invoices").select("*"),
+      branchScope.selectedBranchId,
+    )
+      .eq("id", invoiceId)
+      .maybeSingle(),
     supabase
       .from("invoice_items")
       .select("*")
       .eq("invoice_id", invoiceId)
       .order("line_number", { ascending: true }),
-    supabase
-      .from("payments")
-      .select("*")
-      .eq("invoice_id", invoiceId)
-      .order("paid_at", { ascending: false }),
+    applyBranchFilter(
+      supabase
+        .from("payments")
+        .select("*")
+        .eq("invoice_id", invoiceId)
+        .order("paid_at", { ascending: false }),
+      branchScope.selectedBranchId,
+    ),
   ]);
 
   if (invoiceError) {
@@ -161,8 +172,11 @@ export async function listPayments(filters?: {
   search?: string;
   paymentMethod?: PaymentRow["payment_method"] | "";
 }): Promise<PaymentListItem[]> {
-  const { supabase } = await getAuthorizedSupabaseServerClient("payments:read");
-  let query = supabase.from("payments").select("*").order("paid_at", { ascending: false });
+  const { branchScope, supabase } = await getBranchScopedServerClient("payments:read");
+  let query = applyBranchFilter(
+    supabase.from("payments").select("*").order("paid_at", { ascending: false }),
+    branchScope.selectedBranchId,
+  );
 
   if (filters?.paymentMethod) {
     query = query.eq("payment_method", filters.paymentMethod);
@@ -230,10 +244,11 @@ export async function listPayments(filters?: {
 }
 
 export const getPaymentById = cache(async (paymentId: string): Promise<PaymentDetail | null> => {
-  const { supabase } = await getAuthorizedSupabaseServerClient("payments:read");
-  const { data: payment, error: paymentError } = await supabase
-    .from("payments")
-    .select("*")
+  const { branchScope, supabase } = await getBranchScopedServerClient("payments:read");
+  const { data: payment, error: paymentError } = await applyBranchFilter(
+    supabase.from("payments").select("*"),
+    branchScope.selectedBranchId,
+  )
     .eq("id", paymentId)
     .maybeSingle();
 
@@ -246,9 +261,10 @@ export const getPaymentById = cache(async (paymentId: string): Promise<PaymentDe
   }
 
   const paymentRow = payment as PaymentRow;
-  const { data: invoice, error: invoiceError } = await supabase
-    .from("invoices")
-    .select("*")
+  const { data: invoice, error: invoiceError } = await applyBranchFilter(
+    supabase.from("invoices").select("*"),
+    branchScope.selectedBranchId,
+  )
     .eq("id", paymentRow.invoice_id)
     .maybeSingle();
 

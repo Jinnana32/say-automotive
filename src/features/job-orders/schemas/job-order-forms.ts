@@ -86,7 +86,7 @@ export const additionalJobOrderItemSchema = z
     if (!isNonNegativeMoneyInput(value.unitPrice) || !Number.isFinite(unitPrice) || unitPrice < 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Unit price must be zero or greater with up to 2 decimal places.",
+        message: "Unit price must be zero or greater with up to 4 decimal places.",
         path: ["unitPrice"],
       });
     }
@@ -135,7 +135,7 @@ export const jobOrderItemEditSchema = z
     if (!isNonNegativeMoneyInput(value.unitPrice) || !Number.isFinite(unitPrice) || unitPrice < 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Unit price must be zero or greater with up to 2 decimal places.",
+        message: "Unit price must be zero or greater with up to 4 decimal places.",
         path: ["unitPrice"],
       });
     }
@@ -148,6 +148,12 @@ export const jobOrderPartUsageSchema = z.object({
     .string()
     .refine((value) => Number.isFinite(Number(value)) && Number(value) > 0, "Quantity must be greater than zero."),
   notes: z.string().trim().max(500, "Notes are too long."),
+});
+
+export const jobOrderChecklistStateSchema = z.object({
+  jobOrderId: z.string().uuid("Job order is required."),
+  jobOrderItemId: z.string().uuid("Job order item is required."),
+  checklistCompleted: z.enum(["true", "false"]),
 });
 
 export function parseJobOrderDetailsFormData(formData: FormData) {
@@ -205,6 +211,14 @@ export function parseJobOrderPartUsageFormData(formData: FormData) {
     jobOrderItemId: readString(formData, "jobOrderItemId"),
     quantity: readString(formData, "quantity"),
     notes: readString(formData, "notes"),
+  };
+}
+
+export function parseJobOrderChecklistStateFormData(formData: FormData) {
+  return {
+    jobOrderId: readString(formData, "jobOrderId"),
+    jobOrderItemId: readString(formData, "jobOrderItemId"),
+    checklistCompleted: readString(formData, "checklistCompleted"),
   };
 }
 

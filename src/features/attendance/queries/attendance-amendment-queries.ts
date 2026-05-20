@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { DateTime } from "luxon";
 
 import { getAuthorizedSupabaseServerClient, requireAuthenticatedStaff } from "@/lib/auth/session";
-import { getDefaultBranch } from "@/lib/branches";
+import { getBranchScopedServerClient, getDefaultBranch } from "@/lib/branches";
 import { getBusinessNow } from "@/lib/dates";
 import {
   getServerRequestNetworkContext,
@@ -290,12 +290,11 @@ export async function getMechanicPortalHistoryPageData(
 }
 
 export async function getAttendanceAmendmentsPageData(): Promise<AttendanceAmendmentsPageData> {
-  const { context } = await getAuthorizedSupabaseServerClient("attendance:read");
-  const branchId = context.branchId ?? (await getDefaultBranch()).id;
+  const { branchScope } = await getBranchScopedServerClient("attendance:read");
   const admin = getSupabaseAdminClient();
   const amendments = await getMappedAmendments({
     admin,
-    branchId,
+    branchId: branchScope.selectedBranchId,
   });
 
   return {
@@ -320,15 +319,22 @@ export async function getAttendanceAmendmentsPageData(): Promise<AttendanceAmend
 }
 
 export async function getAttendanceDevicesPageData(): Promise<AttendanceDevicesPageData> {
-  const { context } = await getAuthorizedSupabaseServerClient("attendance:read");
-  const branchId = context.branchId ?? (await getDefaultBranch()).id;
+  const { branchScope } = await getBranchScopedServerClient("attendance:read");
+  const branchId = branchScope.selectedBranchId;
   const admin = getSupabaseAdminClient();
   const [deviceResult, branchStaffResult] = await Promise.all([
     admin.from("staff_devices").select("*").order("created_at", { ascending: false }),
-    admin
-      .from("staff")
-      .select("id, first_name, last_name, role")
-      .eq("branch_id", branchId),
+    (() => {
+      let query = admin
+        .from("staff")
+        .select("id, first_name, last_name, role");
+
+      if (branchId) {
+        query = query.eq("branch_id", branchId);
+      }
+
+      return query;
+    })(),
   ]);
 
   const { data: deviceData, error: deviceError } = deviceResult;
@@ -450,7 +456,7 @@ async function getMappedAmendments({
   endDate,
 }: {
   admin: ReturnType<typeof getSupabaseAdminClient>;
-  branchId: string;
+  branchId?: string | null;
   staffId?: string;
   limit?: number;
   startDate?: string;
@@ -459,8 +465,11 @@ async function getMappedAmendments({
   let amendmentQuery = admin
     .from("dtr_amendment_requests")
     .select("*")
-    .eq("branch_id", branchId)
     .order("created_at", { ascending: false });
+
+  if (branchId) {
+    amendmentQuery = amendmentQuery.eq("branch_id", branchId);
+  }
 
   if (staffId) {
     amendmentQuery = amendmentQuery.eq("staff_id", staffId);

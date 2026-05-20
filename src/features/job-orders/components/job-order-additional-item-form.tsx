@@ -10,12 +10,18 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import type { JobOrderDetailTab, JobOrderItemType } from "@/features/job-orders/types";
 import { addJobOrderItemAction } from "@/features/job-orders/actions/job-order-actions";
+import { QuickCreateProductDialog } from "@/features/products/components/quick-create-product-dialog";
+import { QuickCreateServiceDialog } from "@/features/services/components/quick-create-service-dialog";
 import { formatMoneyInputValue, MONEY_INPUT_STEP } from "@/lib/currency";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 
 type CatalogOptions = {
   products: Array<{ id: string; label: string; sku: string | null; unitPrice: number }>;
   services: Array<{ id: string; label: string; category: string | null; unitPrice: number }>;
+  permissions: {
+    canCreateProducts: boolean;
+    canCreateServices: boolean;
+  };
 };
 
 export function JobOrderAdditionalItemForm({
@@ -157,7 +163,39 @@ export function JobOrderAdditionalItemForm({
 
       {isProductType ? (
         <div className="space-y-2">
-          <Label htmlFor="productId">Product</Label>
+          <div className="flex items-center justify-between gap-3">
+            <Label htmlFor="productId">Product</Label>
+            {catalogOptions?.permissions.canCreateProducts ? (
+              <QuickCreateProductDialog
+                triggerLabel="Add new product"
+                onCreated={(product) => {
+                  setCatalogState((current) =>
+                    current.status === "ready"
+                      ? {
+                          status: "ready",
+                          error: null,
+                          options: {
+                            ...current.options,
+                            products: [
+                              ...current.options.products,
+                              {
+                                id: product.id,
+                                label: product.label,
+                                sku: product.sku,
+                                unitPrice: product.unitPrice,
+                              },
+                            ],
+                          },
+                        }
+                      : current,
+                  );
+                  setProductId(product.id);
+                  setDescription(product.label);
+                  setUnitPrice(formatMoneyInputValue(product.unitPrice));
+                }}
+              />
+            ) : null}
+          </div>
           {catalogOptions ? (
             <NativeSelect
               id="productId"
@@ -188,7 +226,39 @@ export function JobOrderAdditionalItemForm({
         </div>
       ) : isServiceType ? (
         <div className="space-y-2">
-          <Label htmlFor="serviceId">Service</Label>
+          <div className="flex items-center justify-between gap-3">
+            <Label htmlFor="serviceId">Service</Label>
+            {catalogOptions?.permissions.canCreateServices ? (
+              <QuickCreateServiceDialog
+                triggerLabel="Add new service"
+                onCreated={(service) => {
+                  setCatalogState((current) =>
+                    current.status === "ready"
+                      ? {
+                          status: "ready",
+                          error: null,
+                          options: {
+                            ...current.options,
+                            services: [
+                              ...current.options.services,
+                              {
+                                id: service.id,
+                                label: service.label,
+                                category: service.category,
+                                unitPrice: service.unitPrice,
+                              },
+                            ],
+                          },
+                        }
+                      : current,
+                  );
+                  setServiceId(service.id);
+                  setDescription(service.label);
+                  setUnitPrice(formatMoneyInputValue(service.unitPrice));
+                }}
+              />
+            ) : null}
+          </div>
           {catalogOptions ? (
             <NativeSelect
               id="serviceId"

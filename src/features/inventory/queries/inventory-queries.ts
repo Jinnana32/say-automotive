@@ -1,7 +1,9 @@
 import type { TableRow } from "@/types/database";
 
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
-import { getDefaultBranch } from "@/lib/branches";
+import {
+  applySharedCatalogBranchFilter,
+  getBranchScopedServerClient,
+} from "@/lib/branches";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import {
   buildInventoryStockMap,
@@ -61,16 +63,19 @@ export async function getInventoryDashboardData(filters?: {
   stockState?: InventoryStockFilterState;
   movementType?: InventoryMovementType | "";
 }): Promise<InventoryDashboardData> {
-  const branch = await getDefaultBranch();
-  const { supabase } = await getAuthorizedSupabaseServerClient("inventory:read");
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("inventory:read");
+  const branchId = branchScope.selectedBranchId;
   let movementQuery = supabase
     .from("stock_movements")
     .select(
       "id, product_id, movement_type, quantity, previous_quantity, new_quantity, reference_type, notes, created_at",
     )
-    .eq("branch_id", branch.id)
     .order("created_at", { ascending: false })
     .limit(40);
+
+  if (branchId) {
+    movementQuery = movementQuery.eq("branch_id", branchId);
+  }
 
   if (filters?.movementType) {
     movementQuery = movementQuery.eq("movement_type", filters.movementType);
@@ -82,21 +87,30 @@ export async function getInventoryDashboardData(filters?: {
     { data: stocks, error: stocksError },
     { data: movements, error: movementsError },
   ] = await Promise.all([
-    supabase
-      .from("products")
-      .select(
-        "id, name, sku, barcode, product_type, unit_id, cost_price, selling_price, reorder_level, shelf_location, branch_id",
-      )
-      .eq("status", "active")
-      .or(`branch_id.is.null,branch_id.eq.${branch.id}`)
-      .order("name", { ascending: true }),
+    applySharedCatalogBranchFilter(
+      supabase
+        .from("products")
+        .select(
+          "id, name, sku, barcode, product_type, unit_id, cost_price, selling_price, reorder_level, shelf_location, branch_id",
+        )
+        .eq("status", "active")
+        .order("name", { ascending: true }),
+      branchId,
+    ),
     supabase.from("units").select("id, name, abbreviation").order("name", { ascending: true }),
-    supabase
-      .from("inventory_stocks")
-      .select(
-        "id, product_id, quantity_on_hand, reserved_quantity, available_quantity, reorder_level, shelf_location",
-      )
-      .eq("branch_id", branch.id),
+    (() => {
+      let query = supabase
+        .from("inventory_stocks")
+        .select(
+          "id, product_id, quantity_on_hand, reserved_quantity, available_quantity, reorder_level, shelf_location",
+        );
+
+      if (branchId) {
+        query = query.eq("branch_id", branchId);
+      }
+
+      return query;
+    })(),
     movementQuery,
   ]);
 
@@ -118,7 +132,7 @@ export async function getInventoryDashboardData(filters?: {
 
   const productRows = (products ?? []) as ProductRow[];
   const unitLabelMap = buildUnitLabelMap((units ?? []) as UnitRow[]);
-  const stockMap = buildInventoryStockMap((stocks ?? []) as StockRow[]);
+  const stockMap = buildInventoryStockMap(aggregateStockRows((stocks ?? []) as StockRow[]));
   const allStocks = productRows.map((row) =>
     mapProductRowToInventoryStockItem(row, {
       unitLabel: unitLabelMap.get(row.unit_id) ?? "Unknown unit",
@@ -157,11 +171,14 @@ export async function getInventoryDashboardData(filters?: {
     });
 
   return {
-    branchName: branch.name,
+    branchName: branchScope.selectedBranch?.name ?? branchScope.selectedBranchLabel,
     summary: buildInventorySummary(allStocks),
     stocks: filteredStocks,
     movements: movementItems,
     productOptions: allStocks.map(mapInventoryStockItemToProductOption),
+    permissions: {
+      canCreateProducts: context.capabilities.includes("products:write"),
+    },
   };
 }
 
@@ -181,4 +198,29 @@ async function getProductMetaMap(productIds: string[]) {
   }
 
   return new Map(((data ?? []) as ProductMetaRow[]).map((row) => [row.id, row]));
+}
+
+function aggregateStockRows(rows: StockRow[]) {
+  const grouped = new Map<string, StockRow>();
+
+  for (const row of rows) {
+    const existing = grouped.get(row.product_id);
+
+    if (!existing) {
+      grouped.set(row.product_id, { ...row });
+      continue;
+    }
+
+    grouped.set(row.product_id, {
+      ...existing,
+      id: existing.id,
+      quantity_on_hand: existing.quantity_on_hand + row.quantity_on_hand,
+      reserved_quantity: existing.reserved_quantity + row.reserved_quantity,
+      available_quantity: existing.available_quantity + row.available_quantity,
+      reorder_level: existing.reorder_level ?? row.reorder_level,
+      shelf_location: existing.shelf_location ?? row.shelf_location,
+    });
+  }
+
+  return [...grouped.values()];
 }

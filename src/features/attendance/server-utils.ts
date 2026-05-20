@@ -14,12 +14,14 @@ export type DatabaseClient = SupabaseClient<Database>;
 
 export async function getPayrollPeriodLockForDate(
   supabase: DatabaseClient,
+  branchId: string,
   attendanceDate: string,
 ) {
   const { data, error } = await supabase
     .from("payroll_periods")
     .select("id, label, status")
     .in("status", ["processing", "finalized"])
+    .eq("branch_id", branchId)
     .lte("period_start_date", attendanceDate)
     .gte("period_end_date", attendanceDate)
     .order("period_start_date", { ascending: false })
@@ -55,6 +57,7 @@ export function serializeAttendanceSnapshot(row: {
 }
 
 export async function logAttendanceAdjustment({
+  branchId,
   supabase,
   changedByStaffId,
   action,
@@ -65,6 +68,7 @@ export async function logAttendanceAdjustment({
   nextData,
   reason,
 }: {
+  branchId: string;
   supabase: DatabaseClient;
   changedByStaffId: string | null;
   action: "created" | "updated" | "approved" | "unapproved";
@@ -76,6 +80,7 @@ export async function logAttendanceAdjustment({
   reason?: string | null;
 }) {
   const { error } = await supabase.from("attendance_adjustments").insert({
+    branch_id: branchId,
     attendance_id: attendanceId,
     staff_id: staffId,
     attendance_date: attendanceDate,
@@ -92,6 +97,7 @@ export async function logAttendanceAdjustment({
 }
 
 export async function insertAttendanceTimeLog({
+  branchId,
   supabase,
   staffId,
   attendanceId,
@@ -106,6 +112,7 @@ export async function insertAttendanceTimeLog({
   isDeviceApproved,
   userAgent,
 }: {
+  branchId: string;
   supabase: DatabaseClient;
   staffId: string;
   attendanceId: string | null;
@@ -121,6 +128,7 @@ export async function insertAttendanceTimeLog({
   userAgent: string | null;
 }) {
   const payload: TableInsert<"attendance_time_logs"> = {
+    branch_id: branchId,
     staff_id: staffId,
     attendance_id: attendanceId,
     dtr_amendment_id: amendmentId ?? null,

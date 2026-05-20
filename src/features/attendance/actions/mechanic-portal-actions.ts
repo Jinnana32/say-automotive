@@ -57,7 +57,11 @@ export async function recordMechanicAttendanceLogAction(
     userId: context.userId,
   });
   const attendanceDate = getCurrentBusinessAttendanceDate();
-  const payrollLock = await getPayrollPeriodLockForDate(admin, attendanceDate);
+  const payrollLock = await getPayrollPeriodLockForDate(
+    admin,
+    accessContext.branchId,
+    attendanceDate,
+  );
 
   if (payrollLock) {
     return {
@@ -169,6 +173,7 @@ export async function recordMechanicAttendanceLogAction(
       : admin
           .from("attendance")
           .insert({
+            branch_id: accessContext.branchId,
             staff_id: context.staffId,
             attendance_date: attendanceDate,
             time_in: loggedAt,
@@ -223,6 +228,7 @@ export async function recordMechanicAttendanceLogAction(
   }
 
   await logAttendanceAdjustment({
+    branchId: accessContext.branchId,
     supabase: admin,
     changedByStaffId: context.staffId,
     action: existingAttendance ? "updated" : "created",
@@ -235,6 +241,7 @@ export async function recordMechanicAttendanceLogAction(
   });
 
   await insertAttendanceTimeLog({
+    branchId: accessContext.branchId,
     supabase: admin,
     staffId: context.staffId,
     attendanceId: savedAttendance.id,
@@ -298,7 +305,11 @@ export async function submitDtrAmendmentAction(
     };
   }
 
-  const payrollLock = await getPayrollPeriodLockForDate(admin, parsed.data.attendanceDate);
+  const payrollLock = await getPayrollPeriodLockForDate(
+    admin,
+    accessContext.branchId,
+    parsed.data.attendanceDate,
+  );
 
   if (payrollLock) {
     return {
@@ -448,7 +459,11 @@ export async function reviewDtrAmendmentAction(
     };
   }
 
-  const payrollLock = await getPayrollPeriodLockForDate(admin, amendment.attendance_date);
+  const payrollLock = await getPayrollPeriodLockForDate(
+    admin,
+    amendment.branch_id,
+    amendment.attendance_date,
+  );
 
   if (payrollLock) {
     return {
@@ -557,6 +572,7 @@ export async function reviewDtrAmendmentAction(
     : false;
 
   await logAttendanceAdjustment({
+    branchId: amendment.branch_id,
     supabase: admin,
     changedByStaffId: context.staffId,
     action: existingAttendance ? "updated" : "created",
@@ -571,6 +587,7 @@ export async function reviewDtrAmendmentAction(
   });
 
   await insertAttendanceTimeLog({
+    branchId: amendment.branch_id,
     supabase: admin,
     staffId: amendment.staff_id,
     attendanceId: savedAttendance.id,
@@ -709,6 +726,7 @@ function buildApprovedAmendmentAttendancePayload({
         approved_by_staff_id: approvedByStaffId,
       } satisfies TableUpdate<"attendance">,
       insertPayload: {
+        branch_id: amendment.branch_id,
         staff_id: amendment.staff_id,
         attendance_date: amendment.attendance_date,
         time_in: finalTimestamp,
@@ -743,6 +761,7 @@ function buildApprovedAmendmentAttendancePayload({
       approved_by_staff_id: approvedByStaffId,
     } satisfies TableUpdate<"attendance">,
     insertPayload: {
+      branch_id: amendment.branch_id,
       staff_id: amendment.staff_id,
       attendance_date: amendment.attendance_date,
       time_in: existingAttendance.time_in,

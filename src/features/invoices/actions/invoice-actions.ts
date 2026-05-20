@@ -4,7 +4,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import {
+  cancelInvoiceSchema,
   createInvoiceFromJobOrderSchema,
+  parseCancelInvoiceFormData,
   parseCreateInvoiceFromJobOrderFormData,
   parseRecordInvoicePaymentFormData,
   parseReleaseJobOrderVehicleFormData,
@@ -81,6 +83,36 @@ export async function recordInvoicePaymentAction(
   revalidateBillingPaths({
     invoiceId: values.invoiceId,
     jobOrderId: values.jobOrderId,
+  });
+  redirect(`/invoices/${values.invoiceId}`);
+}
+
+export async function cancelInvoiceAction(
+  _prevState: FormActionState = INITIAL_FORM_ACTION_STATE,
+  formData: FormData,
+): Promise<FormActionState> {
+  const parsed = cancelInvoiceSchema.safeParse(parseCancelInvoiceFormData(formData));
+
+  if (!parsed.success) {
+    return toFormActionState(parsed.error);
+  }
+
+  const values = parsed.data;
+  const { supabase } = await getAuthorizedSupabaseServerClient("invoices:write");
+  const { error } = await supabase.rpc("cancel_invoice", {
+    p_invoice_id: values.invoiceId,
+    p_cancellation_reason: values.cancellationReason,
+  });
+
+  if (error) {
+    return {
+      status: "error",
+      message: error.message,
+    };
+  }
+
+  revalidateBillingPaths({
+    invoiceId: values.invoiceId,
   });
   redirect(`/invoices/${values.invoiceId}`);
 }

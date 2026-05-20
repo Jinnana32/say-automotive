@@ -13,6 +13,7 @@ const product = {
   name: "Engine oil",
   sku: "OIL-001",
   barcode: "123456",
+  imageUrl: null,
   unitLabel: "Bottle (btl)",
   sellingPrice: 550,
   availableQuantity: 3,

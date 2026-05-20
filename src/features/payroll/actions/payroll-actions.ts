@@ -3,8 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { computeExpectedWorkdaySummary } from "@/features/attendance/utils";
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
-import { getDefaultBranch } from "@/lib/branches";
+import { getBranchScopedServerClient, requireBranchAccess } from "@/lib/branches";
 import { toFormActionState } from "@/lib/forms";
 import {
   compensationProfileSchema,
@@ -31,7 +30,7 @@ export async function upsertCompensationProfileAction(
   }
 
   const values = parsed.data;
-  const { supabase } = await getAuthorizedSupabaseServerClient("payroll:write");
+  const { supabase } = await getBranchScopedServerClient("payroll:write");
   const { error } = await supabase.from("staff_compensation_profiles").upsert(
     {
       staff_id: values.staffId,
@@ -76,11 +75,8 @@ export async function createPayrollPeriodAction(
   }
 
   const values = parsed.data;
-  const [{ context, supabase }, defaultBranch] = await Promise.all([
-    getAuthorizedSupabaseServerClient("payroll:write"),
-    getDefaultBranch(),
-  ]);
-  const branchId = context.branchId ?? defaultBranch.id;
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("payroll:write");
+  const branchId = branchScope.writeBranchId;
   const { error } = await supabase.from("payroll_periods").insert({
     branch_id: branchId,
     label: values.label,
@@ -121,7 +117,7 @@ export async function updatePayrollPeriodStatusAction(
   }
 
   const values = parsed.data;
-  const { context, supabase } = await getAuthorizedSupabaseServerClient("payroll:write");
+  const { context, supabase } = await getBranchScopedServerClient("payroll:write");
   const { data: periodData, error: periodError } = await supabase
     .from("payroll_periods")
     .select("id, branch_id, label, period_start_date, period_end_date, status")
@@ -142,6 +138,8 @@ export async function updatePayrollPeriodStatusAction(
     };
   }
 
+  await requireBranchAccess(periodData.branch_id);
+
   if (periodData.status === "finalized") {
     return {
       status: "error",
@@ -153,6 +151,7 @@ export async function updatePayrollPeriodStatusAction(
     const { data: staffData, error: staffError } = await supabase
       .from("staff")
       .select("id")
+      .eq("branch_id", periodData.branch_id)
       .eq("status", "active");
 
     if (staffError) {

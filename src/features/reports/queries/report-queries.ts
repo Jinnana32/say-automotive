@@ -1,6 +1,6 @@
 import type { TableRow } from "@/types/database";
 
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { applyBranchFilter, getBranchScopedServerClient } from "@/lib/branches";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type { ReportsPageData } from "@/features/reports/types";
 import {
@@ -54,7 +54,7 @@ export async function getReportsPageData(input: {
 }): Promise<ReportsPageData> {
   const filters = resolveReportFilters(input);
   const { fromIso, toIso } = getReportRangeBounds(filters);
-  const { supabase } = await getAuthorizedSupabaseServerClient("reports:read");
+  const { branchScope, supabase } = await getBranchScopedServerClient("reports:read");
   const [
     { data: quotations, error: quotationsError },
     { data: jobOrders, error: jobOrdersError },
@@ -64,19 +64,40 @@ export async function getReportsPageData(input: {
     { data: inventoryStocks, error: inventoryStocksError },
     { data: stockMovements, error: stockMovementsError },
   ] = await Promise.all([
-    supabase.from("quotations").select("status, total_amount, created_at, approved_at"),
-    supabase.from("job_orders").select("id, status, created_at, released_at"),
-    supabase
-      .from("invoices")
-      .select("id, invoice_number, status, total_amount, balance, customer_id, created_at"),
-    supabase.from("payments").select("invoice_id, amount, payment_method, paid_at"),
-    supabase.from("sales").select("id, total_amount, created_at").eq("status", "completed"),
-    supabase.from("inventory_stocks").select("quantity_on_hand, available_quantity, reorder_level"),
-    supabase
-      .from("stock_movements")
-      .select("id, product_id, movement_type, quantity, created_at")
-      .order("created_at", { ascending: false })
-      .limit(12),
+    applyBranchFilter(
+      supabase.from("quotations").select("status, total_amount, created_at, approved_at"),
+      branchScope.selectedBranchId,
+    ),
+    applyBranchFilter(
+      supabase.from("job_orders").select("id, status, created_at, released_at"),
+      branchScope.selectedBranchId,
+    ),
+    applyBranchFilter(
+      supabase
+        .from("invoices")
+        .select("id, invoice_number, status, total_amount, balance, customer_id, created_at"),
+      branchScope.selectedBranchId,
+    ),
+    applyBranchFilter(
+      supabase.from("payments").select("invoice_id, amount, payment_method, paid_at"),
+      branchScope.selectedBranchId,
+    ),
+    applyBranchFilter(
+      supabase.from("sales").select("id, total_amount, created_at").eq("status", "completed"),
+      branchScope.selectedBranchId,
+    ),
+    applyBranchFilter(
+      supabase.from("inventory_stocks").select("quantity_on_hand, available_quantity, reorder_level"),
+      branchScope.selectedBranchId,
+    ),
+    applyBranchFilter(
+      supabase
+        .from("stock_movements")
+        .select("id, product_id, movement_type, quantity, created_at")
+        .order("created_at", { ascending: false })
+        .limit(12),
+      branchScope.selectedBranchId,
+    ),
   ]);
 
   if (quotationsError) {

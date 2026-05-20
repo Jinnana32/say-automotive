@@ -1,6 +1,6 @@
 import { cache } from "react";
 
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { applyBranchFilter, getBranchScopedServerClient } from "@/lib/branches";
 import type { TableRow } from "@/types/database";
 import {
   mapCustomerDetail,
@@ -47,13 +47,16 @@ type CustomerListRow = Pick<
 type CustomerOptionRow = Pick<CustomerRow, "id" | "display_name">;
 
 export async function listCustomers(search?: string): Promise<CustomerListItem[]> {
-  const { supabase } = await getAuthorizedSupabaseServerClient("customers:read");
-  let query = supabase
+  const { branchScope, supabase } = await getBranchScopedServerClient("customers:read");
+  let query = applyBranchFilter(
+    supabase
     .from("customers")
     .select(
       "id, customer_code, customer_type, display_name, contact_number, email, status, created_at, updated_at",
     )
-    .order("display_name", { ascending: true });
+    .order("display_name", { ascending: true }),
+    branchScope.selectedBranchId,
+  );
 
   if (search) {
     const escapedSearch = escapeSearchTerm(search);
@@ -72,7 +75,7 @@ export async function listCustomers(search?: string): Promise<CustomerListItem[]
 }
 
 export const getCustomerById = cache(async (customerId: string): Promise<CustomerDetail | null> => {
-  const { context, supabase } = await getAuthorizedSupabaseServerClient("customers:read");
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("customers:read");
   const canViewQuotations = context.capabilities.includes("quotations:read");
   const canViewJobOrders = context.capabilities.includes("job_orders:read");
   const canViewInvoices = context.capabilities.includes("invoices:read");
@@ -85,36 +88,50 @@ export const getCustomerById = cache(async (customerId: string): Promise<Custome
     { data: jobOrders, error: jobOrdersError },
     { data: invoices, error: invoicesError },
   ] = await Promise.all([
-    supabase
+    applyBranchFilter(
+      supabase
       .from("customers")
       .select("*")
-      .eq("id", customerId)
-      .maybeSingle(),
-    supabase
+      .eq("id", customerId),
+      branchScope.selectedBranchId,
+    ).maybeSingle(),
+    applyBranchFilter(
+      supabase
       .from("vehicles")
       .select("*")
       .eq("customer_id", customerId)
       .order("created_at", { ascending: false }),
+      branchScope.selectedBranchId,
+    ),
     canViewQuotations
-      ? supabase
+      ? applyBranchFilter(
+          supabase
           .from("quotations")
           .select("id, quotation_number, vehicle_id, status, total_amount, created_at")
           .eq("customer_id", customerId)
-          .order("created_at", { ascending: false })
+          .order("created_at", { ascending: false }),
+          branchScope.selectedBranchId,
+        )
       : Promise.resolve({ data: [], error: null }),
     canViewJobOrders
-      ? supabase
+      ? applyBranchFilter(
+          supabase
           .from("job_orders")
           .select("id, quotation_id, job_order_number, vehicle_id, status, created_at")
           .eq("customer_id", customerId)
-          .order("created_at", { ascending: false })
+          .order("created_at", { ascending: false }),
+          branchScope.selectedBranchId,
+        )
       : Promise.resolve({ data: [], error: null }),
     canViewInvoices || canViewPayments
-      ? supabase
+      ? applyBranchFilter(
+          supabase
           .from("invoices")
           .select("id, job_order_id, invoice_number, vehicle_id, status, total_amount, invoice_date")
           .eq("customer_id", customerId)
-          .order("invoice_date", { ascending: false })
+          .order("invoice_date", { ascending: false }),
+          branchScope.selectedBranchId,
+        )
       : Promise.resolve({ data: [], error: null }),
   ]);
 
@@ -149,14 +166,17 @@ export const getCustomerById = cache(async (customerId: string): Promise<Custome
 
   const { data: payments, error: paymentsError } =
     canViewPayments && invoiceRows.length > 0
-      ? await supabase
+      ? await applyBranchFilter(
+          supabase
           .from("payments")
           .select("id, invoice_id, amount, payment_method, reference_number, paid_at")
           .in(
             "invoice_id",
             invoiceRows.map((invoice) => invoice.id),
           )
-          .order("paid_at", { ascending: false })
+          .order("paid_at", { ascending: false }),
+          branchScope.selectedBranchId,
+        )
       : { data: [], error: null };
 
   if (paymentsError) {
@@ -180,12 +200,15 @@ export const getCustomerById = cache(async (customerId: string): Promise<Custome
 });
 
 export async function listCustomerOptions(): Promise<CustomerOption[]> {
-  const { supabase } = await getAuthorizedSupabaseServerClient("customers:read");
-  const { data, error } = await supabase
+  const { branchScope, supabase } = await getBranchScopedServerClient("customers:read");
+  const { data, error } = await applyBranchFilter(
+    supabase
     .from("customers")
     .select("id, display_name")
     .eq("status", "active")
-    .order("display_name", { ascending: true });
+    .order("display_name", { ascending: true }),
+    branchScope.selectedBranchId,
+  );
 
   if (error) {
     throw new Error(error.message);

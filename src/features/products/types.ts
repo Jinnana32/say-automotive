@@ -6,6 +6,7 @@ export type ProductListItem = {
   name: string;
   sku: string | null;
   barcode: string | null;
+  productImageUrl: string | null;
   productType: ProductType;
   categoryName: string | null;
   brandName: string | null;
@@ -48,10 +49,32 @@ export type ProductFormValues = {
   websiteFeatured: boolean;
   websiteSortOrder: string;
   websiteSlug: string;
+  productImageUrl: string;
   websiteImageUrl: string;
   websiteShortDescription: string;
   websiteBadge: string;
   status: ProductStatus;
+};
+
+export type ProductFormOptionsData = {
+  categories: ReferenceOption[];
+  brands: ReferenceOption[];
+  suppliers: ReferenceOption[];
+  units: ReferenceOption[];
+};
+
+export type ProductInlineCreateResult = {
+  id: string;
+  label: string;
+  sku: string | null;
+  barcode: string | null;
+  productType: ProductType;
+  unitLabel: string;
+  unitPrice: number;
+  costPrice: number;
+  reorderLevel: number;
+  shelfLocation: string | null;
+  productImageUrl: string | null;
 };
 
 export type ReferenceOption = {

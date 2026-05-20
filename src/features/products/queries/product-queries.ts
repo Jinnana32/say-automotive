@@ -10,7 +10,11 @@ import {
   mapProductRowToListItem,
   mapReferenceRowsToOptions,
 } from "@/features/products/mappers";
-import type { ProductListItem, ReferenceOption } from "@/features/products/types";
+import type {
+  ProductFormOptionsData,
+  ProductListItem,
+  ReferenceOption,
+} from "@/features/products/types";
 import type { TableRow } from "@/types/database";
 
 type ProductRow = TableRow<"products">;
@@ -60,12 +64,7 @@ export const getProductById = cache(async (productId: string) => {
   return (data as ProductRow | null) ?? null;
 });
 
-export async function getProductFormOptions(): Promise<{
-  categories: ReferenceOption[];
-  brands: ReferenceOption[];
-  suppliers: ReferenceOption[];
-  units: ReferenceOption[];
-}> {
+export async function getProductFormOptions(): Promise<ProductFormOptionsData> {
   await getAuthorizedSupabaseServerClient("products:write");
   const references = await getProductReferenceRows();
 

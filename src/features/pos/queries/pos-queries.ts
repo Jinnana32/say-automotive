@@ -1,6 +1,5 @@
 import { cache } from "react";
 
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
 import type { TableRow } from "@/types/database";
 
 import {
@@ -11,7 +10,11 @@ import {
   mapRecentSaleRowToListItem,
 } from "@/features/pos/mappers";
 import type { PosRecentSaleItem, PosTerminalData } from "@/features/pos/types";
-import { getDefaultBranch } from "@/lib/branches";
+import {
+  applyBranchFilter,
+  applySharedCatalogBranchFilter,
+  getBranchScopedServerClient,
+} from "@/lib/branches";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 type BusinessSettingsRow = Pick<
@@ -25,7 +28,18 @@ type BusinessSettingsRow = Pick<
 type CustomerRow = Pick<TableRow<"customers">, "id" | "display_name">;
 type ProductRow = Pick<
   TableRow<"products">,
-  "id" | "name" | "sku" | "barcode" | "unit_id" | "selling_price" | "reorder_level" | "shelf_location"
+  | "id"
+  | "name"
+  | "sku"
+  | "barcode"
+  | "unit_id"
+  | "selling_price"
+  | "reorder_level"
+  | "shelf_location"
+  | "product_image_path"
+  | "product_image_url"
+  | "website_image_url"
+  | "updated_at"
 >;
 type UnitRow = Pick<TableRow<"units">, "id" | "name" | "abbreviation">;
 type StockRow = Pick<
@@ -37,8 +51,13 @@ type InvoiceRow = Pick<TableRow<"invoices">, "id" | "sale_id" | "invoice_number"
 type PaymentRow = Pick<TableRow<"payments">, "invoice_id" | "payment_method">;
 
 export const getPosTerminalData = cache(async (): Promise<PosTerminalData> => {
-  const branch = await getDefaultBranch();
-  const { supabase } = await getAuthorizedSupabaseServerClient("pos:read");
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("pos:read");
+  const branch = branchScope.selectedBranch ?? branchScope.accessibleBranches[0] ?? null;
+
+  if (!branch) {
+    throw new Error("No accessible branch is configured for POS.");
+  }
+
   const [
     { data: settings, error: settingsError },
     { data: customers, error: customersError },
@@ -53,17 +72,24 @@ export const getPosTerminalData = cache(async (): Promise<PosTerminalData> => {
       )
       .eq("branch_id", branch.id)
       .maybeSingle(),
-    supabase
-      .from("customers")
-      .select("id, display_name")
-      .eq("status", "active")
-      .order("display_name", { ascending: true }),
-    supabase
-      .from("products")
-      .select("id, name, sku, barcode, unit_id, selling_price, reorder_level, shelf_location")
-      .eq("status", "active")
-      .or(`branch_id.is.null,branch_id.eq.${branch.id}`)
-      .order("name", { ascending: true }),
+    applyBranchFilter(
+      supabase
+        .from("customers")
+        .select("id, display_name")
+        .eq("status", "active")
+        .order("display_name", { ascending: true }),
+      branch.id,
+    ),
+    applySharedCatalogBranchFilter(
+      supabase
+        .from("products")
+        .select(
+          "id, name, sku, barcode, unit_id, selling_price, reorder_level, shelf_location, product_image_path, product_image_url, website_image_url, updated_at",
+        )
+        .eq("status", "active")
+        .order("name", { ascending: true }),
+      branch.id,
+    ),
     supabase.from("units").select("id, name, abbreviation").order("name", { ascending: true }),
     supabase
       .from("inventory_stocks")
@@ -114,17 +140,23 @@ export const getPosTerminalData = cache(async (): Promise<PosTerminalData> => {
         stock: stockMap.get(row.id) ?? null,
       }),
     ),
+    permissions: {
+      canCreateProducts: context.capabilities.includes("products:write"),
+    },
   };
 });
 
 export async function listRecentPosSales(limit = 10): Promise<PosRecentSaleItem[]> {
-  const { supabase } = await getAuthorizedSupabaseServerClient("pos:read");
-  const { data: sales, error: salesError } = await supabase
-    .from("sales")
-    .select("id, sale_number, customer_id, total_amount, created_at")
-    .eq("status", "completed")
-    .order("created_at", { ascending: false })
-    .limit(limit);
+  const { branchScope, supabase } = await getBranchScopedServerClient("pos:read");
+  const { data: sales, error: salesError } = await applyBranchFilter(
+    supabase
+      .from("sales")
+      .select("id, sale_number, customer_id, total_amount, created_at")
+      .eq("status", "completed")
+      .order("created_at", { ascending: false })
+      .limit(limit),
+    branchScope.selectedBranchId,
+  );
 
   if (salesError) {
     throw new Error(salesError.message);
@@ -137,12 +169,15 @@ export async function listRecentPosSales(limit = 10): Promise<PosRecentSaleItem[
   const [{ data: invoices, error: invoicesError }, customerMap, paymentMap] = await Promise.all([
     saleIds.length === 0
       ? Promise.resolve({ data: [], error: null })
-      : supabase
-          .from("invoices")
-          .select("id, sale_id, invoice_number, status")
-          .in("sale_id", saleIds),
-    getCustomerNameMap(customerIds),
-    getPaymentMethodMap(saleIds),
+      : applyBranchFilter(
+          supabase
+            .from("invoices")
+            .select("id, sale_id, invoice_number, status")
+            .in("sale_id", saleIds),
+          branchScope.selectedBranchId,
+        ),
+    getCustomerNameMap(customerIds, branchScope.selectedBranchId),
+    getPaymentMethodMap(saleIds, branchScope.selectedBranchId),
   ]);
 
   if (invoicesError) {
@@ -167,16 +202,16 @@ export async function listRecentPosSales(limit = 10): Promise<PosRecentSaleItem[
   );
 }
 
-async function getCustomerNameMap(customerIds: string[]) {
+async function getCustomerNameMap(customerIds: string[], branchId: string | null) {
   if (customerIds.length === 0) {
     return new Map<string, string>();
   }
 
   const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("customers")
-    .select("id, display_name")
-    .in("id", customerIds);
+  const { data, error } = await applyBranchFilter(
+    supabase.from("customers").select("id, display_name").in("id", customerIds),
+    branchId,
+  );
 
   if (error) {
     throw new Error(error.message);
@@ -185,16 +220,16 @@ async function getCustomerNameMap(customerIds: string[]) {
   return new Map(((data ?? []) as CustomerRow[]).map((row) => [row.id, row.display_name]));
 }
 
-async function getPaymentMethodMap(saleIds: string[]) {
+async function getPaymentMethodMap(saleIds: string[], branchId: string | null) {
   if (saleIds.length === 0) {
     return new Map<string, PaymentRow>();
   }
 
   const supabase = await getSupabaseServerClient();
-  const { data: invoices, error: invoiceError } = await supabase
-    .from("invoices")
-    .select("id, sale_id")
-    .in("sale_id", saleIds);
+  const { data: invoices, error: invoiceError } = await applyBranchFilter(
+    supabase.from("invoices").select("id, sale_id").in("sale_id", saleIds),
+    branchId,
+  );
 
   if (invoiceError) {
     throw new Error(invoiceError.message);
@@ -207,11 +242,14 @@ async function getPaymentMethodMap(saleIds: string[]) {
     return new Map<string, PaymentRow>();
   }
 
-  const { data: payments, error: paymentError } = await supabase
-    .from("payments")
-    .select("invoice_id, payment_method")
-    .in("invoice_id", invoiceIds)
-    .order("paid_at", { ascending: false });
+  const { data: payments, error: paymentError } = await applyBranchFilter(
+    supabase
+      .from("payments")
+      .select("invoice_id, payment_method")
+      .in("invoice_id", invoiceIds)
+      .order("paid_at", { ascending: false }),
+    branchId,
+  );
 
   if (paymentError) {
     throw new Error(paymentError.message);

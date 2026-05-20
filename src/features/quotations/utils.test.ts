@@ -11,10 +11,10 @@ import {
 describe("quotation utils", () => {
   it("calculates line totals", () => {
     const lineTotal = calculateQuotationLineTotal(
-      createQuotationItem({ quantity: "2", unitPrice: "550.50" }),
+      createQuotationItem({ quantity: "2", unitPrice: "550.505" }),
     );
 
-    expect(lineTotal).toBe(1101);
+    expect(lineTotal).toBe(1101.01);
   });
 
   it("calculates subtotal and grand total", () => {

@@ -95,8 +95,8 @@ describe("reports utils", () => {
         { paymentMethod: "gcash", amount: 700 },
       ]),
     ).toEqual([
-      { label: "cash", amount: 1500, count: 2 },
-      { label: "gcash", amount: 700, count: 1 },
+      { label: "Cash", amount: 1500, count: 2 },
+      { label: "GCash", amount: 700, count: 1 },
     ]);
   });
 
@@ -126,7 +126,7 @@ describe("reports utils", () => {
       { label: "Quotations approved", count: 6 },
       { label: "Job orders opened", count: 5 },
       { label: "Vehicles released", count: 4 },
-      { label: "Invoices with payments", count: 3, helper: "₱5,800.00 collected" },
+      { label: "Invoices with payments", count: 3, helper: "₱5,800.0000 collected" },
     ]);
   });
 

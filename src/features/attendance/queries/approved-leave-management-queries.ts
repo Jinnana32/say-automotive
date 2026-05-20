@@ -1,5 +1,4 @@
-import { getDefaultBranch } from "@/lib/branches";
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { getBranchScopedServerClient } from "@/lib/branches";
 import type {
   ApprovedLeaveManagementData,
   StaffLeaveManagementItem,
@@ -14,27 +13,38 @@ type StaffRow = Pick<
 >;
 
 export async function getApprovedLeaveManagementData(): Promise<ApprovedLeaveManagementData> {
-  const [{ context, supabase }, defaultBranch] = await Promise.all([
-    getAuthorizedSupabaseServerClient("attendance:read"),
-    getDefaultBranch(),
-  ]);
-  const branchId = context.branchId ?? defaultBranch.id;
+  const { branchScope, supabase } = await getBranchScopedServerClient("attendance:read");
+  const branchId = branchScope.selectedBranchId;
 
   const [{ data: staffData, error: staffError }, { data: leaveEntryData, error: leaveEntryError }] =
     await Promise.all([
-      supabase
-        .from("staff")
-        .select("id, first_name, last_name, role, status")
-        .eq("branch_id", branchId)
-        .eq("status", "active")
-        .order("last_name", { ascending: true })
-        .order("first_name", { ascending: true }),
-      supabase
-        .from("staff_leave_entries")
-        .select("*")
-        .eq("branch_id", branchId)
-        .order("start_date", { ascending: false })
-        .order("created_at", { ascending: false }),
+      (() => {
+        let query = supabase
+          .from("staff")
+          .select("id, first_name, last_name, role, status")
+          .eq("status", "active")
+          .order("last_name", { ascending: true })
+          .order("first_name", { ascending: true });
+
+        if (branchId) {
+          query = query.eq("branch_id", branchId);
+        }
+
+        return query;
+      })(),
+      (() => {
+        let query = supabase
+          .from("staff_leave_entries")
+          .select("*")
+          .order("start_date", { ascending: false })
+          .order("created_at", { ascending: false });
+
+        if (branchId) {
+          query = query.eq("branch_id", branchId);
+        }
+
+        return query;
+      })(),
     ]);
 
   if (staffError) {

@@ -12,7 +12,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createQuotationAction, updateQuotationAction } from "@/features/quotations/actions/quotation-actions";
+import { QuickCreateProductDialog } from "@/features/products/components/quick-create-product-dialog";
 import { serializeQuotationItems } from "@/features/quotations/schemas/quotation-form-schema";
+import { QuickCreateServiceDialog } from "@/features/services/components/quick-create-service-dialog";
 import type {
   QuotationFormItem,
   QuotationFormOptions,
@@ -54,6 +56,8 @@ export function QuotationForm({
   const [items, setItems] = useState<QuotationFormItem[]>(
     initialValues.items.length > 0 ? initialValues.items : [createQuotationItem()],
   );
+  const [productOptions, setProductOptions] = useState(options.products);
+  const [serviceOptions, setServiceOptions] = useState(options.services);
 
   const availableVehicles = options.vehicles.filter((vehicle) => vehicle.customerId === customerId);
   const subtotal = calculateQuotationSubtotal(items);
@@ -188,8 +192,8 @@ export function QuotationForm({
             <CardContent className="space-y-4">
               {items.map((item, index) => {
                 const lineTotal = calculateQuotationLineTotal(item);
-                const filteredProducts = options.products;
-                const filteredServices = options.services;
+                const filteredProducts = productOptions;
+                const filteredServices = serviceOptions;
 
                 return (
                   <div key={item.key} className="rounded-[1.25rem] border border-border/70 bg-muted/20 p-4">
@@ -232,7 +236,29 @@ export function QuotationForm({
 
                       {item.itemType === "product" ? (
                         <div className="space-y-2 xl:col-span-2">
-                          <Label>Product</Label>
+                          <div className="flex items-center justify-between gap-3">
+                            <Label>Product</Label>
+                            {options.permissions.canCreateProducts ? (
+                              <QuickCreateProductDialog
+                                triggerLabel="Add new product"
+                                onCreated={(product) => {
+                                  setProductOptions((current) => [...current, {
+                                    id: product.id,
+                                    label: product.label,
+                                    sku: product.sku,
+                                    unitPrice: product.unitPrice,
+                                  }]);
+                                  updateItem(setItems, item.key, {
+                                    itemType: "product",
+                                    productId: product.id,
+                                    serviceId: "",
+                                    description: product.label,
+                                    unitPrice: formatMoneyInputValue(product.unitPrice),
+                                  });
+                                }}
+                              />
+                            ) : null}
+                          </div>
                           <select
                             value={item.productId}
                             onChange={(event) => {
@@ -257,7 +283,29 @@ export function QuotationForm({
                         </div>
                       ) : item.itemType === "service" ? (
                         <div className="space-y-2 xl:col-span-2">
-                          <Label>Service</Label>
+                          <div className="flex items-center justify-between gap-3">
+                            <Label>Service</Label>
+                            {options.permissions.canCreateServices ? (
+                              <QuickCreateServiceDialog
+                                triggerLabel="Add new service"
+                                onCreated={(service) => {
+                                  setServiceOptions((current) => [...current, {
+                                    id: service.id,
+                                    label: service.label,
+                                    category: service.category,
+                                    unitPrice: service.unitPrice,
+                                  }]);
+                                  updateItem(setItems, item.key, {
+                                    itemType: "service",
+                                    serviceId: service.id,
+                                    productId: "",
+                                    description: service.label,
+                                    unitPrice: formatMoneyInputValue(service.unitPrice),
+                                  });
+                                }}
+                              />
+                            ) : null}
+                          </div>
                           <select
                             value={item.serviceId}
                             onChange={(event) => {

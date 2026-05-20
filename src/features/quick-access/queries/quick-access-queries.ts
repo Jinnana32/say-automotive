@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import type { AppCapability } from "@/lib/auth/permissions";
+import { applyBranchFilter, getBranchScopedServerClient } from "@/lib/branches";
 import { mapCustomerDetail } from "@/features/customers/mappers";
 import { mapQuotationRowToListItem, mapVehicleRowToQuotationOption } from "@/features/quotations/mappers";
 import type { QuotationListItem } from "@/features/quotations/types";
@@ -13,8 +14,6 @@ import type {
 } from "@/features/quick-access/types";
 import { isPossiblePlateMatch, normalizeQuickAccessPlate } from "@/features/quick-access/utils";
 import { mapVehicleDetail } from "@/features/vehicles/mappers";
-import { requireAuthenticatedStaff } from "@/lib/auth/session";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type { TableRow } from "@/types/database";
 
 type CustomerRow = TableRow<"customers">;
@@ -28,7 +27,7 @@ export async function getQuickAccessSearchState({
   plate?: string;
   lastName?: string;
 }): Promise<QuickAccessSearchState> {
-  const context = await requireAuthenticatedStaff();
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("vehicles:read");
 
   if (
     !context.capabilities.includes("vehicles:read") ||
@@ -42,13 +41,13 @@ export async function getQuickAccessSearchState({
     canViewQuotations: context.capabilities.includes("quotations:read"),
     canViewServiceHistory: context.capabilities.includes("job_orders:read"),
   };
-  const supabase = await getSupabaseServerClient();
   const plateQuery = plate?.trim() ?? "";
   const customerLastNameQuery = plateQuery ? "" : lastName?.trim() ?? "";
   const records = plateQuery
     ? await searchQuickAccessByPlate(
         supabase,
         context.capabilities,
+        branchScope.selectedBranchId,
         plateQuery,
         permissions.canViewQuotations,
       )
@@ -56,6 +55,7 @@ export async function getQuickAccessSearchState({
       ? await searchQuickAccessByCustomerLastName(
           supabase,
           context.capabilities,
+          branchScope.selectedBranchId,
           customerLastNameQuery,
           permissions.canViewQuotations,
         )
@@ -70,8 +70,9 @@ export async function getQuickAccessSearchState({
 }
 
 async function searchQuickAccessByPlate(
-  supabase: Awaited<ReturnType<typeof getSupabaseServerClient>>,
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
   capabilities: readonly AppCapability[],
+  branchId: string | null,
   plateQuery: string,
   canViewQuotations: boolean,
 ) {
@@ -81,11 +82,14 @@ async function searchQuickAccessByPlate(
     return [];
   }
 
-  const { data, error } = await supabase
-    .from("vehicles")
-    .select("*")
-    .not("plate_number", "is", null)
-    .order("created_at", { ascending: false });
+  const { data, error } = await applyBranchFilter(
+    supabase
+      .from("vehicles")
+      .select("*")
+      .not("plate_number", "is", null)
+      .order("created_at", { ascending: false }),
+    branchId,
+  );
 
   if (error) {
     throw new Error(error.message);
@@ -123,10 +127,13 @@ async function searchQuickAccessByPlate(
   const customerIds = [...new Set(matchedVehicleRows.map(({ vehicleRow }) => vehicleRow.customer_id))];
   const [{ data: customers, error: customerError }, { data: relatedVehicles, error: vehicleError }] =
     await Promise.all([
-      supabase.from("customers").select("*").in("id", customerIds),
-      supabase.from("vehicles").select("*").in("customer_id", customerIds).order("created_at", {
-        ascending: false,
-      }),
+      applyBranchFilter(supabase.from("customers").select("*").in("id", customerIds), branchId),
+      applyBranchFilter(
+        supabase.from("vehicles").select("*").in("customer_id", customerIds).order("created_at", {
+          ascending: false,
+        }),
+        branchId,
+      ),
     ]);
 
   if (customerError) {
@@ -140,6 +147,7 @@ async function searchQuickAccessByPlate(
   return buildQuickAccessRecords({
     supabase,
     capabilities,
+    branchId,
     customerRows: (customers ?? []) as CustomerRow[],
     vehicleRows: (relatedVehicles ?? []) as VehicleRow[],
     matches: matchedVehicleRows.map(({ vehicleRow, match }) => ({
@@ -152,18 +160,22 @@ async function searchQuickAccessByPlate(
 }
 
 async function searchQuickAccessByCustomerLastName(
-  supabase: Awaited<ReturnType<typeof getSupabaseServerClient>>,
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
   capabilities: readonly AppCapability[],
+  branchId: string | null,
   lastNameQuery: string,
   canViewQuotations: boolean,
 ) {
   const escapedLastName = escapeSearchTerm(lastNameQuery);
-  const { data: customers, error: customerError } = await supabase
-    .from("customers")
-    .select("*")
-    .or(`last_name.ilike.%${escapedLastName}%,display_name.ilike.%${escapedLastName}%`)
-    .order("display_name", { ascending: true })
-    .limit(12);
+  const { data: customers, error: customerError } = await applyBranchFilter(
+    supabase
+      .from("customers")
+      .select("*")
+      .or(`last_name.ilike.%${escapedLastName}%,display_name.ilike.%${escapedLastName}%`)
+      .order("display_name", { ascending: true })
+      .limit(12),
+    branchId,
+  );
 
   if (customerError) {
     throw new Error(customerError.message);
@@ -176,11 +188,14 @@ async function searchQuickAccessByCustomerLastName(
   }
 
   const customerIds = customerRows.map((customer) => customer.id);
-  const { data: vehicles, error: vehicleError } = await supabase
-    .from("vehicles")
-    .select("*")
-    .in("customer_id", customerIds)
-    .order("created_at", { ascending: false });
+  const { data: vehicles, error: vehicleError } = await applyBranchFilter(
+    supabase
+      .from("vehicles")
+      .select("*")
+      .in("customer_id", customerIds)
+      .order("created_at", { ascending: false }),
+    branchId,
+  );
 
   if (vehicleError) {
     throw new Error(vehicleError.message);
@@ -189,6 +204,7 @@ async function searchQuickAccessByCustomerLastName(
   return buildQuickAccessRecords({
     supabase,
     capabilities,
+    branchId,
     customerRows,
     vehicleRows: (vehicles ?? []) as VehicleRow[],
     matches: customerRows.map((customer) => ({
@@ -204,8 +220,9 @@ async function searchQuickAccessByCustomerLastName(
 }
 
 async function buildQuickAccessRecords(params: {
-  supabase: Awaited<ReturnType<typeof getSupabaseServerClient>>;
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"];
   capabilities: readonly AppCapability[];
+  branchId: string | null;
   customerRows: CustomerRow[];
   vehicleRows: VehicleRow[];
   matches: Array<{
@@ -225,12 +242,14 @@ async function buildQuickAccessRecords(params: {
     supabase: params.supabase,
     customerRows: params.customerRows,
     vehicleRows: params.vehicleRows,
+    branchId: params.branchId,
     canViewQuotations: params.canViewQuotations,
   });
   const serviceHistoryEntries = await listServiceHistoryByVehicleIdsForContext({
     supabase: params.supabase,
     capabilities: params.capabilities,
     vehicleIds: params.vehicleRows.map((vehicle) => vehicle.id),
+    branchId: params.branchId,
   });
   const serviceHistoryByVehicleId = groupServiceHistoryByVehicle(serviceHistoryEntries);
 
@@ -269,9 +288,10 @@ async function buildQuickAccessRecords(params: {
 }
 
 async function listRecentQuotationsByCustomerId(params: {
-  supabase: Awaited<ReturnType<typeof getSupabaseServerClient>>;
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"];
   customerRows: CustomerRow[];
   vehicleRows: VehicleRow[];
+  branchId: string | null;
   canViewQuotations: boolean;
 }) {
   if (!params.canViewQuotations || params.customerRows.length === 0) {
@@ -279,12 +299,15 @@ async function listRecentQuotationsByCustomerId(params: {
   }
 
   const customerIds = params.customerRows.map((customer) => customer.id);
-  const { data, error } = await params.supabase
-    .from("quotations")
-    .select("*")
-    .in("customer_id", customerIds)
-    .order("created_at", { ascending: false })
-    .limit(60);
+  const { data, error } = await applyBranchFilter(
+    params.supabase
+      .from("quotations")
+      .select("*")
+      .in("customer_id", customerIds)
+      .order("created_at", { ascending: false })
+      .limit(60),
+    params.branchId,
+  );
 
   if (error) {
     throw new Error(error.message);

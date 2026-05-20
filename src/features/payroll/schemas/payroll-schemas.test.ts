@@ -17,11 +17,11 @@ describe("compensationProfileSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("rejects money fields beyond two decimal places", () => {
+  it("rejects money fields beyond four decimal places", () => {
     const result = compensationProfileSchema.safeParse({
       staffId: "6f85967c-31db-43ae-8d70-cdb34abd57b2",
       payBasis: "daily",
-      baseRate: "1500.123",
+      baseRate: "1500.12345",
       overtimeRate: "10.00",
       allowancePerPeriod: "0.00",
       effectiveStartDate: "2026-05-01",

@@ -58,6 +58,10 @@ export type JobOrderItemDetail = {
   isAdditional: boolean;
   approvalStatus: JobOrderApprovalStatus;
   usageStatus: JobOrderUsageStatus;
+  checklistCompleted: boolean;
+  checklistCheckedAt: string | null;
+  checklistCheckedByStaffId: string | null;
+  checklistCheckedByName: string | null;
   approvedAt: string | null;
   rejectedAt: string | null;
   inventoryTracking: JobOrderItemInventoryTracking | null;
@@ -117,6 +121,7 @@ export type JobOrderDetail = JobOrderListItem & {
   canAssignMechanics: boolean;
   canAddAdditionalItems: boolean;
   canResolveAdditionalItems: boolean;
+  canUpdateChecklist: boolean;
   canGenerateInvoice: boolean;
   canReleaseVehicle: boolean;
   availableNextStatuses: JobOrderStatus[];
@@ -171,6 +176,10 @@ export type JobOrderFormOptions = {
   mechanics: JobOrderMechanicOption[];
   products: JobOrderProductOption[];
   services: JobOrderServiceOption[];
+  permissions: {
+    canCreateProducts: boolean;
+    canCreateServices: boolean;
+  };
 };
 
 export type JobOrderDetailsFormValues = {

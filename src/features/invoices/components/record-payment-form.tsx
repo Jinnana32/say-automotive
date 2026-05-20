@@ -7,6 +7,7 @@ import { SubmitButton } from "@/components/shared/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { recordInvoicePaymentAction } from "@/features/invoices/actions/invoice-actions";
+import { PAYMENT_METHOD_OPTIONS } from "@/features/invoices/types";
 import { formatMoneyInputValue, MONEY_INPUT_STEP } from "@/lib/currency";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 import { useFormValues } from "@/lib/use-form-values";
@@ -67,11 +68,11 @@ export function RecordPaymentForm({
             className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             onChange={(event) => updateFormValue("paymentMethod", event.target.value)}
           >
-            <option value="cash">Cash</option>
-            <option value="gcash">GCash</option>
-            <option value="card">Card</option>
-            <option value="bank_transfer">Bank transfer</option>
-            <option value="check">Check</option>
+            {PAYMENT_METHOD_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
           <FieldError errors={state.fieldErrors} name="paymentMethod" />
         </div>

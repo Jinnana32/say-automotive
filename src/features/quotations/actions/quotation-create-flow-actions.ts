@@ -8,7 +8,7 @@ import {
   deriveCustomerDisplayName,
 } from "@/features/customers/schemas/customer-form-schema";
 import type { CustomerFormValues, CustomerOption } from "@/features/customers/types";
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { getBranchScopedServerClient } from "@/lib/branches";
 import { toFormActionState } from "@/lib/forms";
 import {
   vehicleFormSchema,
@@ -44,8 +44,9 @@ export async function quickCreateCustomerForQuotationAction(
   }
 
   const values = parsed.data;
-  const { supabase } = await getAuthorizedSupabaseServerClient("customers:write");
+  const { branchScope, supabase } = await getBranchScopedServerClient("customers:write");
   const payload = {
+    branch_id: branchScope.writeBranchId,
     customer_type: values.customerType,
     display_name: deriveCustomerDisplayName(values),
     first_name: values.firstName || null,
@@ -96,16 +97,26 @@ export async function quickCreateVehicleForQuotationAction(
   }
 
   const values = parsed.data;
-  const { supabase } = await getAuthorizedSupabaseServerClient("vehicles:write");
+  const { branchScope, supabase } = await getBranchScopedServerClient("vehicles:write");
   const normalizedPlateNumber = normalizeNullableUpper(values.plateNumber);
   const normalizedVin = normalizeNullableUpper(values.vin);
 
   const [plateConflict, vinConflict] = await Promise.all([
     normalizedPlateNumber
-      ? supabase.from("vehicles").select("id").eq("plate_number", normalizedPlateNumber).maybeSingle()
+      ? supabase
+          .from("vehicles")
+          .select("id")
+          .eq("branch_id", branchScope.writeBranchId)
+          .eq("plate_number", normalizedPlateNumber)
+          .maybeSingle()
       : Promise.resolve({ data: null, error: null }),
     normalizedVin
-      ? supabase.from("vehicles").select("id").eq("vin", normalizedVin).maybeSingle()
+      ? supabase
+          .from("vehicles")
+          .select("id")
+          .eq("branch_id", branchScope.writeBranchId)
+          .eq("vin", normalizedVin)
+          .maybeSingle()
       : Promise.resolve({ data: null, error: null }),
   ]);
 
@@ -144,6 +155,7 @@ export async function quickCreateVehicleForQuotationAction(
   }
 
   const payload = {
+    branch_id: branchScope.writeBranchId,
     customer_id: values.customerId,
     make: values.make,
     model: values.model,

@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { DateTime } from "luxon";
 
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { getBranchScopedServerClient } from "@/lib/branches";
 import { getReportsPageData } from "@/features/reports/queries/report-queries";
 import type { ReportsPrintDocument } from "@/features/reports/types";
 import { buildBusinessLogoUrl } from "@/lib/storage";
@@ -14,27 +14,26 @@ export const getReportsPrintDocument = cache(
     groupBy?: string;
   }): Promise<ReportsPrintDocument> => {
     const reports = await getReportsPageData(input);
-    const { supabase } = await getAuthorizedSupabaseServerClient("reports:read");
-    const { data: settingsRows, error } = await supabase
+    const { branchScope, supabase } = await getBranchScopedServerClient("reports:read");
+    const { data: settingsRow, error } = await supabase
       .from("business_settings")
       .select("business_name, business_logo_path, business_vat_registration_no, business_contact, business_email, business_address, updated_at")
-      .limit(1);
+      .eq("branch_id", branchScope.writeBranchId)
+      .maybeSingle();
 
     if (error) {
       throw new Error(error.message);
     }
 
-    const settings = settingsRows?.[0] ?? null;
-
     return {
       reports,
       businessProfile: {
-        businessName: settings?.business_name ?? "SAY Auto Care Center",
-        businessLogoUrl: buildBusinessLogoUrl(settings?.business_logo_path ?? null, settings?.updated_at ?? null),
-        businessVatRegistrationNo: settings?.business_vat_registration_no ?? null,
-        businessContact: settings?.business_contact ?? null,
-        businessEmail: settings?.business_email ?? null,
-        businessAddress: settings?.business_address ?? null,
+        businessName: settingsRow?.business_name ?? "SAY Auto Care Center",
+        businessLogoUrl: buildBusinessLogoUrl(settingsRow?.business_logo_path ?? null, settingsRow?.updated_at ?? null),
+        businessVatRegistrationNo: settingsRow?.business_vat_registration_no ?? null,
+        businessContact: settingsRow?.business_contact ?? null,
+        businessEmail: settingsRow?.business_email ?? null,
+        businessAddress: settingsRow?.business_address ?? null,
       },
       generatedAt: DateTime.now().setZone("Asia/Manila").toISO() ?? new Date().toISOString(),
     };

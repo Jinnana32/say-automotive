@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { getMainBranch } from "@/lib/branches";
 import { INITIAL_FORM_ACTION_STATE, toFormActionState, type FormActionState } from "@/lib/forms";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { slugify } from "@/features/website/utils";
@@ -27,19 +28,7 @@ export async function submitWebsiteQuoteRequestAction(
   }
 
   const supabase = getSupabaseAdminClient();
-  const { data: branch, error: branchError } = await supabase
-    .from("branches")
-    .select("id")
-    .eq("is_default", true)
-    .maybeSingle();
-
-  if (branchError) {
-    return { status: "error", message: branchError.message };
-  }
-
-  if (!branch) {
-    return { status: "error", message: "Default branch is not configured." };
-  }
+  const branch = await getMainBranch();
 
   const payload = {
     branch_id: branch.id,

@@ -14,6 +14,7 @@ import {
 } from "@/components/shared/table-row-actions-menu";
 import { formatCurrency } from "@/lib/currency";
 import { listProducts } from "@/features/products/queries/product-queries";
+import { ProductImage } from "@/features/products/components/product-image";
 import { paginateItems } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
@@ -96,11 +97,19 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 {pagination.items.map((product) => (
                   <TableRow key={product.id}>
                     <TableCell>
-                      <div className="space-y-1">
-                        <p className="font-semibold">{product.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {product.categoryName ?? "Uncategorized"} · {product.unitLabel}
-                        </p>
+                      <div className="flex items-center gap-3">
+                        <ProductImage
+                          src={product.productImageUrl}
+                          alt={product.name}
+                          className="size-14 shrink-0"
+                          fallbackLabel="Photo"
+                        />
+                        <div className="space-y-1">
+                          <p className="font-semibold">{product.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {product.categoryName ?? "Uncategorized"} · {product.unitLabel}
+                          </p>
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell className="capitalize">{product.productType}</TableCell>

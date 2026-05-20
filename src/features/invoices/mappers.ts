@@ -7,7 +7,11 @@ import type {
   InvoicePaymentEntry,
   PaymentListItem,
 } from "@/features/invoices/types";
-import { canRecordInvoicePayment, canReleaseInvoiceVehicle } from "@/features/invoices/utils";
+import {
+  canCancelInvoice,
+  canRecordInvoicePayment,
+  canReleaseInvoiceVehicle,
+} from "@/features/invoices/utils";
 
 type InvoiceRow = TableRow<"invoices">;
 type InvoiceItemRow = TableRow<"invoice_items">;
@@ -88,6 +92,9 @@ export function mapInvoiceDetail(params: {
     vehicleId: params.row.vehicle_id,
     saleId: params.row.sale_id,
     saleNumber: params.saleNumber,
+    cancelledAt: params.row.cancelled_at,
+    cancelledByUserId: params.row.cancelled_by,
+    cancellationReason: params.row.cancellation_reason,
     items: params.items,
     payments: params.payments,
     allowPartialPayments: params.allowPartialPayments,
@@ -97,12 +104,14 @@ export function mapInvoiceDetail(params: {
     releasedAt: params.releasedAt,
     canRecordPayment: false,
     canReleaseVehicle: false,
+    canCancel: false,
   };
 
   return {
     ...detail,
     canRecordPayment: canRecordInvoicePayment(detail),
     canReleaseVehicle: canReleaseInvoiceVehicle(detail),
+    canCancel: canCancelInvoice(detail),
   };
 }
 

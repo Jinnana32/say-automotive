@@ -41,6 +41,7 @@ export default async function NewProductPage() {
           websiteFeatured: false,
           websiteSortOrder: "0",
           websiteSlug: "",
+          productImageUrl: "",
           websiteImageUrl: "",
           websiteShortDescription: "",
           websiteBadge: "",

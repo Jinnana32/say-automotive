@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { applyBranchFilter, getBranchScopedServerClient } from "@/lib/branches";
 import { INITIAL_FORM_ACTION_STATE, toFormActionState, type FormActionState } from "@/lib/forms";
 import {
   customerFormSchema,
@@ -32,10 +32,11 @@ export async function deleteCustomerAction(formData: FormData) {
     redirect("/customers?error=Invalid customer request.");
   }
 
-  const { supabase } = await getAuthorizedSupabaseServerClient("customers:write");
-  const { data: customer, error: customerError } = await supabase
-    .from("customers")
-    .select("id, display_name")
+  const { branchScope, supabase } = await getBranchScopedServerClient("customers:write");
+  const { data: customer, error: customerError } = await applyBranchFilter(
+    supabase.from("customers").select("id, display_name, branch_id"),
+    branchScope.selectedBranchId,
+  )
     .eq("id", customerId)
     .maybeSingle();
 
@@ -47,7 +48,10 @@ export async function deleteCustomerAction(formData: FormData) {
     redirect("/customers?error=Customer record not found.");
   }
 
-  const { error } = await supabase.from("customers").delete().eq("id", customerId);
+  const { error } = await applyBranchFilter(
+    supabase.from("customers").delete(),
+    branchScope.selectedBranchId,
+  ).eq("id", customerId);
 
   if (error) {
     redirect(`/customers?error=${encodeURIComponent(toCustomerDeleteErrorMessage(error.message))}`);
@@ -66,8 +70,12 @@ async function saveCustomer(formData: FormData): Promise<FormActionState> {
   }
 
   const values = parsed.data;
-  const { supabase } = await getAuthorizedSupabaseServerClient("customers:write");
+  const { branchScope, supabase } = await getBranchScopedServerClient("customers:write");
+  const branchId = values.customerId
+    ? await getExistingCustomerBranchId(supabase, branchScope.selectedBranchId, values.customerId)
+    : branchScope.writeBranchId;
   const payload = {
+    branch_id: branchId,
     customer_type: values.customerType,
     display_name: deriveCustomerDisplayName(values),
     first_name: values.firstName || null,
@@ -81,7 +89,13 @@ async function saveCustomer(formData: FormData): Promise<FormActionState> {
   };
 
   const operation = values.customerId
-    ? supabase.from("customers").update(payload).eq("id", values.customerId).select("id").single()
+    ? applyBranchFilter(
+        supabase.from("customers").update(payload),
+        branchScope.selectedBranchId,
+      )
+        .eq("id", values.customerId)
+        .select("id")
+        .single()
     : supabase.from("customers").insert(payload).select("id").single();
 
   const { data, error } = await operation;
@@ -116,4 +130,27 @@ function toCustomerDeleteErrorMessage(message: string) {
   }
 
   return message;
+}
+
+async function getExistingCustomerBranchId(
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
+  selectedBranchId: string | null,
+  customerId: string,
+) {
+  const { data, error } = await applyBranchFilter(
+    supabase.from("customers").select("branch_id"),
+    selectedBranchId,
+  )
+    .eq("id", customerId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data?.branch_id) {
+    throw new Error("Customer record does not exist.");
+  }
+
+  return data.branch_id;
 }

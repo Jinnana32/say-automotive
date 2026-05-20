@@ -1,6 +1,7 @@
 import type { TableRow } from "@/types/database";
 
 import { formatMoneyInputValue } from "@/lib/currency";
+import { resolveProductImageUrl } from "@/lib/storage";
 import type { ProductFormValues, ProductListItem, ReferenceOption } from "@/features/products/types";
 
 type ProductRow = TableRow<"products">;
@@ -23,6 +24,12 @@ export function mapProductRowToListItem(
     name: row.name,
     sku: row.sku,
     barcode: row.barcode,
+    productImageUrl: resolveProductImageUrl({
+      productImagePath: row.product_image_path,
+      productImageUrl: row.product_image_url,
+      websiteImageUrl: row.website_image_url,
+      cacheBust: row.updated_at,
+    }),
     productType: row.product_type,
     categoryName: row.category_id ? dictionaries.categories.get(row.category_id) ?? null : null,
     brandName: row.brand_id ? dictionaries.brands.get(row.brand_id) ?? null : null,
@@ -69,6 +76,7 @@ export function mapProductRowToFormValues(row: ProductRow): ProductFormValues {
     websiteFeatured: row.website_featured,
     websiteSortOrder: String(row.website_sort_order),
     websiteSlug: row.website_slug ?? "",
+    productImageUrl: row.product_image_url ?? "",
     websiteImageUrl: row.website_image_url ?? "",
     websiteShortDescription: row.website_short_description ?? "",
     websiteBadge: row.website_badge ?? "",

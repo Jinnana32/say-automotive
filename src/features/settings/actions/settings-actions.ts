@@ -4,8 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { writeAuditLog } from "@/lib/audit";
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
-import { getDefaultBranch } from "@/lib/branches";
+import { getBranchScopedServerClient } from "@/lib/branches";
 import {
   INITIAL_FORM_ACTION_STATE,
   toFormActionState,
@@ -36,14 +35,12 @@ export async function updateBusinessProfileSettingsAction(
     return toFormActionState(parsed.error);
   }
 
-  const [branch, { context, supabase }] = await Promise.all([
-    getDefaultBranch(),
-    getAuthorizedSupabaseServerClient("settings:write"),
-  ]);
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("settings:write");
+  const branchId = branchScope.writeBranchId;
   const { data: currentSettings, error: currentError } = await supabase
     .from("business_settings")
     .select("*")
-    .eq("branch_id", branch.id)
+    .eq("branch_id", branchId)
     .single();
 
   if (currentError) {
@@ -60,7 +57,7 @@ export async function updateBusinessProfileSettingsAction(
       return { status: "error", message: fileValidationError };
     }
 
-    const uploadPath = buildBusinessLogoObjectKey(branch.id, businessLogoFile.name);
+    const uploadPath = buildBusinessLogoObjectKey(branchId, businessLogoFile.name);
     const { error: uploadError } = await supabase.storage
       .from(BUSINESS_ASSETS_BUCKET)
       .upload(uploadPath, businessLogoFile, {
@@ -89,7 +86,7 @@ export async function updateBusinessProfileSettingsAction(
   const { error } = await supabase
     .from("business_settings")
     .update(payload)
-    .eq("branch_id", branch.id);
+    .eq("branch_id", branchId);
 
   if (error) {
     return { status: "error", message: error.message };
@@ -129,14 +126,12 @@ export async function updateOperationalRulesSettingsAction(
     return toFormActionState(parsed.error);
   }
 
-  const [branch, { context, supabase }] = await Promise.all([
-    getDefaultBranch(),
-    getAuthorizedSupabaseServerClient("settings:write"),
-  ]);
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("settings:write");
+  const branchId = branchScope.writeBranchId;
   const { data: currentSettings, error: currentError } = await supabase
     .from("business_settings")
     .select("*")
-    .eq("branch_id", branch.id)
+    .eq("branch_id", branchId)
     .single();
 
   if (currentError) {
@@ -155,7 +150,7 @@ export async function updateOperationalRulesSettingsAction(
   const { error } = await supabase
     .from("business_settings")
     .update(payload)
-    .eq("branch_id", branch.id);
+    .eq("branch_id", branchId);
 
   if (error) {
     return { status: "error", message: error.message };
@@ -195,11 +190,13 @@ export async function updateDocumentSequenceSettingsAction(
     return toFormActionState(parsed.error);
   }
 
-  const { context, supabase } = await getAuthorizedSupabaseServerClient("settings:write");
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("settings:write");
+  const branchId = branchScope.writeBranchId;
   const { data: currentSequence, error: currentError } = await supabase
     .from("document_sequences")
     .select("*")
     .eq("key", parsed.data.key)
+    .eq("branch_id", branchId)
     .single();
 
   if (currentError) {
@@ -215,7 +212,8 @@ export async function updateDocumentSequenceSettingsAction(
   const { error } = await supabase
     .from("document_sequences")
     .update(payload)
-    .eq("key", parsed.data.key);
+    .eq("key", parsed.data.key)
+    .eq("branch_id", branchId);
 
   if (error) {
     return { status: "error", message: error.message };
@@ -227,12 +225,14 @@ export async function updateDocumentSequenceSettingsAction(
     userId: context.userId,
     beforeData: {
       key: currentSequence.key,
+      branch_id: currentSequence.branch_id,
       prefix: currentSequence.prefix,
       padding: currentSequence.padding,
       last_value: currentSequence.last_value,
     },
     afterData: {
       key: parsed.data.key,
+      branch_id: branchId,
       ...payload,
     },
   });

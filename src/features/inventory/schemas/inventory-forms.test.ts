@@ -31,6 +31,17 @@ describe("inventory form schemas", () => {
     expect(parsed.success).toBe(false);
   });
 
+  it("requires notes for recount adjustments in the unified movement schema", () => {
+    const parsed = inventoryMovementSchema.safeParse({
+      movementMode: "recount",
+      productId: "34c25057-b0f8-4da0-9a27-c1792efa2ebd",
+      quantity: "2",
+      notes: "",
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+
   it("rejects zero stock-in quantity", () => {
     const parsed = receiveInventoryStockSchema.safeParse({
       productId: "34c25057-b0f8-4da0-9a27-c1792efa2ebd",
@@ -51,10 +62,30 @@ describe("inventory form schemas", () => {
     expect(parsed.success).toBe(false);
   });
 
+  it("requires notes for standalone recount adjustments", () => {
+    const parsed = reconcileInventoryStockSchema.safeParse({
+      productId: "34c25057-b0f8-4da0-9a27-c1792efa2ebd",
+      countedQuantity: "5",
+      notes: "",
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+
   it("rejects zero damaged quantity", () => {
     const parsed = markInventoryStockDamagedSchema.safeParse({
       productId: "34c25057-b0f8-4da0-9a27-c1792efa2ebd",
       quantity: "0",
+      notes: "",
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+
+  it("requires notes when marking stock as damaged", () => {
+    const parsed = markInventoryStockDamagedSchema.safeParse({
+      productId: "34c25057-b0f8-4da0-9a27-c1792efa2ebd",
+      quantity: "1",
       notes: "",
     });
 

@@ -1,6 +1,10 @@
 import { cache } from "react";
 
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import {
+  applyBranchFilter,
+  applySharedCatalogBranchFilter,
+  getBranchScopedServerClient,
+} from "@/lib/branches";
 import type { TableRow } from "@/types/database";
 
 import {
@@ -48,11 +52,14 @@ export async function listJobOrders(filters?: {
   search?: string;
   status?: JobOrderRow["status"] | "";
 }): Promise<JobOrderListItem[]> {
-  const { supabase } = await getAuthorizedSupabaseServerClient("job_orders:read");
-  let query = supabase
-    .from("job_orders")
-    .select("*")
-    .order("created_at", { ascending: false });
+  const { branchScope, supabase } = await getBranchScopedServerClient("job_orders:read");
+  let query = applyBranchFilter(
+    supabase
+      .from("job_orders")
+      .select("*")
+      .order("created_at", { ascending: false }),
+    branchScope.selectedBranchId,
+  );
 
   if (filters?.status) {
     query = query.eq("status", filters.status);
@@ -96,7 +103,7 @@ export async function listJobOrders(filters?: {
 }
 
 export const getJobOrderById = cache(async (jobOrderId: string): Promise<JobOrderDetail | null> => {
-  const { supabase } = await getAuthorizedSupabaseServerClient("job_orders:read");
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("job_orders:read");
   const [
     { data: jobOrder, error: jobOrderError },
     { data: items, error: itemsError },
@@ -104,7 +111,12 @@ export const getJobOrderById = cache(async (jobOrderId: string): Promise<JobOrde
     { data: usages, error: usagesError },
     { data: invoice, error: invoiceError },
   ] = await Promise.all([
-    supabase.from("job_orders").select("*").eq("id", jobOrderId).maybeSingle(),
+    applyBranchFilter(
+      supabase.from("job_orders").select("*"),
+      branchScope.selectedBranchId,
+    )
+      .eq("id", jobOrderId)
+      .maybeSingle(),
     supabase
       .from("job_order_items")
       .select("*")
@@ -120,11 +132,13 @@ export const getJobOrderById = cache(async (jobOrderId: string): Promise<JobOrde
       .select("*")
       .eq("job_order_id", jobOrderId)
       .order("created_at", { ascending: true }),
-    supabase
-      .from("invoices")
-      .select("id, invoice_number, status, total_amount, paid_amount, balance")
-      .eq("job_order_id", jobOrderId)
-      .maybeSingle(),
+    applyBranchFilter(
+      supabase
+        .from("invoices")
+        .select("id, invoice_number, status, total_amount, paid_amount, balance")
+        .eq("job_order_id", jobOrderId),
+      branchScope.selectedBranchId,
+    ).maybeSingle(),
   ]);
 
   if (jobOrderError) {
@@ -156,6 +170,13 @@ export const getJobOrderById = cache(async (jobOrderId: string): Promise<JobOrde
   const mechanicRows = (mechanics ?? []) as JobOrderMechanicRow[];
   const usageRows = (usages ?? []) as JobOrderPartUsageRow[];
   const staffIds = [...new Set(mechanicRows.map((row) => row.staff_id))];
+  const checklistStaffIds = [
+    ...new Set(
+      itemRows.flatMap((row) =>
+        row.checklist_checked_by_staff_id ? [row.checklist_checked_by_staff_id] : [],
+      ),
+    ),
+  ];
   const productIds = [
     ...new Set(itemRows.flatMap((row) => (row.product_id ? [row.product_id] : []))),
   ];
@@ -168,7 +189,7 @@ export const getJobOrderById = cache(async (jobOrderId: string): Promise<JobOrde
     getCustomerNameMap([jobOrderRow.customer_id]),
     getVehicleLabelMap([jobOrderRow.vehicle_id]),
     getQuotationNumberMap(jobOrderRow.quotation_id ? [jobOrderRow.quotation_id] : []),
-    getStaffNameMap(staffIds),
+    getStaffNameMap([...new Set([...staffIds, ...checklistStaffIds])]),
     getInventoryStockMap(jobOrderRow.branch_id, productIds),
     getProductInventoryMap(productIds),
     getStockMovementMap(stockMovementIds),
@@ -192,6 +213,9 @@ export const getJobOrderById = cache(async (jobOrderId: string): Promise<JobOrde
   const itemDetails = itemRows.map((row) =>
     mapJobOrderItemRowToDetail({
       row,
+      checklistCheckedByName: row.checklist_checked_by_staff_id
+        ? staffMap.get(row.checklist_checked_by_staff_id) ?? null
+        : null,
       inventoryTracking: buildInventoryTracking({
         itemRow: row,
         stockRow: row.product_id ? inventoryStockMap.get(row.product_id) ?? null : null,
@@ -216,17 +240,21 @@ export const getJobOrderById = cache(async (jobOrderId: string): Promise<JobOrde
         staffMap.get(row.staff_id) ?? "Unknown mechanic",
       ),
     ),
+    canUpdateChecklistRole: context.capabilities.includes("job_orders:write"),
   });
 });
 
 export const getJobOrderMechanicOptions = cache(async (): Promise<JobOrderMechanicOption[]> => {
-  const supabase = await getSupabaseServerClient();
-  const { data: mechanics, error } = await supabase
-    .from("staff")
-    .select("id, first_name, last_name")
-    .eq("status", "active")
-    .eq("role", "mechanic")
-    .order("last_name", { ascending: true });
+  const { branchScope, supabase } = await getBranchScopedServerClient("job_orders:write");
+  const { data: mechanics, error } = await applyBranchFilter(
+    supabase
+      .from("staff")
+      .select("id, first_name, last_name")
+      .eq("status", "active")
+      .eq("role", "mechanic")
+      .order("last_name", { ascending: true }),
+    branchScope.selectedBranchId,
+  );
 
   if (error) {
     throw new Error(error.message);
@@ -238,20 +266,27 @@ export const getJobOrderMechanicOptions = cache(async (): Promise<JobOrderMechan
 export const getJobOrderItemCatalogOptions = cache(async (): Promise<{
   products: JobOrderFormOptions["products"];
   services: JobOrderFormOptions["services"];
+  permissions: JobOrderFormOptions["permissions"];
 }> => {
-  const supabase = await getSupabaseServerClient();
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("job_orders:write");
   const [{ data: products, error: productsError }, { data: services, error: servicesError }] =
     await Promise.all([
-      supabase
-        .from("products")
-        .select("id, name, sku, selling_price")
-        .eq("status", "active")
-        .order("name", { ascending: true }),
-      supabase
-        .from("services")
-        .select("id, name, category, labor_price")
-        .eq("status", "active")
-        .order("name", { ascending: true }),
+      applySharedCatalogBranchFilter(
+        supabase
+          .from("products")
+          .select("id, name, sku, selling_price")
+          .eq("status", "active")
+          .order("name", { ascending: true }),
+        branchScope.selectedBranchId,
+      ),
+      applySharedCatalogBranchFilter(
+        supabase
+          .from("services")
+          .select("id, name, category, labor_price")
+          .eq("status", "active")
+          .order("name", { ascending: true }),
+        branchScope.selectedBranchId,
+      ),
     ]);
 
   if (productsError) {
@@ -265,6 +300,10 @@ export const getJobOrderItemCatalogOptions = cache(async (): Promise<{
   return {
     products: ((products ?? []) as ProductRow[]).map(mapProductRowToJobOrderOption),
     services: ((services ?? []) as ServiceRow[]).map(mapServiceRowToJobOrderOption),
+    permissions: {
+      canCreateProducts: context.capabilities.includes("products:write"),
+      canCreateServices: context.capabilities.includes("services:write"),
+    },
   };
 });
 
@@ -278,6 +317,7 @@ export async function getJobOrderFormOptions(): Promise<JobOrderFormOptions> {
     mechanics,
     products: catalog.products,
     services: catalog.services,
+    permissions: catalog.permissions,
   };
 }
 

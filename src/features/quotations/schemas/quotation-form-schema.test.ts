@@ -33,7 +33,7 @@ describe("quotationFormSchema", () => {
       natureOfRepair: "Change oil and filters",
       inspectionNotes: "",
       status: "pending_approval",
-      discount: "0",
+      discount: "0.1234",
       tax: "0",
       items: [
         createQuotationItem({
@@ -41,17 +41,39 @@ describe("quotationFormSchema", () => {
           serviceId: crypto.randomUUID(),
           description: "Oil Change",
           quantity: "1",
-          unitPrice: "500.12",
+          unitPrice: "500.1234",
         }),
         createQuotationItem({
           itemType: "labor",
           description: "Manual labor",
           quantity: "2",
-          unitPrice: "300.01",
+          unitPrice: "300.0101",
         }),
       ],
     });
 
     expect(result.success).toBe(true);
+  });
+
+  it("rejects discounts larger than the computed subtotal", () => {
+    const result = quotationFormSchema.safeParse({
+      customerId: crypto.randomUUID(),
+      vehicleId: crypto.randomUUID(),
+      natureOfRepair: "",
+      inspectionNotes: "",
+      status: "draft",
+      discount: "1000.0001",
+      tax: "0",
+      items: [
+        createQuotationItem({
+          itemType: "labor",
+          description: "Inspection",
+          quantity: "1",
+          unitPrice: "1000.0000",
+        }),
+      ],
+    });
+
+    expect(result.success).toBe(false);
   });
 });

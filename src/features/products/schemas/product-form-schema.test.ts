@@ -25,6 +25,7 @@ describe("productFormSchema", () => {
       websiteFeatured: false,
       websiteSortOrder: "0",
       websiteSlug: "",
+      productImageUrl: "",
       websiteImageUrl: "",
       websiteShortDescription: "",
       websiteBadge: "",
@@ -34,7 +35,7 @@ describe("productFormSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("accepts two-decimal prices and rejects more precise values", () => {
+  it("accepts four-decimal prices and rejects more precise values", () => {
     const valid = productFormSchema.safeParse({
       name: "Brake Pad",
       sku: "",
@@ -47,8 +48,8 @@ describe("productFormSchema", () => {
       oemNumber: "",
       description: "",
       productType: "part",
-      costPrice: "180.12",
-      sellingPrice: "250.56",
+      costPrice: "180.1234",
+      sellingPrice: "250.5678",
       reorderLevel: "0",
       warrantyDurationDays: "",
       shelfLocation: "",
@@ -56,6 +57,7 @@ describe("productFormSchema", () => {
       websiteFeatured: false,
       websiteSortOrder: "0",
       websiteSlug: "",
+      productImageUrl: "",
       websiteImageUrl: "",
       websiteShortDescription: "",
       websiteBadge: "",
@@ -73,7 +75,7 @@ describe("productFormSchema", () => {
       oemNumber: "",
       description: "",
       productType: "part",
-      costPrice: "180.123",
+      costPrice: "180.12345",
       sellingPrice: "250.56",
       reorderLevel: "0",
       warrantyDurationDays: "",
@@ -82,6 +84,7 @@ describe("productFormSchema", () => {
       websiteFeatured: false,
       websiteSortOrder: "0",
       websiteSlug: "",
+      productImageUrl: "",
       websiteImageUrl: "",
       websiteShortDescription: "",
       websiteBadge: "",

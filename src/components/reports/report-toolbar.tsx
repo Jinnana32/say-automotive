@@ -10,7 +10,7 @@ export function ReportToolbar({
   alternatePrintHref,
   showingAlternatePrint = false,
 }: {
-  downloadHref: string;
+  downloadHref?: string;
   alternatePrintHref?: string;
   showingAlternatePrint?: boolean;
 }) {
@@ -48,12 +48,14 @@ export function ReportToolbar({
           Print
         </Button>
       )}
-      <Button asChild type="button" variant="bluePrimary" size="sm">
-        <a href={downloadHref}>
-          <Download className="size-4" />
-          Download PDF
-        </a>
-      </Button>
+      {downloadHref ? (
+        <Button asChild type="button" variant="bluePrimary" size="sm">
+          <a href={downloadHref}>
+            <Download className="size-4" />
+            Download PDF
+          </a>
+        </Button>
+      ) : null}
     </div>
   );
 }

@@ -2,8 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
-import { getDefaultBranch } from "@/lib/branches";
+import { getBranchScopedServerClient } from "@/lib/branches";
 import { toUtcIso } from "@/lib/dates";
 import { toFormActionState } from "@/lib/forms";
 import { parseAttendanceEntryFormData, attendanceEntrySchema } from "@/features/attendance/schemas/attendance-form-schema";
@@ -26,8 +25,8 @@ export async function upsertAttendanceRecordAction(
   }
 
   const values = parsed.data;
-  const { context, supabase } = await getAuthorizedSupabaseServerClient("attendance:write");
-  const branchId = context.branchId ?? (await getDefaultBranch()).id;
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("attendance:write");
+  const branchId = branchScope.writeBranchId;
   const { data: businessSettings, error: businessSettingsError } = await supabase
     .from("business_settings")
     .select("allow_attendance_admin_override")
@@ -49,7 +48,7 @@ export async function upsertAttendanceRecordAction(
     };
   }
 
-  const payrollLock = await getPayrollPeriodLockForDate(supabase, values.attendanceDate);
+  const payrollLock = await getPayrollPeriodLockForDate(supabase, branchId, values.attendanceDate);
 
   if (payrollLock) {
     return {
@@ -76,6 +75,7 @@ export async function upsertAttendanceRecordAction(
   }
 
   const payload: TableInsert<"attendance"> = {
+    branch_id: branchId,
     staff_id: values.staffId,
     attendance_date: values.attendanceDate,
     time_in: values.timeIn ? toUtcIso(values.timeIn) : null,
@@ -98,6 +98,7 @@ export async function upsertAttendanceRecordAction(
   }
 
   await logAttendanceAdjustment({
+    branchId,
     supabase,
     changedByStaffId: context.staffId,
     action: existingAttendance ? "updated" : "created",
@@ -138,7 +139,7 @@ export async function setAttendanceApprovalAction(
     };
   }
 
-  const { context, supabase } = await getAuthorizedSupabaseServerClient("attendance:write");
+  const { context, supabase } = await getBranchScopedServerClient("attendance:write");
   const { data: existingAttendance, error: existingAttendanceError } = await supabase
     .from("attendance")
     .select("*")
@@ -159,7 +160,11 @@ export async function setAttendanceApprovalAction(
     };
   }
 
-  const payrollLock = await getPayrollPeriodLockForDate(supabase, existingAttendance.attendance_date);
+  const payrollLock = await getPayrollPeriodLockForDate(
+    supabase,
+    existingAttendance.branch_id,
+    existingAttendance.attendance_date,
+  );
 
   if (payrollLock?.status === "finalized") {
     return {
@@ -187,6 +192,7 @@ export async function setAttendanceApprovalAction(
   }
 
   await logAttendanceAdjustment({
+    branchId: savedAttendance.branch_id,
     supabase,
     changedByStaffId: context.staffId,
     action: nextApprovalState ? "approved" : "unapproved",
@@ -220,7 +226,7 @@ export async function upsertStaffScheduleAction(
   }
 
   const values = parsed.data;
-  const { supabase } = await getAuthorizedSupabaseServerClient("attendance:write");
+  const { supabase } = await getBranchScopedServerClient("attendance:write");
   const { error } = await supabase.from("staff_schedules").upsert(
     {
       staff_id: values.staffId,
@@ -268,13 +274,15 @@ function readString(formData: FormData, key: string) {
 }
 
 async function getPayrollPeriodLockForDate(
-  supabase: Awaited<ReturnType<typeof getAuthorizedSupabaseServerClient>>["supabase"],
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
+  branchId: string,
   attendanceDate: string,
 ) {
   const { data, error } = await supabase
     .from("payroll_periods")
     .select("id, label, status")
     .in("status", ["processing", "finalized"])
+    .eq("branch_id", branchId)
     .lte("period_start_date", attendanceDate)
     .gte("period_end_date", attendanceDate)
     .order("period_start_date", { ascending: false })
@@ -289,6 +297,7 @@ async function getPayrollPeriodLockForDate(
 }
 
 async function logAttendanceAdjustment({
+  branchId,
   supabase,
   changedByStaffId,
   action,
@@ -298,7 +307,8 @@ async function logAttendanceAdjustment({
   previousData,
   nextData,
 }: {
-  supabase: Awaited<ReturnType<typeof getAuthorizedSupabaseServerClient>>["supabase"];
+  branchId: string;
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"];
   changedByStaffId: string;
   action: "created" | "updated" | "approved" | "unapproved";
   attendanceId: string;
@@ -308,6 +318,7 @@ async function logAttendanceAdjustment({
   nextData: Record<string, string | null> | null;
 }) {
   const { error } = await supabase.from("attendance_adjustments").insert({
+    branch_id: branchId,
     attendance_id: attendanceId,
     staff_id: staffId,
     attendance_date: attendanceDate,

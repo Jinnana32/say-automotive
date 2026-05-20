@@ -1,5 +1,4 @@
-import { getDefaultBranch } from "@/lib/branches";
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { getBranchScopedServerClient } from "@/lib/branches";
 import { getServerRequestNetworkContext, normalizePublicIpAddress } from "@/lib/network/request-ip";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import type {
@@ -18,30 +17,11 @@ type BranchHolidayRow = TableRow<"branch_holidays">;
 type StaffRow = Pick<TableRow<"staff">, "id">;
 
 export async function getTimekeepingCalendarPageData(): Promise<TimekeepingCalendarPageData> {
-  const [{ context, supabase }, defaultBranch] = await Promise.all([
-    getAuthorizedSupabaseServerClient("settings:read"),
-    getDefaultBranch(),
-  ]);
-  const branchId = context.branchId ?? defaultBranch.id;
+  const { branchScope, supabase } = await getBranchScopedServerClient("settings:read");
+  const branchId = branchScope.writeBranchId;
   const { requestIp } = await getServerRequestNetworkContext();
   const admin = getSupabaseAdminClient();
-  let branchName = defaultBranch.name;
-
-  if (branchId !== defaultBranch.id) {
-    const { data: branchData, error: branchError } = await supabase
-      .from("branches")
-      .select("name")
-      .eq("id", branchId)
-      .maybeSingle();
-
-    if (branchError) {
-      throw new Error(branchError.message);
-    }
-
-    if (branchData) {
-      branchName = branchData.name;
-    }
-  }
+  const branchName = branchScope.selectedBranch?.name ?? branchScope.selectedBranchLabel;
 
   const [
     { data: settingsData, error: settingsError },

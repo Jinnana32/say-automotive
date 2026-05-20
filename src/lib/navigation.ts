@@ -15,6 +15,7 @@ export type NavigationIconName =
   | "customers"
   | "vehicles"
   | "quotations"
+  | "documents"
   | "job-orders"
   | "inventory"
   | "products"
@@ -179,6 +180,14 @@ export const DASHBOARD_NAV_ITEMS: ReadonlyArray<{
     capability: "reports:read",
     group: "Insights",
     iconName: "reports",
+  },
+  {
+    href: "/documents/blank-preview",
+    label: "Blank Document",
+    description: "Preview the reusable document template.",
+    capability: "settings:write",
+    group: "System",
+    iconName: "documents",
   },
   {
     href: "/settings/website",

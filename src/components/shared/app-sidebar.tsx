@@ -44,6 +44,7 @@ const ICONS: Record<
   customers: Users,
   vehicles: CarFront,
   quotations: FileText,
+  documents: FileText,
   'job-orders': ClipboardList,
   inventory: Boxes,
   products: Package,

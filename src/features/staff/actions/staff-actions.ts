@@ -3,8 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
-import { getDefaultBranch } from "@/lib/branches";
+import { applyBranchFilter, getBranchScopedServerClient } from "@/lib/branches";
 import { INITIAL_FORM_ACTION_STATE, toFormActionState, type FormActionState } from "@/lib/forms";
 import { parseStaffFormData, staffFormSchema } from "@/features/staff/schemas/staff-form-schema";
 
@@ -30,10 +29,10 @@ async function saveStaff(formData: FormData): Promise<FormActionState> {
   }
 
   const values = parsed.data;
-  const [{ id: branchId }, { supabase }] = await Promise.all([
-    getDefaultBranch(),
-    getAuthorizedSupabaseServerClient("staff:write"),
-  ]);
+  const { branchScope, supabase } = await getBranchScopedServerClient("staff:write");
+  const branchId = values.staffId
+    ? await getExistingStaffBranchId(supabase, branchScope.selectedBranchId, values.staffId)
+    : branchScope.writeBranchId;
 
   const payload = {
     branch_id: branchId,
@@ -67,4 +66,27 @@ async function saveStaff(formData: FormData): Promise<FormActionState> {
 function normalizeNullable(value: string) {
   const trimmed = value.trim();
   return trimmed ? trimmed : null;
+}
+
+async function getExistingStaffBranchId(
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
+  selectedBranchId: string | null,
+  staffId: string,
+) {
+  const { data, error } = await applyBranchFilter(
+    supabase.from("staff").select("branch_id"),
+    selectedBranchId,
+  )
+    .eq("id", staffId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data?.branch_id) {
+    throw new Error("Staff record does not exist.");
+  }
+
+  return data.branch_id;
 }

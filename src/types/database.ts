@@ -12,6 +12,7 @@ export type Database = {
       attendance: {
         Row: {
           id: string;
+          branch_id: string;
           staff_id: string;
           attendance_date: string;
           time_in: string | null;
@@ -25,6 +26,7 @@ export type Database = {
         };
         Insert: {
           id?: string;
+          branch_id: string;
           staff_id: string;
           attendance_date: string;
           time_in?: string | null;
@@ -38,6 +40,13 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["attendance"]["Insert"]>;
         Relationships: [
+          {
+            foreignKeyName: "attendance_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "attendance_staff_id_fkey";
             columns: ["staff_id"];
@@ -57,6 +66,7 @@ export type Database = {
       attendance_adjustments: {
         Row: {
           id: string;
+          branch_id: string;
           attendance_id: string;
           staff_id: string;
           attendance_date: string;
@@ -69,6 +79,7 @@ export type Database = {
         };
         Insert: {
           id?: string;
+          branch_id: string;
           attendance_id: string;
           staff_id: string;
           attendance_date: string;
@@ -81,6 +92,13 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["attendance_adjustments"]["Insert"]>;
         Relationships: [
+          {
+            foreignKeyName: "attendance_adjustments_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "attendance_adjustments_attendance_id_fkey";
             columns: ["attendance_id"];
@@ -135,6 +153,7 @@ export type Database = {
       attendance_time_logs: {
         Row: {
           id: string;
+          branch_id: string;
           staff_id: string;
           attendance_id: string | null;
           dtr_amendment_id: string | null;
@@ -151,6 +170,7 @@ export type Database = {
         };
         Insert: {
           id?: string;
+          branch_id: string;
           staff_id: string;
           attendance_id?: string | null;
           dtr_amendment_id?: string | null;
@@ -167,6 +187,13 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["attendance_time_logs"]["Insert"]>;
         Relationships: [
+          {
+            foreignKeyName: "attendance_time_logs_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "attendance_time_logs_attendance_id_fkey";
             columns: ["attendance_id"];
@@ -226,6 +253,11 @@ export type Database = {
           id: string;
           code: string;
           name: string;
+          address: string | null;
+          contact_number: string | null;
+          email: string | null;
+          is_main: boolean;
+          is_active: boolean;
           is_default: boolean;
           status: Database["public"]["Enums"]["record_status"];
           created_at: string;
@@ -235,6 +267,11 @@ export type Database = {
           id?: string;
           code: string;
           name: string;
+          address?: string | null;
+          contact_number?: string | null;
+          email?: string | null;
+          is_main?: boolean;
+          is_active?: boolean;
           is_default?: boolean;
           status?: Database["public"]["Enums"]["record_status"];
           created_at?: string;
@@ -356,6 +393,7 @@ export type Database = {
       customers: {
         Row: {
           id: string;
+          branch_id: string;
           customer_code: string | null;
           customer_type: Database["public"]["Enums"]["customer_type"];
           display_name: string;
@@ -372,6 +410,7 @@ export type Database = {
         };
         Insert: {
           id?: string;
+          branch_id: string;
           customer_code?: string | null;
           customer_type?: Database["public"]["Enums"]["customer_type"];
           display_name: string;
@@ -387,11 +426,20 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["customers"]["Insert"]>;
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "customers_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       document_sequences: {
         Row: {
           key: string;
+          branch_id: string;
           prefix: string;
           padding: number;
           last_value: number;
@@ -400,6 +448,7 @@ export type Database = {
         };
         Insert: {
           key: string;
+          branch_id: string;
           prefix: string;
           padding?: number;
           last_value?: number;
@@ -407,7 +456,15 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["document_sequences"]["Insert"]>;
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "document_sequences_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       dtr_amendment_requests: {
         Row: {
@@ -731,6 +788,7 @@ export type Database = {
         Row: {
           id: string;
           invoice_number: string;
+          branch_id: string;
           job_order_id: string | null;
           sale_id: string | null;
           customer_id: string | null;
@@ -744,12 +802,16 @@ export type Database = {
           balance: number;
           status: Database["public"]["Enums"]["invoice_status"];
           created_by: string | null;
+          cancelled_at: string | null;
+          cancelled_by: string | null;
+          cancellation_reason: string | null;
           created_at: string;
           updated_at: string;
         };
         Insert: {
           id?: string;
           invoice_number: string;
+          branch_id: string;
           job_order_id?: string | null;
           sale_id?: string | null;
           customer_id?: string | null;
@@ -763,11 +825,21 @@ export type Database = {
           balance?: number;
           status?: Database["public"]["Enums"]["invoice_status"];
           created_by?: string | null;
+          cancelled_at?: string | null;
+          cancelled_by?: string | null;
+          cancellation_reason?: string | null;
           created_at?: string;
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["invoices"]["Insert"]>;
         Relationships: [
+          {
+            foreignKeyName: "invoices_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "invoices_customer_id_fkey";
             columns: ["customer_id"];
@@ -814,6 +886,9 @@ export type Database = {
           is_additional: boolean;
           approval_status: Database["public"]["Enums"]["approval_status"];
           usage_status: Database["public"]["Enums"]["usage_status"];
+          checklist_completed: boolean;
+          checklist_checked_at: string | null;
+          checklist_checked_by_staff_id: string | null;
           approved_at: string | null;
           rejected_at: string | null;
           created_at: string;
@@ -834,13 +909,24 @@ export type Database = {
           is_additional?: boolean;
           approval_status?: Database["public"]["Enums"]["approval_status"];
           usage_status?: Database["public"]["Enums"]["usage_status"];
+          checklist_completed?: boolean;
+          checklist_checked_at?: string | null;
+          checklist_checked_by_staff_id?: string | null;
           approved_at?: string | null;
           rejected_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["job_order_items"]["Insert"]>;
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "job_order_items_checklist_checked_by_staff_id_fkey";
+            columns: ["checklist_checked_by_staff_id"];
+            isOneToOne: false;
+            referencedRelation: "staff";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       job_order_mechanics: {
         Row: {
@@ -945,6 +1031,7 @@ export type Database = {
       payments: {
         Row: {
           id: string;
+          branch_id: string;
           invoice_id: string;
           amount: number;
           payment_method: Database["public"]["Enums"]["payment_method"];
@@ -957,6 +1044,7 @@ export type Database = {
         };
         Insert: {
           id?: string;
+          branch_id: string;
           invoice_id: string;
           amount: number;
           payment_method: Database["public"]["Enums"]["payment_method"];
@@ -969,6 +1057,13 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["payments"]["Insert"]>;
         Relationships: [
+          {
+            foreignKeyName: "payments_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "payments_invoice_id_fkey";
             columns: ["invoice_id"];
@@ -1080,6 +1175,8 @@ export type Database = {
           website_featured: boolean;
           website_sort_order: number;
           website_slug: string | null;
+          product_image_path: string | null;
+          product_image_url: string | null;
           website_image_url: string | null;
           website_short_description: string | null;
           website_badge: string | null;
@@ -1110,6 +1207,8 @@ export type Database = {
           website_featured?: boolean;
           website_sort_order?: number;
           website_slug?: string | null;
+          product_image_path?: string | null;
+          product_image_url?: string | null;
           website_image_url?: string | null;
           website_short_description?: string | null;
           website_badge?: string | null;
@@ -1659,6 +1758,7 @@ export type Database = {
       vehicles: {
         Row: {
           id: string;
+          branch_id: string;
           customer_id: string;
           make: string;
           model: string;
@@ -1677,6 +1777,7 @@ export type Database = {
         };
         Insert: {
           id?: string;
+          branch_id: string;
           customer_id: string;
           make: string;
           model: string;
@@ -1695,6 +1796,13 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["vehicles"]["Insert"]>;
         Relationships: [
+          {
+            foreignKeyName: "vehicles_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "vehicles_customer_id_fkey";
             columns: ["customer_id"];
@@ -1758,6 +1866,13 @@ export type Database = {
           p_job_order_id: string;
           p_invoice_date: string;
           p_created_by?: string | null;
+        };
+        Returns: string;
+      };
+      cancel_invoice: {
+        Args: {
+          p_invoice_id: string;
+          p_cancellation_reason: string;
         };
         Returns: string;
       };
@@ -1880,6 +1995,13 @@ export type Database = {
         };
         Returns: string;
       };
+      set_job_order_item_checklist_state: {
+        Args: {
+          p_job_order_item_id: string;
+          p_checklist_completed: boolean;
+        };
+        Returns: string;
+      };
       update_inventory_stock_settings: {
         Args: {
           p_branch_id: string;
@@ -1915,7 +2037,7 @@ export type Database = {
       line_item_type: "product" | "service" | "labor";
       pay_basis: "monthly" | "daily" | "hourly";
       part_usage_type: "use" | "return";
-      payment_method: "cash" | "gcash" | "card" | "bank_transfer" | "check";
+      payment_method: "cash" | "gcash" | "card" | "bank_transfer" | "check" | "other";
       payroll_period_status: "draft" | "processing" | "finalized";
       product_type: "part" | "fluid" | "consumable" | "accessory" | "tool";
       quotation_status: "draft" | "pending_approval" | "approved" | "rejected" | "expired";

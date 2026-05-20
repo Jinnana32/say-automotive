@@ -1,5 +1,26 @@
 export type InvoiceStatus = "unpaid" | "partially_paid" | "paid" | "cancelled";
-export type PaymentMethod = "cash" | "gcash" | "card" | "bank_transfer" | "check";
+export const PAYMENT_METHOD_VALUES = [
+  "cash",
+  "gcash",
+  "bank_transfer",
+  "card",
+  "check",
+  "other",
+] as const;
+
+export type PaymentMethod = (typeof PAYMENT_METHOD_VALUES)[number];
+
+export const PAYMENT_METHOD_OPTIONS: ReadonlyArray<{
+  value: PaymentMethod;
+  label: string;
+}> = [
+  { value: "cash", label: "Cash" },
+  { value: "gcash", label: "GCash" },
+  { value: "bank_transfer", label: "Bank Transfer" },
+  { value: "card", label: "Card" },
+  { value: "check", label: "Check" },
+  { value: "other", label: "Other" },
+];
 
 export type InvoiceListItem = {
   id: string;
@@ -43,6 +64,9 @@ export type InvoiceDetail = InvoiceListItem & {
   vehicleId: string | null;
   saleId: string | null;
   saleNumber: string | null;
+  cancelledAt: string | null;
+  cancelledByUserId: string | null;
+  cancellationReason: string | null;
   items: InvoiceItemDetail[];
   payments: InvoicePaymentEntry[];
   allowPartialPayments: boolean;
@@ -52,6 +76,7 @@ export type InvoiceDetail = InvoiceListItem & {
   releasedAt: string | null;
   canRecordPayment: boolean;
   canReleaseVehicle: boolean;
+  canCancel: boolean;
 };
 
 export type InvoicePrintDetail = InvoiceDetail & {

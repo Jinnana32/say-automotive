@@ -74,6 +74,10 @@ export function canEditJobOrderItems(status: JobOrderStatus) {
   return !FINAL_ITEM_LOCKED_STATUSES.includes(status);
 }
 
+export function canUpdateJobOrderChecklist(status: JobOrderStatus) {
+  return !["released", "cancelled"].includes(status);
+}
+
 export function canResolveAdditionalItems(status: JobOrderStatus) {
   return !FINAL_ITEM_LOCKED_STATUSES.includes(status);
 }
@@ -124,7 +128,12 @@ export function calculateJobOrderRejectedAdditionalTotal(items: JobOrderItemDeta
   );
 }
 
-export function mapJobOrderDetailCapabilities(detail: Omit<JobOrderDetail, keyof ReturnType<typeof buildJobOrderDetailCapabilities>>) {
+export function mapJobOrderDetailCapabilities(
+  detail: Omit<JobOrderDetail, keyof ReturnType<typeof buildJobOrderDetailCapabilities>>,
+  params: {
+    canUpdateChecklistRole: boolean;
+  },
+) {
   return {
     ...detail,
     ...buildJobOrderDetailCapabilities({
@@ -132,6 +141,7 @@ export function mapJobOrderDetailCapabilities(detail: Omit<JobOrderDetail, keyof
       invoiceId: detail.invoiceId,
       invoiceStatus: detail.invoiceStatus,
       releasedAt: detail.releasedAt,
+      canUpdateChecklistRole: params.canUpdateChecklistRole,
     }),
   };
 }
@@ -181,11 +191,78 @@ export function buildJobOrderItemInventoryTracking(params: {
   };
 }
 
+export function isJobOrderChecklistRequired(item: JobOrderItemDetail) {
+  return item.approvalStatus === "approved" || item.approvalStatus === "not_required";
+}
+
+export function getJobOrderChecklistStatus(item: JobOrderItemDetail) {
+  if (item.approvalStatus === "pending") {
+    return {
+      label: "Pending approval",
+      variant: "warning" as const,
+      actionable: false,
+    };
+  }
+
+  if (item.approvalStatus === "rejected") {
+    return {
+      label: "Rejected",
+      variant: "destructive" as const,
+      actionable: false,
+    };
+  }
+
+  if (item.checklistCompleted) {
+    return {
+      label: "Completed",
+      variant: "success" as const,
+      actionable: true,
+    };
+  }
+
+  return {
+    label: "Open",
+    variant: "neutral" as const,
+    actionable: true,
+  };
+}
+
+export function calculateJobOrderChecklistSummary(items: JobOrderItemDetail[]) {
+  const requiredItems = items.filter(isJobOrderChecklistRequired);
+  const completedRequiredItems = requiredItems.filter((item) => item.checklistCompleted);
+
+  return {
+    requiredCount: requiredItems.length,
+    completedCount: completedRequiredItems.length,
+    blockedCount: items.length - requiredItems.length,
+    allRequiredCompleted:
+      requiredItems.length > 0 && completedRequiredItems.length === requiredItems.length,
+  };
+}
+
+export function groupJobOrderChecklistItems(items: JobOrderItemDetail[]) {
+  return [
+    {
+      key: "service-labor",
+      label: "Services / Labor",
+      items: items.filter(
+        (item) => item.itemType === "service" || item.itemType === "labor",
+      ),
+    },
+    {
+      key: "parts-products",
+      label: "Parts / Products",
+      items: items.filter((item) => item.itemType === "product"),
+    },
+  ] as const;
+}
+
 function buildJobOrderDetailCapabilities(params: {
   status: JobOrderStatus;
   invoiceId: string | null;
   invoiceStatus: "unpaid" | "partially_paid" | "paid" | "cancelled" | null;
   releasedAt: string | null;
+  canUpdateChecklistRole: boolean;
 }) {
   return {
     canEditDetails: canEditJobOrderDetails(params.status),
@@ -193,6 +270,8 @@ function buildJobOrderDetailCapabilities(params: {
     canAssignMechanics: canAssignMechanics(params.status),
     canAddAdditionalItems: canAddAdditionalItems(params.status),
     canResolveAdditionalItems: canResolveAdditionalItems(params.status),
+    canUpdateChecklist:
+      params.canUpdateChecklistRole && canUpdateJobOrderChecklist(params.status),
     canGenerateInvoice: canGenerateJobOrderInvoice(params.status, params.invoiceId),
     canReleaseVehicle: canReleaseJobOrderVehicle({
       status: params.status,

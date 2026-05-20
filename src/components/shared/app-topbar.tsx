@@ -4,6 +4,7 @@ import { useId, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Bell, Menu, Search } from 'lucide-react';
 
+import { BranchScopeSelector } from '@/components/shared/branch-scope-selector';
 import { UserAccountMenu } from '@/components/shared/user-account-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,11 +13,22 @@ export function AppTopbar({
   activeLabel,
   userDisplayName,
   userRoleLabel,
+  branchScope,
   onOpenNavigation,
 }: {
   activeLabel: string;
   userDisplayName: string;
   userRoleLabel: string;
+  branchScope: {
+    canAccessAllBranches: boolean;
+    accessibleBranches: Array<{
+      id: string;
+      code: string;
+      name: string;
+    }>;
+    selectedBranchId: string | null;
+    selectedBranchLabel: string;
+  };
   onOpenNavigation?: () => void;
 }) {
   const router = useRouter();
@@ -66,6 +78,14 @@ export function AppTopbar({
         </div>
 
         <div className="xl:hidden">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-primary/70">
+                Branch scope
+              </p>
+            </div>
+            <BranchScopeSelector {...branchScope} />
+          </div>
           <GlobalSearchForm
             inputId={`${searchInputBaseId}-mobile`}
             value={searchQuery}
@@ -86,6 +106,7 @@ export function AppTopbar({
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            <BranchScopeSelector {...branchScope} />
             <HeaderIconButton label="Notifications coming soon">
               <Bell className="size-4" />
             </HeaderIconButton>

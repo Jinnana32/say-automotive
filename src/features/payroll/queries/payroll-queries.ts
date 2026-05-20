@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import type { StaffScheduleSummary } from "@/features/attendance/types";
 import { computeExpectedWorkdaySummary } from "@/features/attendance/utils";
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { applyBranchFilter, getBranchScopedServerClient } from "@/lib/branches";
 import type {
   CompensationProfileSummary,
   PayrollCompensationRosterItem,
@@ -35,20 +35,26 @@ type AttendanceRow = Pick<
 >;
 
 export async function getPayrollPageData(filters: PayrollPageFilters): Promise<PayrollPageData> {
-  const { supabase } = await getAuthorizedSupabaseServerClient("payroll:read");
+  const { branchScope, supabase } = await getBranchScopedServerClient("payroll:read");
   const [{ data: staffData, error: staffError }, { data: periodData, error: periodError }] =
     await Promise.all([
-      supabase
-        .from("staff")
-        .select("id, first_name, last_name, role, contact_number, status")
-        .eq("status", "active")
-        .order("last_name", { ascending: true })
-        .order("first_name", { ascending: true }),
-      supabase
-        .from("payroll_periods")
-        .select("*")
-        .order("period_start_date", { ascending: false })
-        .order("created_at", { ascending: false }),
+      applyBranchFilter(
+        supabase
+          .from("staff")
+          .select("id, first_name, last_name, role, contact_number, status")
+          .eq("status", "active")
+          .order("last_name", { ascending: true })
+          .order("first_name", { ascending: true }),
+        branchScope.selectedBranchId,
+      ),
+      applyBranchFilter(
+        supabase
+          .from("payroll_periods")
+          .select("*")
+          .order("period_start_date", { ascending: false })
+          .order("created_at", { ascending: false }),
+        branchScope.selectedBranchId,
+      ),
     ]);
 
   if (staffError) {
@@ -142,10 +148,11 @@ export async function getPayrollPageData(filters: PayrollPageFilters): Promise<P
 }
 
 export async function getPayrollPeriodDetailData(periodId: string): Promise<PayrollPeriodDetailData> {
-  const { supabase } = await getAuthorizedSupabaseServerClient("payroll:read");
-  const { data: periodData, error: periodError } = await supabase
-    .from("payroll_periods")
-    .select("*")
+  const { branchScope, supabase } = await getBranchScopedServerClient("payroll:read");
+  const { data: periodData, error: periodError } = await applyBranchFilter(
+    supabase.from("payroll_periods").select("*"),
+    branchScope.selectedBranchId,
+  )
     .eq("id", periodId)
     .maybeSingle();
 
@@ -161,6 +168,7 @@ export async function getPayrollPeriodDetailData(periodId: string): Promise<Payr
   const { data: staffData, error: staffError } = await supabase
     .from("staff")
     .select("id, first_name, last_name, role, contact_number, status")
+    .eq("branch_id", period.branchId)
     .eq("status", "active")
     .order("last_name", { ascending: true })
     .order("first_name", { ascending: true });

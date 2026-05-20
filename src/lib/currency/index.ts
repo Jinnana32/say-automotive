@@ -1,6 +1,6 @@
-export const APP_MONEY_DECIMAL_PLACES = 2;
+export const APP_MONEY_DECIMAL_PLACES = 4;
 export const PRINT_MONEY_DECIMAL_PLACES = 4;
-export const MONEY_INPUT_STEP = "0.01";
+export const MONEY_INPUT_STEP = "0.0001";
 
 const phpFormatter = new Intl.NumberFormat("en-PH", {
   style: "currency",

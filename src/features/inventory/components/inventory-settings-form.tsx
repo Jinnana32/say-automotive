@@ -16,14 +16,9 @@ export function InventorySettingsForm({ products }: { products: InventoryProduct
     updateInventoryStockSettingsAction,
     INITIAL_FORM_ACTION_STATE,
   );
-  const initialProduct = products[0] ?? null;
-  const [productId, setProductId] = useState(initialProduct?.id ?? "");
-  const [reorderLevel, setReorderLevel] = useState(
-    initialProduct?.reorderLevel !== null && initialProduct?.reorderLevel !== undefined
-      ? String(initialProduct.reorderLevel)
-      : "",
-  );
-  const [shelfLocation, setShelfLocation] = useState(initialProduct?.shelfLocation ?? "");
+  const [productId, setProductId] = useState("");
+  const [reorderLevel, setReorderLevel] = useState("");
+  const [shelfLocation, setShelfLocation] = useState("");
 
   return (
     <form action={formAction} className="space-y-4">

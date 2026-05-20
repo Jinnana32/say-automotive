@@ -32,6 +32,7 @@ import {
 } from '@/features/job-orders/actions/job-order-actions';
 import { AssignMechanicForm } from '@/features/job-orders/components/assign-mechanic-form';
 import { JobOrderAdditionalItemDialog } from '@/features/job-orders/components/job-order-additional-item-dialog';
+import { JobOrderChecklistPanel } from '@/features/job-orders/components/job-order-checklist-panel';
 import { JobOrderDetailTabs } from '@/features/job-orders/components/job-order-detail-tabs';
 import { JobOrderDetailsForm } from '@/features/job-orders/components/job-order-details-form';
 import { JobOrderItemApprovalAction } from '@/features/job-orders/components/job-order-item-approval-action';
@@ -487,6 +488,13 @@ export function JobOrderDetailPage({
                 </Table>
               </div>
             </SectionCard>
+
+            <JobOrderChecklistPanel
+              jobOrderId={jobOrder.id}
+              items={jobOrder.items}
+              canUpdateChecklist={jobOrder.canUpdateChecklist}
+              redirectTab={activeTab}
+            />
           </div>
         }
         partsUsage={

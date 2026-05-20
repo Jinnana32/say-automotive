@@ -1,4 +1,8 @@
-import type { QuotationDetail, QuotationItemDetail } from "@/features/quotations/types";
+import type {
+  QuotationDetail,
+  QuotationItemDetail,
+  QuotationPrintMode,
+} from "@/features/quotations/types";
 import { roundCurrency } from "@/lib/currency";
 
 export type QuotationPartPrintLine = {
@@ -16,6 +20,7 @@ export type QuotationLaborPrintLine = {
 };
 
 export type QuotationPrintBreakdown = {
+  mode: QuotationPrintMode;
   partLines: QuotationPartPrintLine[];
   laborLines: QuotationLaborPrintLine[];
   subtotal: number;
@@ -24,10 +29,13 @@ export type QuotationPrintBreakdown = {
   discount: number;
   tax: number;
   grandTotal: number;
+  visibleSubtotal: number;
+  visibleTotal: number;
 };
 
 export function buildQuotationPrintBreakdown(
   quotation: Pick<QuotationDetail, "items" | "discount" | "tax" | "totalAmount">,
+  mode: QuotationPrintMode = "full",
 ): QuotationPrintBreakdown {
   const partLines = quotation.items
     .filter((item) => item.itemType === "product")
@@ -46,19 +54,31 @@ export function buildQuotationPrintBreakdown(
       total: item.total,
     }));
 
+  const totalParts = roundCurrency(partLines.reduce((sum, item) => sum + item.total, 0));
+  const totalLabor = roundCurrency(laborLines.reduce((sum, item) => sum + item.total, 0));
+  const subtotal = roundCurrency(totalParts + totalLabor);
+  const visibleSubtotal =
+    mode === "parts" ? totalParts : mode === "labor" ? totalLabor : subtotal;
+
   return {
+    mode,
     partLines,
     laborLines,
-    subtotal: roundCurrency(
-      partLines.reduce((sum, item) => sum + item.total, 0) +
-        laborLines.reduce((sum, item) => sum + item.total, 0),
-    ),
-    totalParts: roundCurrency(partLines.reduce((sum, item) => sum + item.total, 0)),
-    totalLabor: roundCurrency(laborLines.reduce((sum, item) => sum + item.total, 0)),
+    subtotal,
+    totalParts,
+    totalLabor,
     discount: quotation.discount,
     tax: quotation.tax,
     grandTotal: quotation.totalAmount,
+    visibleSubtotal,
+    visibleTotal: mode === "full" ? quotation.totalAmount : visibleSubtotal,
   };
+}
+
+export function resolveQuotationPrintMode(
+  value: string | null | undefined,
+): QuotationPrintMode {
+  return value === "parts" || value === "labor" ? value : "full";
 }
 
 function formatPartQuantity(item: QuotationItemDetail) {

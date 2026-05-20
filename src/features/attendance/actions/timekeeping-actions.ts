@@ -3,8 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { writeAuditLog } from "@/lib/audit";
-import { getDefaultBranch } from "@/lib/branches";
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { getBranchScopedServerClient } from "@/lib/branches";
 import { toFormActionState } from "@/lib/forms";
 import { isPublicIpAddress, normalizeIpAddress } from "@/lib/network/request-ip";
 import {
@@ -38,11 +37,8 @@ export async function upsertBranchHolidayAction(
   }
 
   const values = parsed.data;
-  const [{ context, supabase }, defaultBranch] = await Promise.all([
-    getAuthorizedSupabaseServerClient("settings:write"),
-    getDefaultBranch(),
-  ]);
-  const branchId = context.branchId ?? defaultBranch.id;
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("settings:write");
+  const branchId = branchScope.writeBranchId;
   let duplicateQuery = supabase
     .from("branch_holidays")
     .select("id")
@@ -159,11 +155,8 @@ export async function deleteBranchHolidayAction(formData: FormData) {
     return;
   }
 
-  const [{ context, supabase }, defaultBranch] = await Promise.all([
-    getAuthorizedSupabaseServerClient("settings:write"),
-    getDefaultBranch(),
-  ]);
-  const branchId = context.branchId ?? defaultBranch.id;
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("settings:write");
+  const branchId = branchScope.writeBranchId;
   const { data: currentHoliday, error: currentHolidayError } = await supabase
     .from("branch_holidays")
     .select("*")
@@ -208,11 +201,8 @@ export async function upsertStaffLeaveEntryAction(
   }
 
   const values = parsed.data;
-  const [{ context, supabase }, defaultBranch] = await Promise.all([
-    getAuthorizedSupabaseServerClient("settings:write"),
-    getDefaultBranch(),
-  ]);
-  const branchId = context.branchId ?? defaultBranch.id;
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("settings:write");
+  const branchId = branchScope.writeBranchId;
   let overlapQuery = supabase
     .from("staff_leave_entries")
     .select("id")
@@ -332,11 +322,8 @@ export async function deleteStaffLeaveEntryAction(formData: FormData) {
     return;
   }
 
-  const [{ context, supabase }, defaultBranch] = await Promise.all([
-    getAuthorizedSupabaseServerClient("settings:write"),
-    getDefaultBranch(),
-  ]);
-  const branchId = context.branchId ?? defaultBranch.id;
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("settings:write");
+  const branchId = branchScope.writeBranchId;
   const { data: currentLeaveEntry, error: currentLeaveError } = await supabase
     .from("staff_leave_entries")
     .select("*")
@@ -382,11 +369,8 @@ export async function updateAttendanceAccessSettingsAction(
     };
   }
 
-  const [{ context, supabase }, defaultBranch] = await Promise.all([
-    getAuthorizedSupabaseServerClient("settings:write"),
-    getDefaultBranch(),
-  ]);
-  const branchId = context.branchId ?? defaultBranch.id;
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("settings:write");
+  const branchId = branchScope.writeBranchId;
   const { data: currentSettings, error: currentSettingsError } = await supabase
     .from("business_settings")
     .select("*")
@@ -457,11 +441,8 @@ export async function addAttendanceAllowedIpAction(
     };
   }
 
-  const [{ context, supabase }, defaultBranch] = await Promise.all([
-    getAuthorizedSupabaseServerClient("settings:write"),
-    getDefaultBranch(),
-  ]);
-  const branchId = context.branchId ?? defaultBranch.id;
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("settings:write");
+  const branchId = branchScope.writeBranchId;
   const normalizedIp = normalizeIpAddress(parsed.data.ipAddress);
 
   if (!normalizedIp) {
@@ -523,11 +504,8 @@ export async function deleteAttendanceAllowedIpAction(formData: FormData) {
     return;
   }
 
-  const [{ context, supabase }, defaultBranch] = await Promise.all([
-    getAuthorizedSupabaseServerClient("settings:write"),
-    getDefaultBranch(),
-  ]);
-  const branchId = context.branchId ?? defaultBranch.id;
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("settings:write");
+  const branchId = branchScope.writeBranchId;
   const { data: currentAllowedIp, error: currentAllowedIpError } = await supabase
     .from("attendance_allowed_ips")
     .select("*")

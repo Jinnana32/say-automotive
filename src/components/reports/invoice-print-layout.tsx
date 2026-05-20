@@ -1,11 +1,13 @@
-import { ReportFooter } from '@/components/reports/report-footer';
-import { ReportHeader } from '@/components/reports/report-header';
+import { BlankPrintDocument } from '@/components/reports/blank-print-document';
 import { ReportSectionHeading } from '@/components/reports/report-section-heading';
 import { ReportSignatureBlock } from '@/components/reports/report-signature-block';
 import { ReportTotals } from '@/components/reports/report-totals';
 import type { InvoicePrintDocument } from '@/features/invoices/types';
 import {
-  formatCurrency,
+  formatInvoiceStatus,
+  formatPaymentMethod,
+} from '@/features/invoices/utils';
+import {
   formatPrintCurrency,
   formatPrintCurrencyNumber,
 } from '@/lib/currency';
@@ -25,13 +27,16 @@ export function InvoicePrintLayout({
   );
 
   return (
-    <article className="flex min-h-[297mm] flex-col bg-white px-[12mm] py-[10mm] text-[11px] leading-[1.35] text-slate-900">
-      <ReportHeader
-        businessName={businessProfile.businessName}
-        documentTitle="Invoice"
-        documentMeta={`Invoice No.: ${invoice.invoiceNumber} • Date: ${formatDocumentDate(invoice.invoiceDate)}`}
-        logoSrc={businessProfile.businessLogoUrl ?? undefined}
-      />
+    <BlankPrintDocument
+      businessName={businessProfile.businessName}
+      businessLogoUrl={businessProfile.businessLogoUrl}
+      businessVatRegistrationNo={businessProfile.businessVatRegistrationNo}
+      businessContact={businessProfile.businessContact}
+      businessEmail={businessProfile.businessEmail}
+      businessAddress={businessProfile.businessAddress}
+      documentTitle="Invoice"
+      documentMeta={`Invoice No.: ${invoice.invoiceNumber} • Date: ${formatDocumentDate(invoice.invoiceDate)}`}
+    >
 
       <section className="report-section-keep mt-5 grid gap-x-8 gap-y-2 sm:grid-cols-2">
         <MetadataColumn
@@ -48,12 +53,34 @@ export function InvoicePrintLayout({
         <MetadataColumn
           items={[
             { label: 'Date', value: formatDocumentDate(invoice.invoiceDate) },
-            { label: 'Status', value: invoice.status.replaceAll('_', ' ') },
+            { label: 'Status', value: formatInvoiceStatus(invoice.status) },
             { label: 'Address', value: invoice.customerAddress || '—' },
             { label: 'Car Model & Year', value: formatVehicleModel(invoice) },
           ]}
         />
       </section>
+
+      {invoice.status === 'cancelled' ? (
+        <section className="report-section-keep mt-4">
+          <div className="rounded-[1.25rem] border border-brand-red bg-brand-red/10 px-4 py-3">
+            <p className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-brand-red">
+              Cancelled Invoice
+            </p>
+            <div className="mt-2 grid gap-2 text-[10.5px] text-slate-800 sm:grid-cols-2">
+              <p>
+                <span className="font-semibold">Cancelled at:</span>{" "}
+                {invoice.cancelledAt
+                  ? formatDateTime(invoice.cancelledAt)
+                  : 'Not recorded'}
+              </p>
+              <p>
+                <span className="font-semibold">Reason:</span>{" "}
+                {invoice.cancellationReason || 'No reason recorded'}
+              </p>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section className="report-section-keep mt-3 grid gap-x-8 gap-y-2 sm:grid-cols-2">
         <MetadataColumn
@@ -182,7 +209,7 @@ export function InvoicePrintLayout({
                           {formatDocumentDate(payment.paidAt)}
                         </td>
                         <td className="px-2 py-1.5 align-top">
-                          {payment.paymentMethod.replaceAll('_', ' ')}
+                          {formatPaymentMethod(payment.paymentMethod)}
                         </td>
                         <td className="px-2 py-1.5 align-top">
                           {payment.referenceNumber || '—'}
@@ -220,18 +247,18 @@ export function InvoicePrintLayout({
           <div className="overflow-hidden border border-brand-border bg-brand-soft/35 px-3 py-3">
             <ReportTotals
               lines={[
-                { label: 'Subtotal:', value: formatCurrency(invoice.subtotal) },
-                { label: 'Discount:', value: formatCurrency(invoice.discount) },
-                { label: 'Tax:', value: formatCurrency(invoice.tax) },
+                { label: 'Subtotal:', value: formatPrintCurrency(invoice.subtotal) },
+                { label: 'Discount:', value: formatPrintCurrency(invoice.discount) },
+                { label: 'Tax:', value: formatPrintCurrency(invoice.tax) },
                 {
                   label: 'TOTAL:',
-                  value: formatCurrency(invoice.totalAmount),
+                  value: formatPrintCurrency(invoice.totalAmount),
                   emphasized: true,
                 },
-                { label: 'Paid:', value: formatCurrency(paidTotals) },
+                { label: 'Paid:', value: formatPrintCurrency(paidTotals) },
                 {
                   label: 'Balance:',
-                  value: formatCurrency(invoice.balance),
+                  value: formatPrintCurrency(invoice.balance),
                   emphasized: invoice.balance > 0,
                 },
               ]}
@@ -241,14 +268,7 @@ export function InvoicePrintLayout({
         </div>
       </section>
 
-      <ReportFooter
-        businessName={businessProfile.businessName}
-        vatRegistrationNo={businessProfile.businessVatRegistrationNo}
-        contactNumber={businessProfile.businessContact}
-        email={businessProfile.businessEmail}
-        address={businessProfile.businessAddress}
-      />
-    </article>
+    </BlankPrintDocument>
   );
 }
 

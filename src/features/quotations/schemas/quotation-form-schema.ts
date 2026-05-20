@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import type { QuotationFormItem, QuotationFormValues } from "@/features/quotations/types";
+import { calculateQuotationSubtotal, toNumeric } from "@/features/quotations/utils";
 import { isNonNegativeMoneyInput } from "@/lib/currency";
 
 const quotationItemSchema = z
@@ -17,7 +18,7 @@ const quotationItemSchema = z
     unitPrice: z
       .string()
       .trim()
-      .refine(isNonNegativeMoneyInput, "Unit price must be zero or greater with up to 2 decimal places."),
+      .refine(isNonNegativeMoneyInput, "Unit price must be zero or greater with up to 4 decimal places."),
   })
   .superRefine((value, ctx) => {
     if (value.itemType === "product" && !value.productId) {
@@ -37,23 +38,36 @@ const quotationItemSchema = z
     }
   });
 
-export const quotationFormSchema = z.object({
-  quotationId: z.string().uuid().optional(),
-  customerId: z.string().uuid("Customer is required."),
-  vehicleId: z.string().uuid("Vehicle is required."),
-  natureOfRepair: z.string().trim(),
-  inspectionNotes: z.string().trim(),
-  status: z.enum(["draft", "pending_approval"]),
-  discount: z
-    .string()
-    .trim()
-    .refine(isNonNegativeMoneyInput, "Discount must be zero or greater with up to 2 decimal places."),
-  tax: z
-    .string()
-    .trim()
-    .refine(isNonNegativeMoneyInput, "Tax must be zero or greater with up to 2 decimal places."),
-  items: z.array(quotationItemSchema).min(1, "At least one quotation item is required."),
-});
+export const quotationFormSchema = z
+  .object({
+    quotationId: z.string().uuid().optional(),
+    customerId: z.string().uuid("Customer is required."),
+    vehicleId: z.string().uuid("Vehicle is required."),
+    natureOfRepair: z.string().trim(),
+    inspectionNotes: z.string().trim(),
+    status: z.enum(["draft", "pending_approval"]),
+    discount: z
+      .string()
+      .trim()
+      .refine(isNonNegativeMoneyInput, "Discount must be zero or greater with up to 4 decimal places."),
+    tax: z
+      .string()
+      .trim()
+      .refine(isNonNegativeMoneyInput, "Tax must be zero or greater with up to 4 decimal places."),
+    items: z.array(quotationItemSchema).min(1, "At least one quotation item is required."),
+  })
+  .superRefine((value, ctx) => {
+    const subtotal = calculateQuotationSubtotal(value.items);
+    const discount = toNumeric(value.discount);
+
+    if (discount > subtotal) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["discount"],
+        message: "Discount cannot exceed the quotation subtotal.",
+      });
+    }
+  });
 
 export function parseQuotationFormData(formData: FormData): QuotationFormValues {
   return {

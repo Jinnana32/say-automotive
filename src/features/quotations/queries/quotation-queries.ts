@@ -1,6 +1,10 @@
 import { cache } from "react";
 
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import {
+  applyBranchFilter,
+  applySharedCatalogBranchFilter,
+  getBranchScopedServerClient,
+} from "@/lib/branches";
 import { listCustomerOptions } from "@/features/customers/queries/customer-queries";
 import { getVehicleFormLookupData } from "@/features/vehicles/queries/vehicle-lookup-queries";
 import {
@@ -31,11 +35,14 @@ export async function listQuotations(filters?: {
   search?: string;
   status?: QuotationRow["status"] | "";
 }): Promise<QuotationListItem[]> {
-  const { supabase } = await getAuthorizedSupabaseServerClient("quotations:read");
-  let query = supabase
+  const { branchScope, supabase } = await getBranchScopedServerClient("quotations:read");
+  let query = applyBranchFilter(
+    supabase
     .from("quotations")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false }),
+    branchScope.selectedBranchId,
+  );
 
   if (filters?.status) {
     query = query.eq("status", filters.status);
@@ -70,24 +77,31 @@ export async function listQuotations(filters?: {
 }
 
 export const getQuotationById = cache(async (quotationId: string): Promise<QuotationDetail | null> => {
-  const { supabase } = await getAuthorizedSupabaseServerClient("quotations:read");
+  const { branchScope, supabase } = await getBranchScopedServerClient("quotations:read");
 
   const [
     { data: quotation, error: quotationError },
     { data: items, error: itemsError },
     { data: jobOrder, error: jobOrderError },
   ] = await Promise.all([
-    supabase.from("quotations").select("*").eq("id", quotationId).maybeSingle(),
+    applyBranchFilter(
+      supabase.from("quotations").select("*"),
+      branchScope.selectedBranchId,
+    )
+      .eq("id", quotationId)
+      .maybeSingle(),
     supabase
       .from("quotation_items")
       .select("*")
       .eq("quotation_id", quotationId)
       .order("line_number", { ascending: true }),
-    supabase
+    applyBranchFilter(
+      supabase
       .from("job_orders")
       .select("id, job_order_number")
-      .eq("quotation_id", quotationId)
-      .maybeSingle(),
+      .eq("quotation_id", quotationId),
+      branchScope.selectedBranchId,
+    ).maybeSingle(),
   ]);
 
   if (quotationError) {
@@ -121,7 +135,7 @@ export const getQuotationById = cache(async (quotationId: string): Promise<Quota
 });
 
 export async function getQuotationFormOptions(): Promise<QuotationFormOptions> {
-  const { supabase } = await getAuthorizedSupabaseServerClient("quotations:write");
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("quotations:write");
   const [
     customers,
     { data: vehicles, error: vehiclesError },
@@ -129,21 +143,30 @@ export async function getQuotationFormOptions(): Promise<QuotationFormOptions> {
     { data: services, error: servicesError },
   ] = await Promise.all([
     listCustomerOptions(),
-    supabase
+    applyBranchFilter(
+      supabase
       .from("vehicles")
       .select("*")
       .eq("status", "active")
       .order("created_at", { ascending: false }),
-    supabase
+      branchScope.selectedBranchId,
+    ),
+    applySharedCatalogBranchFilter(
+      supabase
       .from("products")
       .select("*")
       .eq("status", "active")
       .order("name", { ascending: true }),
-    supabase
+      branchScope.selectedBranchId,
+    ),
+    applySharedCatalogBranchFilter(
+      supabase
       .from("services")
       .select("*")
       .eq("status", "active")
       .order("name", { ascending: true }),
+      branchScope.selectedBranchId,
+    ),
   ]);
 
   if (vehiclesError) {
@@ -163,6 +186,10 @@ export async function getQuotationFormOptions(): Promise<QuotationFormOptions> {
     vehicles: ((vehicles ?? []) as VehicleRow[]).map(mapVehicleRowToQuotationOption),
     products: ((products ?? []) as ProductRow[]).map(mapProductRowToQuotationOption),
     services: ((services ?? []) as ServiceRow[]).map(mapServiceRowToQuotationOption),
+    permissions: {
+      canCreateProducts: context.capabilities.includes("products:write"),
+      canCreateServices: context.capabilities.includes("services:write"),
+    },
   };
 }
 

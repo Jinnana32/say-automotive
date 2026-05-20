@@ -33,6 +33,8 @@ import type {
   QuotationFormValues,
   QuotationVehicleOption,
 } from '@/features/quotations/types';
+import { QuickCreateProductDialog } from '@/features/products/components/quick-create-product-dialog';
+import { QuickCreateServiceDialog } from '@/features/services/components/quick-create-service-dialog';
 import {
   calculateQuotationGrandTotal,
   calculateQuotationLineTotal,
@@ -89,6 +91,8 @@ export function QuotationCreateFlow({
   );
   const [customerOptions, setCustomerOptions] = useState(options.customers);
   const [vehicleOptions, setVehicleOptions] = useState(options.vehicles);
+  const [productOptions, setProductOptions] = useState(options.products);
+  const [serviceOptions, setServiceOptions] = useState(options.services);
   const [customerSearch, setCustomerSearch] = useState('');
   const [customerMode, setCustomerMode] =
     useState<IntakeSelectionMode>('choose');
@@ -659,7 +663,7 @@ export function QuotationCreateFlow({
                                 <NativeSelect
                                   value={item.productId}
                                   onChange={(event) => {
-                                    const selected = options.products.find(
+                                    const selected = productOptions.find(
                                       (product) =>
                                         product.id === event.target.value,
                                     );
@@ -675,13 +679,40 @@ export function QuotationCreateFlow({
                                   }}
                                 >
                                   <option value="">Select product</option>
-                                  {options.products.map((product) => (
+                                  {productOptions.map((product) => (
                                     <option key={product.id} value={product.id}>
                                       {product.label}
                                       {product.sku ? ` (${product.sku})` : ''}
                                     </option>
                                   ))}
                                 </NativeSelect>
+                                {options.permissions.canCreateProducts ? (
+                                  <div className="pt-1">
+                                    <QuickCreateProductDialog
+                                      triggerLabel="Add new product"
+                                      onCreated={(product) => {
+                                        setProductOptions((current) => [
+                                          ...current,
+                                          {
+                                            id: product.id,
+                                            label: product.label,
+                                            sku: product.sku,
+                                            unitPrice: product.unitPrice,
+                                          },
+                                        ]);
+                                        updateQuotationItem(setValues, item.key, {
+                                          itemType: 'product',
+                                          productId: product.id,
+                                          serviceId: '',
+                                          description: product.label,
+                                          unitPrice: formatMoneyInputValue(
+                                            product.unitPrice,
+                                          ),
+                                        });
+                                      }}
+                                    />
+                                  </div>
+                                ) : null}
                               </div>
                             ) : item.itemType === 'service' ? (
                               <div className="space-y-2 xl:col-span-2">
@@ -689,7 +720,7 @@ export function QuotationCreateFlow({
                                 <NativeSelect
                                   value={item.serviceId}
                                   onChange={(event) => {
-                                    const selected = options.services.find(
+                                    const selected = serviceOptions.find(
                                       (service) =>
                                         service.id === event.target.value,
                                     );
@@ -705,7 +736,7 @@ export function QuotationCreateFlow({
                                   }}
                                 >
                                   <option value="">Select service</option>
-                                  {options.services.map((service) => (
+                                  {serviceOptions.map((service) => (
                                     <option key={service.id} value={service.id}>
                                       {service.label}
                                       {service.category
@@ -714,6 +745,33 @@ export function QuotationCreateFlow({
                                     </option>
                                   ))}
                                 </NativeSelect>
+                                {options.permissions.canCreateServices ? (
+                                  <div className="pt-1">
+                                    <QuickCreateServiceDialog
+                                      triggerLabel="Add new service"
+                                      onCreated={(service) => {
+                                        setServiceOptions((current) => [
+                                          ...current,
+                                          {
+                                            id: service.id,
+                                            label: service.label,
+                                            category: service.category,
+                                            unitPrice: service.unitPrice,
+                                          },
+                                        ]);
+                                        updateQuotationItem(setValues, item.key, {
+                                          itemType: 'service',
+                                          serviceId: service.id,
+                                          productId: '',
+                                          description: service.label,
+                                          unitPrice: formatMoneyInputValue(
+                                            service.unitPrice,
+                                          ),
+                                        });
+                                      }}
+                                    />
+                                  </div>
+                                ) : null}
                               </div>
                             ) : (
                               <div className="space-y-2 xl:col-span-2">

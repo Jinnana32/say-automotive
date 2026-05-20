@@ -1,6 +1,7 @@
 import { AppShell } from "@/components/shared/app-shell";
 import { DASHBOARD_NAV_ITEMS } from "@/lib/navigation";
 import { requireAuthenticatedStaff } from "@/lib/auth/session";
+import { getBranchScope } from "@/lib/branches";
 import { getBusinessBranding } from "@/features/settings/queries/settings-queries";
 
 const SHOW_SIDEBAR_BUSINESS_NAME = false;
@@ -19,8 +20,11 @@ export default async function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const context = await requireAuthenticatedStaff();
-  const branding = await getBusinessBranding(context.branchId);
+  const [context, branchScope] = await Promise.all([
+    requireAuthenticatedStaff(),
+    getBranchScope(),
+  ]);
+  const branding = await getBusinessBranding(branchScope.selectedBranchId ?? branchScope.currentUserBranchId);
   const navigationItems = DASHBOARD_NAV_ITEMS.filter((item) =>
     (item.requiredCapabilities ?? [item.capability]).every((capability) =>
       context.capabilities.includes(capability),
@@ -35,6 +39,16 @@ export default async function DashboardLayout({
       capabilities={context.capabilities}
       businessName={branding.businessName}
       businessLogoUrl={branding.businessLogoUrl}
+      branchScope={{
+        canAccessAllBranches: branchScope.canAccessAllBranches,
+        accessibleBranches: branchScope.accessibleBranches.map((branch) => ({
+          id: branch.id,
+          code: branch.code,
+          name: branch.name,
+        })),
+        selectedBranchId: branchScope.selectedBranchId,
+        selectedBranchLabel: branchScope.selectedBranchLabel,
+      }}
       showSidebarBusinessName={SHOW_SIDEBAR_BUSINESS_NAME}
     >
       {children}

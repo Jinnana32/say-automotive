@@ -21,6 +21,10 @@ describe("buildJobOrderPrintBreakdown", () => {
           isAdditional: false,
           approvalStatus: "not_required",
           usageStatus: "used",
+          checklistCompleted: true,
+          checklistCheckedAt: "2026-05-20T09:00:00.000Z",
+          checklistCheckedByStaffId: "staff-1",
+          checklistCheckedByName: "Alex Mechanic",
           approvedAt: null,
           rejectedAt: null,
           inventoryTracking: {
@@ -51,6 +55,10 @@ describe("buildJobOrderPrintBreakdown", () => {
           isAdditional: false,
           approvalStatus: "not_required",
           usageStatus: "planned",
+          checklistCompleted: false,
+          checklistCheckedAt: null,
+          checklistCheckedByStaffId: null,
+          checklistCheckedByName: null,
           approvedAt: null,
           rejectedAt: null,
           inventoryTracking: null,
@@ -69,6 +77,10 @@ describe("buildJobOrderPrintBreakdown", () => {
           isAdditional: true,
           approvalStatus: "rejected",
           usageStatus: "cancelled",
+          checklistCompleted: false,
+          checklistCheckedAt: null,
+          checklistCheckedByStaffId: null,
+          checklistCheckedByName: null,
           approvedAt: null,
           rejectedAt: "2026-05-08T03:00:00.000Z",
           inventoryTracking: null,
@@ -81,6 +93,15 @@ describe("buildJobOrderPrintBreakdown", () => {
     const result = buildJobOrderPrintBreakdown(jobOrder);
 
     expect(result.workLines).toHaveLength(3);
+    expect(result.workLines[0]).toMatchObject({
+      checklistCompleted: true,
+      checklistStatusLabel: "Completed",
+      checklistCheckedByName: "Alex Mechanic",
+    });
+    expect(result.workLines[2]).toMatchObject({
+      checklistCompleted: false,
+      checklistStatusLabel: "Rejected",
+    });
     expect(result.totalParts).toBe(2000);
     expect(result.totalLabor).toBe(700);
     expect(result.pendingExtras).toBe(0);

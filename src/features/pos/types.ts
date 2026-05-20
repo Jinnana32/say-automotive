@@ -10,6 +10,7 @@ export type PosProductOption = {
   name: string;
   sku: string | null;
   barcode: string | null;
+  imageUrl: string | null;
   unitLabel: string;
   sellingPrice: number;
   availableQuantity: number;
@@ -33,6 +34,9 @@ export type PosTerminalData = {
   config: PosTerminalConfig;
   customers: PosCustomerOption[];
   products: PosProductOption[];
+  permissions: {
+    canCreateProducts: boolean;
+  };
 };
 
 export type PosCartItem = {

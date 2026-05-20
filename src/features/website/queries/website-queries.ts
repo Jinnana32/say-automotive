@@ -32,7 +32,7 @@ export const getWebsiteShellData = cache(async (): Promise<WebsiteShellData> => 
   const { data: branch, error: branchError } = await supabase
     .from("branches")
     .select("id, name")
-    .eq("is_default", true)
+    .eq("is_main", true)
     .maybeSingle();
 
   if (branchError) {

@@ -71,4 +71,7 @@ export type InventoryDashboardData = {
   stocks: InventoryStockItem[];
   movements: InventoryMovementItem[];
   productOptions: InventoryProductOption[];
+  permissions: {
+    canCreateProducts: boolean;
+  };
 };
