@@ -193,13 +193,20 @@ describe("mechanic portal pages", () => {
     pathname = "/portal/history";
     render(
       <>
-        <MechanicPortalHeaderCard displayName="Jerick B. Tayona" />
+        <MechanicPortalHeaderCard
+          displayName="Jerick B. Tayona"
+          businessLogoUrl="https://example.com/business-logo.png"
+        />
         <MechanicPortalBottomNav />
       </>,
     );
 
     expect(screen.getByText("Jerick B. Tayona")).toBeInTheDocument();
     expect(screen.getByText("Mechanic - SAY Auto Care Center")).toBeInTheDocument();
+    expect(screen.getByAltText("SAY Auto Care Center")).toHaveAttribute(
+      "src",
+      "https://example.com/business-logo.png",
+    );
     expect(screen.getAllByRole("link", { name: /History/i }).length).toBeGreaterThan(0);
   });
 });
