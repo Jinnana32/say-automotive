@@ -23,6 +23,7 @@ export default async function PaymentPrintPage({ params }: PaymentPrintPageProps
 
   return (
     <ReportPage
+      wrapInPrintPage={false}
       toolbar={
         <ReportToolbar
           downloadHref={`/api/payments/${document.payment.id}/pdf`}

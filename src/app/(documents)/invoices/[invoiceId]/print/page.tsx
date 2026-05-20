@@ -23,6 +23,7 @@ export default async function InvoicePrintPage({ params }: InvoicePrintPageProps
 
   return (
     <ReportPage
+      wrapInPrintPage={false}
       toolbar={
         <ReportToolbar
           downloadHref={`/api/invoices/${document.invoice.id}/pdf`}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
 import { AppSidebar } from "@/components/shared/app-sidebar";
@@ -12,6 +12,12 @@ import {
   type NavigationGroup,
   type NavigationIconName,
 } from "@/lib/navigation";
+
+const SIDEBAR_COLLAPSE_STORAGE_KEY = "say-admin-sidebar-collapsed";
+const DESKTOP_SIDEBAR_EXPANDED_CLASS = "xl:w-[15.5rem]";
+const DESKTOP_SIDEBAR_COLLAPSED_CLASS = "xl:w-[5.75rem]";
+const DESKTOP_CONTENT_EXPANDED_CLASS = "xl:pl-[15.5rem]";
+const DESKTOP_CONTENT_COLLAPSED_CLASS = "xl:pl-[5.75rem]";
 
 export function AppShell({
   children,
@@ -53,8 +59,36 @@ export function AppShell({
 }>) {
   const pathname = usePathname();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
   const activeItem = resolveActiveNavigationItem(navigationItems, pathname);
   void capabilities;
+
+  useEffect(() => {
+    try {
+      setIsDesktopSidebarCollapsed(
+        window.localStorage.getItem(SIDEBAR_COLLAPSE_STORAGE_KEY) === "true",
+      );
+    } catch {
+      setIsDesktopSidebarCollapsed(false);
+    }
+  }, []);
+
+  function handleToggleDesktopSidebar() {
+    setIsDesktopSidebarCollapsed((current) => {
+      const next = !current;
+
+      try {
+        window.localStorage.setItem(
+          SIDEBAR_COLLAPSE_STORAGE_KEY,
+          String(next),
+        );
+      } catch {
+        // Ignore storage failures and keep the UI responsive.
+      }
+
+      return next;
+    });
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -63,7 +97,10 @@ export function AppShell({
         businessName={businessName}
         businessLogoUrl={businessLogoUrl}
         showBusinessName={showSidebarBusinessName}
-        className="no-print hidden xl:fixed xl:inset-y-0 xl:left-0 xl:flex xl:w-[15.5rem] xl:flex-col"
+        collapsed={isDesktopSidebarCollapsed}
+        onToggleCollapse={handleToggleDesktopSidebar}
+        showCollapseButton
+        className={`no-print hidden xl:fixed xl:inset-y-0 xl:left-0 xl:flex xl:flex-col ${isDesktopSidebarCollapsed ? DESKTOP_SIDEBAR_COLLAPSED_CLASS : DESKTOP_SIDEBAR_EXPANDED_CLASS}`}
       />
       {isMobileSidebarOpen ? (
         <div className="fixed inset-0 z-40 xl:hidden" aria-hidden="true">
@@ -87,7 +124,9 @@ export function AppShell({
           showCloseButton
         />
       ) : null}
-      <div className="min-h-screen xl:pl-[15.5rem]">
+      <div
+        className={`min-h-screen ${isDesktopSidebarCollapsed ? DESKTOP_CONTENT_COLLAPSED_CLASS : DESKTOP_CONTENT_EXPANDED_CLASS}`}
+      >
         <div className="no-print">
           <AppTopbar
             activeLabel={activeItem?.label ?? "Dashboard"}

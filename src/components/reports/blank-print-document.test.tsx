@@ -28,6 +28,7 @@ describe("BlankPrintDocument", () => {
       </BlankPrintDocument>,
     );
 
+    expect(container.querySelector(".print-page")).not.toBeNull();
     expect(container.querySelector(".print-document-frame")).not.toBeNull();
     expect(container.querySelector(".print-document-header")).not.toBeNull();
     expect(container.querySelector(".print-document-body")).not.toBeNull();

@@ -113,7 +113,88 @@ describe("QuotationPrintLayout", () => {
     const preparedByContent = within(preparedByBlock as HTMLElement);
 
     expect(preparedByContent.getByText("Nia Grace Ariete")).toBeInTheDocument();
-    expect(preparedByContent.getByText("SAY Auto Care Center")).toBeInTheDocument();
+    expect(preparedByContent.getByText("Admin")).toBeInTheDocument();
+  });
+
+  it("keeps the closing sections on page 1 for medium quotations when they still fit", () => {
+    const mediumDocument: QuotationPrintDocument = {
+      ...documentFixture,
+      quotation: {
+        ...documentFixture.quotation,
+        natureOfRepair: null,
+        items: [
+          {
+            id: "item-1",
+            lineNumber: 1,
+            itemType: "product",
+            productId: "product-1",
+            serviceId: null,
+            description: "Fully synthetic engine oil",
+            quantity: 1,
+            unitLabel: "bottle",
+            unitPrice: 790,
+            total: 790,
+          },
+          {
+            id: "item-2",
+            lineNumber: 2,
+            itemType: "product",
+            productId: "product-2",
+            serviceId: null,
+            description: "Oil filter",
+            quantity: 1,
+            unitLabel: "pc",
+            unitPrice: 420,
+            total: 420,
+          },
+          {
+            id: "item-3",
+            lineNumber: 3,
+            itemType: "service",
+            productId: null,
+            serviceId: "service-1",
+            description: "Brake inspection and cleaning",
+            quantity: 1,
+            unitLabel: null,
+            unitPrice: 1000,
+            total: 1000,
+          },
+          {
+            id: "item-4",
+            lineNumber: 4,
+            itemType: "service",
+            productId: null,
+            serviceId: "service-2",
+            description: "Battery terminal cleaning",
+            quantity: 1,
+            unitLabel: null,
+            unitPrice: 350,
+            total: 350,
+          },
+          {
+            id: "item-5",
+            lineNumber: 5,
+            itemType: "labor",
+            productId: null,
+            serviceId: null,
+            description: "General preventive maintenance labor",
+            quantity: 1,
+            unitLabel: null,
+            unitPrice: 600,
+            total: 600,
+          },
+        ],
+      },
+    };
+
+    const { container } = render(
+      <QuotationPrintLayout document={mediumDocument} mode="full" />,
+    );
+
+    expect(container.querySelectorAll(".print-page")).toHaveLength(1);
+    expect(screen.getByText("TERMS & CONDITIONS")).toBeInTheDocument();
+    expect(screen.getByText("QUOTATION SUMMARY")).toBeInTheDocument();
+    expect(screen.getByText("APPROVAL")).toBeInTheDocument();
   });
 
   it("splits long quotations into explicit print pages with a footer on every page", () => {
@@ -143,13 +224,11 @@ describe("QuotationPrintLayout", () => {
       <QuotationPrintLayout document={longDocument} mode="full" />,
     );
 
-    expect(
-      container.querySelectorAll(".quotation-print-page").length,
-    ).toBeGreaterThan(1);
-    const pageCount = container.querySelectorAll(".quotation-print-page").length;
+    expect(container.querySelectorAll(".print-page").length).toBeGreaterThan(1);
+    const pageCount = container.querySelectorAll(".print-page").length;
 
     expect(
-      container.querySelectorAll(".quotation-print-page-footer").length,
+      container.querySelectorAll(".print-document-footer").length,
     ).toBe(pageCount);
     expect(
       screen.getAllByRole("heading", { name: "Quotation" }).length,
@@ -180,11 +259,11 @@ describe("QuotationPrintLayout", () => {
       <QuotationPrintLayout document={laborDocument} mode="labor" />,
     );
 
-    const pageCount = container.querySelectorAll(".quotation-print-page").length;
+    const pageCount = container.querySelectorAll(".print-page").length;
 
     expect(pageCount).toBeGreaterThan(1);
     expect(
-      container.querySelectorAll(".quotation-print-page-footer").length,
+      container.querySelectorAll(".print-document-footer").length,
     ).toBe(pageCount);
     expect(screen.getByText("APPROVAL")).toBeInTheDocument();
     expect(screen.getByText("Prepared By:")).toBeInTheDocument();

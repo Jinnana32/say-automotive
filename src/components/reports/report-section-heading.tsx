@@ -8,8 +8,8 @@ export function ReportSectionHeading({
   className?: string;
 }) {
   return (
-    <div className={cn("mb-2 flex items-center gap-3", className)}>
-      <span className="bg-brand-navy px-3 py-1.5 text-[10.5px] font-semibold tracking-[0.24em] text-white">
+    <div className={cn("mb-1.5 flex items-center gap-2.5", className)}>
+      <span className="bg-brand-navy px-3 py-1.25 text-[10.25px] font-semibold tracking-[0.22em] text-white">
         {title}
       </span>
       <span className="h-[2px] flex-1 bg-brand-border" />

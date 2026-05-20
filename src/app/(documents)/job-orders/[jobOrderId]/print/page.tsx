@@ -34,6 +34,7 @@ export default async function JobOrderPrintPage({
 
   return (
     <ReportPage
+      wrapInPrintPage={false}
       toolbar={
         <ReportToolbar
           downloadHref={`/api/job-orders/${document.jobOrder.id}/pdf${hidePrices ? "?hidePrices=1" : ""}`}

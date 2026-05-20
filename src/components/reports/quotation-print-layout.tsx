@@ -1,5 +1,5 @@
-import { DocumentFooter } from "@/components/reports/document-footer";
-import { DocumentHeader } from "@/components/reports/document-header";
+import { PrintDocumentPage } from "@/components/reports/print-document-page";
+import { PrintPageStack } from "@/components/reports/print-document-layout";
 import { buildQuotationPrintBreakdown } from "@/features/quotations/report-utils";
 import type {
   QuotationItemDetail,
@@ -29,7 +29,9 @@ export function QuotationPrintLayout({
   const breakdown = buildQuotationPrintBreakdown(quotation, mode);
   const lineItems = buildQuotationLineRows(quotation.items, mode);
   const natureOfRepair = getPrintableText(quotation.natureOfRepair);
-  const serviceAdviserName = quotation.preparedByName || "Not captured";
+  const serviceAdviserName =
+    quotation.preparedByName?.trim() || "Prepared by current user";
+  const serviceAdviserTitle = getPrintableText(quotation.preparedByTitle);
   const pages = buildQuotationPrintPages({
     lineItems,
     mode,
@@ -37,35 +39,23 @@ export function QuotationPrintLayout({
   });
 
   return (
-    <div className="quotation-print-document leading-[1.42]">
+    <PrintPageStack className="quotation-print-document leading-[1.42]">
       {pages.map((page, index) => (
-        <QuotationPrintPage
+        <PrintDocumentPage
           key={page.key}
-          header={
-            <DocumentHeader
-              businessName={businessProfile.businessName}
-              documentTitle={getDocumentTitle(mode)}
-              documentMeta={buildCompactHeaderMeta(
-                quotation.quotationNumber,
-                quotation.createdAt,
-              )}
-              logoSrc={businessProfile.businessLogoUrl}
-              compact={index > 0}
-            />
-          }
-          footer={
-            <DocumentFooter
-              businessName={businessProfile.businessName}
-              vatRegistrationNo={businessProfile.businessVatRegistrationNo}
-              contactNumber={businessProfile.businessContact}
-              email={businessProfile.businessEmail}
-              address={businessProfile.businessAddress}
-            />
-          }
+          className="leading-[1.42]"
+          bodyClassName="pb-[9mm]"
+          compactHeader={index > 0}
+          businessProfile={businessProfile}
+          documentTitle={getDocumentTitle(mode)}
+          documentMeta={buildCompactHeaderMeta(
+            quotation.quotationNumber,
+            quotation.createdAt,
+          )}
         >
           {page.includeIntro ? (
             <>
-              <section className="mt-5 grid gap-4 sm:grid-cols-2">
+              <section className="mt-4 grid gap-3.5 sm:grid-cols-2">
                 <QuotationInfoPanel
                   title="CUSTOMER DETAILS"
                   rows={[
@@ -98,12 +88,12 @@ export function QuotationPrintLayout({
               </section>
 
               {page.includeNatureOfRepair && natureOfRepair ? (
-                <section className="report-section-keep mt-4">
+                <section className="report-section-keep mt-3.5">
                   <div className="border border-brand-border">
-                    <div className="bg-brand-navy px-4 py-2.5 text-[10.5px] font-semibold tracking-[0.24em] text-white">
+                    <div className="bg-brand-navy px-4 py-2 text-[10.25px] font-semibold tracking-[0.22em] text-white">
                       NATURE OF REPAIR
                     </div>
-                    <div className="px-4 py-3.5 text-[11px] leading-[1.48] text-slate-800">
+                    <div className="px-4 py-3 text-[10.75px] leading-[1.42] text-slate-800">
                       {natureOfRepair}
                     </div>
                   </div>
@@ -117,25 +107,25 @@ export function QuotationPrintLayout({
           ) : null}
 
           {page.includeClosing ? (
-            <>
-              <section className="report-section-keep mt-4 grid items-stretch gap-3 sm:grid-cols-[minmax(0,1fr)_272px]">
+            <div className="flex flex-col gap-3 pt-3.5">
+              <section className="report-section-keep grid items-stretch gap-3 sm:grid-cols-[minmax(0,1fr)_268px]">
                 <QuotationTermsSection terms={buildDefaultQuotationTerms(validUntil)} />
                 <QuotationTotalsPanel breakdown={breakdown} />
               </section>
 
-              <section className="report-section-keep mt-4">
+              <section className="report-section-keep">
                 <p className="text-[10.5px] font-semibold uppercase tracking-[0.26em] text-brand-navy">
                   APPROVAL
                 </p>
                 <div className="mt-1.5 h-0.5 w-12 bg-brand-red" />
-                <div className="grid items-start gap-x-4 gap-y-3 pt-2.5 sm:grid-cols-[1.1fr_1.2fr_0.9fr]">
-                  <div className="text-[10.25px] leading-[1.38] text-slate-700">
+                <div className="grid items-start gap-x-4 gap-y-2 pt-[7px] sm:grid-cols-[1.1fr_1.2fr_0.9fr]">
+                  <div className="text-[10.1px] leading-[1.34] text-slate-700">
                     <p>
                       I have read and agree to the terms and conditions stated above and
                       authorize SAY Auto Care to proceed with the listed services.
                     </p>
                   </div>
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-1.5">
                     <SignatureLine label="Customer Signature" />
                     <SignatureLine label="Name" value={quotation.customerName} />
                     <SignatureLine label="Date" />
@@ -143,36 +133,17 @@ export function QuotationPrintLayout({
                   <div className="border-t border-slate-200 pt-2.5 sm:border-l sm:border-t-0 sm:pl-3.5 sm:pt-0">
                     <PreparedBySignatureBlock
                       name={serviceAdviserName}
+                      title={serviceAdviserTitle}
                       businessName={businessProfile.businessName}
                     />
                   </div>
                 </div>
               </section>
-            </>
+            </div>
           ) : null}
-        </QuotationPrintPage>
+        </PrintDocumentPage>
       ))}
-    </div>
-  );
-}
-
-function QuotationPrintPage({
-  header,
-  footer,
-  children,
-}: {
-  header: React.ReactNode;
-  footer: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="quotation-print-page">
-      <div className="quotation-print-page-inner">
-        <div className="quotation-print-page-header">{header}</div>
-        <div className="quotation-print-page-body">{children}</div>
-        <div className="quotation-print-page-footer">{footer}</div>
-      </div>
-    </section>
+    </PrintPageStack>
   );
 }
 
@@ -184,9 +155,9 @@ function QuotationLineItemsSection({
   mode: QuotationPrintMode;
 }) {
   return (
-    <section className="mt-4">
-      <div className="mb-2 flex items-center gap-3">
-        <span className="bg-brand-navy px-3 py-1.5 text-[10.5px] font-semibold tracking-[0.24em] text-white">
+    <section className="mt-3.5">
+      <div className="mb-1.5 flex items-center gap-2.5">
+        <span className="bg-brand-navy px-3 py-[5px] text-[10.25px] font-semibold tracking-[0.22em] text-white">
           {getLineItemHeading(mode)}
         </span>
         <span className="h-[2px] flex-1 bg-brand-border" />
@@ -195,17 +166,17 @@ function QuotationLineItemsSection({
         <table className="w-full border-collapse text-[11px]">
           <thead className="bg-brand-navy text-white">
             <tr>
-              <th className="w-10 px-3 py-2.5 text-left font-semibold">#</th>
-              <th className="px-3 py-2.5 text-left font-semibold">
+              <th className="w-10 px-3 py-2 text-left font-semibold">#</th>
+              <th className="px-3 py-2 text-left font-semibold">
                 Description
               </th>
-              <th className="w-20 px-3 py-2.5 text-left font-semibold">
+              <th className="w-20 px-3 py-2 text-left font-semibold">
                 Qty
               </th>
-              <th className="w-28 px-3 py-2.5 text-right font-semibold">
+              <th className="w-28 px-3 py-2 text-right font-semibold">
                 Unit Price
               </th>
-              <th className="w-28 px-3 py-2.5 text-right font-semibold">
+              <th className="w-28 px-3 py-2 text-right font-semibold">
                 Amount
               </th>
             </tr>
@@ -219,7 +190,7 @@ function QuotationLineItemsSection({
                 >
                   <td
                     colSpan={5}
-                    className="border-t border-slate-200 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-brand-navy"
+                    className="border-t border-slate-200 px-3 py-[5px] text-[9.75px] font-semibold uppercase tracking-[0.22em] text-brand-navy"
                   >
                     {row.label}
                   </td>
@@ -229,26 +200,26 @@ function QuotationLineItemsSection({
                   key={row.key}
                   className="report-row-avoid border-t border-slate-200"
                 >
-                  <td className="px-3 py-3.5 align-top text-slate-700">
+                  <td className="px-3 py-2.5 align-top text-slate-700">
                     {row.displayLineNumber}
                   </td>
-                  <td className="px-3 py-3.5 align-top">
-                    <p className="font-semibold leading-[1.35] text-slate-950">
+                  <td className="px-3 py-2.5 align-top">
+                    <p className="font-semibold leading-[1.3] text-slate-950">
                       {row.description}
                     </p>
                     {row.subtext ? (
-                      <p className="mt-1 text-[9.5px] leading-[1.35] text-slate-600">
+                      <p className="mt-0.5 text-[9.25px] leading-[1.25] text-slate-600">
                         {row.subtext}
                       </p>
                     ) : null}
                   </td>
-                  <td className="px-3 py-3.5 align-top text-slate-700">
+                  <td className="px-3 py-2.5 align-top text-slate-700">
                     {row.quantityLabel}
                   </td>
-                  <td className="px-3 py-3.5 text-right align-top text-slate-800">
+                  <td className="px-3 py-2.5 text-right align-top text-slate-800">
                     {formatPrintCurrencyNumber(row.unitPrice)}
                   </td>
-                  <td className="px-3 py-3.5 text-right align-top font-semibold text-slate-950">
+                  <td className="px-3 py-2.5 text-right align-top font-semibold text-slate-950">
                     {formatPrintCurrencyNumber(row.amount)}
                   </td>
                 </tr>
@@ -270,13 +241,13 @@ function QuotationInfoPanel({
 }) {
   return (
     <section className="report-section-keep">
-      <div className="flex items-center gap-3">
-        <span className="bg-brand-navy px-3 py-1.5 text-[10.5px] font-semibold tracking-[0.24em] text-white">
+      <div className="flex items-center gap-2.5">
+        <span className="bg-brand-navy px-3 py-[5px] text-[10.25px] font-semibold tracking-[0.22em] text-white">
           {title}
         </span>
         <span className="h-px flex-1 bg-brand-border" />
       </div>
-      <div className="mt-3 space-y-2.5">
+      <div className="mt-2.5 space-y-2">
         {rows.map((row) => (
           <div
             key={row.label}
@@ -300,7 +271,7 @@ function QuotationTermsSection({ terms }: { terms: string[] }) {
         TERMS &amp; CONDITIONS
       </p>
       <div className="mt-1.5 h-px bg-brand-border" />
-      <ul className="mt-2 list-disc space-y-1 pl-4 text-[10.25px] leading-[1.36] text-slate-700">
+      <ul className="mt-[5px] list-disc space-y-[2px] pl-4 text-[9.95px] leading-[1.28] text-slate-700">
         {terms.map((term) => (
           <li key={term}>{term}</li>
         ))}
@@ -358,24 +329,24 @@ function QuotationTotalsPanel({
 
   return (
     <section className="flex h-full flex-col justify-between overflow-hidden border border-brand-border bg-brand-soft/35">
-      <div className="flex-1 px-3.5 pt-3.5">
+      <div className="flex-1 px-3.5 pt-3">
         <p className="text-[10.5px] font-semibold uppercase tracking-[0.26em] text-brand-navy">
           {breakdown.mode === "full"
             ? "QUOTATION SUMMARY"
             : "PRINT MODE SUMMARY"}
         </p>
         <div className="mt-1.5 h-px bg-brand-border" />
-        <table className="mt-2.5 w-full border-collapse text-[10.75px]">
+        <table className="mt-2 w-full border-collapse text-[10.6px]">
           <tbody>
             {totalLines.map((line) => (
               <tr
                 key={line.label}
                 className="border-b border-slate-200 last:border-b-0"
               >
-                <td className="py-1.25 pr-4 font-semibold text-slate-700">
+                <td className="py-1 pr-4 font-semibold text-slate-700">
                   {line.label}
                 </td>
-                <td className="py-1.25 text-right font-semibold text-slate-900">
+                <td className="py-1 text-right font-semibold text-slate-900">
                   {line.value}
                 </td>
               </tr>
@@ -384,7 +355,7 @@ function QuotationTotalsPanel({
         </table>
       </div>
 
-      <div className="shrink-0 border-t-2 border-brand-red bg-brand-navy px-3.5 py-2.5 text-white">
+      <div className="shrink-0 border-t-2 border-brand-red bg-brand-navy px-3.5 py-2.25 text-white">
         <div className="flex items-end justify-between gap-4">
           <span className="text-[10.5px] font-semibold uppercase tracking-[0.26em]">
             {getTotalsFooterLabel(breakdown.mode)}
@@ -406,7 +377,7 @@ function SignatureLine({
   value?: string | null;
 }) {
   return (
-    <div className="grid grid-cols-[122px_minmax(0,156px)] items-center gap-2.5">
+    <div className="grid grid-cols-[118px_minmax(0,150px)] items-center gap-2">
       <p className="text-[10.25px] font-semibold text-slate-700">{label}:</p>
       <div className="border-b border-slate-500 pb-px text-[10.75px] leading-tight text-slate-950">
         {value?.trim() || "\u00A0"}
@@ -417,23 +388,25 @@ function SignatureLine({
 
 function PreparedBySignatureBlock({
   name,
+  title,
   businessName,
 }: {
   name: string;
+  title: string | null;
   businessName: string;
 }) {
+  const subtitle = title || businessName;
+
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-1">
       <p className="text-[10.25px] font-semibold text-slate-700">
         Prepared By:
       </p>
-      <div className="w-[156px] border-b border-slate-500 pb-px text-[10.75px] leading-tight text-slate-950">
+      <div className="w-[150px] border-b border-slate-500 pb-px text-[10.75px] leading-tight text-slate-950">
         {"\u00A0"}
       </div>
       <p className="text-[10.75px] leading-tight text-slate-950">{name}</p>
-      <p className="text-[10.25px] leading-tight text-slate-600">
-        {businessName}
-      </p>
+      <p className="text-[10.25px] leading-tight text-slate-600">{subtitle}</p>
     </div>
   );
 }
@@ -471,15 +444,13 @@ function buildQuotationPrintPages(params: {
   mode: QuotationPrintMode;
   hasNatureOfRepair: boolean;
 }): QuotationPrintPageModel[] {
-  const {
-    lineItems,
-    mode,
-    hasNatureOfRepair,
-  } = params;
-  const singlePageCapacity = getSinglePageLineCapacity(mode, hasNatureOfRepair);
+  const { lineItems, mode, hasNatureOfRepair } = params;
+  const pageCapacity = getQuotationPageCapacity(mode);
+  const introUnits = getQuotationIntroUnits(hasNatureOfRepair);
+  const closingUnits = getQuotationClosingUnits(mode);
   const totalUnits = estimateLineRowsUnits(lineItems);
 
-  if (totalUnits <= singlePageCapacity) {
+  if (introUnits + totalUnits + closingUnits <= pageCapacity) {
     return [
       {
         key: "quotation-page-1",
@@ -496,7 +467,7 @@ function buildQuotationPrintPages(params: {
     lineItems,
     0,
     null,
-    getFirstPageLineCapacity(mode, hasNatureOfRepair),
+    Math.max(3.5, pageCapacity - introUnits),
   );
   pages.push({
     key: "quotation-page-1",
@@ -509,7 +480,7 @@ function buildQuotationPrintPages(params: {
   let index = firstPage.nextIndex;
   let activeGroup = firstPage.activeGroup;
   let pageNumber = 2;
-  const finalPageCapacity = getFinalPageLineCapacity(mode);
+  const finalPageCapacity = Math.max(3.5, pageCapacity - closingUnits);
 
   while (
     index < lineItems.length &&
@@ -519,7 +490,7 @@ function buildQuotationPrintPages(params: {
       lineItems,
       index,
       activeGroup,
-      getContinuationPageLineCapacity(mode),
+      pageCapacity,
     );
 
     pages.push({
@@ -671,58 +642,49 @@ function estimateLineRowsUnits(rows: QuotationLineRow[]) {
 
 function estimateLineRowUnits(row: QuotationLineRow) {
   if (row.kind === "group") {
-    return 0.8;
+    return 0.65;
   }
 
-  let units = 1.45;
+  let units = 1.12;
 
   if (row.subtext) {
-    units += 0.3;
+    units += 0.18;
   }
 
   if (row.description.length > 52) {
-    units += 0.4;
+    units += 0.22;
   }
 
   if (row.description.length > 92) {
-    units += 0.35;
+    units += 0.18;
   }
 
   return units;
 }
 
-function getSinglePageLineCapacity(
-  mode: QuotationPrintMode,
-  hasNatureOfRepair: boolean,
-) {
-  const capacity =
-    mode === "full" ? 5.9 : mode === "labor" ? 6.4 : 7.2;
-  return capacity - (hasNatureOfRepair ? 1.1 : 0);
-}
-
-function getFirstPageLineCapacity(
-  mode: QuotationPrintMode,
-  hasNatureOfRepair: boolean,
-) {
-  const capacity =
-    mode === "full" ? 13.2 : mode === "labor" ? 12.2 : 14.2;
-  return capacity - (hasNatureOfRepair ? 1 : 0);
-}
-
-function getContinuationPageLineCapacity(mode: QuotationPrintMode) {
-  if (mode === "full") {
-    return 15.6;
+function getQuotationPageCapacity(mode: QuotationPrintMode) {
+  switch (mode) {
+    case "parts":
+      return 18.1;
+    case "labor":
+      return 17.8;
+    default:
+      return 17.65;
   }
-
-  return mode === "labor" ? 14.8 : 16.2;
 }
 
-function getFinalPageLineCapacity(mode: QuotationPrintMode) {
-  if (mode === "full") {
-    return 6.4;
-  }
+function getQuotationIntroUnits(hasNatureOfRepair: boolean) {
+  return hasNatureOfRepair ? 5.1 : 4.25;
+}
 
-  return mode === "labor" ? 7.2 : 8.2;
+function getQuotationClosingUnits(mode: QuotationPrintMode) {
+  switch (mode) {
+    case "parts":
+    case "labor":
+      return 4.4;
+    default:
+      return 4.95;
+  }
 }
 
 function buildQuotationLineRows(

@@ -26,6 +26,7 @@ export default async function ReportsPrintPage({ searchParams }: ReportsPrintPag
 
   return (
     <ReportPage
+      wrapInPrintPage={false}
       toolbar={
         <ReportToolbar
           downloadHref={`/api/reports/pdf?${search}`}

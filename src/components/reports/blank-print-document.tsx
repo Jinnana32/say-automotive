@@ -1,8 +1,6 @@
 import type { ReactNode } from "react";
 
-import { DocumentFooter } from "@/components/reports/document-footer";
-import { DocumentHeader } from "@/components/reports/document-header";
-import { PrintDocumentLayout } from "@/components/reports/print-document-layout";
+import { PrintDocumentPage } from "@/components/reports/print-document-page";
 import { cn } from "@/lib/utils";
 
 export function BlankPrintDocument({
@@ -19,6 +17,8 @@ export function BlankPrintDocument({
   horizontalPaddingClassName,
   topPaddingClassName,
   bottomPaddingClassName,
+  bodyClassName,
+  compactHeader = false,
 }: {
   businessName: string;
   businessLogoUrl?: string | null;
@@ -33,32 +33,29 @@ export function BlankPrintDocument({
   horizontalPaddingClassName?: string;
   topPaddingClassName?: string;
   bottomPaddingClassName?: string;
+  bodyClassName?: string;
+  compactHeader?: boolean;
 }) {
   return (
-    <PrintDocumentLayout
+    <PrintDocumentPage
       className={cn("leading-[1.4]", className)}
+      bodyClassName={bodyClassName}
       horizontalPaddingClassName={horizontalPaddingClassName}
       topPaddingClassName={topPaddingClassName}
       bottomPaddingClassName={bottomPaddingClassName}
-      header={
-        <DocumentHeader
-          businessName={businessName}
-          documentTitle={documentTitle}
-          documentMeta={documentMeta}
-          logoSrc={businessLogoUrl}
-        />
-      }
-      footer={
-        <DocumentFooter
-          businessName={businessName}
-          vatRegistrationNo={businessVatRegistrationNo}
-          contactNumber={businessContact}
-          email={businessEmail}
-          address={businessAddress}
-        />
-      }
+      compactHeader={compactHeader}
+      businessProfile={{
+        businessName,
+        businessLogoUrl,
+        businessVatRegistrationNo,
+        businessContact,
+        businessEmail,
+        businessAddress,
+      }}
+      documentTitle={documentTitle}
+      documentMeta={documentMeta}
     >
       {children}
-    </PrintDocumentLayout>
+    </PrintDocumentPage>
   );
 }

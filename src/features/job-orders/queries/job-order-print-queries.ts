@@ -1,15 +1,15 @@
 import { cache } from "react";
 
 import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { buildPreparedByProfile } from "@/lib/auth/prepared-by";
 import { buildBusinessLogoUrl } from "@/lib/storage";
-import { toTitleCaseWords } from "@/features/job-orders/utils";
 import { getJobOrderById } from "@/features/job-orders/queries/job-order-queries";
 import type { JobOrderPrintDocument } from "@/features/job-orders/types";
 import type { TableRow } from "@/types/database";
 
 type JobOrderPrintSupportRow = Pick<
   TableRow<"job_orders">,
-  "branch_id" | "customer_id" | "vehicle_id" | "created_by"
+  "branch_id" | "customer_id" | "vehicle_id"
 >;
 
 export const getJobOrderPrintDocument = cache(
@@ -20,10 +20,11 @@ export const getJobOrderPrintDocument = cache(
       return null;
     }
 
-    const { supabase } = await getAuthorizedSupabaseServerClient("job_orders:read");
+    const { supabase, context } = await getAuthorizedSupabaseServerClient("job_orders:read");
+    const preparedBy = buildPreparedByProfile(context);
     const { data: supportRow, error: supportError } = await supabase
       .from("job_orders")
-      .select("branch_id, customer_id, vehicle_id, created_by")
+      .select("branch_id, customer_id, vehicle_id")
       .eq("id", jobOrderId)
       .maybeSingle();
 
@@ -40,7 +41,6 @@ export const getJobOrderPrintDocument = cache(
       { data: customer, error: customerError },
       { data: vehicle, error: vehicleError },
       { data: businessSettings, error: settingsError },
-      preparedByResult,
     ] = await Promise.all([
       supabase
         .from("customers")
@@ -57,13 +57,6 @@ export const getJobOrderPrintDocument = cache(
         .select("business_name, business_logo_path, business_vat_registration_no, business_contact, business_email, business_address, updated_at")
         .eq("branch_id", support.branch_id)
         .maybeSingle(),
-      support.created_by
-        ? supabase
-            .from("staff")
-            .select("first_name, last_name, role")
-            .eq("linked_user_id", support.created_by)
-            .maybeSingle()
-        : Promise.resolve({ data: null, error: null }),
     ]);
 
     if (customerError) {
@@ -78,12 +71,6 @@ export const getJobOrderPrintDocument = cache(
       throw new Error(settingsError.message);
     }
 
-    if (preparedByResult.error) {
-      throw new Error(preparedByResult.error.message);
-    }
-
-    const preparedBy = preparedByResult.data;
-
     return {
       jobOrder: {
         ...jobOrder,
@@ -94,10 +81,8 @@ export const getJobOrderPrintDocument = cache(
         vehicleYear: vehicle?.year ?? null,
         vehiclePlateNumber: vehicle?.plate_number ?? null,
         vehicleVin: vehicle?.vin ?? null,
-        preparedByName: preparedBy
-          ? `${preparedBy.first_name} ${preparedBy.last_name}`.trim()
-          : null,
-        preparedByTitle: preparedBy ? toTitleCaseWords(preparedBy.role.replaceAll("_", " ")) : null,
+        preparedByName: preparedBy.name,
+        preparedByTitle: preparedBy.title,
       },
       businessProfile: {
         businessName: businessSettings?.business_name ?? "SAY Auto Care Center",

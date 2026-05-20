@@ -20,7 +20,7 @@ export function ReportPage({
         className={cn(
           wrapInPrintPage
             ? "report-print-page print-page"
-            : "report-print-stack",
+            : "report-print-content",
           className,
         )}
       >

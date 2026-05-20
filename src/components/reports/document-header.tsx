@@ -16,11 +16,11 @@ export function DocumentHeader({
   return (
     <header
       className={`report-section-keep border-b-2 border-brand-border ${
-        compact ? "pb-3" : "pb-4"
+        compact ? "pb-2.5" : "pb-3"
       }`}
     >
       <div
-        className={`grid gap-3 ${
+        className={`grid gap-2.5 ${
           compact
             ? "sm:grid-cols-[minmax(0,1fr)_minmax(0,0.82fr)]"
             : "sm:grid-cols-[minmax(0,1fr)_minmax(0,0.88fr)]"
@@ -29,7 +29,7 @@ export function DocumentHeader({
         <div className="flex min-w-0 items-center">
           <div
             className={`flex max-w-full shrink-0 items-center justify-start ${
-              compact ? "w-[180px]" : "w-[220px]"
+              compact ? "w-[176px]" : "w-[208px]"
             }`}
           >
             <Image
@@ -41,8 +41,8 @@ export function DocumentHeader({
               unoptimized
               className={`h-auto w-auto object-contain object-left ${
                 compact
-                  ? "max-h-[68px] max-w-[180px]"
-                  : "max-h-[90px] max-w-[220px]"
+                  ? "max-h-[64px] max-w-[176px]"
+                  : "max-h-[84px] max-w-[208px]"
               }`}
             />
           </div>
@@ -50,20 +50,20 @@ export function DocumentHeader({
         <div className="min-w-0 sm:text-right">
           <h1
             className={`break-words font-display font-semibold uppercase tracking-[0.16em] text-brand-navy ${
-              compact ? "text-[20px] sm:text-[22px]" : "text-[24px] sm:text-[28px]"
+              compact ? "text-[19px] sm:text-[21px]" : "text-[23px] sm:text-[26px]"
             }`}
           >
             {documentTitle}
           </h1>
           <div
             className={`ml-auto max-w-full bg-brand-red ${
-              compact ? "mt-1.5 h-[3px] w-28" : "mt-2 h-[4px] w-40"
+              compact ? "mt-1 h-[3px] w-24" : "mt-1.5 h-[4px] w-36"
             }`}
           />
           {documentMeta ? (
             <p
               className={`max-w-full break-words font-medium text-slate-600 ${
-                compact ? "mt-1.5 text-[9.5px] leading-[1.35]" : "mt-2 text-[10px] leading-[1.4]"
+                compact ? "mt-1 text-[9.25px] leading-[1.32]" : "mt-1.5 text-[9.75px] leading-[1.36]"
               }`}
             >
               {documentMeta}

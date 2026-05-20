@@ -2,6 +2,7 @@ import { cache } from "react";
 import { DateTime } from "luxon";
 
 import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import { buildPreparedByProfile } from "@/lib/auth/prepared-by";
 import { getQuotationById } from "@/features/quotations/queries/quotation-queries";
 import type {
   QuotationPrintBusinessProfile,
@@ -17,7 +18,8 @@ export const getQuotationPrintDocument = cache(
       return null;
     }
 
-    const { supabase } = await getAuthorizedSupabaseServerClient("quotations:read");
+    const { supabase, context } = await getAuthorizedSupabaseServerClient("quotations:read");
+    const preparedBy = buildPreparedByProfile(context);
     const [
       { data: businessSettings, error },
       { data: customer, error: customerError },
@@ -71,7 +73,11 @@ export const getQuotationPrintDocument = cache(
       .toISO();
 
     return {
-      quotation,
+      quotation: {
+        ...quotation,
+        preparedByName: preparedBy.name,
+        preparedByTitle: preparedBy.title,
+      },
       businessProfile,
       customerSnapshot: {
         companyName: customer?.company_name ?? null,

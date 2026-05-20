@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Printer } from "lucide-react";
 
 import { BlankPrintDocument } from "@/components/reports/blank-print-document";
+import { PrintPageStack } from "@/components/reports/print-document-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -77,7 +78,7 @@ export function BlankDocumentPreviewComposer({
       </Card>
 
       <div className="report-preview-shell px-4 py-5 sm:px-6">
-        <div className="report-print-page print-page">
+        <PrintPageStack>
           <BlankPrintDocument
             businessName={businessName}
             businessLogoUrl={businessLogoUrl}
@@ -87,6 +88,7 @@ export function BlankDocumentPreviewComposer({
             businessAddress={businessAddress}
             documentTitle={resolvedDocumentTitle}
             documentMeta={`Internal blank document preview • ${branchName}`}
+            bodyClassName="pb-[12mm]"
           >
             <div className="min-h-[180mm] pt-6">
               <div className="whitespace-pre-wrap text-[12px] leading-[1.68] text-slate-800">
@@ -94,7 +96,7 @@ export function BlankDocumentPreviewComposer({
               </div>
             </div>
           </BlankPrintDocument>
-        </div>
+        </PrintPageStack>
       </div>
     </div>
   );

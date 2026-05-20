@@ -1,6 +1,4 @@
-import { ReportFooter } from "@/components/reports/report-footer";
-import { ReportHeader } from "@/components/reports/report-header";
-import { PrintDocumentLayout } from "@/components/reports/print-document-layout";
+import { PrintDocumentPage } from "@/components/reports/print-document-page";
 import { ReportSectionHeading } from "@/components/reports/report-section-heading";
 import { ReportSignatureBlock } from "@/components/reports/report-signature-block";
 import { ReportTotals } from "@/components/reports/report-totals";
@@ -18,25 +16,11 @@ export function PaymentPrintLayout({
   const sourceLabel = payment.jobOrderNumber ?? payment.saleNumber ?? "Direct sale";
 
   return (
-    <PrintDocumentLayout
+    <PrintDocumentPage
       className="leading-[1.35]"
-      header={
-        <ReportHeader
-          businessName={businessProfile.businessName}
-          documentTitle="Payment Receipt"
-          documentMeta={`Invoice No.: ${payment.invoiceNumber} • Paid At: ${formatDocumentDate(payment.paidAt)}`}
-          logoSrc={businessProfile.businessLogoUrl ?? undefined}
-        />
-      }
-      footer={
-        <ReportFooter
-          businessName={businessProfile.businessName}
-          vatRegistrationNo={businessProfile.businessVatRegistrationNo}
-          contactNumber={businessProfile.businessContact}
-          email={businessProfile.businessEmail}
-          address={businessProfile.businessAddress}
-        />
-      }
+      businessProfile={businessProfile}
+      documentTitle="Payment Receipt"
+      documentMeta={`Invoice #: ${payment.invoiceNumber} • Paid At: ${formatDocumentDate(payment.paidAt)}`}
     >
       <section className="report-section-keep mt-5 grid gap-x-8 gap-y-2 sm:grid-cols-2">
         <MetadataColumn
@@ -111,7 +95,7 @@ export function PaymentPrintLayout({
         </div>
       </section>
 
-    </PrintDocumentLayout>
+    </PrintDocumentPage>
   );
 }
 

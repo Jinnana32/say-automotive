@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AppShell } from "@/components/shared/app-shell";
 
@@ -20,6 +20,53 @@ vi.mock("@/components/shared/branch-scope-selector", () => ({
 }));
 
 describe("AppShell", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  it("collapses the desktop sidebar into an icon-only rail from the bottom chevron", () => {
+    render(
+      <AppShell
+        navigationItems={[
+          {
+            href: "/dashboard",
+            label: "Dashboard",
+            description: "Overview of shop activity",
+            group: "Overview",
+            iconName: "dashboard",
+          },
+          {
+            href: "/customers",
+            label: "Customers",
+            description: "Manage customer records",
+            group: "Service Desk",
+            iconName: "customers",
+          },
+        ]}
+        userDisplayName="Alex"
+        userRoleLabel="Administrator"
+        capabilities={[]}
+        businessName="SAY Auto Care Center"
+        businessLogoUrl={null}
+        branchScope={{
+          canAccessAllBranches: false,
+          accessibleBranches: [],
+          selectedBranchId: "branch-main",
+          selectedBranchLabel: "Main Branch",
+        }}
+      >
+        <div>Dashboard content</div>
+      </AppShell>,
+    );
+
+    expect(screen.getByText("Customers")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Collapse sidebar" }));
+
+    expect(screen.getByRole("button", { name: "Expand sidebar" })).toBeInTheDocument();
+    expect(screen.queryByText("Customers")).not.toBeInTheDocument();
+  });
+
   it("opens mobile navigation from the topbar menu button", () => {
     render(
       <AppShell

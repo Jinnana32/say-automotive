@@ -7,6 +7,8 @@ import {
   BarChart3,
   Boxes,
   CarFront,
+  ChevronLeft,
+  ChevronRight,
   ClipboardList,
   Clock3,
   FileText,
@@ -68,10 +70,13 @@ export function AppSidebar({
   businessName,
   businessLogoUrl,
   showBusinessName = false,
+  collapsed = false,
   className,
   onNavigate,
   onClose,
+  onToggleCollapse,
   showCloseButton = false,
+  showCollapseButton = false,
 }: {
   navigationItems: ReadonlyArray<{
     href: string;
@@ -84,10 +89,13 @@ export function AppSidebar({
   businessName: string;
   businessLogoUrl: string | null;
   showBusinessName?: boolean;
+  collapsed?: boolean;
   className?: string;
   onNavigate?: () => void;
   onClose?: () => void;
+  onToggleCollapse?: () => void;
   showCloseButton?: boolean;
+  showCollapseButton?: boolean;
 }) {
   const pathname = usePathname();
   const mobileShortcutItems = navigationItems.filter(
@@ -121,19 +129,37 @@ export function AppSidebar({
   return (
     <aside
       className={cn(
-        'border-r border-border/70 bg-background/95 shadow-[inset_-1px_0_0_rgba(15,23,42,0.04)] backdrop-blur',
+        'overflow-visible border-r border-border/70 bg-background/95 shadow-[inset_-1px_0_0_rgba(15,23,42,0.04)] backdrop-blur',
         className,
       )}
     >
-      <div className="flex h-full flex-col px-3.5 py-4">
+      <div
+        className={cn(
+          'flex h-full flex-col py-4',
+          collapsed ? 'px-2.5' : 'px-3.5',
+        )}
+      >
         <div
           className={cn(
             'flex items-start justify-between gap-3 border-b border-border/70',
-            showBusinessName ? 'pb-4' : 'pb-3',
+            collapsed ? 'pb-3' : showBusinessName ? 'pb-4' : 'pb-3',
           )}
         >
           <div className="min-w-0 flex-1">
-            {showBusinessName ? (
+            {collapsed ? (
+              <div className="flex min-h-[3.55rem] items-center justify-center py-0.5">
+                <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-white p-2 shadow-sm">
+                  <Image
+                    src={businessLogoUrl ?? '/say-auto-care-logo.jpeg'}
+                    alt={businessName}
+                    width={120}
+                    height={120}
+                    className="max-h-10 w-auto object-contain"
+                    priority
+                  />
+                </div>
+              </div>
+            ) : showBusinessName ? (
               <div className="flex items-center gap-3">
                 <div className="flex size-16 shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-white p-2 shadow-sm">
                   <Image
@@ -184,15 +210,24 @@ export function AppSidebar({
           ) : null}
         </div>
 
-        <nav className="mt-3 flex-1 overflow-y-auto pr-1">
-          <div className="space-y-5">
+        <nav
+          className={cn(
+            'mt-3 flex-1 overflow-y-auto',
+            collapsed ? 'pr-0' : 'pr-1',
+          )}
+        >
+          <div className={cn(collapsed ? 'space-y-4' : 'space-y-5')}>
             {Object.entries(groupedItems)
               .filter(([, items]) => items.length > 0)
               .map(([group, items]) => (
-                <div key={group} className="space-y-2">
+                <div
+                  key={group}
+                  className={cn(collapsed ? 'space-y-1.5' : 'space-y-2')}
+                >
                   {showCloseButton &&
                   group === 'Overview' &&
-                  mobileShortcutItems.length > 0 ? (
+                  mobileShortcutItems.length > 0 &&
+                  !collapsed ? (
                     <div className="space-y-2 pb-1">
                       {mobileShortcutItems.map((item) => {
                         const Icon = ICONS[item.iconName];
@@ -222,10 +257,14 @@ export function AppSidebar({
                       })}
                     </div>
                   ) : null}
-                  <p className="px-3 text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-muted-foreground/90">
-                    {group}
-                  </p>
-                  <div className="space-y-1.5">
+                  {collapsed ? (
+                    <div className="mx-auto h-px w-8 bg-border/70" />
+                  ) : (
+                    <p className="px-3 text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-muted-foreground/90">
+                      {group}
+                    </p>
+                  )}
+                  <div className={cn(collapsed ? 'space-y-1' : 'space-y-1.5')}>
                     {items.map((item) => {
                       const Icon = ICONS[item.iconName];
                       const isActive =
@@ -237,8 +276,13 @@ export function AppSidebar({
                           key={item.href}
                           href={item.href}
                           onClick={onNavigate}
+                          aria-label={item.label}
+                          title={item.label}
                           className={cn(
-                            'group flex items-center gap-3 rounded-2xl px-3 py-3 text-[0.95rem] transition-all',
+                            'group flex rounded-2xl text-[0.95rem] transition-all',
+                            collapsed
+                              ? 'justify-center px-2 py-3'
+                              : 'items-center gap-3 px-3 py-3',
                             isActive
                               ? 'text-white shadow-sm'
                               : 'text-slate-600 hover:bg-slate-100 hover:text-brand-navy',
@@ -251,8 +295,8 @@ export function AppSidebar({
                                 }
                               : undefined
                           }
-                          >
-                            <span
+                        >
+                          <span
                             className={cn(
                               'flex size-9 shrink-0 items-center justify-center rounded-xl transition-colors',
                               isActive
@@ -262,7 +306,11 @@ export function AppSidebar({
                           >
                             <Icon className="size-4" />
                           </span>
-                          <span className="truncate font-medium leading-none">{item.label}</span>
+                          {!collapsed ? (
+                            <span className="truncate font-medium leading-none">
+                              {item.label}
+                            </span>
+                          ) : null}
                         </Link>
                       );
                     })}
@@ -272,9 +320,39 @@ export function AppSidebar({
           </div>
         </nav>
 
-        <div className="mt-5 border-t border-border/60 px-3 pt-4">
-          <p className="text-sm font-medium text-slate-700">SAY Auto Care Admin</p>
-          <p className="mt-1 text-xs text-slate-500">© 2023 All rights reserved.</p>
+        <div className="relative mt-5 border-t border-border/60 px-1 pt-4">
+          {!collapsed ? (
+            <>
+              <p className="text-sm font-medium text-slate-700">
+                SAY Auto Care Admin
+              </p>
+              <p className="mt-1 text-xs text-slate-500">
+                © 2024 All rights reserved.
+              </p>
+            </>
+          ) : (
+            <div className="h-9" aria-hidden="true" />
+          )}
+          {showCollapseButton ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={onToggleCollapse}
+              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              className={cn(
+                'absolute right-[-0.875rem] top-1/2 z-10 size-10 -translate-y-1/2 rounded-full border-2 border-white text-white shadow-lg transition-all hover:scale-[1.03] hover:bg-[#10295f]',
+                collapsed ? 'bg-[#10295f]' : 'bg-[#0B1F4D]',
+              )}
+            >
+              {collapsed ? (
+                <ChevronRight className="size-4" />
+              ) : (
+                <ChevronLeft className="size-4" />
+              )}
+            </Button>
+          ) : null}
         </div>
       </div>
     </aside>
