@@ -1,16 +1,18 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { DateTime } from "luxon";
 import {
   ChevronLeft,
   ChevronRight,
+  Eye,
   FileClock,
   ShieldCheck,
   Smartphone,
+  WalletCards,
 } from "lucide-react";
 
 import { ModalDialog } from "@/components/shared/modal-dialog";
@@ -32,7 +34,7 @@ import {
   formatLeaveDateRange,
   formatStaffLeaveTypeLabel,
 } from "@/features/attendance/utils";
-import { formatDate, fromUtcIso } from "@/lib/dates";
+import { formatDate, formatDateTime, fromUtcIso } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
@@ -50,11 +52,14 @@ export function MechanicPortalHistoryPage({
   const selectedMonthValue = activeMonth.month;
   const selectedYearValue = activeMonth.year;
   const yearOptions = buildYearOptions(selectedYearValue, DateTime.fromISO(data.todayDate).year);
-
   const calendarCells = buildCalendarCells(data.days, data.monthStartDate);
   const selectedDay = data.days.find((item) => item.date === selectedDate) ?? data.days[0] ?? null;
   const monthHasRecords = data.days.some(
     (item) => item.attendance !== null || item.amendments.length > 0,
+  );
+  const recentAmendments = useMemo(
+    () => data.recentAmendments.slice(0, 4),
+    [data.recentAmendments],
   );
 
   function navigateMonth(offset: number) {
@@ -85,77 +90,73 @@ export function MechanicPortalHistoryPage({
     <div className="space-y-4">
       <MechanicPortalSectionIntro
         eyebrow="History"
-        title="Attendance calendar"
+        title="Attendance Calendar"
         description="Review your daily attendance records and DTR amendments."
       />
 
       <section className="rounded-[1.9rem] border border-slate-200/80 bg-white px-4 py-5 shadow-[0_18px_45px_rgba(8,23,53,0.05)]">
         <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-              Month
-            </p>
-            <h2 className="mt-1 text-lg font-semibold text-slate-950">{data.monthLabel}</h2>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <NativeSelect
-                aria-label="Select attendance month"
-                value={String(selectedMonthValue)}
-                className="h-10 rounded-xl border-slate-200 bg-slate-50 text-sm text-slate-700 shadow-none"
-                onChange={(event) =>
-                  updateMonthSelection(Number(event.target.value), selectedYearValue)
-                }
-              >
-                {Array.from({ length: 12 }, (_, index) => {
-                  const month = index + 1;
-
-                  return (
-                    <option key={month} value={month}>
-                      {DateTime.fromObject({ year: 2026, month, day: 1 }).toFormat("LLLL")}
-                    </option>
-                  );
-                })}
-              </NativeSelect>
-              <NativeSelect
-                aria-label="Select attendance year"
-                value={String(selectedYearValue)}
-                className="h-10 rounded-xl border-slate-200 bg-slate-50 text-sm text-slate-700 shadow-none"
-                onChange={(event) =>
-                  updateMonthSelection(selectedMonthValue, Number(event.target.value))
-                }
-              >
-                {yearOptions.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </NativeSelect>
-            </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="size-10 rounded-full border border-slate-200 text-slate-700 hover:bg-slate-100"
+            onClick={() => navigateMonth(-1)}
+          >
+            <ChevronLeft className="size-4" />
+            <span className="sr-only">Previous month</span>
+          </Button>
+          <div className="text-center">
+            <h2 className="text-[1.05rem] font-semibold text-slate-950">{data.monthLabel}</h2>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="size-10 rounded-full border-slate-200 text-slate-700 hover:bg-slate-100"
-              onClick={() => navigateMonth(-1)}
-            >
-              <ChevronLeft className="size-4" />
-              <span className="sr-only">Previous month</span>
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="size-10 rounded-full border-slate-200 text-slate-700 hover:bg-slate-100"
-              onClick={() => navigateMonth(1)}
-            >
-              <ChevronRight className="size-4" />
-              <span className="sr-only">Next month</span>
-            </Button>
-          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="size-10 rounded-full border border-slate-200 text-slate-700 hover:bg-slate-100"
+            onClick={() => navigateMonth(1)}
+          >
+            <ChevronRight className="size-4" />
+            <span className="sr-only">Next month</span>
+          </Button>
         </div>
 
-        <div className="mt-5 grid grid-cols-7 gap-2 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <NativeSelect
+            aria-label="Select attendance month"
+            value={String(selectedMonthValue)}
+            className="h-10 rounded-xl border-slate-200 bg-slate-50 text-sm text-slate-700 shadow-none"
+            onChange={(event) =>
+              updateMonthSelection(Number(event.target.value), selectedYearValue)
+            }
+          >
+            {Array.from({ length: 12 }, (_, index) => {
+              const month = index + 1;
+
+              return (
+                <option key={month} value={month}>
+                  {DateTime.fromObject({ year: 2026, month, day: 1 }).toFormat("LLLL")}
+                </option>
+              );
+            })}
+          </NativeSelect>
+          <NativeSelect
+            aria-label="Select attendance year"
+            value={String(selectedYearValue)}
+            className="h-10 rounded-xl border-slate-200 bg-slate-50 text-sm text-slate-700 shadow-none"
+            onChange={(event) =>
+              updateMonthSelection(selectedMonthValue, Number(event.target.value))
+            }
+          >
+            {yearOptions.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </NativeSelect>
+        </div>
+
+        <div className="mt-5 grid grid-cols-7 gap-2 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
           {WEEKDAY_LABELS.map((label) => (
             <div key={label}>{label}</div>
           ))}
@@ -216,6 +217,48 @@ export function MechanicPortalHistoryPage({
           allowDtrAmendments={data.settings.allowDtrAmendments}
         />
       ) : null}
+
+      <section className="rounded-[1.9rem] border border-slate-200/80 bg-white px-5 py-5 shadow-[0_18px_45px_rgba(8,23,53,0.05)]">
+        <div className="space-y-1">
+          <h2 className="text-base font-semibold text-slate-950">Recent Amendments</h2>
+        </div>
+
+        <div className="mt-4">
+          {recentAmendments.length === 0 ? (
+            <div className="flex items-center gap-3 rounded-[1.35rem] border border-slate-200 bg-slate-50/70 px-4 py-4 text-slate-500">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white text-[#8AA0D6] shadow-sm">
+                <WalletCards className="size-5" />
+              </span>
+              <p className="text-sm">No correction requests yet.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {recentAmendments.map((amendment) => (
+                <div
+                  key={amendment.id}
+                  className="rounded-[1.35rem] border border-slate-200 bg-slate-50/70 px-4 py-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-slate-950">
+                        {formatDate(amendment.attendanceDate)} -{" "}
+                        {formatDtrAmendmentTypeLabel(amendment.amendmentType)}
+                      </p>
+                      <p className="mt-1 text-sm text-slate-500">
+                        Requested {formatDateTime(amendment.requestedTimestamp)}
+                      </p>
+                    </div>
+                    <StatusBadge tone={getAmendmentTone(amendment.status)}>
+                      {formatDtrAmendmentStatusLabel(amendment.status)}
+                    </StatusBadge>
+                  </div>
+                  <p className="mt-3 text-sm text-slate-900">{amendment.reason}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }
@@ -245,10 +288,7 @@ function SelectedAttendanceDetailCard({
     <section className="rounded-[1.9rem] border border-slate-200/80 bg-white px-5 py-5 shadow-[0_18px_45px_rgba(8,23,53,0.05)]">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-            Selected date
-          </p>
-          <h2 className="mt-1 text-lg font-semibold text-slate-950">{formatDate(day.date)}</h2>
+          <h2 className="text-[1.12rem] font-semibold text-slate-950">{formatDate(day.date)}</h2>
         </div>
         <StatusBadge tone={detailStatusTone}>{detailStatusLabel}</StatusBadge>
       </div>
@@ -256,26 +296,26 @@ function SelectedAttendanceDetailCard({
       <div className="mt-4 grid grid-cols-2 gap-3">
         <DetailMetric label="Time in" value={formatAttendanceTime(day.attendance?.timeIn)} />
         <DetailMetric label="Time out" value={formatAttendanceTime(day.attendance?.timeOut)} />
-        <DetailMetric label="Total" value={totalHours} />
+        <DetailMetric label="Total hours" value={totalHours} />
         <DetailMetric label="Source" value={sourceLabel} />
       </div>
 
       <div className="mt-4 space-y-3 rounded-[1.35rem] border border-slate-200 bg-slate-50/70 px-4 py-4">
         <DetailRow
           icon={<ShieldCheck className="size-4 text-emerald-600" />}
-          label="Network"
+          label="Network verification"
           value={networkLabel}
         />
         <DetailRow
           icon={<Smartphone className="size-4 text-[#081735]" />}
-          label="Device"
+          label="Device verification"
           value={deviceLabel}
         />
         {latestAmendment ? (
           <DetailRow
             icon={<FileClock className="size-4 text-[#D62828]" />}
-            label="Amendment"
-            value={`${formatDtrAmendmentStatusLabel(latestAmendment.status)} · ${formatDtrAmendmentTypeLabel(latestAmendment.amendmentType)}`}
+            label="Correction status"
+            value={`${formatDtrAmendmentStatusLabel(latestAmendment.status)} - ${formatDtrAmendmentTypeLabel(latestAmendment.amendmentType)}`}
           />
         ) : null}
       </div>
@@ -287,7 +327,7 @@ function SelectedAttendanceDetailCard({
           <p>No attendance record for this date.</p>
         ) : day.attendance === null && day.leaveEntry ? (
           <p>
-            On approved leave: {formatStaffLeaveTypeLabel(day.leaveEntry.leaveType)} ·{" "}
+            On approved leave: {formatStaffLeaveTypeLabel(day.leaveEntry.leaveType)} -{" "}
             {formatLeaveDateRange(day.leaveEntry)}
           </p>
         ) : day.attendance === null && day.isBranchHoliday ? (
@@ -305,18 +345,17 @@ function SelectedAttendanceDetailCard({
             className="h-12 rounded-[1.2rem] border-[#0B1F4D]/20 text-sm font-semibold text-[#0B1F4D] hover:bg-[#EAF1FB]"
           >
             <Link href="/portal/amendments">
-              {latestAmendment.status === "approved"
-                ? "View approved amendment"
-                : latestAmendment.status === "pending"
-                  ? "View amendment"
-                  : "View amendment history"}
+              <Eye className="mr-2 size-4" />
+              {latestAmendment.status === "approved" || latestAmendment.status === "pending"
+                ? "View request"
+                : "View request history"}
             </Link>
           </Button>
         ) : null}
 
         {canFileAmendment ? (
           <ModalDialog
-            title="File DTR amendment"
+            title="Request Time Correction"
             description="Request a correction for the selected attendance date."
             trigger={({ openDialog }) => (
               <Button
@@ -330,7 +369,7 @@ function SelectedAttendanceDetailCard({
                 )}
                 onClick={openDialog}
               >
-                File DTR amendment
+                Request Time Correction
               </Button>
             )}
           >
@@ -440,7 +479,7 @@ function getDetailStatusLabel(day: MechanicPortalHistoryDay) {
   }
 
   if (day.amendments.some((item) => item.status === "pending")) {
-    return "Pending amendment";
+    return "Pending";
   }
 
   if (day.attendance?.status === "late") {
@@ -496,7 +535,7 @@ function getDetailStatusTone(day: MechanicPortalHistoryDay) {
 
 function getAttendanceTotalHours(day: MechanicPortalHistoryDay) {
   if (!day.attendance?.timeIn || !day.attendance.timeOut) {
-    return "—";
+    return "-";
   }
 
   const timeIn = fromUtcIso(day.attendance.timeIn);
@@ -521,37 +560,51 @@ function getAttendanceSourceLabel(day: MechanicPortalHistoryDay) {
     return "Mechanic Portal";
   }
 
-  return "—";
+  return "-";
 }
 
 function getAttendanceVerificationLabel(
   timeLogs: MechanicPortalHistoryDay["timeLogs"],
-  mode: "network" | "device",
+  target: "network" | "device",
 ) {
-  if (timeLogs.length === 0) {
-    return "—";
+  const newestLog = [...timeLogs].sort((left, right) => right.loggedAt.localeCompare(left.loggedAt))[0];
+
+  if (!newestLog) {
+    return "No verification data";
   }
 
-  const values =
-    mode === "network"
-      ? timeLogs.map((item) => item.isShopIpValid)
-      : timeLogs.map((item) => item.isDeviceApproved);
-
-  if (values.every(Boolean)) {
-    return mode === "network" ? "Approved shop IP" : "Approved device";
+  if (target === "network") {
+    return newestLog.isShopIpValid
+      ? newestLog.requestIp
+        ? `Approved shop IP - ${newestLog.requestIp}`
+        : "Approved shop IP"
+      : newestLog.requestIp
+        ? `Needs review - ${newestLog.requestIp}`
+        : "Needs review";
   }
 
-  if (values.some(Boolean)) {
-    return "Mixed verification";
-  }
-
-  return "Needs review";
+  return newestLog.isDeviceApproved ? "Approved device" : "Needs review";
 }
 
 function getAmendmentTargetLogType(day: MechanicPortalHistoryDay) {
-  if (day.attendance?.timeIn && !day.attendance.timeOut) {
+  if (!day.attendance?.timeIn) {
+    return "time_in" as const;
+  }
+
+  if (!day.attendance.timeOut) {
     return "time_out" as const;
   }
 
   return "time_in" as const;
+}
+
+function getAmendmentTone(status: "pending" | "approved" | "rejected") {
+  switch (status) {
+    case "pending":
+      return "warning" as const;
+    case "approved":
+      return "success" as const;
+    case "rejected":
+      return "destructive" as const;
+  }
 }

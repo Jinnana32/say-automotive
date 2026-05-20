@@ -138,6 +138,7 @@ export async function getMechanicPortalHistoryPageData(
     { data: holidayData, error: holidayError },
     { data: leaveData, error: leaveError },
     amendments,
+    recentAmendments,
   ] = await Promise.all([
     admin
       .from("attendance")
@@ -179,6 +180,12 @@ export async function getMechanicPortalHistoryPageData(
       staffId: context.staffId,
       startDate: monthStartDate,
       endDate: monthEndDate,
+    }),
+    getMappedAmendments({
+      admin,
+      branchId: accessContext.branchId,
+      staffId: context.staffId,
+      limit: 6,
     }),
   ]);
 
@@ -286,6 +293,7 @@ export async function getMechanicPortalHistoryPageData(
     schedule,
     branchHolidays,
     days,
+    recentAmendments,
   };
 }
 

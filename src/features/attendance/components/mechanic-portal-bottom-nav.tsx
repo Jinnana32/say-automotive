@@ -14,7 +14,7 @@ const PORTAL_BOTTOM_NAV_ITEMS = [
   },
   {
     href: '/portal/history',
-    label: 'Calendar',
+    label: 'History',
     icon: Calendar,
   },
   {
@@ -29,7 +29,7 @@ export function MechanicPortalBottomNav() {
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-4 pb-4 md:hidden">
-      <div className="mx-auto max-w-xl rounded-[1.75rem] border border-slate-200/80 bg-white/95 p-2 shadow-[0_-10px_30px_rgba(8,23,53,0.08)] backdrop-blur">
+      <div className="mx-auto max-w-[29rem] rounded-[1.7rem] border border-slate-200/80 bg-white/95 p-2 shadow-[0_-12px_34px_rgba(8,23,53,0.09)] backdrop-blur">
         <nav
           className="pointer-events-auto grid grid-cols-3 gap-2"
           aria-label="Portal navigation"

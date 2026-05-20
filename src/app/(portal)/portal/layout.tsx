@@ -17,8 +17,8 @@ export default async function MechanicPortalLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] px-4 py-5 md:py-6">
-      <div className="mx-auto max-w-xl space-y-4 pb-24 md:space-y-5 md:pb-6">
+    <div className="min-h-screen bg-[#F5F7FB] px-4 py-5 md:py-6">
+      <div className="mx-auto max-w-[30rem] space-y-4 pb-24 md:space-y-5 md:pb-6">
         <MechanicPortalDeviceBootstrap />
         <MechanicPortalHeaderCard displayName={context.displayName} />
 

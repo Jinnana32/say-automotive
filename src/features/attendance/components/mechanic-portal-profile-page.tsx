@@ -17,7 +17,7 @@ export function MechanicPortalProfilePage({
     <div className="space-y-4">
       <MechanicPortalSectionIntro
         eyebrow="Profile"
-        title="Account"
+        title="Mechanic Profile"
         description="Review your portal access details and sign out when you finish your shift."
       />
 

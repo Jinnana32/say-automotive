@@ -9,8 +9,8 @@ import { cn } from '@/lib/utils';
 
 const PORTAL_NAV_ITEMS = [
   { href: '/portal/attendance', label: 'Attendance' },
-  { href: '/portal/history', label: 'Calendar' },
-  { href: '/portal/amendments', label: 'Amendments' },
+  { href: '/portal/history', label: 'History' },
+  { href: '/portal/amendments', label: 'Correction Requests' },
   { href: '/portal/profile', label: 'Profile' },
 ] as const;
 
@@ -19,7 +19,7 @@ export function MechanicPortalMenu() {
 
   return (
     <details className="group relative">
-      <summary className="flex size-10 list-none cursor-pointer items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 shadow-sm [&::-webkit-details-marker]:hidden">
+      <summary className="flex size-11 list-none cursor-pointer items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm [&::-webkit-details-marker]:hidden">
         <Menu className="size-5" />
         <span className="sr-only">Open portal menu</span>
       </summary>

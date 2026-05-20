@@ -19,24 +19,24 @@ export function MechanicPortalVerificationCard({
   const toneClasses =
     tone === "success"
       ? {
-          card: "border-emerald-200/80 bg-emerald-50/80",
+          card: "border-slate-200 bg-white",
           icon: "bg-emerald-100 text-emerald-700",
-          title: "text-emerald-950",
-          subtitle: "text-emerald-800/80",
-          chevron: "text-emerald-700/70",
+          title: "text-slate-950",
+          subtitle: "text-slate-500",
+          chevron: "text-slate-400",
         }
       : {
-          card: "border-amber-200/80 bg-amber-50/80",
+          card: "border-slate-200 bg-white",
           icon: "bg-amber-100 text-amber-700",
-          title: "text-amber-950",
-          subtitle: "text-amber-800/80",
-          chevron: "text-amber-700/70",
+          title: "text-slate-950",
+          subtitle: "text-slate-500",
+          chevron: "text-slate-400",
         };
 
   return (
     <div
       className={cn(
-        "flex items-center gap-3 rounded-[1.35rem] border px-4 py-3 shadow-[0_8px_25px_rgba(15,23,42,0.03)]",
+        "flex items-center gap-3 rounded-[1.2rem] border px-4 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.03)]",
         toneClasses.card,
       )}
     >

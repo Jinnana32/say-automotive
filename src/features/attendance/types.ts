@@ -383,6 +383,7 @@ export type MechanicPortalHistoryPageData = {
   schedule: StaffScheduleSummary | null;
   branchHolidays: BranchHolidaySummary[];
   days: MechanicPortalHistoryDay[];
+  recentAmendments: DtrAmendmentSummary[];
 };
 
 export type AttendanceAmendmentsPageData = {
