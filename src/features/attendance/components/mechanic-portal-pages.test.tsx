@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { OFFICIAL_BRAND_MARK_SRC } from "@/components/shared/brand-assets";
 import { MechanicPortalAttendancePage } from "@/features/attendance/components/mechanic-portal-attendance-page";
 import { MechanicPortalBottomNav } from "@/features/attendance/components/mechanic-portal-bottom-nav";
 import { MechanicPortalHeaderCard } from "@/features/attendance/components/mechanic-portal-header-card";
@@ -205,7 +206,7 @@ describe("mechanic portal pages", () => {
     expect(screen.getByText("Mechanic • SAY Auto Care Center")).toBeInTheDocument();
     expect(screen.getByAltText("SAY Auto Care Center shield")).toHaveAttribute(
       "src",
-      "/say-auto-care-shield.png",
+      OFFICIAL_BRAND_MARK_SRC,
     );
     expect(screen.getAllByRole("link", { name: /History/i }).length).toBeGreaterThan(0);
   });

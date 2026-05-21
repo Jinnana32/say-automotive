@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { OFFICIAL_BRAND_MARK_SRC } from "@/components/shared/brand-assets";
 import { BrandLogo } from "@/components/shared/brand-logo";
 
 vi.mock("next/image", () => ({
@@ -27,10 +28,9 @@ describe("BrandLogo", () => {
     );
   });
 
-  it("renders the provided brand mark when the mark variant is requested", () => {
+  it("renders the official brand mark when the mark variant is requested", () => {
     render(
       <BrandLogo
-        markSrc="/say-auto-care-shield.png"
         alt="SAY Auto Care Center mark"
         variant="mark"
         width={52}
@@ -40,7 +40,7 @@ describe("BrandLogo", () => {
 
     expect(screen.getByAltText("SAY Auto Care Center mark")).toHaveAttribute(
       "src",
-      "/say-auto-care-shield.png",
+      OFFICIAL_BRAND_MARK_SRC,
     );
   });
 

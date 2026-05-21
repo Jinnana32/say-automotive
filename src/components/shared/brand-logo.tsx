@@ -1,10 +1,10 @@
 import Image from "next/image";
 
+import { OFFICIAL_BRAND_MARK_SRC } from "@/components/shared/brand-assets";
 import { cn } from "@/lib/utils";
 
 type BrandLogoProps = {
   src?: string | null;
-  markSrc?: string | null;
   alt: string;
   width: number;
   height: number;
@@ -16,7 +16,6 @@ type BrandLogoProps = {
 
 export function BrandLogo({
   src,
-  markSrc,
   alt,
   width,
   height,
@@ -26,50 +25,15 @@ export function BrandLogo({
   fallbackClassName,
 }: BrandLogoProps) {
   if (variant === "mark") {
-    if (markSrc) {
-      return (
-        <Image
-          src={markSrc}
-          alt={alt}
-          width={width}
-          height={height}
-          className={className}
-          priority={priority}
-        />
-      );
-    }
-
     return (
-      <div role="img" aria-label={alt} className={cn("inline-flex", fallbackClassName)}>
-        <svg
-          viewBox="0 0 72 72"
-          className={cn("size-full", className)}
-          aria-hidden="true"
-        >
-          <path
-            d="M36 4L58.5 12.5V31.3C58.5 46.6 48.8 60.6 36 65.4C23.2 60.6 13.5 46.6 13.5 31.3V12.5L36 4Z"
-            fill="#0B1F4D"
-          />
-          <path
-            d="M36 10.4L52.5 16.7V31.1C52.5 42 45.5 52.2 36 56.1C26.5 52.2 19.5 42 19.5 31.1V16.7L36 10.4Z"
-            stroke="#FFFFFF"
-            strokeWidth="4.5"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M50.1 22H31.8C27.3 22 23.2 24.5 21.1 28.5L17.2 36.2C15.4 39.7 18 43.8 22 43.8H37.2L40.3 37.8H28C26.9 37.8 26.2 36.7 26.7 35.7L29.9 29.5C31 27.4 33.1 26 35.5 26H47L50.1 22Z"
-            fill="#E11D2E"
-          />
-          <path
-            d="M21.9 50H40.2C44.7 50 48.8 47.5 50.9 43.5L54.8 35.8C56.6 32.3 54 28.2 50 28.2H34.8L31.7 34.2H44C45.1 34.2 45.8 35.3 45.3 36.3L42.1 42.5C41 44.6 38.9 46 36.5 46H25L21.9 50Z"
-            fill="#E11D2E"
-          />
-          <path
-            d="M37.4 33.7C38.6 32.5 40.3 31.8 42.2 31.8C43 31.8 43.8 31.9 44.5 32.2L41.8 34.9L43.5 36.6L47.2 36.3L48.9 34.7C49.2 35.4 49.4 36.2 49.4 37C49.4 40.9 46.3 44 42.4 44C41.9 44 41.3 43.9 40.8 43.8L35.8 48.8C35.2 49.4 34.2 49.4 33.6 48.8L32.8 48C32.2 47.4 32.2 46.5 32.8 45.8L37.8 40.9C37.6 40.4 37.6 39.8 37.6 39.2C37.6 38.4 37.8 37.6 38.1 36.9L38.9 40L40.6 40.9L43.5 40.1L42.7 37.2L41.8 35.5L38.7 34.7C38.2 35.6 37.9 36.6 37.9 37.7C37.9 36.2 37.7 35 37.4 33.7Z"
-            fill="#E11D2E"
-          />
-        </svg>
-      </div>
+      <Image
+        src={OFFICIAL_BRAND_MARK_SRC}
+        alt={alt}
+        width={width}
+        height={height}
+        className={className}
+        priority={priority}
+      />
     );
   }
 

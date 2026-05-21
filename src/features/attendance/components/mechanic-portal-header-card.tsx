@@ -16,7 +16,6 @@ export function MechanicPortalHeaderCard({
       <div className="flex items-center justify-between gap-4">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <BrandLogo
-            markSrc="/say-auto-care-shield.png"
             alt="SAY Auto Care Center shield"
             variant="mark"
             width={42}
