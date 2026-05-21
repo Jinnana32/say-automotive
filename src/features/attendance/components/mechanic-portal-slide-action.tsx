@@ -1,5 +1,3 @@
-import { ArrowRight } from "lucide-react";
-
 import { SubmitButton } from "@/components/shared/submit-button";
 import { cn } from "@/lib/utils";
 
@@ -24,16 +22,8 @@ export function MechanicPortalSlideAction({
         className,
       )}
     >
-      <span className="flex items-center gap-3">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white text-[#081735] shadow-sm">
-          <ArrowRight className="size-5" />
-        </span>
-        <span className="flex min-w-0 flex-1 items-center justify-between gap-3">
-          <span className="truncate text-base font-semibold text-white">
-            {children}
-          </span>
-          <ArrowRight className="size-5 shrink-0 text-white/85" />
-        </span>
+      <span className="flex min-w-0 items-center justify-center">
+        <span className="truncate text-base font-semibold text-white">{children}</span>
       </span>
     </SubmitButton>
   );
