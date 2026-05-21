@@ -14,10 +14,11 @@ import {
 } from "@/lib/navigation";
 
 const SIDEBAR_COLLAPSE_STORAGE_KEY = "say-admin-sidebar-collapsed";
-const DESKTOP_SIDEBAR_EXPANDED_CLASS = "xl:w-[15.5rem]";
-const DESKTOP_SIDEBAR_COLLAPSED_CLASS = "xl:w-[5.75rem]";
-const DESKTOP_CONTENT_EXPANDED_CLASS = "xl:pl-[15.5rem]";
-const DESKTOP_CONTENT_COLLAPSED_CLASS = "xl:pl-[5.75rem]";
+const TABLET_SIDEBAR_MEDIA_QUERY = "(min-width: 768px) and (max-width: 1023px)";
+const DESKTOP_SIDEBAR_EXPANDED_CLASS = "md:w-[15.5rem]";
+const DESKTOP_SIDEBAR_COLLAPSED_CLASS = "md:w-[5.75rem]";
+const DESKTOP_CONTENT_EXPANDED_CLASS = "md:pl-[15.5rem]";
+const DESKTOP_CONTENT_COLLAPSED_CLASS = "md:pl-[5.75rem]";
 
 export function AppShell({
   children,
@@ -65,8 +66,15 @@ export function AppShell({
 
   useEffect(() => {
     try {
+      const storedValue = window.localStorage.getItem(SIDEBAR_COLLAPSE_STORAGE_KEY);
+
+      if (storedValue === "true" || storedValue === "false") {
+        setIsDesktopSidebarCollapsed(storedValue === "true");
+        return;
+      }
+
       setIsDesktopSidebarCollapsed(
-        window.localStorage.getItem(SIDEBAR_COLLAPSE_STORAGE_KEY) === "true",
+        window.matchMedia(TABLET_SIDEBAR_MEDIA_QUERY).matches,
       );
     } catch {
       setIsDesktopSidebarCollapsed(false);
@@ -100,10 +108,10 @@ export function AppShell({
         collapsed={isDesktopSidebarCollapsed}
         onToggleCollapse={handleToggleDesktopSidebar}
         showCollapseButton
-        className={`no-print hidden xl:fixed xl:inset-y-0 xl:left-0 xl:flex xl:flex-col ${isDesktopSidebarCollapsed ? DESKTOP_SIDEBAR_COLLAPSED_CLASS : DESKTOP_SIDEBAR_EXPANDED_CLASS}`}
+        className={`no-print hidden md:fixed md:inset-y-0 md:left-0 md:flex md:flex-col ${isDesktopSidebarCollapsed ? DESKTOP_SIDEBAR_COLLAPSED_CLASS : DESKTOP_SIDEBAR_EXPANDED_CLASS}`}
       />
       {isMobileSidebarOpen ? (
-        <div className="fixed inset-0 z-40 xl:hidden" aria-hidden="true">
+        <div className="fixed inset-0 z-40 md:hidden" aria-hidden="true">
           <button
             type="button"
             className="absolute inset-0 bg-foreground/35"
@@ -118,7 +126,7 @@ export function AppShell({
           businessName={businessName}
           businessLogoUrl={businessLogoUrl}
           showBusinessName={showSidebarBusinessName}
-          className="no-print fixed inset-y-0 left-0 z-50 flex w-[17rem] max-w-[calc(100vw-2rem)] flex-col shadow-2xl xl:hidden"
+          className="no-print fixed inset-y-0 left-0 z-50 flex w-[17rem] max-w-[calc(100vw-2rem)] flex-col shadow-2xl md:hidden"
           onNavigate={() => setIsMobileSidebarOpen(false)}
           onClose={() => setIsMobileSidebarOpen(false)}
           showCloseButton

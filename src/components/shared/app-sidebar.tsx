@@ -203,7 +203,7 @@ export function AppSidebar({
               type="button"
               variant="ghost"
               size="icon"
-              className="shrink-0 rounded-2xl border border-border/70 bg-background xl:hidden"
+              className="shrink-0 rounded-2xl border border-border/70 bg-background md:hidden"
               onClick={onClose}
               aria-label="Close navigation menu"
             >

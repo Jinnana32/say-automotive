@@ -50,7 +50,7 @@ export function AppTopbar({
   return (
     <header className="sticky top-0 z-30 border-b border-border/70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90">
       <div className="mx-auto flex max-w-[1600px] flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex items-start justify-between gap-3 xl:hidden">
+        <div className="flex items-start justify-between gap-3 md:hidden">
           <div className="flex min-w-0 items-start gap-3">
             <Button
               type="button"
@@ -77,7 +77,7 @@ export function AppTopbar({
           </div>
         </div>
 
-        <div className="xl:hidden">
+        <div className="md:hidden">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-primary/70">
@@ -94,7 +94,7 @@ export function AppTopbar({
           />
         </div>
 
-        <div className="hidden items-center justify-between gap-6 xl:flex">
+        <div className="hidden items-center justify-between gap-6 md:flex">
           <div className="min-w-0 flex-1">
             <div className="w-full max-w-2xl">
               <GlobalSearchForm

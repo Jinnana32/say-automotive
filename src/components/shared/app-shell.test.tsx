@@ -29,6 +29,19 @@ vi.mock("@/components/shared/branch-scope-selector", () => ({
 describe("AppShell", () => {
   beforeEach(() => {
     window.localStorage.clear();
+    Object.defineProperty(window, "matchMedia", {
+      writable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
   });
 
   it("collapses the desktop sidebar into an icon-only rail from the bottom chevron", () => {
@@ -126,6 +139,61 @@ describe("AppShell", () => {
     expect(screen.getByRole("link", { name: /Quick Access/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Close navigation menu" })).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "Customers" }).length).toBeGreaterThan(0);
+  });
+
+  it("defaults to a collapsed sidebar on tablet widths but still allows expanding", () => {
+    vi.mocked(window.matchMedia).mockImplementation((query: string) => ({
+      matches: query === "(min-width: 768px) and (max-width: 1023px)",
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+
+    render(
+      <AppShell
+        navigationItems={[
+          {
+            href: "/dashboard",
+            label: "Dashboard",
+            description: "Overview of shop activity",
+            group: "Overview",
+            iconName: "dashboard",
+          },
+          {
+            href: "/customers",
+            label: "Customers",
+            description: "Manage customer records",
+            group: "Service Desk",
+            iconName: "customers",
+          },
+        ]}
+        userDisplayName="Alex"
+        userRoleLabel="Administrator"
+        capabilities={[]}
+        businessName="SAY Auto Care Center"
+        businessLogoUrl={null}
+        branchScope={{
+          canAccessAllBranches: false,
+          accessibleBranches: [],
+          selectedBranchId: "branch-main",
+          selectedBranchLabel: "Main Branch",
+        }}
+      >
+        <div>Dashboard content</div>
+      </AppShell>,
+    );
+
+    expect(screen.queryByText("Customers")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Expand sidebar" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Expand sidebar" }));
+
+    expect(screen.getByRole("button", { name: "Collapse sidebar" })).toBeInTheDocument();
+    expect(screen.getByText("Customers")).toBeInTheDocument();
   });
 
   it("can show the business name block in the sidebar when enabled", () => {
