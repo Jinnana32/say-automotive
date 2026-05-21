@@ -1,5 +1,4 @@
-import Image from "next/image";
-
+import { AppImage } from "@/components/shared/app-image";
 import { OFFICIAL_BRAND_MARK_SRC } from "@/components/shared/brand-assets";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +10,9 @@ type BrandLogoProps = {
   variant?: "full" | "mark";
   className?: string;
   priority?: boolean;
+  surface?: "light" | "dark";
+  unoptimized?: boolean;
+  sizes?: string;
   fallbackClassName?: string;
 };
 
@@ -22,30 +24,41 @@ export function BrandLogo({
   variant = "full",
   className,
   priority = false,
+  surface = "light",
+  unoptimized = false,
+  sizes,
   fallbackClassName,
 }: BrandLogoProps) {
   if (variant === "mark") {
     return (
-      <Image
+      <AppImage
         src={OFFICIAL_BRAND_MARK_SRC}
         alt={alt}
         width={width}
         height={height}
+        mode="brand"
+        surface={surface}
         className={className}
         priority={priority}
+        unoptimized={unoptimized}
+        sizes={sizes}
       />
     );
   }
 
   if (src) {
     return (
-      <Image
+      <AppImage
         src={src}
         alt={alt}
         width={width}
         height={height}
+        mode="brand"
+        surface={surface}
         className={className}
         priority={priority}
+        unoptimized={unoptimized}
+        sizes={sizes}
       />
     );
   }

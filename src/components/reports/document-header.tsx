@@ -1,10 +1,11 @@
-import Image from "next/image";
+import { DEFAULT_BRAND_LOGO_SRC } from "@/components/shared/brand-assets";
+import { BrandLogo } from "@/components/shared/brand-logo";
 
 export function DocumentHeader({
   businessName,
   documentTitle,
   documentMeta,
-  logoSrc = "/say-auto-care-logo.jpeg",
+  logoSrc = DEFAULT_BRAND_LOGO_SRC,
   compact = false,
 }: {
   businessName: string;
@@ -32,14 +33,14 @@ export function DocumentHeader({
               compact ? "w-[176px]" : "w-[208px]"
             }`}
           >
-            <Image
-              src={logoSrc || "/say-auto-care-logo.jpeg"}
+            <BrandLogo
+              src={logoSrc || DEFAULT_BRAND_LOGO_SRC}
               alt={businessName}
               width={320}
               height={150}
               priority
               unoptimized
-              className={`h-auto w-auto object-contain object-left ${
+              className={`h-auto w-auto object-left ${
                 compact
                   ? "max-h-[64px] max-w-[176px]"
                   : "max-h-[84px] max-w-[208px]"

@@ -27,6 +27,7 @@ import {
   X,
 } from 'lucide-react';
 
+import { DEFAULT_BRAND_LOGO_SRC } from '@/components/shared/brand-assets';
 import { Button } from '@/components/ui/button';
 import { BrandLogo } from '@/components/shared/brand-logo';
 import {
@@ -162,7 +163,7 @@ export function AppSidebar({
               <div className="flex items-start gap-3">
                 <div className="flex min-h-[3.25rem] shrink-0 items-center py-0.5">
                   <BrandLogo
-                    src={businessLogoUrl}
+                    src={businessLogoUrl ?? DEFAULT_BRAND_LOGO_SRC}
                     alt={businessName}
                     width={220}
                     height={66}
@@ -186,7 +187,7 @@ export function AppSidebar({
             ) : (
               <div className="flex min-h-[3.25rem] w-full items-center py-0.5 pl-0.5 pr-1">
                 <BrandLogo
-                  src={businessLogoUrl}
+                  src={businessLogoUrl ?? DEFAULT_BRAND_LOGO_SRC}
                   alt={businessName}
                   width={520}
                   height={140}

@@ -1,6 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 
+import { DEFAULT_BRAND_LOGO_SRC } from "@/components/shared/brand-assets";
+import { BrandLogo } from "@/components/shared/brand-logo";
 import {
   BatteryCharging,
   ClipboardList,
@@ -119,13 +120,16 @@ export async function WebsiteHomePage({
         }
         aside={
           <div className="space-y-5">
-            <Image
-              src={shellData.businessLogoUrl ?? "/say-auto-care-logo.jpeg"}
-              alt={shellData.businessName}
-              width={420}
-              height={360}
-              className="mx-auto h-auto w-full max-w-[380px] rounded-2xl bg-[#f3f5fa] p-5"
-            />
+            <div className="flex justify-center px-2 pt-1 sm:px-4">
+              <BrandLogo
+                src={shellData.businessLogoUrl ?? DEFAULT_BRAND_LOGO_SRC}
+                alt={shellData.businessName}
+                width={420}
+                height={360}
+                className="h-auto w-full max-w-[360px]"
+                priority
+              />
+            </div>
             <div className="rounded-2xl bg-[#f3f5fa] p-5">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#173c99]">
                 Pinoy craftsmanship

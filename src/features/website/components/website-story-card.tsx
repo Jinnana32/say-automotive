@@ -1,7 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
-
 import Link from "next/link";
 
+import { AppImage } from "@/components/shared/app-image";
 import { ArrowRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +14,15 @@ export function WebsiteStoryCard({ post }: { post: WebsitePostListItem }) {
   return (
     <Card className={websiteCardVariants({ variant: "product" })}>
       {post.coverImageUrl ? (
-        <img src={post.coverImageUrl} alt={post.title} className="aspect-[16/10] w-full object-cover" />
+        <AppImage
+          src={post.coverImageUrl}
+          alt={post.title}
+          width={960}
+          height={600}
+          mode="content"
+          fit="cover"
+          className="aspect-[16/10] w-full"
+        />
       ) : (
         <div className="aspect-[16/10] bg-[linear-gradient(135deg,_#102b84_0%,_#173c99_68%,_#ffd24a_100%)]" />
       )}

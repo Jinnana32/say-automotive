@@ -1,8 +1,9 @@
 "use client";
-/* eslint-disable @next/next/no-img-element */
 
 import { useActionState } from "react";
 
+import { DEFAULT_BRAND_LOGO_SRC } from "@/components/shared/brand-assets";
+import { BrandLogo } from "@/components/shared/brand-logo";
 import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
 import { FormSection } from "@/components/shared/form-section";
 import { SubmitButton } from "@/components/shared/submit-button";
@@ -32,7 +33,7 @@ export function BusinessProfileForm({
     defaultTaxRate: initialValues.defaultTaxRate,
     receiptFooter: initialValues.receiptFooter,
   });
-  const logoPreviewSrc = initialValues.businessLogoUrl ?? "/say-auto-care-logo.jpeg";
+  const logoPreviewSrc = initialValues.businessLogoUrl ?? DEFAULT_BRAND_LOGO_SRC;
 
   return (
     <FormSection
@@ -46,10 +47,13 @@ export function BusinessProfileForm({
           <div className="space-y-2">
             <Label>Current logo</Label>
             <div className="flex h-[104px] items-center justify-center rounded-xl border border-border/70 bg-muted/15 px-4 py-3">
-              <img
+              <BrandLogo
                 src={logoPreviewSrc}
                 alt="Current business logo"
-                className="max-h-[72px] max-w-full object-contain"
+                width={240}
+                height={120}
+                className="max-h-[72px] max-w-full"
+                unoptimized
               />
             </div>
             <p className="text-xs text-muted-foreground">

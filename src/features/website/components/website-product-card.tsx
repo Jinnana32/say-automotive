@@ -1,7 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
-
 import Link from "next/link";
 
+import { AppImage } from "@/components/shared/app-image";
 import { ArrowRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -20,10 +19,14 @@ export function WebsiteProductCard({
     <Card className={websiteCardVariants({ variant: "product" })}>
       <div className="relative">
         {product.imageUrl ? (
-          <img
+          <AppImage
             src={product.imageUrl}
             alt={product.name}
-            className={`w-full object-cover ${compact ? "aspect-[4/3]" : "aspect-[5/4]"}`}
+            width={800}
+            height={640}
+            mode="content"
+            fit="cover"
+            className={`w-full ${compact ? "aspect-[4/3]" : "aspect-[5/4]"}`}
           />
         ) : (
           <div

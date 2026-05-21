@@ -1,11 +1,11 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { DEFAULT_BRAND_LOGO_SRC } from '@/components/shared/brand-assets';
+import { BrandLogo } from '@/components/shared/brand-logo';
 import { Button } from '@/components/ui/button';
-import { websiteCardVariants } from '@/features/website/components/website-card-variants';
 import type { WebsiteShellData } from '@/features/website/types';
 import { cn } from '@/lib/utils';
 
@@ -79,12 +79,12 @@ export function PublicSiteShell({
         <div className="h-1 w-full bg-[linear-gradient(90deg,#ffd24a_0%,#0f2d83_38%,#173c99_100%)]" />
         <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
           <Link href="/" className="flex min-w-0 items-center gap-3">
-            <Image
-              src={shellData.businessLogoUrl ?? "/say-auto-care-logo.jpeg"}
+            <BrandLogo
+              src={shellData.businessLogoUrl ?? DEFAULT_BRAND_LOGO_SRC}
               alt={shellData.businessName}
               width={240}
               height={192}
-              className="h-14 w-auto rounded-sm object-contain sm:h-16"
+              className="h-14 w-auto sm:h-16"
               priority
             />
             <div className="hidden min-w-0 sm:block">
