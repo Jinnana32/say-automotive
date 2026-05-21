@@ -173,7 +173,7 @@ describe("mechanic portal pages", () => {
 
     expect(screen.getByText("Today's Attendance")).toBeInTheDocument();
     expect(screen.getByText("Timed In")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Clock Out" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Time Out" })).toBeInTheDocument();
     expect(screen.getByText("Verification Status")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Request Time Correction" })).toBeInTheDocument();
     expect(screen.getByText("Recent Requests")).toBeInTheDocument();
@@ -205,7 +205,7 @@ describe("mechanic portal pages", () => {
     expect(screen.getByText("Mechanic • SAY Auto Care Center")).toBeInTheDocument();
     expect(screen.getByAltText("SAY Auto Care Center shield")).toHaveAttribute(
       "src",
-      "/say-auto-care-shield.svg",
+      "/say-auto-care-shield.png",
     );
     expect(screen.getAllByRole("link", { name: /History/i }).length).toBeGreaterThan(0);
   });
