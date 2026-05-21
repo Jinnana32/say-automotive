@@ -147,16 +147,16 @@ export function AppSidebar({
         >
           <div className="min-w-0 flex-1">
             {collapsed ? (
-              <div className="flex min-h-[3.35rem] items-center justify-center py-0.5">
+              <div className="flex min-h-[3.75rem] items-center justify-center py-0.5">
                 <BrandLogo
-                  markSrc="/say-auto-care-shield.png"
+                  markSrc="/say-auto-care-shield.svg"
                   alt={`${businessName} mark`}
                   variant="mark"
-                  width={52}
-                  height={52}
-                  className="size-[2.9rem] object-contain"
+                  width={58}
+                  height={58}
+                  className="size-[3.2rem] object-contain"
                   priority
-                  fallbackClassName="size-[2.9rem]"
+                  fallbackClassName="size-[3.2rem]"
                 />
               </div>
             ) : showBusinessName ? (
