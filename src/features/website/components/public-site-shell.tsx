@@ -89,12 +89,31 @@ export function PublicSiteShell({
         <div className="h-1 w-full bg-[linear-gradient(90deg,#ffd24a_0%,#0f2d83_38%,#173c99_100%)]" />
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
           <Link href="/" className="flex min-w-0 flex-1 items-center gap-3 md:flex-none">
+            <div className="flex min-w-0 items-center gap-2.5 md:hidden">
+              <BrandLogo
+                alt={`${shellData.businessName} shield`}
+                variant="mark"
+                width={56}
+                height={56}
+                className="h-11 w-11 shrink-0 object-contain"
+                priority
+              />
+              <div className="min-w-0 leading-none">
+                <p className="truncate text-[1.55rem] font-black italic tracking-[-0.08em] text-[#173c99]">
+                  SAY
+                </p>
+                <p className="truncate text-[0.68rem] font-bold uppercase tracking-[0.24em] text-[#5c6a8a]">
+                  Auto Care
+                </p>
+              </div>
+            </div>
+
             <BrandLogo
               src={shellData.businessLogoUrl ?? DEFAULT_BRAND_LOGO_SRC}
               alt={shellData.businessName}
               width={240}
               height={192}
-              className="h-9 w-auto max-w-[9.75rem] sm:h-11 md:h-14 md:max-w-none"
+              className="hidden h-11 w-auto sm:h-12 md:block md:h-14 md:max-w-none"
               priority
             />
             <div className="hidden min-w-0 md:block">
