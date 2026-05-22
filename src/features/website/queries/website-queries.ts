@@ -49,7 +49,7 @@ export const getWebsiteShellData = cache(async (): Promise<WebsiteShellData> => 
 
   const { data: settings, error: settingsError } = await supabase
     .from("business_settings")
-    .select("business_name, business_address, business_contact, business_logo_path, updated_at")
+    .select("business_name, business_address, business_contact, business_email, business_logo_path, updated_at")
     .eq("branch_id", branch.id)
     .maybeSingle();
 
@@ -63,6 +63,7 @@ export const getWebsiteShellData = cache(async (): Promise<WebsiteShellData> => 
     branchName: branch.name,
     address: settings?.business_address ?? null,
     contactNumber: settings?.business_contact ?? null,
+    email: settings?.business_email ?? null,
   };
 });
 

@@ -23,6 +23,7 @@ const shellData: WebsiteShellData = {
   branchName: "Main Branch",
   address: "123 Service Road",
   contactNumber: "09171234567",
+  email: "say@example.com",
 };
 
 describe("PublicSiteShell", () => {

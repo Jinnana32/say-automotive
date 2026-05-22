@@ -9,6 +9,7 @@ export type WebsiteShellData = {
   branchName: string;
   address: string | null;
   contactNumber: string | null;
+  email: string | null;
 };
 
 export type WebsiteCatalogProduct = {

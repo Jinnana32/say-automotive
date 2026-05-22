@@ -105,9 +105,9 @@ export async function WebsiteHomePage({
   return (
     <div className="overflow-x-clip">
       <HeroSection
-        eyebrow="SAYssss Auto Care Center"
+        eyebrow="SAY Auto Care Center"
         title="TIRES, TRUSTED PARTS, AND STRAIGHTFORWARD AUTO CARE SUPPORT."
-        description="A cleaner, stronger public website for showcasing products, collecting service quote requests, and sharing real shop updates with a clear automotive service feel."
+        description="Explore trusted tires, everyday auto care products, and workshop support from SAY Auto Care Center. Browse featured items, request a service quote, and stay updated with the latest shop news."
         actions={
           <>
             <Button asChild variant="yellowPrimary" size="pill">
@@ -138,23 +138,21 @@ export async function WebsiteHomePage({
                 American precision.
               </h2>
               <p className="mt-3 text-sm leading-6 text-[#4d5f7f]">
-                Strong blue sections, clearer product presentation, and faster
-                service inquiry actions give the website a more intentional
-                service-brand presence.
+                From product inquiries to workshop assistance, SAY Auto Care Center is ready to help you choose the right next step for your vehicle.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
               <HeroAsideChip
                 title="Catalog-led"
-                description="Products first, not filler copy."
+                description="Browse featured parts, fluids, and accessories in one place."
               />
               <HeroAsideChip
                 title="Brand-led"
-                description="Blue and yellow used intentionally."
+                description="Clean product presentation with trusted SAY Auto Care branding."
               />
               <HeroAsideChip
                 title="Service-ready"
-                description="Workshop quote stays separate from product browsing."
+                description="Request workshop help without leaving the public website."
               />
             </div>
           </div>
@@ -182,7 +180,7 @@ export async function WebsiteHomePage({
           <PageHeader
             eyebrow="Main website focus"
             title="SHOWCASE THE PRODUCTS CUSTOMERS ASK ABOUT FIRST."
-            description="The reference design stays simple, but it separates sections clearly and gives the important categories stronger visual presence. This block does the same."
+            description="Browse popular categories first, then contact the shop for product availability, fitment, and service support."
             align="center"
             inverse
           />
@@ -208,7 +206,7 @@ export async function WebsiteHomePage({
           <PageHeader
             eyebrow="How it works"
             title="A clear path from browsing to the right next step."
-            description="Products stay browse-first, while service work has its own request path. That makes the website easier to understand and more realistic for an in-store shop."
+            description="Browse products, request a service quote, or contact the shop directly for availability, fitment, and workshop assistance."
             align="left"
           />
 
@@ -238,7 +236,7 @@ export async function WebsiteHomePage({
           <PageHeader
             eyebrow="Featured products"
             title="TIRES, FLUIDS, BATTERIES, AND EVERYDAY AUTO CARE ITEMS."
-            description="Featured cards should feel curated and valuable, not like a generic list. These product cards now carry more brand weight while staying easy to scan."
+            description="Browse selected tires, fluids, batteries, and everyday auto care items available through SAY Auto Care Center."
             align="left"
           />
           <Button asChild variant="outlineBlue" size="pill">
@@ -249,7 +247,7 @@ export async function WebsiteHomePage({
         <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {featuredProducts.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-[#d2dbef] bg-[#f8faff] p-8 text-sm leading-7 text-[#5b6783]">
-              Publish featured products to start building this section.
+              Featured products will appear here soon. Please check back later or contact the shop directly.
             </div>
           ) : (
             featuredProducts.map((product) => (
@@ -264,7 +262,7 @@ export async function WebsiteHomePage({
           <PageHeader
             eyebrow="Shop updates and tips"
             title="REAL WORK, PROMOS, AND PRACTICAL MAINTENANCE ADVICE."
-            description="This keeps the owner’s social-style posting habit but presents it inside a more polished website section with stronger contrast and better grouping."
+            description="See recent shop updates, promos, and practical maintenance tips from the SAY Auto Care team."
             align="left"
             inverse
           />
@@ -276,7 +274,7 @@ export async function WebsiteHomePage({
         <div className="mt-8 grid gap-5 lg:grid-cols-3">
           {latestPosts.length === 0 ? (
             <div className="rounded-2xl bg-white p-8 text-sm leading-7 text-[#5b6783] shadow-[0_22px_48px_rgba(7,18,57,0.18)]">
-              Add shop updates or maintenance tips to publish them here.
+              No shop updates are available right now. Please check back soon for promos, maintenance tips, and recent work highlights.
             </div>
           ) : (
             latestPosts.map((post) => (
@@ -288,8 +286,8 @@ export async function WebsiteHomePage({
 
       <CTASection
         eyebrow="Need service help?"
-        title="LET CUSTOMERS SEND THE SERVICE DETAILS YOU NEED THE FIRST TIME."
-        description="Keep product browsing simple, and use the structured form for maintenance, repairs, inspections, and other workshop concerns."
+        title="SEND YOUR SERVICE CONCERN IN ONE CLEAR REQUEST."
+        description="Use the service quote form for maintenance, repairs, inspections, and other workshop concerns. For products, you can still call or visit the shop directly."
         actions={
           <>
             <Button asChild variant="yellowPrimary" size="pill">

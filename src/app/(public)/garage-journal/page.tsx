@@ -19,8 +19,8 @@ export default async function GarageJournalPage() {
       <SectionContainer tone="navy" spacing="hero" className="pb-20">
         <PageHeader
           eyebrow="Garage journal"
-          title="SHOP UPDATES THAT FEEL LIKE REAL WORK, NOT GENERIC CONTENT."
-          description="The reference design uses strong sectioning and obvious hierarchy. This page applies that to the owner’s update style so recent work, promos, and tips feel more intentional."
+          title="SHOP UPDATES, PROMOS, AND AUTO CARE TIPS."
+          description="See recent shop updates, promos, and practical maintenance tips from SAY Auto Care Center."
           inverse
           titleTag="h1"
           size="hero"
@@ -36,14 +36,14 @@ export default async function GarageJournalPage() {
         <PageHeader
           eyebrow="Latest highlights"
           title="RECENT POSTS FROM THE SHOP."
-          description="Short featured cards create a cleaner first pass through the journal before customers read the full updates below."
+          description="Browse the latest updates from the shop before reading the full posts below."
           align="left"
         />
 
         <div className="mt-8 grid gap-5 lg:grid-cols-3">
           {posts.length === 0 ? (
             <div className="rounded-2xl bg-white p-8 text-sm leading-7 text-[#5b6783] shadow-[0_22px_48px_rgba(7,18,57,0.12)] ring-1 ring-[#dbe3f5]">
-              Publish your first shop update or maintenance tip to start building this section.
+              No shop updates are available right now. Please check back soon for promos, maintenance tips, and recent work highlights.
             </div>
           ) : (
             posts.map((post) => <WebsiteStoryCard key={post.id} post={post} />)
@@ -56,7 +56,7 @@ export default async function GarageJournalPage() {
           <PageHeader
             eyebrow="Full updates"
             title="READ THE DETAILS, PROMOS, AND MAINTENANCE NOTES."
-            description="Longer updates now live inside clearer, grouped reading cards so the page keeps its contrast and structure instead of dissolving into one plain white list."
+            description="Read the full details from the shop, including promos, maintenance reminders, and recent work highlights."
             align="left"
             inverse
           />
@@ -92,8 +92,8 @@ export default async function GarageJournalPage() {
 
       <CTASection
         eyebrow="Need service or parts?"
-        title="USE THE JOURNAL AS A TRUST SIGNAL, THEN POINT VISITORS TO THE RIGHT NEXT STEP."
-        description="For service work, open the quote form. For products, browse the catalog and contact the shop directly."
+        title="NEED SERVICE OR PRODUCT ASSISTANCE?"
+        description="Open the service quote form for workshop concerns, or browse the catalog and contact the shop for product inquiries."
         actions={
           <>
             <Button asChild variant="yellowPrimary" size="pill">

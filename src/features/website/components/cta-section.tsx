@@ -29,7 +29,9 @@ export function CTASection({
             inverse
             className="max-w-3xl"
           />
-          <div className="flex flex-wrap gap-4">{actions}</div>
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:gap-4 [&>*]:w-full sm:[&>*]:w-auto">
+            {actions}
+          </div>
         </div>
         {aside ? <div className={cn("mt-6")}>{aside}</div> : null}
       </div>

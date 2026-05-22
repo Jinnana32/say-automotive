@@ -16,11 +16,11 @@ export default async function ContactPage() {
 
   return (
     <div className="bg-[#f3f5fa]">
-      <SectionContainer tone="navy" spacing="hero" className="pb-20">
+      <SectionContainer tone="navy" spacing="hero" className="pb-16 sm:pb-20">
         <PageHeader
           eyebrow="Contact"
           title="GET IN TOUCH WITH SAY AUTO CARE."
-          description="The contact page should feel like part of the same brand system: dark hero, clear next step, and solid information cards instead of plain text dropped on white."
+          description="Need a service quote, product inquiry, or workshop assistance? Send us a message or visit the shop and we’ll help you with the next step."
           inverse
           titleTag="h1"
           size="hero"
@@ -37,13 +37,13 @@ export default async function ContactPage() {
         />
       </SectionContainer>
 
-      <SectionContainer tone="muted" spacing="compact" className="-mt-12 pt-0">
+      <SectionContainer tone="muted" spacing="compact" className="-mt-10 pt-0 sm:-mt-12">
         <div className="grid gap-5 lg:grid-cols-2">
           <ContactCard
             icon={MapPin}
             eyebrow="Business details"
             title="VISIT OR CALL THE SHOP."
-            description="Keep the essential information visible in one strong contact block so customers do not have to hunt for it."
+            description="For service inquiries, parts availability, and appointment concerns, contact SAY Auto Care Center directly."
           >
             <div className="space-y-4 text-sm leading-7 text-[#5b6783]">
               <p>
@@ -58,17 +58,23 @@ export default async function ContactPage() {
                 {shellData.address ?? "Please contact the shop for the latest address details."}
               </p>
               <p>
-                <span className="font-semibold text-[#10224d]">Contact:</span>{" "}
+                <span className="font-semibold text-[#10224d]">Phone:</span>{" "}
                 {shellData.contactNumber ?? "Please contact the shop for the latest number."}
               </p>
+              {shellData.email ? (
+                <p>
+                  <span className="font-semibold text-[#10224d]">Email:</span>{" "}
+                  {shellData.email}
+                </p>
+              ) : null}
             </div>
           </ContactCard>
 
           <ContactCard
             icon={ClipboardCheck}
             eyebrow="Best next step"
-            title="USE THE SERVICE FORM FOR MAINTENANCE, REPAIRS, AND INSPECTIONS."
-            description="For catalog items, call or visit the shop. The form is best used for actual workshop service requests."
+            title="REQUEST A SERVICE QUOTE OR ASK ABOUT THE NEXT STEP."
+            description="Use the service form for maintenance, repairs, diagnostics, and inspection concerns. For products, you can also call or visit the shop directly."
             action={
               <Button asChild variant="bluePrimary" size="pill">
                 <Link href="/get-quote">Open the service form</Link>
@@ -91,8 +97,8 @@ export default async function ContactPage() {
 
       <CTASection
         eyebrow="Prefer to talk directly?"
-        title="KEEP THE CONTACT PATH CLEAR, VISIBLE, AND EASY TO ACT ON."
-        description="Strong public website sections matter, but the practical outcome is simple: customers should always know how to ask for service help or product availability."
+        title="CALL, VISIT, OR SEND A SERVICE REQUEST."
+        description="Choose the contact method that works best for you. We can help with service concerns, product availability, and workshop assistance."
         actions={
           <>
             <Button asChild variant="yellowPrimary" size="pill">

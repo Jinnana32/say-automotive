@@ -61,7 +61,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
         <PageHeader
           eyebrow="Catalog"
           title="TIRES, FLUIDS, BATTERIES, AND WORKSHOP ESSENTIALS."
-          description="The catalog should feel like a real automotive storefront, with strong brand contrast, clear filters, and obvious ways to contact or visit the shop for availability and fitment."
+          description="Browse tires, fluids, batteries, and workshop essentials from SAY Auto Care Center. Contact the shop for availability, fitment, and in-store assistance."
           inverse
           titleTag="h1"
           size="hero"
@@ -113,7 +113,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
           <PageHeader
             eyebrow="Browse by focus"
             title="START WITH THE CATEGORIES CUSTOMERS ASK ABOUT MOST."
-            description="The reference site uses clear grouped blocks below the hero. This gives the catalog the same kind of visual entry points before people dive into the product grid or contact the shop."
+            description="Start with the categories customers ask about most, then contact the shop for product availability and fitment help."
             align="left"
           />
 
@@ -138,7 +138,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
           <PageHeader
             eyebrow="Published items"
             title="CURRENTLY HIGHLIGHTED PRODUCTS."
-            description="The product grid should feel substantial and curated, not like plain boxes on a blank page. Customers can browse what the shop carries and then contact the branch for availability, fitment, or next-step advice."
+            description="Browse currently highlighted products and contact the shop for availability, fitment, and purchase assistance."
             align="left"
           />
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#173c99]">
@@ -159,30 +159,28 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                   Featured product
                 </p>
                 <h3 className="mt-3 text-2xl font-semibold leading-tight text-white">
-                  A single catalog item should still feel properly merchandised.
+                  Need more details about this item?
                 </h3>
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-[#d8e3ff]">
-                  When the catalog only has one published item, the layout now supports it with a
-                  branded information panel instead of leaving a large empty grid area. Keep the
-                  product visible and route questions toward contact or an in-store visit.
+                  Contact the shop for availability, fitment, and installation guidance while this featured product is on display.
                 </p>
                 <div className="mt-6 grid gap-4 sm:grid-cols-3">
                   <div className="rounded-2xl border border-white/12 bg-white/10 p-4 backdrop-blur">
-                    <p className="text-sm font-semibold text-white">Published product</p>
+                    <p className="text-sm font-semibold text-white">Ask about stock</p>
                     <p className="mt-1 text-sm leading-6 text-[#d8e3ff]">
-                      Even one active catalog item can anchor the section cleanly.
+                      Confirm current availability before visiting the shop.
                     </p>
                   </div>
                   <div className="rounded-2xl border border-white/12 bg-white/10 p-4 backdrop-blur">
-                    <p className="text-sm font-semibold text-white">In-store buying</p>
+                    <p className="text-sm font-semibold text-white">Check fitment</p>
                     <p className="mt-1 text-sm leading-6 text-[#d8e3ff]">
-                      Customers can call or visit the branch for availability and final confirmation.
+                      Ask the team if this item fits your vehicle or service need.
                     </p>
                   </div>
                   <div className="rounded-2xl border border-white/12 bg-white/10 p-4 backdrop-blur">
-                    <p className="text-sm font-semibold text-white">Shop guidance</p>
+                    <p className="text-sm font-semibold text-white">Plan installation</p>
                     <p className="mt-1 text-sm leading-6 text-[#d8e3ff]">
-                      The shop can advise on fitment, compatibility, or installation before purchase.
+                      Get guidance on installation or the next best step for your vehicle.
                     </p>
                   </div>
                 </div>

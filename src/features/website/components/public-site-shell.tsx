@@ -94,7 +94,7 @@ export function PublicSiteShell({
               alt={shellData.businessName}
               width={240}
               height={192}
-              className="h-10 w-auto max-w-[10.5rem] sm:h-12 md:h-14 md:max-w-none"
+              className="h-9 w-auto max-w-[9.75rem] sm:h-11 md:h-14 md:max-w-none"
               priority
             />
             <div className="hidden min-w-0 md:block">
