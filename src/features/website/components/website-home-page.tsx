@@ -103,7 +103,7 @@ export async function WebsiteHomePage({
   ]);
 
   return (
-    <div className="bg-[#0b1f4d]">
+    <div className="overflow-x-clip">
       <HeroSection
         eyebrow="SAYssss Auto Care Center"
         title="TIRES, TRUSTED PARTS, AND STRAIGHTFORWARD AUTO CARE SUPPORT."
@@ -120,17 +120,17 @@ export async function WebsiteHomePage({
         }
         aside={
           <div className="space-y-5">
-            <div className="flex justify-center px-2 pt-1 sm:px-4">
+            <div className="flex justify-center px-1 pt-1 sm:px-4">
               <BrandLogo
                 src={shellData.businessLogoUrl ?? DEFAULT_BRAND_LOGO_SRC}
                 alt={shellData.businessName}
                 width={420}
                 height={360}
-                className="h-auto w-full max-w-[360px]"
+                className="h-auto w-full max-w-[320px] sm:max-w-[360px]"
                 priority
               />
             </div>
-            <div className="rounded-2xl bg-[#f3f5fa] p-5">
+            <div className="rounded-2xl bg-[#f3f5fa] p-4 sm:p-5">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#173c99]">
                 Pinoy craftsmanship
               </p>
@@ -164,7 +164,7 @@ export async function WebsiteHomePage({
           {HERO_POINTS.map((point) => (
             <div
               key={point.title}
-              className="rounded-2xl border border-white/12 bg-white/10 p-4 shadow-[0_16px_34px_rgba(4,12,38,0.16)] backdrop-blur"
+              className="rounded-2xl border border-white/12 bg-white/10 p-4 shadow-[0_16px_34px_rgba(4,12,38,0.16)] backdrop-blur sm:p-4"
             >
               <p className="text-base font-semibold text-white">
                 {point.title}

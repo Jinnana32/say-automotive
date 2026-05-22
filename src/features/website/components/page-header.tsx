@@ -25,10 +25,10 @@ export function PageHeader({
   const TitleTag = titleTag;
 
   return (
-    <div className={cn("space-y-4", centered ? "text-center" : "text-left", className)}>
+    <div className={cn("max-w-full space-y-4", centered ? "text-center" : "text-left", className)}>
       <p
         className={cn(
-          "text-xs font-semibold uppercase tracking-[0.24em]",
+          "text-[11px] font-semibold uppercase tracking-[0.18em] sm:text-xs sm:tracking-[0.24em]",
           inverse ? "text-[#ffd24a]" : "text-[#173c99]",
         )}
       >
@@ -36,9 +36,9 @@ export function PageHeader({
       </p>
       <TitleTag
         className={cn(
-          "font-display uppercase leading-[0.92] tracking-[0.03em]",
+          "max-w-full text-balance break-words font-display uppercase leading-[0.96] tracking-[0.012em] sm:leading-[0.92] sm:tracking-[0.03em]",
           size === "hero"
-            ? "text-4xl sm:text-5xl lg:text-6xl"
+            ? "text-[2.35rem] sm:text-5xl lg:text-6xl"
             : "text-3xl sm:text-4xl lg:text-5xl",
           inverse ? "text-white" : "text-[#10224d]",
         )}
@@ -55,7 +55,12 @@ export function PageHeader({
         {description}
       </p>
       {actions ? (
-        <div className={cn("flex flex-wrap gap-4 pt-2", centered ? "justify-center" : "")}>
+        <div
+          className={cn(
+            "flex flex-col gap-3 pt-2 [&>*]:w-full sm:flex-row sm:flex-wrap sm:gap-4 sm:[&>*]:w-auto",
+            centered ? "justify-center" : "",
+          )}
+        >
           {actions}
         </div>
       ) : null}

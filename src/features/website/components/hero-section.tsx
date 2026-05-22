@@ -21,8 +21,8 @@ export function HeroSection({
 }) {
   return (
     <SectionContainer tone="navy" width="default" spacing="hero" className={className}>
-      <div className="grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
-        <div className="space-y-6">
+      <div className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:gap-8">
+        <div className="space-y-5 sm:space-y-6">
           <PageHeader
             eyebrow={eyebrow}
             title={title}
@@ -38,7 +38,7 @@ export function HeroSection({
         {aside ? (
           <div
             className={cn(
-              "rounded-2xl border border-white/10 bg-white p-5 text-[#10224d] shadow-[0_24px_48px_rgba(6,18,58,0.32)] sm:p-6",
+              "overflow-hidden rounded-[1.75rem] border border-white/10 bg-white p-4 text-[#10224d] shadow-[0_24px_48px_rgba(6,18,58,0.32)] sm:p-6",
             )}
           >
             {aside}

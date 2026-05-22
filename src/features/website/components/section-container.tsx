@@ -16,7 +16,7 @@ const WIDTH_CLASS_NAMES: Record<SectionWidth, string> = {
 };
 
 const SPACING_CLASS_NAMES: Record<SectionSpacing, string> = {
-  hero: 'py-12 sm:py-14 lg:py-16',
+  hero: 'py-10 sm:py-14 lg:py-16',
   default: 'py-14 sm:py-16',
   compact: 'py-12 sm:py-14',
 };
