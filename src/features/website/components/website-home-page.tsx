@@ -1,7 +1,7 @@
-import Link from "next/link";
+import Link from 'next/link';
 
-import { DEFAULT_BRAND_LOGO_SRC } from "@/components/shared/brand-assets";
-import { BrandLogo } from "@/components/shared/brand-logo";
+import { DEFAULT_BRAND_LOGO_SRC } from '@/components/shared/brand-assets';
+import { BrandLogo } from '@/components/shared/brand-logo';
 import {
   BatteryCharging,
   ClipboardList,
@@ -10,85 +10,85 @@ import {
   ShieldCheck,
   type LucideIcon,
   Wrench,
-} from "lucide-react";
+} from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
-import { CTASection } from "@/features/website/components/cta-section";
-import { HeroSection } from "@/features/website/components/hero-section";
-import { PageHeader } from "@/features/website/components/page-header";
-import { SectionContainer } from "@/features/website/components/section-container";
-import { ServiceCard } from "@/features/website/components/service-card";
-import { WebsiteProductCard } from "@/features/website/components/website-product-card";
-import { WebsiteStoryCard } from "@/features/website/components/website-story-card";
+import { Button } from '@/components/ui/button';
+import { CTASection } from '@/features/website/components/cta-section';
+import { HeroSection } from '@/features/website/components/hero-section';
+import { PageHeader } from '@/features/website/components/page-header';
+import { SectionContainer } from '@/features/website/components/section-container';
+import { ServiceCard } from '@/features/website/components/service-card';
+import { WebsiteProductCard } from '@/features/website/components/website-product-card';
+import { WebsiteStoryCard } from '@/features/website/components/website-story-card';
 import {
   listFeaturedWebsiteProducts,
   listPublishedWebsitePosts,
-} from "@/features/website/queries/website-queries";
-import type { WebsiteShellData } from "@/features/website/types";
+} from '@/features/website/queries/website-queries';
+import type { WebsiteShellData } from '@/features/website/types';
 
 const FEATURE_BLOCKS = [
   {
-    eyebrow: "Top category",
-    title: "Tires & wheel packages",
+    eyebrow: 'Top category',
+    title: 'Tires & wheel packages',
     description:
-      "From everyday replacements to upgrade-ready sets, make tire choices easier to browse before customers ask for pricing.",
+      'From everyday replacements to upgrade-ready sets, make tire choices easier to browse before customers ask for pricing.',
     icon: Gauge,
-    href: "/catalog?search=tire",
-    cta: "Browse tires",
+    href: '/catalog?search=tire',
+    cta: 'Browse tires',
   },
   {
-    eyebrow: "Maintenance",
-    title: "Oils, fluids, and consumables",
+    eyebrow: 'Maintenance',
+    title: 'Oils, fluids, and consumables',
     description:
-      "Highlight oils, brake fluids, coolants, and other maintenance essentials customers often need during routine service.",
+      'Highlight oils, brake fluids, coolants, and other maintenance essentials customers often need during routine service.',
     icon: Wrench,
-    href: "/catalog?type=fluid",
-    cta: "See fluids",
+    href: '/catalog?type=fluid',
+    cta: 'See fluids',
   },
   {
-    eyebrow: "Fast-moving item",
-    title: "Batteries and electrical essentials",
+    eyebrow: 'Fast-moving item',
+    title: 'Batteries and electrical essentials',
     description:
-      "Keep batteries and electrical essentials visible for customers who need immediate replacement or a fast availability check.",
+      'Keep batteries and electrical essentials visible for customers who need immediate replacement or a fast availability check.',
     icon: BatteryCharging,
-    href: "/catalog?search=battery",
-    cta: "Shop batteries",
+    href: '/catalog?search=battery',
+    cta: 'Shop batteries',
   },
 ] as const;
 
 const PROCESS_STEPS = [
   {
-    step: "1",
-    title: "Browse",
+    step: '1',
+    title: 'Browse',
     description:
-      "Explore tires, fluids, batteries, and other automotive items in a clean, easy-to-scan catalog.",
+      'Explore tires, fluids, batteries, and other automotive items in a clean, easy-to-scan catalog.',
   },
   {
-    step: "2",
-    title: "Request service",
+    step: '2',
+    title: 'Request service',
     description:
-      "Use the service form when you need maintenance, repair, diagnostics, or other workshop work.",
+      'Use the service form when you need maintenance, repair, diagnostics, or other workshop work.',
   },
   {
-    step: "3",
-    title: "Call or visit",
+    step: '3',
+    title: 'Call or visit',
     description:
-      "For catalog items, call or visit the shop directly to confirm availability, fitment, or installation.",
+      'For catalog items, call or visit the shop directly to confirm availability, fitment, or installation.',
   },
 ] as const;
 
 const HERO_POINTS = [
   {
-    title: "Tires",
-    description: "Featured brands and fitment-friendly options.",
+    title: 'Tires',
+    description: 'Featured brands and fitment-friendly options.',
   },
   {
-    title: "Service",
-    description: "Dedicated form for workshop inquiries and estimates.",
+    title: 'Service',
+    description: 'Dedicated form for workshop inquiries and estimates.',
   },
   {
-    title: "Updates",
-    description: "Shop work, promos, and maintenance tips.",
+    title: 'Updates',
+    description: 'Shop work, promos, and maintenance tips.',
   },
 ] as const;
 
@@ -103,9 +103,9 @@ export async function WebsiteHomePage({
   ]);
 
   return (
-    <div className="bg-[#f3f5fa]">
+    <div className="bg-[#0b1f4d]">
       <HeroSection
-        eyebrow="SAY Auto Care Center"
+        eyebrow="SAYssss Auto Care Center"
         title="TIRES, TRUSTED PARTS, AND STRAIGHTFORWARD AUTO CARE SUPPORT."
         description="A cleaner, stronger public website for showcasing products, collecting service quote requests, and sharing real shop updates with a clear automotive service feel."
         actions={
@@ -138,14 +138,24 @@ export async function WebsiteHomePage({
                 American precision.
               </h2>
               <p className="mt-3 text-sm leading-6 text-[#4d5f7f]">
-                Strong blue sections, clearer product presentation, and faster service inquiry actions
-                give the website a more intentional service-brand presence.
+                Strong blue sections, clearer product presentation, and faster
+                service inquiry actions give the website a more intentional
+                service-brand presence.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-              <HeroAsideChip title="Catalog-led" description="Products first, not filler copy." />
-              <HeroAsideChip title="Brand-led" description="Blue and yellow used intentionally." />
-              <HeroAsideChip title="Service-ready" description="Workshop quote stays separate from product browsing." />
+              <HeroAsideChip
+                title="Catalog-led"
+                description="Products first, not filler copy."
+              />
+              <HeroAsideChip
+                title="Brand-led"
+                description="Blue and yellow used intentionally."
+              />
+              <HeroAsideChip
+                title="Service-ready"
+                description="Workshop quote stays separate from product browsing."
+              />
             </div>
           </div>
         }
@@ -159,7 +169,9 @@ export async function WebsiteHomePage({
               <p className="text-base font-semibold text-white">
                 {point.title}
               </p>
-              <p className="mt-2 text-sm leading-6 text-[#d8e3ff]">{point.description}</p>
+              <p className="mt-2 text-sm leading-6 text-[#d8e3ff]">
+                {point.description}
+              </p>
             </div>
           ))}
         </div>
@@ -212,7 +224,9 @@ export async function WebsiteHomePage({
                 <h3 className="mt-4 text-xl font-semibold leading-tight text-[#10224d]">
                   {step.title}
                 </h3>
-                <p className="mt-2.5 text-sm leading-6 text-[#4d5f7f]">{step.description}</p>
+                <p className="mt-2.5 text-sm leading-6 text-[#4d5f7f]">
+                  {step.description}
+                </p>
               </div>
             ))}
           </div>
@@ -265,7 +279,9 @@ export async function WebsiteHomePage({
               Add shop updates or maintenance tips to publish them here.
             </div>
           ) : (
-            latestPosts.map((post) => <WebsiteStoryCard key={post.id} post={post} />)
+            latestPosts.map((post) => (
+              <WebsiteStoryCard key={post.id} post={post} />
+            ))
           )}
         </div>
       </SectionContainer>
