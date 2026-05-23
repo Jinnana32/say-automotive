@@ -12,6 +12,7 @@ export function createPosCartItem(product: PosProductOption): PosCartItem {
     availableQuantity: product.availableQuantity,
     quantity: 1,
     shelfLocation: product.shelfLocation,
+    hasStockRecord: product.hasStockRecord,
     isLowStock: product.isLowStock,
   };
 }
@@ -31,6 +32,7 @@ export function addProductToCart(items: PosCartItem[], product: PosProductOption
           unitPrice: product.sellingPrice,
           quantity: clampQuantity(item.quantity + 1, product.availableQuantity),
           shelfLocation: product.shelfLocation,
+          hasStockRecord: product.hasStockRecord,
           isLowStock: product.isLowStock,
         }
       : item,

@@ -9,6 +9,7 @@ type CategoryRow = TableRow<"product_categories">;
 type BrandRow = TableRow<"brands">;
 type UnitRow = TableRow<"units">;
 type SupplierRow = TableRow<"suppliers">;
+type BranchRow = Pick<TableRow<"branches">, "id" | "name">;
 
 export function mapProductRowToListItem(
   row: ProductRow,
@@ -17,10 +18,18 @@ export function mapProductRowToListItem(
     brands: Map<string, string>;
     units: Map<string, string>;
     suppliers: Map<string, string>;
+    branches: Map<string, string>;
+  },
+  params: {
+    canManage: boolean;
   },
 ): ProductListItem {
   return {
     id: row.id,
+    branchId: row.branch_id,
+    owningBranchName: dictionaries.branches.get(row.branch_id) ?? null,
+    isGlobal: row.is_global ?? false,
+    canManage: params.canManage,
     name: row.name,
     sku: row.sku,
     barcode: row.barcode,
@@ -56,6 +65,8 @@ export function mapProductRowToListItem(
 export function mapProductRowToFormValues(row: ProductRow): ProductFormValues {
   return {
     productId: row.id,
+    owningBranchId: row.branch_id,
+    shareGlobally: row.is_global ?? false,
     name: row.name,
     sku: row.sku ?? "",
     barcode: row.barcode ?? "",
@@ -108,4 +119,8 @@ export function buildUnitMap(rows: UnitRow[]) {
 
 export function buildSupplierMap(rows: SupplierRow[]) {
   return new Map(rows.map((row) => [row.id, row.supplier_name]));
+}
+
+export function buildBranchMap(rows: BranchRow[]) {
+  return new Map(rows.map((row) => [row.id, row.name]));
 }

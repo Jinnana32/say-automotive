@@ -168,7 +168,7 @@ function QuickCreateProductDialogForm({
   return (
     <ModalDialog
       title="Add new product"
-      description="Create a shared product record without leaving the current workflow."
+      description="Create a branch product record without leaving the current workflow."
       size="lg"
       open={open}
       onOpenChange={onOpenChange}
@@ -189,6 +189,8 @@ function QuickCreateProductDialogForm({
           <input type="hidden" name="partNumber" value="" />
           <input type="hidden" name="oemNumber" value="" />
           <input type="hidden" name="description" value="" />
+          <input type="hidden" name="owningBranchId" value="" />
+          <input type="hidden" name="shareGlobally" value="" />
           <input type="hidden" name="warrantyDurationDays" value="" />
           <input type="hidden" name="websiteVisible" value="" />
           <input type="hidden" name="websiteFeatured" value="" />

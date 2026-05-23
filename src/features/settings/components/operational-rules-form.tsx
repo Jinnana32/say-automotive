@@ -21,6 +21,8 @@ export function OperationalRulesForm({
     INITIAL_FORM_ACTION_STATE,
   );
   const { values, updateFormValue } = useFormValues({
+    allowGlobalProductCatalog: initialValues.allowGlobalProductCatalog,
+    allowGlobalServiceCatalog: initialValues.allowGlobalServiceCatalog,
     allowPartialPayments: initialValues.allowPartialPayments,
     requireInvoiceBeforeJobCompletion:
       initialValues.requireInvoiceBeforeJobCompletion,
@@ -42,6 +44,20 @@ export function OperationalRulesForm({
         <FormStatusMessage message={state.message} />
 
         <div className="space-y-3">
+          <RuleToggle
+            name="allowGlobalProductCatalog"
+            title="Allow global product catalog"
+            description="Let this branch see products marked as global by authorized catalog managers."
+            checked={values.allowGlobalProductCatalog}
+            onCheckedChange={(checked) => updateFormValue("allowGlobalProductCatalog", checked)}
+          />
+          <RuleToggle
+            name="allowGlobalServiceCatalog"
+            title="Allow global service catalog"
+            description="Let this branch see services marked as global by authorized catalog managers."
+            checked={values.allowGlobalServiceCatalog}
+            onCheckedChange={(checked) => updateFormValue("allowGlobalServiceCatalog", checked)}
+          />
           <RuleToggle
             name="allowPartialPayments"
             title="Allow partial payments"

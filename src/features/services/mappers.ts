@@ -5,9 +5,19 @@ import type { ServiceFormValues, ServiceListItem } from "@/features/services/typ
 
 type ServiceRow = TableRow<"services">;
 
-export function mapServiceRowToListItem(row: ServiceRow): ServiceListItem {
+export function mapServiceRowToListItem(
+  row: ServiceRow,
+  params: {
+    owningBranchName: string | null;
+    canManage: boolean;
+  },
+): ServiceListItem {
   return {
     id: row.id,
+    branchId: row.branch_id,
+    owningBranchName: params.owningBranchName,
+    isGlobal: row.is_global ?? false,
+    canManage: params.canManage,
     name: row.name,
     category: row.category,
     description: row.description,
@@ -22,6 +32,8 @@ export function mapServiceRowToListItem(row: ServiceRow): ServiceListItem {
 export function mapServiceRowToFormValues(row: ServiceRow): ServiceFormValues {
   return {
     serviceId: row.id,
+    owningBranchId: row.branch_id,
+    shareGlobally: row.is_global ?? false,
     name: row.name,
     category: row.category ?? "",
     description: row.description ?? "",

@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/shared/page-header";
 import { ProductForm } from "@/features/products/components/product-form";
 import { mapProductRowToFormValues } from "@/features/products/mappers";
-import { getProductFormOptions, getProductById } from "@/features/products/queries/product-queries";
+import {
+  getEditableProductById,
+  getProductFormOptions,
+} from "@/features/products/queries/product-queries";
 import { resolveProductImageUrl } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +19,10 @@ type EditProductPageProps = {
 
 export default async function EditProductPage({ params }: EditProductPageProps) {
   const { productId } = await params;
-  const [product, options] = await Promise.all([getProductById(productId), getProductFormOptions()]);
+  const [product, options] = await Promise.all([
+    getEditableProductById(productId),
+    getProductFormOptions(),
+  ]);
 
   if (!product) {
     notFound();
@@ -34,6 +40,8 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
         brands={options.brands}
         suppliers={options.suppliers}
         units={options.units}
+        branches={options.branches}
+        permissions={options.permissions}
         initialValues={mapProductRowToFormValues(product)}
         initialImagePreviewUrl={resolveProductImageUrl({
           productImagePath: product.product_image_path,

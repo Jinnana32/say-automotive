@@ -2,9 +2,11 @@ import { cache } from "react";
 
 import {
   applyBranchFilter,
-  applySharedCatalogBranchFilter,
   getBranchScopedServerClient,
 } from "@/lib/branches";
+import {
+  applyCatalogVisibilityFilter,
+} from "@/lib/catalog-visibility";
 import type { TableRow } from "@/types/database";
 
 import {
@@ -291,23 +293,43 @@ export const getJobOrderItemCatalogOptions = cache(async (): Promise<{
   permissions: JobOrderFormOptions["permissions"];
 }> => {
   const { branchScope, context, supabase } = await getBranchScopedServerClient("job_orders:write");
+  const { data: catalogSettings, error: catalogSettingsError } = await (supabase as any)
+    .from("business_settings")
+    .select("allow_global_product_catalog, allow_global_service_catalog")
+    .eq("branch_id", branchScope.selectedBranchId)
+    .maybeSingle();
+
+  if (catalogSettingsError) {
+    throw new Error(catalogSettingsError.message);
+  }
+
+  const sharingSettings = {
+    allowGlobalProductCatalog: catalogSettings?.allow_global_product_catalog ?? false,
+    allowGlobalServiceCatalog: catalogSettings?.allow_global_service_catalog ?? false,
+  };
   const [{ data: products, error: productsError }, { data: services, error: servicesError }] =
     await Promise.all([
-      applySharedCatalogBranchFilter(
+      applyCatalogVisibilityFilter(
         supabase
           .from("products")
           .select("id, name, sku, selling_price")
           .eq("status", "active")
           .order("name", { ascending: true }),
-        branchScope.selectedBranchId,
+        {
+          branchId: branchScope.selectedBranchId,
+          includeGlobal: sharingSettings.allowGlobalProductCatalog,
+        },
       ),
-      applySharedCatalogBranchFilter(
+      applyCatalogVisibilityFilter(
         supabase
           .from("services")
           .select("id, name, category, labor_price")
           .eq("status", "active")
           .order("name", { ascending: true }),
-        branchScope.selectedBranchId,
+        {
+          branchId: branchScope.selectedBranchId,
+          includeGlobal: sharingSettings.allowGlobalServiceCatalog,
+        },
       ),
     ]);
 

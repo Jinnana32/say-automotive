@@ -5,6 +5,8 @@ import { serviceFormSchema } from "@/features/services/schemas/service-form-sche
 describe("serviceFormSchema", () => {
   it("rejects negative labor prices", () => {
     const result = serviceFormSchema.safeParse({
+      owningBranchId: crypto.randomUUID(),
+      shareGlobally: false,
       name: "Oil Change",
       category: "",
       description: "",
@@ -18,6 +20,8 @@ describe("serviceFormSchema", () => {
 
   it("accepts valid service input", () => {
     const result = serviceFormSchema.safeParse({
+      owningBranchId: crypto.randomUUID(),
+      shareGlobally: false,
       name: "Oil Change",
       category: "Maintenance",
       description: "",
@@ -31,6 +35,8 @@ describe("serviceFormSchema", () => {
 
   it("rejects labor prices beyond four decimal places", () => {
     const result = serviceFormSchema.safeParse({
+      owningBranchId: crypto.randomUUID(),
+      shareGlobally: false,
       name: "Oil Change",
       category: "Maintenance",
       description: "",

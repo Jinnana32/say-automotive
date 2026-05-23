@@ -84,6 +84,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               <TableHeader>
                 <TableRow>
                   <TableHead>Product</TableHead>
+                  <TableHead>Ownership</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Website</TableHead>
                   <TableHead>Supplier</TableHead>
@@ -110,6 +111,16 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                             {product.categoryName ?? "Uncategorized"} · {product.unitLabel}
                           </p>
                         </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <StatusBadge tone={product.isGlobal ? "info" : "neutral"}>
+                          {product.isGlobal ? "Global" : "Branch item"}
+                        </StatusBadge>
+                        <p className="text-xs text-muted-foreground">
+                          {product.owningBranchName ?? "Unknown branch"}
+                        </p>
                       </div>
                     </TableCell>
                     <TableCell className="capitalize">{product.productType}</TableCell>
@@ -141,12 +152,16 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                       </StatusBadge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <TableRowActionsMenu label={`Product actions for ${product.name}`}>
-                        <TableRowActionsMenuLink
-                          href={`/products/${product.id}/edit`}
-                          label="Edit product"
-                        />
-                      </TableRowActionsMenu>
+                      {product.canManage ? (
+                        <TableRowActionsMenu label={`Product actions for ${product.name}`}>
+                          <TableRowActionsMenuLink
+                            href={`/products/${product.id}/edit`}
+                            label="Edit product"
+                          />
+                        </TableRowActionsMenu>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">View only</span>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

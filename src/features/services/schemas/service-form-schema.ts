@@ -5,6 +5,8 @@ import { isNonNegativeMoneyInput } from "@/lib/currency";
 
 export const serviceFormSchema = z.object({
   serviceId: z.string().uuid().optional(),
+  owningBranchId: z.string().trim(),
+  shareGlobally: z.boolean(),
   name: z.string().trim().min(1, "Service name is required."),
   category: z.string().trim(),
   description: z.string().trim(),
@@ -25,6 +27,8 @@ export const serviceFormSchema = z.object({
 export function parseServiceFormData(formData: FormData): ServiceFormValues {
   return {
     serviceId: readString(formData, "serviceId") || undefined,
+    owningBranchId: readString(formData, "owningBranchId"),
+    shareGlobally: readBoolean(formData, "shareGlobally"),
     name: readString(formData, "name"),
     category: readString(formData, "category"),
     description: readString(formData, "description"),
@@ -37,4 +41,8 @@ export function parseServiceFormData(formData: FormData): ServiceFormValues {
 function readString(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value : "";
+}
+
+function readBoolean(formData: FormData, key: string) {
+  return formData.get(key) === "on";
 }

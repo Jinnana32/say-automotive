@@ -2,9 +2,12 @@ import { cache } from "react";
 
 import {
   applyBranchFilter,
-  applySharedCatalogBranchFilter,
   getBranchScopedServerClient,
 } from "@/lib/branches";
+import {
+  applyCatalogVisibilityFilter,
+  getCatalogSharingSettings,
+} from "@/lib/catalog-visibility";
 import { listCustomerOptions } from "@/features/customers/queries/customer-queries";
 import { getVehicleFormLookupData } from "@/features/vehicles/queries/vehicle-lookup-queries";
 import {
@@ -136,6 +139,7 @@ export const getQuotationById = cache(async (quotationId: string): Promise<Quota
 
 export async function getQuotationFormOptions(): Promise<QuotationFormOptions> {
   const { branchScope, context, supabase } = await getBranchScopedServerClient("quotations:write");
+  const sharingSettings = await getCatalogSharingSettings(supabase, branchScope.selectedBranchId);
   const [
     customers,
     { data: vehicles, error: vehiclesError },
@@ -151,21 +155,27 @@ export async function getQuotationFormOptions(): Promise<QuotationFormOptions> {
       .order("created_at", { ascending: false }),
       branchScope.selectedBranchId,
     ),
-    applySharedCatalogBranchFilter(
+    applyCatalogVisibilityFilter(
       supabase
       .from("products")
       .select("*")
       .eq("status", "active")
       .order("name", { ascending: true }),
-      branchScope.selectedBranchId,
+      {
+        branchId: branchScope.selectedBranchId,
+        includeGlobal: sharingSettings.allowGlobalProductCatalog,
+      },
     ),
-    applySharedCatalogBranchFilter(
+    applyCatalogVisibilityFilter(
       supabase
       .from("services")
       .select("*")
       .eq("status", "active")
       .order("name", { ascending: true }),
-      branchScope.selectedBranchId,
+      {
+        branchId: branchScope.selectedBranchId,
+        includeGlobal: sharingSettings.allowGlobalServiceCatalog,
+      },
     ),
   ]);
 

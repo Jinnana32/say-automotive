@@ -5,6 +5,7 @@ import { DataTableFilters } from "@/components/shared/data-table-filters";
 import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
@@ -81,8 +82,9 @@ export default async function ServicesPage({ searchParams }: ServicesPageProps) 
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Service</TableHead>
-                    <TableHead>Category</TableHead>
+                  <TableHead>Service</TableHead>
+                  <TableHead>Ownership</TableHead>
+                  <TableHead>Category</TableHead>
                     <TableHead>Labor price</TableHead>
                     <TableHead>Duration</TableHead>
                     <TableHead>Status</TableHead>
@@ -100,6 +102,16 @@ export default async function ServicesPage({ searchParams }: ServicesPageProps) 
                           </p>
                         </div>
                       </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <StatusBadge tone={service.isGlobal ? "info" : "neutral"}>
+                            {service.isGlobal ? "Global" : "Branch item"}
+                          </StatusBadge>
+                          <p className="text-xs text-muted-foreground">
+                            {service.owningBranchName ?? "Unknown branch"}
+                          </p>
+                        </div>
+                      </TableCell>
                       <TableCell>{service.category ?? "Uncategorized"}</TableCell>
                       <TableCell>{formatCurrency(service.laborPrice)}</TableCell>
                       <TableCell>
@@ -109,12 +121,16 @@ export default async function ServicesPage({ searchParams }: ServicesPageProps) 
                       </TableCell>
                       <TableCell className="capitalize">{service.status}</TableCell>
                       <TableCell className="text-right">
-                        <TableRowActionsMenu label={`Service actions for ${service.name}`}>
-                          <TableRowActionsMenuLink
-                            href={`/services/${service.id}/edit`}
-                            label="Edit service"
-                          />
-                        </TableRowActionsMenu>
+                        {service.canManage ? (
+                          <TableRowActionsMenu label={`Service actions for ${service.name}`}>
+                            <TableRowActionsMenuLink
+                              href={`/services/${service.id}/edit`}
+                              label="Edit service"
+                            />
+                          </TableRowActionsMenu>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">View only</span>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

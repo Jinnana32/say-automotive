@@ -1,9 +1,16 @@
 import { cache } from "react";
 
-import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
+import {
+  applyCatalogVisibilityFilter,
+  canManageCatalogRecord,
+  getCatalogSharingSettings,
+  resolveCatalogPermissions,
+} from "@/lib/catalog-visibility";
+import { getBranchScopedServerClient } from "@/lib/branches";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import {
   buildBrandMap,
+  buildBranchMap,
   buildCategoryMap,
   buildSupplierMap,
   buildUnitMap,
@@ -22,10 +29,18 @@ type CategoryRow = TableRow<"product_categories">;
 type BrandRow = TableRow<"brands">;
 type SupplierRow = TableRow<"suppliers">;
 type UnitRow = TableRow<"units">;
+type BranchRow = Pick<TableRow<"branches">, "id" | "name">;
 
 export async function listProducts(search?: string): Promise<ProductListItem[]> {
-  const { supabase } = await getAuthorizedSupabaseServerClient("products:read");
-  let query = supabase.from("products").select("*").order("name", { ascending: true });
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("products:read");
+  const sharingSettings = await getCatalogSharingSettings(supabase, branchScope.selectedBranchId);
+  let query = applyCatalogVisibilityFilter(
+    supabase.from("products").select("*").order("name", { ascending: true }),
+    {
+      branchId: branchScope.selectedBranchId,
+      includeGlobal: sharingSettings.allowGlobalProductCatalog,
+    },
+  );
 
   if (search) {
     const escapedSearch = escapeSearchTerm(search);
@@ -46,16 +61,51 @@ export async function listProducts(search?: string): Promise<ProductListItem[]> 
   const dictionaries = {
     categories: buildCategoryMap(references.categories),
     brands: buildBrandMap(references.brands),
+    branches: buildBranchMap(references.branches),
     units: buildUnitMap(references.units),
     suppliers: buildSupplierMap(references.suppliers),
   };
 
-  return ((products ?? []) as ProductRow[]).map((row) => mapProductRowToListItem(row, dictionaries));
+  return ((products ?? []) as ProductRow[]).map((row) =>
+    mapProductRowToListItem(row, dictionaries, {
+      canManage: canManageCatalogRecord({
+        ownerBranchId: row.branch_id,
+        writeBranchId: branchScope.writeBranchId,
+        canAccessAllBranches: branchScope.canAccessAllBranches,
+      }),
+    }),
+  );
 }
 
 export const getProductById = cache(async (productId: string) => {
-  const { supabase } = await getAuthorizedSupabaseServerClient("products:read");
-  const { data, error } = await supabase.from("products").select("*").eq("id", productId).maybeSingle();
+  const { branchScope, supabase } = await getBranchScopedServerClient("products:read");
+  const sharingSettings = await getCatalogSharingSettings(supabase, branchScope.selectedBranchId);
+  const { data, error } = await applyCatalogVisibilityFilter(
+    supabase.from("products").select("*"),
+    {
+      branchId: branchScope.selectedBranchId,
+      includeGlobal: sharingSettings.allowGlobalProductCatalog,
+    },
+  )
+    .eq("id", productId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data as ProductRow | null) ?? null;
+});
+
+export const getEditableProductById = cache(async (productId: string) => {
+  const { branchScope, supabase } = await getBranchScopedServerClient("products:write");
+  let query = supabase.from("products").select("*");
+
+  if (!branchScope.canAccessAllBranches) {
+    query = query.eq("branch_id", branchScope.writeBranchId);
+  }
+
+  const { data, error } = await query.eq("id", productId).maybeSingle();
 
   if (error) {
     throw new Error(error.message);
@@ -65,8 +115,13 @@ export const getProductById = cache(async (productId: string) => {
 });
 
 export async function getProductFormOptions(): Promise<ProductFormOptionsData> {
-  await getAuthorizedSupabaseServerClient("products:write");
+  const { branchScope, context } = await getBranchScopedServerClient("products:write");
   const references = await getProductReferenceRows();
+  const permissions = resolveCatalogPermissions({
+    role: context.role,
+    accessibleBranchCount: branchScope.accessibleBranches.length,
+    capabilities: context.capabilities,
+  });
 
   return {
     categories: mapReferenceRowsToOptions(references.categories, (row) => row.name),
@@ -76,6 +131,12 @@ export async function getProductFormOptions(): Promise<ProductFormOptionsData> {
       references.units,
       (row) => `${row.name} (${row.abbreviation})`,
     ),
+    branches: branchScope.accessibleBranches.map((branch) => ({
+      id: branch.id,
+      label: branch.name,
+    })),
+    permissions,
+    defaultBranchId: branchScope.selectedBranchId ?? branchScope.writeBranchId,
   };
 }
 
@@ -84,11 +145,13 @@ const getProductReferenceRows = cache(async () => {
   const [
     { data: categories, error: categoryError },
     { data: brands, error: brandError },
+    { data: branches, error: branchError },
     { data: suppliers, error: supplierError },
     { data: units, error: unitError },
   ] = await Promise.all([
     supabase.from("product_categories").select("*").eq("status", "active").order("name", { ascending: true }),
     supabase.from("brands").select("*").eq("status", "active").order("name", { ascending: true }),
+    supabase.from("branches").select("id, name").eq("is_active", true).order("name", { ascending: true }),
     supabase.from("suppliers").select("*").eq("status", "active").order("supplier_name", { ascending: true }),
     supabase.from("units").select("*").order("name", { ascending: true }),
   ]);
@@ -105,6 +168,10 @@ const getProductReferenceRows = cache(async () => {
     throw new Error(supplierError.message);
   }
 
+  if (branchError) {
+    throw new Error(branchError.message);
+  }
+
   if (unitError) {
     throw new Error(unitError.message);
   }
@@ -112,6 +179,7 @@ const getProductReferenceRows = cache(async () => {
   return {
     categories: (categories ?? []) as CategoryRow[],
     brands: (brands ?? []) as BrandRow[],
+    branches: (branches ?? []) as BranchRow[],
     suppliers: (suppliers ?? []) as SupplierRow[],
     units: (units ?? []) as UnitRow[],
   };

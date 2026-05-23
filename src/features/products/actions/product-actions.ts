@@ -5,6 +5,11 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import {
+  canMarkCatalogRecordGlobal,
+  canSelectCatalogOwningBranch,
+  resolveCatalogWriteBranchId,
+} from "@/lib/catalog-visibility";
 import { getBranchScopedServerClient } from "@/lib/branches";
 import {
   BUSINESS_ASSETS_BUCKET,
@@ -120,7 +125,7 @@ async function upsertProduct(
   }
 
   const values = parsed.data;
-  const { supabase } = await getBranchScopedServerClient("products:write");
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("products:write");
   const productId = values.productId ?? randomUUID();
   const productImageFile = readFile(formData, "productImage");
   const productImageValidationError = validateProductImageFile(productImageFile);
@@ -146,6 +151,31 @@ async function upsertProduct(
       : null;
   const normalizedProductImageUrl = normalizeNullable(values.productImageUrl);
 
+  const canMarkGlobal = canMarkCatalogRecordGlobal(context.role);
+  const canSelectOwningBranch = canSelectCatalogOwningBranch({
+    role: context.role,
+    accessibleBranchCount: branchScope.accessibleBranches.length,
+  });
+  const resolvedBranchId = resolveCatalogWriteBranchId({
+    requestedBranchId: values.owningBranchId,
+    writeBranchId: branchScope.writeBranchId,
+    canSelectOwningBranch,
+    accessibleBranchIds: branchScope.accessibleBranches.map((branch) => branch.id),
+  });
+
+  if (values.shareGlobally && !canMarkGlobal) {
+    return {
+      success: false,
+      state: {
+        status: "error",
+        message: "Only owner and admin roles can share products globally.",
+        fieldErrors: {
+          shareGlobally: ["Only owner and admin roles can share products globally."],
+        },
+      },
+    };
+  }
+
   const [
     currentProductResult,
     unitResult,
@@ -156,7 +186,7 @@ async function upsertProduct(
     values.productId
       ? supabase
           .from("products")
-          .select("id, product_image_path, product_image_url")
+          .select("id, branch_id, is_global, product_image_path, product_image_url")
           .eq("id", values.productId)
           .maybeSingle()
       : Promise.resolve({ data: null, error: null }),
@@ -170,6 +200,7 @@ async function upsertProduct(
           .from("products")
           .select("id")
           .eq("sku", normalizedSku)
+          .eq("branch_id", resolvedBranchId)
           .neq("id", values.productId ?? "")
           .maybeSingle()
       : Promise.resolve({ data: null, error: null }),
@@ -178,6 +209,7 @@ async function upsertProduct(
           .from("products")
           .select("id")
           .eq("barcode", normalizedBarcode)
+          .eq("branch_id", resolvedBranchId)
           .neq("id", values.productId ?? "")
           .maybeSingle()
       : Promise.resolve({ data: null, error: null }),
@@ -197,6 +229,20 @@ async function upsertProduct(
 
   if (values.productId && !currentProductResult.data) {
     return { success: false, state: { status: "error", message: "Product does not exist." } };
+  }
+
+  if (
+    currentProductResult.data &&
+    !branchScope.canAccessAllBranches &&
+    currentProductResult.data.branch_id !== branchScope.writeBranchId
+  ) {
+    return {
+      success: false,
+      state: {
+        status: "error",
+        message: "You can only edit products owned by your branch.",
+      },
+    };
   }
 
   if (unitResult.error) {
@@ -299,7 +345,8 @@ async function upsertProduct(
 
   const payload = {
     id: productId,
-    branch_id: null,
+    branch_id: resolvedBranchId,
+    is_global: values.shareGlobally,
     name: values.name,
     sku: normalizedSku,
     barcode: normalizedBarcode,

@@ -16,6 +16,7 @@ export type PosProductOption = {
   availableQuantity: number;
   reorderLevel: number | null;
   shelfLocation: string | null;
+  hasStockRecord: boolean;
   isLowStock: boolean;
 };
 
@@ -49,6 +50,7 @@ export type PosCartItem = {
   availableQuantity: number;
   quantity: number;
   shelfLocation: string | null;
+  hasStockRecord: boolean;
   isLowStock: boolean;
 };
 

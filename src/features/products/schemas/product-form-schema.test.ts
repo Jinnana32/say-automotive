@@ -5,6 +5,8 @@ import { productFormSchema } from "@/features/products/schemas/product-form-sche
 describe("productFormSchema", () => {
   it("requires a unit and valid prices", () => {
     const result = productFormSchema.safeParse({
+      owningBranchId: crypto.randomUUID(),
+      shareGlobally: false,
       name: "Brake Pad",
       sku: "",
       barcode: "",
@@ -37,6 +39,8 @@ describe("productFormSchema", () => {
 
   it("accepts four-decimal prices and rejects more precise values", () => {
     const valid = productFormSchema.safeParse({
+      owningBranchId: crypto.randomUUID(),
+      shareGlobally: false,
       name: "Brake Pad",
       sku: "",
       barcode: "",
@@ -64,6 +68,8 @@ describe("productFormSchema", () => {
       status: "active",
     });
     const invalid = productFormSchema.safeParse({
+      owningBranchId: crypto.randomUUID(),
+      shareGlobally: false,
       name: "Brake Pad",
       sku: "",
       barcode: "",

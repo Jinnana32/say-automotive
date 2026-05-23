@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/shared/page-header";
 import { ServiceForm } from "@/features/services/components/service-form";
 import { mapServiceRowToFormValues } from "@/features/services/mappers";
-import { getServiceById } from "@/features/services/queries/service-queries";
+import {
+  getEditableServiceById,
+  getServiceFormOptions,
+} from "@/features/services/queries/service-queries";
 import { requireStaffCapability } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +21,10 @@ export default async function EditServicePage({ params }: EditServicePageProps) 
   await requireStaffCapability("services:write");
 
   const { serviceId } = await params;
-  const service = await getServiceById(serviceId);
+  const [service, options] = await Promise.all([
+    getEditableServiceById(serviceId),
+    getServiceFormOptions(),
+  ]);
 
   if (!service) {
     notFound();
@@ -30,7 +36,7 @@ export default async function EditServicePage({ params }: EditServicePageProps) 
         title={`Edit ${service.name}`}
         description="Update the reusable labor entry without exposing raw database types to the form layer."
       />
-      <ServiceForm mode="edit" initialValues={mapServiceRowToFormValues(service)} />
+      <ServiceForm mode="edit" options={options} initialValues={mapServiceRowToFormValues(service)} />
     </div>
   );
 }

@@ -1,9 +1,12 @@
 import type { TableRow } from "@/types/database";
 
 import {
-  applySharedCatalogBranchFilter,
   getBranchScopedServerClient,
 } from "@/lib/branches";
+import {
+  applyCatalogVisibilityFilter,
+  getCatalogSharingSettings,
+} from "@/lib/catalog-visibility";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import {
   buildInventoryStockMap,
@@ -65,6 +68,7 @@ export async function getInventoryDashboardData(filters?: {
 }): Promise<InventoryDashboardData> {
   const { branchScope, context, supabase } = await getBranchScopedServerClient("inventory:read");
   const branchId = branchScope.selectedBranchId;
+  const sharingSettings = await getCatalogSharingSettings(supabase, branchId);
   let movementQuery = supabase
     .from("stock_movements")
     .select(
@@ -87,7 +91,7 @@ export async function getInventoryDashboardData(filters?: {
     { data: stocks, error: stocksError },
     { data: movements, error: movementsError },
   ] = await Promise.all([
-    applySharedCatalogBranchFilter(
+    applyCatalogVisibilityFilter(
       supabase
         .from("products")
         .select(
@@ -95,7 +99,10 @@ export async function getInventoryDashboardData(filters?: {
         )
         .eq("status", "active")
         .order("name", { ascending: true }),
-      branchId,
+      {
+        branchId,
+        includeGlobal: sharingSettings.allowGlobalProductCatalog,
+      },
     ),
     supabase.from("units").select("id, name, abbreviation").order("name", { ascending: true }),
     (() => {

@@ -17,6 +17,7 @@ const product = {
   unitLabel: "Bottle (btl)",
   sellingPrice: 550,
   availableQuantity: 3,
+  hasStockRecord: true,
   reorderLevel: 2,
   shelfLocation: "A-02",
   isLowStock: false,

@@ -3,6 +3,10 @@ export type ProductType = "part" | "fluid" | "consumable" | "accessory" | "tool"
 
 export type ProductListItem = {
   id: string;
+  branchId: string;
+  owningBranchName: string | null;
+  isGlobal: boolean;
+  canManage: boolean;
   name: string;
   sku: string | null;
   barcode: string | null;
@@ -29,6 +33,8 @@ export type ProductListItem = {
 
 export type ProductFormValues = {
   productId?: string;
+  owningBranchId: string;
+  shareGlobally: boolean;
   name: string;
   sku: string;
   barcode: string;
@@ -61,6 +67,12 @@ export type ProductFormOptionsData = {
   brands: ReferenceOption[];
   suppliers: ReferenceOption[];
   units: ReferenceOption[];
+  branches: ReferenceOption[];
+  permissions: {
+    canMarkGlobal: boolean;
+    canSelectOwningBranch: boolean;
+  };
+  defaultBranchId: string;
 };
 
 export type ProductInlineCreateResult = {

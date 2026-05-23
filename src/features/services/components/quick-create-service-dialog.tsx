@@ -92,7 +92,7 @@ function QuickCreateServiceDialogForm({
   return (
     <ModalDialog
       title="Add new service"
-      description="Create a reusable labor or service entry without leaving the current workflow."
+      description="Create a branch-owned labor or service entry without leaving the current workflow."
       size="md"
       open={open}
       onOpenChange={onOpenChange}
@@ -110,6 +110,8 @@ function QuickCreateServiceDialogForm({
     >
       {({ closeDialog }) => (
         <form action={formAction} className="space-y-5">
+          <input type="hidden" name="owningBranchId" value="" />
+          <input type="hidden" name="shareGlobally" value="" />
           <input type="hidden" name="status" value="active" />
 
           <FormStatusMessage message={state.message} />

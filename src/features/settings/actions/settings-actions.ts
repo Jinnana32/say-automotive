@@ -139,6 +139,8 @@ export async function updateOperationalRulesSettingsAction(
   }
 
   const payload = {
+    allow_global_product_catalog: parsed.data.allowGlobalProductCatalog,
+    allow_global_service_catalog: parsed.data.allowGlobalServiceCatalog,
     allow_partial_payments: parsed.data.allowPartialPayments,
     require_invoice_before_job_completion:
       parsed.data.requireInvoiceBeforeJobCompletion,
@@ -166,6 +168,8 @@ export async function updateOperationalRulesSettingsAction(
     entityId: String(currentSettings.id),
     userId: context.userId,
     beforeData: {
+      allow_global_product_catalog: currentSettings.allow_global_product_catalog,
+      allow_global_service_catalog: currentSettings.allow_global_service_catalog,
       allow_partial_payments: currentSettings.allow_partial_payments,
       require_invoice_before_job_completion:
         currentSettings.require_invoice_before_job_completion,

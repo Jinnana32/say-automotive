@@ -29,6 +29,8 @@ export function mapBusinessSettingsRowToValues(
     businessVatRegistrationNo: row.business_vat_registration_no ?? "",
     receiptFooter: row.receipt_footer ?? "",
     defaultTaxRate: String(row.default_tax_rate),
+    allowGlobalProductCatalog: row.allow_global_product_catalog ?? false,
+    allowGlobalServiceCatalog: row.allow_global_service_catalog ?? false,
     allowPartialPayments: row.allow_partial_payments,
     requireInvoiceBeforeJobCompletion: row.require_invoice_before_job_completion,
     requireInvoiceBeforeVehicleRelease: row.require_invoice_before_vehicle_release,

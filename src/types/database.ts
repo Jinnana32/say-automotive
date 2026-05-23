@@ -336,6 +336,8 @@ export type Database = {
         Row: {
           id: number;
           branch_id: string;
+          allow_global_product_catalog: boolean;
+          allow_global_service_catalog: boolean;
           allow_partial_payments: boolean;
           require_invoice_before_job_completion: boolean;
           require_invoice_before_vehicle_release: boolean;
@@ -361,6 +363,8 @@ export type Database = {
         Insert: {
           id?: number;
           branch_id: string;
+          allow_global_product_catalog?: boolean;
+          allow_global_service_catalog?: boolean;
           allow_partial_payments?: boolean;
           require_invoice_before_job_completion?: boolean;
           require_invoice_before_vehicle_release?: boolean;
@@ -1158,7 +1162,8 @@ export type Database = {
       products: {
         Row: {
           id: string;
-          branch_id: string | null;
+          branch_id: string;
+          is_global: boolean;
           name: string;
           sku: string | null;
           barcode: string | null;
@@ -1190,7 +1195,8 @@ export type Database = {
         };
         Insert: {
           id?: string;
-          branch_id?: string | null;
+          branch_id: string;
+          is_global?: boolean;
           name: string;
           sku?: string | null;
           barcode?: string | null;
@@ -1491,7 +1497,8 @@ export type Database = {
       services: {
         Row: {
           id: string;
-          branch_id: string | null;
+          branch_id: string;
+          is_global: boolean;
           name: string;
           category: string | null;
           description: string | null;
@@ -1503,7 +1510,8 @@ export type Database = {
         };
         Insert: {
           id?: string;
-          branch_id?: string | null;
+          branch_id: string;
+          is_global?: boolean;
           name: string;
           category?: string | null;
           description?: string | null;

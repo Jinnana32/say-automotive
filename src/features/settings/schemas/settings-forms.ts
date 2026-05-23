@@ -23,6 +23,8 @@ export const businessProfileSettingsSchema = z.object({
 });
 
 export const operationalRulesSettingsSchema = z.object({
+  allowGlobalProductCatalog: z.boolean(),
+  allowGlobalServiceCatalog: z.boolean(),
   allowPartialPayments: z.boolean(),
   requireInvoiceBeforeJobCompletion: z.boolean(),
   requireInvoiceBeforeVehicleRelease: z.boolean(),
@@ -66,6 +68,8 @@ export function parseBusinessProfileSettingsFormData(formData: FormData) {
 
 export function parseOperationalRulesSettingsFormData(formData: FormData) {
   return {
+    allowGlobalProductCatalog: readCheckbox(formData, "allowGlobalProductCatalog"),
+    allowGlobalServiceCatalog: readCheckbox(formData, "allowGlobalServiceCatalog"),
     allowPartialPayments: readCheckbox(formData, "allowPartialPayments"),
     requireInvoiceBeforeJobCompletion: readCheckbox(formData, "requireInvoiceBeforeJobCompletion"),
     requireInvoiceBeforeVehicleRelease: readCheckbox(

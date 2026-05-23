@@ -5,6 +5,8 @@ import { isNonNegativeMoneyInput } from "@/lib/currency";
 
 export const productFormSchema = z.object({
   productId: z.string().uuid().optional(),
+  owningBranchId: z.string().trim(),
+  shareGlobally: z.boolean(),
   name: z.string().trim().min(1, "Product name is required."),
   sku: z.string().trim(),
   barcode: z.string().trim(),
@@ -72,6 +74,8 @@ export const productFormSchema = z.object({
 export function parseProductFormData(formData: FormData): ProductFormValues {
   return {
     productId: readString(formData, "productId") || undefined,
+    owningBranchId: readString(formData, "owningBranchId"),
+    shareGlobally: readBoolean(formData, "shareGlobally"),
     name: readString(formData, "name"),
     sku: readString(formData, "sku"),
     barcode: readString(formData, "barcode"),

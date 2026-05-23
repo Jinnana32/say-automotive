@@ -114,6 +114,7 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
                           availableQuantity: 0,
                           reorderLevel: product.reorderLevel,
                           shelfLocation: product.shelfLocation,
+                          hasStockRecord: false,
                           isLowStock: true,
                         },
                       ]);
@@ -162,7 +163,9 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="font-semibold">{product.name}</p>
                             {product.isLowStock ? <Badge variant="warning">Low stock</Badge> : null}
-                            {product.availableQuantity <= 0 ? (
+                            {!product.hasStockRecord ? (
+                              <Badge variant="destructive">No stock record</Badge>
+                            ) : product.availableQuantity <= 0 ? (
                               <Badge variant="destructive">Out of stock</Badge>
                             ) : null}
                           </div>
@@ -171,8 +174,10 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
                             {product.barcode ? ` · ${product.barcode}` : ""}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {product.unitLabel} · Shelf {product.shelfLocation ?? "Not set"} · Available{" "}
-                            {product.availableQuantity}
+                            {product.unitLabel} · Shelf {product.shelfLocation ?? "Not set"} ·{" "}
+                            {product.hasStockRecord
+                              ? `Available ${product.availableQuantity}`
+                              : "No stock record for this branch"}
                           </p>
                         </div>
                       </div>
@@ -184,7 +189,11 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
                           onClick={() => setItems((current) => addProductToCart(current, product))}
                           disabled={addDisabled}
                         >
-                          {product.availableQuantity <= 0 ? "No stock" : "Add"}
+                          {!product.hasStockRecord
+                            ? "No stock record"
+                            : product.availableQuantity <= 0
+                              ? "No stock"
+                              : "Add"}
                         </Button>
                       </div>
                     </div>

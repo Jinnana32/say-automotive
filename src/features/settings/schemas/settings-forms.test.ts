@@ -23,6 +23,8 @@ describe("settings form schemas", () => {
 
   it("accepts operational rule toggles", () => {
     const parsed = operationalRulesSettingsSchema.safeParse({
+      allowGlobalProductCatalog: false,
+      allowGlobalServiceCatalog: true,
       allowPartialPayments: true,
       requireInvoiceBeforeJobCompletion: false,
       requireInvoiceBeforeVehicleRelease: false,

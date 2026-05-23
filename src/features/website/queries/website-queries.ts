@@ -31,21 +31,28 @@ type UnitRow = TableRow<"units">;
 type WebsitePostRow = TableRow<"website_posts">;
 type WebsiteQuoteRequestRow = TableRow<"website_quote_requests">;
 
-export const getWebsiteShellData = cache(async (): Promise<WebsiteShellData> => {
+const getWebsiteMainBranch = cache(async () => {
   const supabase = getSupabaseAdminClient();
-  const { data: branch, error: branchError } = await supabase
+  const { data: branch, error } = await supabase
     .from("branches")
     .select("id, name")
     .eq("is_main", true)
     .maybeSingle();
 
-  if (branchError) {
-    throw new Error(branchError.message);
+  if (error) {
+    throw new Error(error.message);
   }
 
   if (!branch) {
     throw new Error("Default branch is not configured.");
   }
+
+  return branch;
+});
+
+export const getWebsiteShellData = cache(async (): Promise<WebsiteShellData> => {
+  const supabase = getSupabaseAdminClient();
+  const branch = await getWebsiteMainBranch();
 
   const { data: settings, error: settingsError } = await supabase
     .from("business_settings")
@@ -75,6 +82,7 @@ export async function listWebsiteCatalogProducts({
   productType?: ProductType | "";
 } = {}): Promise<WebsiteCatalogProduct[]> {
   const supabase = getSupabaseAdminClient();
+  const branch = await getWebsiteMainBranch();
   let query = supabase
     .from("products")
     .select("*")
@@ -104,13 +112,16 @@ export async function listWebsiteCatalogProducts({
     throw new Error(productError.message);
   }
 
-  return ((products ?? []) as ProductRow[]).map((product) =>
+  return ((products ?? []) as ProductRow[])
+    .filter((product) => isPublicWebsiteCatalogRecord(product, branch.id))
+    .map((product) =>
     mapProductRowToWebsiteCatalogProduct(product, dictionaries),
-  );
+    );
 }
 
 export async function listFeaturedWebsiteProducts(limitCount = 6) {
   const supabase = getSupabaseAdminClient();
+  const branch = await getWebsiteMainBranch();
   const [{ data: products, error: productError }, dictionaries] = await Promise.all([
     supabase
       .from("products")
@@ -120,7 +131,7 @@ export async function listFeaturedWebsiteProducts(limitCount = 6) {
       .eq("status", "active")
       .order("website_sort_order", { ascending: true })
       .order("name", { ascending: true })
-      .limit(limitCount),
+      .limit(limitCount * 3),
     getWebsiteReferenceDictionaries(),
   ]);
 
@@ -128,13 +139,15 @@ export async function listFeaturedWebsiteProducts(limitCount = 6) {
     throw new Error(productError.message);
   }
 
-  return ((products ?? []) as ProductRow[]).map((product) =>
-    mapProductRowToWebsiteCatalogProduct(product, dictionaries),
-  );
+  return ((products ?? []) as ProductRow[])
+    .filter((product) => isPublicWebsiteCatalogRecord(product, branch.id))
+    .slice(0, limitCount)
+    .map((product) => mapProductRowToWebsiteCatalogProduct(product, dictionaries));
 }
 
 export async function getWebsiteProductBySlug(slug: string) {
   const supabase = getSupabaseAdminClient();
+  const branch = await getWebsiteMainBranch();
   const routeSegment = slug.trim();
   const [{ data, error }, dictionaries] = await Promise.all([
     buildWebsiteProductLookupQuery(supabase, routeSegment),
@@ -145,7 +158,10 @@ export async function getWebsiteProductBySlug(slug: string) {
     throw new Error(error.message);
   }
 
-  const matchedProduct = ((data ?? []) as ProductRow[])[0] ?? null;
+  const matchedProduct =
+    ((data ?? []) as ProductRow[]).find((product) =>
+      isPublicWebsiteCatalogRecord(product, branch.id),
+    ) ?? null;
 
   if (!matchedProduct) {
     return null;
@@ -179,13 +195,18 @@ export async function listPublishedWebsitePosts(limitCount?: number): Promise<We
 
 export async function getWebsiteQuoteFormOptions(): Promise<WebsiteQuoteFormOptionData> {
   const supabase = getSupabaseAdminClient();
+  const branch = await getWebsiteMainBranch();
   const [
     { data: services, error: servicesError },
     { data: makes, error: makesError },
     { data: models, error: modelsError },
     { data: transmissions, error: transmissionsError },
   ] = await Promise.all([
-    supabase.from("services").select("name").eq("status", "active").order("name", { ascending: true }),
+    supabase
+      .from("services")
+      .select("name, branch_id, is_global")
+      .eq("status", "active")
+      .order("name", { ascending: true }),
     supabase.from("vehicle_makes").select("id, name").eq("status", "active").order("sort_order", { ascending: true }).order("name", { ascending: true }),
     supabase
       .from("vehicle_models")
@@ -216,7 +237,9 @@ export async function getWebsiteQuoteFormOptions(): Promise<WebsiteQuoteFormOpti
   );
 
   return {
-    services: ((services ?? []) as Array<{ name: string }>).map((service) => service.name),
+    services: ((services ?? []) as Array<{ name: string; branch_id: string; is_global?: boolean }>)
+      .filter((service) => isPublicWebsiteCatalogRecord(service, branch.id))
+      .map((service) => service.name),
     vehicleMakes: (makes ?? []) as Array<{ id: string; name: string }>,
     vehicleModels: ((models ?? []) as Array<{ id: string; make_id: string; name: string }>).map(
       (model) => ({
@@ -525,4 +548,11 @@ function buildWebsiteProductLookupQuery(
   }
 
   return query.eq("website_slug", routeSegment);
+}
+
+function isPublicWebsiteCatalogRecord(
+  row: { branch_id: string; is_global?: boolean | null },
+  mainBranchId: string,
+) {
+  return row.branch_id === mainBranchId || row.is_global === true;
 }

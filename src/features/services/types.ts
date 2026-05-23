@@ -2,6 +2,10 @@ export type ServiceStatus = "active" | "inactive";
 
 export type ServiceListItem = {
   id: string;
+  branchId: string;
+  owningBranchName: string | null;
+  isGlobal: boolean;
+  canManage: boolean;
   name: string;
   category: string | null;
   description: string | null;
@@ -14,6 +18,8 @@ export type ServiceListItem = {
 
 export type ServiceFormValues = {
   serviceId?: string;
+  owningBranchId: string;
+  shareGlobally: boolean;
   name: string;
   category: string;
   description: string;
@@ -27,4 +33,13 @@ export type ServiceInlineCreateResult = {
   label: string;
   category: string | null;
   unitPrice: number;
+};
+
+export type ServiceFormOptionsData = {
+  branches: Array<{ id: string; label: string }>;
+  permissions: {
+    canMarkGlobal: boolean;
+    canSelectOwningBranch: boolean;
+  };
+  defaultBranchId: string;
 };

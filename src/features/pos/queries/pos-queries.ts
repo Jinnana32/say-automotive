@@ -12,9 +12,12 @@ import {
 import type { PosRecentSaleItem, PosTerminalData } from "@/features/pos/types";
 import {
   applyBranchFilter,
-  applySharedCatalogBranchFilter,
   getBranchScopedServerClient,
 } from "@/lib/branches";
+import {
+  applyCatalogVisibilityFilter,
+  getCatalogSharingSettings,
+} from "@/lib/catalog-visibility";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 type BusinessSettingsRow = Pick<
@@ -58,6 +61,8 @@ export const getPosTerminalData = cache(async (): Promise<PosTerminalData> => {
     throw new Error("No accessible branch is configured for POS.");
   }
 
+  const sharingSettings = await getCatalogSharingSettings(supabase, branch.id);
+
   const [
     { data: settings, error: settingsError },
     { data: customers, error: customersError },
@@ -80,7 +85,7 @@ export const getPosTerminalData = cache(async (): Promise<PosTerminalData> => {
         .order("display_name", { ascending: true }),
       branch.id,
     ),
-    applySharedCatalogBranchFilter(
+    applyCatalogVisibilityFilter(
       supabase
         .from("products")
         .select(
@@ -88,7 +93,10 @@ export const getPosTerminalData = cache(async (): Promise<PosTerminalData> => {
         )
         .eq("status", "active")
         .order("name", { ascending: true }),
-      branch.id,
+      {
+        branchId: branch.id,
+        includeGlobal: sharingSettings.allowGlobalProductCatalog,
+      },
     ),
     supabase.from("units").select("id, name, abbreviation").order("name", { ascending: true }),
     supabase

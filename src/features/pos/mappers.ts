@@ -49,6 +49,7 @@ export function mapProductRowToPosOption(
   const availableQuantity = params.stock?.available_quantity ?? 0;
   const reorderLevel = params.stock?.reorder_level ?? row.reorder_level ?? null;
   const shelfLocation = params.stock?.shelf_location ?? row.shelf_location ?? null;
+  const hasStockRecord = params.stock !== null;
 
   return {
     id: row.id,
@@ -66,6 +67,7 @@ export function mapProductRowToPosOption(
     availableQuantity,
     reorderLevel,
     shelfLocation,
+    hasStockRecord,
     isLowStock: reorderLevel !== null && availableQuantity <= reorderLevel,
   };
 }

@@ -20,7 +20,11 @@ export default async function NewProductPage() {
         brands={options.brands}
         suppliers={options.suppliers}
         units={options.units}
+        branches={options.branches}
+        permissions={options.permissions}
         initialValues={{
+          owningBranchId: options.defaultBranchId,
+          shareGlobally: false,
           name: "",
           sku: "",
           barcode: "",

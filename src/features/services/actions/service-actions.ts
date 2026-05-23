@@ -3,6 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import {
+  canMarkCatalogRecordGlobal,
+  canSelectCatalogOwningBranch,
+  resolveCatalogWriteBranchId,
+} from "@/lib/catalog-visibility";
 import { getBranchScopedServerClient } from "@/lib/branches";
 import {
   INITIAL_FORM_ACTION_STATE,
@@ -24,6 +29,8 @@ import type {
 
 type PersistedServiceRow = {
   id: string;
+  branch_id: string;
+  is_global: boolean;
   name: string;
   category: string | null;
   labor_price: number;
@@ -96,10 +103,61 @@ async function upsertService(
   }
 
   const values = parsed.data;
-  const { supabase } = await getBranchScopedServerClient("services:write");
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("services:write");
+  const canMarkGlobal = canMarkCatalogRecordGlobal(context.role);
+  const canSelectOwningBranch = canSelectCatalogOwningBranch({
+    role: context.role,
+    accessibleBranchCount: branchScope.accessibleBranches.length,
+  });
+  const resolvedBranchId = resolveCatalogWriteBranchId({
+    requestedBranchId: values.owningBranchId,
+    writeBranchId: branchScope.writeBranchId,
+    canSelectOwningBranch,
+    accessibleBranchIds: branchScope.accessibleBranches.map((branch) => branch.id),
+  });
+
+  if (values.shareGlobally && !canMarkGlobal) {
+    return {
+      success: false,
+      state: {
+        status: "error",
+        message: "Only owner and admin roles can share services globally.",
+        fieldErrors: {
+          shareGlobally: ["Only owner and admin roles can share services globally."],
+        },
+      },
+    };
+  }
+
+  const { data: currentService, error: currentServiceError } = values.serviceId
+    ? await supabase
+        .from("services")
+        .select("id, branch_id")
+        .eq("id", values.serviceId)
+        .maybeSingle()
+    : { data: null, error: null };
+
+  if (currentServiceError) {
+    return { success: false, state: { status: "error", message: currentServiceError.message } };
+  }
+
+  if (
+    currentService &&
+    !branchScope.canAccessAllBranches &&
+    currentService.branch_id !== branchScope.writeBranchId
+  ) {
+    return {
+      success: false,
+      state: {
+        status: "error",
+        message: "You can only edit services owned by your branch.",
+      },
+    };
+  }
 
   const payload = {
-    branch_id: null,
+    branch_id: resolvedBranchId,
+    is_global: values.shareGlobally,
     name: values.name,
     category: normalizeNullable(values.category),
     description: normalizeNullable(values.description),
@@ -111,16 +169,16 @@ async function upsertService(
   };
 
   const operation = values.serviceId
-    ? supabase
+      ? supabase
         .from("services")
         .update(payload)
         .eq("id", values.serviceId)
-        .select("id, name, category, labor_price")
+        .select("id, branch_id, is_global, name, category, labor_price")
         .single()
     : supabase
         .from("services")
         .insert(payload)
-        .select("id, name, category, labor_price")
+        .select("id, branch_id, is_global, name, category, labor_price")
         .single();
 
   const { data, error } = await operation;

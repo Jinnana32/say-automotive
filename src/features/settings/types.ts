@@ -21,6 +21,8 @@ export type BusinessSettingsValues = {
   businessVatRegistrationNo: string;
   receiptFooter: string;
   defaultTaxRate: string;
+  allowGlobalProductCatalog: boolean;
+  allowGlobalServiceCatalog: boolean;
   allowPartialPayments: boolean;
   requireInvoiceBeforeJobCompletion: boolean;
   requireInvoiceBeforeVehicleRelease: boolean;
