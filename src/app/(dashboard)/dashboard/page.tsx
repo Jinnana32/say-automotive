@@ -49,7 +49,7 @@ export default async function DashboardPage() {
         description="Live workshop, billing, and stock activity in one operational view."
         actions={
           <Button asChild variant="navyPrimary">
-            <Link href="/job-orders">Open job orders</Link>
+            <Link href="/quick-access">Open quick access</Link>
           </Button>
         }
       />

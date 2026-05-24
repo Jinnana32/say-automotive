@@ -58,8 +58,6 @@ export const DASHBOARD_NAV_ITEMS: ReadonlyArray<{
     requiredCapabilities: ["vehicles:read", "customers:read"],
     group: "Overview",
     iconName: "quick-access",
-    showInSidebar: false,
-    showAsMobileShortcut: true,
   },
   {
     href: "/customers",

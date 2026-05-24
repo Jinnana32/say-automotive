@@ -5,6 +5,7 @@ import { staffFormSchema } from "@/features/staff/schemas/staff-form-schema";
 describe("staffFormSchema", () => {
   it("requires first and last name", () => {
     const result = staffFormSchema.safeParse({
+      staffCode: "",
       role: "mechanic",
       firstName: "",
       lastName: "",
@@ -24,6 +25,7 @@ describe("staffFormSchema", () => {
 
   it("accepts an optional document title for customer-facing print documents", () => {
     const result = staffFormSchema.safeParse({
+      staffCode: "EMP-MAIN-0007",
       role: "admin",
       firstName: "Nia Grace",
       lastName: "Ariete",

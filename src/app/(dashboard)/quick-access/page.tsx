@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 
 type QuickAccessRouteProps = {
   searchParams: Promise<{
+    q?: string;
     plate?: string;
     lastName?: string;
   }>;
@@ -13,8 +14,12 @@ type QuickAccessRouteProps = {
 export default async function QuickAccessRoute({
   searchParams,
 }: QuickAccessRouteProps) {
-  const { plate, lastName } = await searchParams;
-  const searchState = await getQuickAccessSearchState({ plate, lastName });
+  const { q, plate, lastName } = await searchParams;
+  const searchState = await getQuickAccessSearchState({
+    query: q,
+    plate,
+    lastName,
+  });
 
   return <QuickAccessPage searchState={searchState} />;
 }

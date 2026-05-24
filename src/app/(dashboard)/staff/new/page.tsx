@@ -16,6 +16,7 @@ export default async function NewStaffPage() {
       <StaffForm
         mode="create"
         initialValues={{
+          staffCode: "",
           firstName: "",
           lastName: "",
           documentTitle: "",

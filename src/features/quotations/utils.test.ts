@@ -5,6 +5,7 @@ import {
   calculateQuotationLineTotal,
   calculateQuotationSubtotal,
   createQuotationItem,
+  dedupeOptionsById,
   resolveQuotationCreateFlowSelection,
 } from "@/features/quotations/utils";
 
@@ -61,5 +62,18 @@ describe("quotation utils", () => {
       customerId: "customer-1",
       vehicleId: "vehicle-1",
     });
+  });
+
+  it("deduplicates option arrays by id and keeps the latest entry", () => {
+    expect(
+      dedupeOptionsById([
+        { id: "product-1", label: "Old label" },
+        { id: "product-2", label: "Battery" },
+        { id: "product-1", label: "Updated label" },
+      ]),
+    ).toEqual([
+      { id: "product-1", label: "Updated label" },
+      { id: "product-2", label: "Battery" },
+    ]);
   });
 });

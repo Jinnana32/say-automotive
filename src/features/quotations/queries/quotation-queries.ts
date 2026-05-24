@@ -17,12 +17,14 @@ import {
   mapServiceRowToQuotationOption,
   mapVehicleRowToQuotationOption,
 } from "@/features/quotations/mappers";
+import { getProductFormOptions } from "@/features/products/queries/product-queries";
 import type {
   QuotationCreateFlowOptions,
   QuotationDetail,
   QuotationFormOptions,
   QuotationListItem,
 } from "@/features/quotations/types";
+import { dedupeOptionsById } from "@/features/quotations/utils";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type { TableRow } from "@/types/database";
 
@@ -140,11 +142,14 @@ export const getQuotationById = cache(async (quotationId: string): Promise<Quota
 export async function getQuotationFormOptions(): Promise<QuotationFormOptions> {
   const { branchScope, context, supabase } = await getBranchScopedServerClient("quotations:write");
   const sharingSettings = await getCatalogSharingSettings(supabase, branchScope.selectedBranchId);
+  const canCreateProducts = context.capabilities.includes("products:write");
+  const canCreateServices = context.capabilities.includes("services:write");
   const [
     customers,
     { data: vehicles, error: vehiclesError },
     { data: products, error: productsError },
     { data: services, error: servicesError },
+    productFormOptions,
   ] = await Promise.all([
     listCustomerOptions(),
     applyBranchFilter(
@@ -177,6 +182,7 @@ export async function getQuotationFormOptions(): Promise<QuotationFormOptions> {
         includeGlobal: sharingSettings.allowGlobalServiceCatalog,
       },
     ),
+    canCreateProducts ? getProductFormOptions() : Promise.resolve(null),
   ]);
 
   if (vehiclesError) {
@@ -192,13 +198,20 @@ export async function getQuotationFormOptions(): Promise<QuotationFormOptions> {
   }
 
   return {
-    customers,
-    vehicles: ((vehicles ?? []) as VehicleRow[]).map(mapVehicleRowToQuotationOption),
-    products: ((products ?? []) as ProductRow[]).map(mapProductRowToQuotationOption),
-    services: ((services ?? []) as ServiceRow[]).map(mapServiceRowToQuotationOption),
+    customers: dedupeOptionsById(customers),
+    vehicles: dedupeOptionsById(
+      ((vehicles ?? []) as VehicleRow[]).map(mapVehicleRowToQuotationOption),
+    ),
+    products: dedupeOptionsById(
+      ((products ?? []) as ProductRow[]).map(mapProductRowToQuotationOption),
+    ),
+    services: dedupeOptionsById(
+      ((services ?? []) as ServiceRow[]).map(mapServiceRowToQuotationOption),
+    ),
+    productFormOptions,
     permissions: {
-      canCreateProducts: context.capabilities.includes("products:write"),
-      canCreateServices: context.capabilities.includes("services:write"),
+      canCreateProducts,
+      canCreateServices,
     },
   };
 }

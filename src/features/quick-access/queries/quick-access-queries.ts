@@ -12,7 +12,11 @@ import type {
   QuickAccessRecordMatch,
   QuickAccessSearchState,
 } from "@/features/quick-access/types";
-import { isPossiblePlateMatch, normalizeQuickAccessPlate } from "@/features/quick-access/utils";
+import {
+  isPossiblePlateMatch,
+  normalizeQuickAccessPlate,
+  resolveQuickAccessQuery,
+} from "@/features/quick-access/utils";
 import { mapVehicleDetail } from "@/features/vehicles/mappers";
 import type { TableRow } from "@/types/database";
 
@@ -21,9 +25,11 @@ type VehicleRow = TableRow<"vehicles">;
 type QuotationRow = TableRow<"quotations">;
 
 export async function getQuickAccessSearchState({
+  query,
   plate,
   lastName,
 }: {
+  query?: string;
   plate?: string;
   lastName?: string;
 }): Promise<QuickAccessSearchState> {
@@ -41,8 +47,16 @@ export async function getQuickAccessSearchState({
     canViewQuotations: context.capabilities.includes("quotations:read"),
     canViewServiceHistory: context.capabilities.includes("job_orders:read"),
   };
-  const plateQuery = plate?.trim() ?? "";
-  const customerLastNameQuery = plateQuery ? "" : lastName?.trim() ?? "";
+  const directPlateQuery = plate?.trim() ?? "";
+  const directCustomerLastNameQuery = directPlateQuery ? "" : lastName?.trim() ?? "";
+  const resolvedSearchInput = query?.trim()
+    ? resolveQuickAccessQuery(query)
+    : {
+        plateQuery: directPlateQuery,
+        customerLastNameQuery: directCustomerLastNameQuery,
+      };
+  const plateQuery = resolvedSearchInput.plateQuery;
+  const customerLastNameQuery = resolvedSearchInput.customerLastNameQuery;
   const records = plateQuery
     ? await searchQuickAccessByPlate(
         supabase,

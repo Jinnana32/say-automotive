@@ -101,9 +101,8 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
                   <QuickCreateProductDialog
                     triggerLabel="Add new product"
                     onCreated={(product) => {
-                      setProductCatalog((current) => [
-                        ...current,
-                        {
+                      setProductCatalog((current) => {
+                        const nextProduct = {
                           id: product.id,
                           name: product.label,
                           sku: product.sku,
@@ -116,8 +115,14 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
                           shelfLocation: product.shelfLocation,
                           hasStockRecord: false,
                           isLowStock: true,
-                        },
-                      ]);
+                        };
+
+                        return current.some((entry) => entry.id === product.id)
+                          ? current.map((entry) =>
+                              entry.id === product.id ? nextProduct : entry,
+                            )
+                          : [...current, nextProduct];
+                      });
                       setSearch(product.label);
                     }}
                   />

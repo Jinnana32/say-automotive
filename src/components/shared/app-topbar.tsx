@@ -8,6 +8,7 @@ import { BranchScopeSelector } from '@/components/shared/branch-scope-selector';
 import { UserAccountMenu } from '@/components/shared/user-account-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { resolveQuickAccessQuery } from '@/features/quick-access/utils';
 
 export function AppTopbar({
   activeLabel,
@@ -132,7 +133,7 @@ function GlobalSearchForm({
   return (
     <form onSubmit={onSubmit} className="w-full">
       <label htmlFor={inputId} className="sr-only">
-        Search customers, vehicles, job orders, and documents
+        Search customer or vehicle records
       </label>
       <div className="relative">
         <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -140,7 +141,7 @@ function GlobalSearchForm({
           id={inputId}
           value={value}
           onChange={(event) => onValueChange(event.target.value)}
-          placeholder="Search customers, vehicles, job orders..."
+          placeholder="Search customer or plate number..."
           className="h-11 rounded-full border-border/70 bg-muted/35 pl-11 pr-4 shadow-sm transition-colors focus-visible:bg-background"
         />
       </div>
@@ -176,38 +177,11 @@ function resolveGlobalSearchDestination(query: string) {
     return null;
   }
 
-  const encodedValue = encodeURIComponent(value);
-  const normalized = value.toUpperCase();
+  const resolvedQuery = resolveQuickAccessQuery(value);
+  const lookupValue =
+    resolvedQuery.plateQuery || resolvedQuery.customerLastNameQuery;
 
-  if (/^(QT|QTN|QUOT)/.test(normalized)) {
-    return `/quotations?search=${encodedValue}`;
-  }
-
-  if (/^(JO|JOB|WO|WORK)/.test(normalized)) {
-    return `/job-orders?search=${encodedValue}`;
-  }
-
-  if (/^(INV|SI|BILL)/.test(normalized)) {
-    return `/invoices?search=${encodedValue}`;
-  }
-
-  if (/^(PAY|OR|RCPT|REC)/.test(normalized)) {
-    return `/payments?search=${encodedValue}`;
-  }
-
-  if (looksLikePlateLookup(value)) {
-    return `/quick-access?plate=${encodedValue}`;
-  }
-
-  return `/customers?search=${encodedValue}`;
-}
-
-function looksLikePlateLookup(value: string) {
-  const normalized = value.trim().toUpperCase();
-
-  if (!normalized) {
-    return false;
-  }
-
-  return /\d/.test(normalized) || /[- ]/.test(normalized);
+  return lookupValue
+    ? `/quick-access?q=${encodeURIComponent(lookupValue)}`
+    : null;
 }

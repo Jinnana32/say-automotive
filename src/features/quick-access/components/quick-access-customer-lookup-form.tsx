@@ -30,7 +30,7 @@ export function QuickAccessCustomerLookupForm({
     setFormError(null);
     onLookupSubmitted?.();
     startTransition(() => {
-      router.push(`/quick-access?lastName=${encodeURIComponent(normalizedLastName)}`);
+      router.push(`/quick-access?q=${encodeURIComponent(normalizedLastName)}`);
     });
   }
 

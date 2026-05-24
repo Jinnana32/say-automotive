@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { Plus } from "lucide-react";
 
 import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
@@ -78,13 +78,25 @@ function QuickCreateServiceDialogForm({
     createInlineServiceAction,
     INITIAL_INLINE_SERVICE_ACTION_STATE,
   );
+  const handledCreatedServiceId = useRef<string | null>(null);
   const { values, updateFormValue } = useFormValues(INITIAL_VALUES);
+
+  useEffect(() => {
+    if (!open) {
+      handledCreatedServiceId.current = null;
+    }
+  }, [open]);
 
   useEffect(() => {
     if (state.status !== "success" || !state.service) {
       return;
     }
 
+    if (handledCreatedServiceId.current === state.service.id) {
+      return;
+    }
+
+    handledCreatedServiceId.current = state.service.id;
     onCreated(state.service);
     onOpenChange(false);
   }, [onCreated, onOpenChange, state]);

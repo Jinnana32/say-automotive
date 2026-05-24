@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { Plus } from "lucide-react";
 
 import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
@@ -53,11 +53,13 @@ export function QuickCreateProductDialog({
   triggerLabel = "Add new product",
   triggerVariant = "outline",
   triggerSize = "sm",
+  initialOptions = null,
 }: {
   onCreated: (product: ProductInlineCreateResult) => void;
   triggerLabel?: string;
   triggerVariant?: ButtonProps["variant"];
   triggerSize?: ButtonProps["size"];
+  initialOptions?: ProductFormOptionsData | null;
 }) {
   const [open, setOpen] = useState(false);
   const [instanceKey, setInstanceKey] = useState(0);
@@ -77,6 +79,7 @@ export function QuickCreateProductDialog({
       triggerLabel={triggerLabel}
       triggerVariant={triggerVariant}
       triggerSize={triggerSize}
+      initialOptions={initialOptions}
     />
   );
 }
@@ -88,6 +91,7 @@ function QuickCreateProductDialogForm({
   triggerLabel,
   triggerVariant,
   triggerSize,
+  initialOptions,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -95,18 +99,35 @@ function QuickCreateProductDialogForm({
   triggerLabel: string;
   triggerVariant: ButtonProps["variant"];
   triggerSize: ButtonProps["size"];
+  initialOptions: ProductFormOptionsData | null;
 }) {
   const [state, formAction] = useActionState(
     createInlineProductAction,
     INITIAL_INLINE_PRODUCT_ACTION_STATE,
   );
+  const handledCreatedProductId = useRef<string | null>(null);
   const [optionsState, setOptionsState] = useState<ProductOptionsState>(
-    INITIAL_OPTIONS_STATE,
+    initialOptions
+      ? { status: "ready", data: initialOptions, error: null }
+      : INITIAL_OPTIONS_STATE,
   );
   const { values, updateFormValue } = useFormValues(INITIAL_VALUES);
 
   useEffect(() => {
-    if (!open || optionsState.status === "ready" || optionsState.status === "loading") {
+    if (!initialOptions) {
+      return;
+    }
+
+    setOptionsState({ status: "ready", data: initialOptions, error: null });
+  }, [initialOptions]);
+
+  useEffect(() => {
+    if (
+      !open ||
+      initialOptions ||
+      optionsState.status === "ready" ||
+      optionsState.status === "loading"
+    ) {
       return;
     }
 
@@ -152,18 +173,38 @@ function QuickCreateProductDialogForm({
       isMounted = false;
       controller.abort();
     };
-  }, [open, optionsState.status]);
+  }, [initialOptions, open, optionsState.status]);
+
+  useEffect(() => {
+    if (!open) {
+      handledCreatedProductId.current = null;
+    }
+  }, [open]);
 
   useEffect(() => {
     if (state.status !== "success" || !state.product) {
       return;
     }
 
+    if (handledCreatedProductId.current === state.product.id) {
+      return;
+    }
+
+    handledCreatedProductId.current = state.product.id;
     onCreated(state.product);
     onOpenChange(false);
   }, [onCreated, onOpenChange, state]);
 
   const options = optionsState.status === "ready" ? optionsState.data : null;
+  const units = options?.units ?? [];
+  const isOptionsLoading =
+    optionsState.status === "idle" || optionsState.status === "loading";
+  const unitPlaceholder = isOptionsLoading
+    ? "Loading units..."
+    : units.length > 0
+      ? "Select unit"
+      : "No units available";
+  const isCreateDisabled = isOptionsLoading || optionsState.status === "error" || units.length === 0;
 
   return (
     <ModalDialog
@@ -189,7 +230,11 @@ function QuickCreateProductDialogForm({
           <input type="hidden" name="partNumber" value="" />
           <input type="hidden" name="oemNumber" value="" />
           <input type="hidden" name="description" value="" />
-          <input type="hidden" name="owningBranchId" value="" />
+          <input
+            type="hidden"
+            name="owningBranchId"
+            value={options?.defaultBranchId ?? ""}
+          />
           <input type="hidden" name="shareGlobally" value="" />
           <input type="hidden" name="warrantyDurationDays" value="" />
           <input type="hidden" name="websiteVisible" value="" />
@@ -271,13 +316,11 @@ function QuickCreateProductDialogForm({
                 id="quickProductUnit"
                 name="unitId"
                 value={values.unitId}
-                disabled={!options}
+                disabled={isOptionsLoading || units.length === 0}
                 onChange={(event) => updateFormValue("unitId", event.target.value)}
               >
-                <option value="">
-                  {options ? "Select unit" : "Loading units..."}
-                </option>
-                {options?.units.map((option) => (
+                <option value="">{unitPlaceholder}</option>
+                {units.map((option) => (
                   <option key={option.id} value={option.id}>
                     {option.label}
                   </option>
@@ -341,7 +384,7 @@ function QuickCreateProductDialogForm({
               name="categoryId"
               label="Category"
               value={values.categoryId}
-              disabled={!options}
+              disabled={isOptionsLoading}
               options={options?.categories ?? []}
               onChange={(value) => updateFormValue("categoryId", value)}
             />
@@ -350,7 +393,7 @@ function QuickCreateProductDialogForm({
               name="brandId"
               label="Brand"
               value={values.brandId}
-              disabled={!options}
+              disabled={isOptionsLoading}
               options={options?.brands ?? []}
               onChange={(value) => updateFormValue("brandId", value)}
             />
@@ -359,7 +402,7 @@ function QuickCreateProductDialogForm({
               name="supplierId"
               label="Supplier"
               value={values.supplierId}
-              disabled={!options}
+              disabled={isOptionsLoading}
               options={options?.suppliers ?? []}
               onChange={(value) => updateFormValue("supplierId", value)}
             />
@@ -383,7 +426,7 @@ function QuickCreateProductDialogForm({
             <Button type="button" variant="outline" onClick={closeDialog}>
               Cancel
             </Button>
-            <SubmitButton pendingLabel="Creating..." disabled={!options}>
+            <SubmitButton pendingLabel="Creating..." disabled={isCreateDisabled}>
               Create product
             </SubmitButton>
           </div>

@@ -9,6 +9,7 @@ export type StaffRole =
 
 export type StaffListItem = {
   id: string;
+  staffCode: string | null;
   fullName: string;
   role: StaffRole;
   contactNumber: string | null;
@@ -19,6 +20,7 @@ export type StaffListItem = {
 
 export type StaffFormValues = {
   staffId?: string;
+  staffCode: string;
   firstName: string;
   lastName: string;
   documentTitle: string;

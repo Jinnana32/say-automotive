@@ -176,15 +176,28 @@ export function JobOrderAdditionalItemForm({
                           error: null,
                           options: {
                             ...current.options,
-                            products: [
-                              ...current.options.products,
-                              {
-                                id: product.id,
-                                label: product.label,
-                                sku: product.sku,
-                                unitPrice: product.unitPrice,
-                              },
-                            ],
+                            products: current.options.products.some(
+                              (entry) => entry.id === product.id,
+                            )
+                              ? current.options.products.map((entry) =>
+                                  entry.id === product.id
+                                    ? {
+                                        id: product.id,
+                                        label: product.label,
+                                        sku: product.sku,
+                                        unitPrice: product.unitPrice,
+                                      }
+                                    : entry,
+                                )
+                              : [
+                                  ...current.options.products,
+                                  {
+                                    id: product.id,
+                                    label: product.label,
+                                    sku: product.sku,
+                                    unitPrice: product.unitPrice,
+                                  },
+                                ],
                           },
                         }
                       : current,
@@ -239,15 +252,28 @@ export function JobOrderAdditionalItemForm({
                           error: null,
                           options: {
                             ...current.options,
-                            services: [
-                              ...current.options.services,
-                              {
-                                id: service.id,
-                                label: service.label,
-                                category: service.category,
-                                unitPrice: service.unitPrice,
-                              },
-                            ],
+                            services: current.options.services.some(
+                              (entry) => entry.id === service.id,
+                            )
+                              ? current.options.services.map((entry) =>
+                                  entry.id === service.id
+                                    ? {
+                                        id: service.id,
+                                        label: service.label,
+                                        category: service.category,
+                                        unitPrice: service.unitPrice,
+                                      }
+                                    : entry,
+                                )
+                              : [
+                                  ...current.options.services,
+                                  {
+                                    id: service.id,
+                                    label: service.label,
+                                    category: service.category,
+                                    unitPrice: service.unitPrice,
+                                  },
+                                ],
                           },
                         }
                       : current,

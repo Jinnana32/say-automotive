@@ -2,6 +2,39 @@ export function normalizeQuickAccessPlate(value: string) {
   return value.toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
 
+export function looksLikeQuickAccessPlateLookup(value: string) {
+  const normalized = normalizeQuickAccessPlate(value);
+
+  if (!normalized) {
+    return false;
+  }
+
+  return /\d/.test(normalized);
+}
+
+export function resolveQuickAccessQuery(value: string) {
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue) {
+    return {
+      plateQuery: "",
+      customerLastNameQuery: "",
+    };
+  }
+
+  if (looksLikeQuickAccessPlateLookup(trimmedValue)) {
+    return {
+      plateQuery: normalizeQuickAccessPlate(trimmedValue),
+      customerLastNameQuery: "",
+    };
+  }
+
+  return {
+    plateQuery: "",
+    customerLastNameQuery: trimmedValue,
+  };
+}
+
 export function extractPlateCandidatesFromTextBlocks(textBlocks: string[]) {
   const candidates = new Set<string>();
 

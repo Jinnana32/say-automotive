@@ -56,7 +56,7 @@ export function QuickAccessPlateLookupForm({
 
     onLookupSubmitted?.();
     startTransition(() => {
-      router.push(`/quick-access?plate=${encodeURIComponent(normalizedPlate)}`);
+      router.push(`/quick-access?q=${encodeURIComponent(normalizedPlate)}`);
     });
   }
 

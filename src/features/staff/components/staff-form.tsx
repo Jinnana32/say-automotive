@@ -58,6 +58,22 @@ export function StaffForm({
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
+              <Label htmlFor="staffCode">Staff ID</Label>
+              <Input
+                id="staffCode"
+                name="staffCode"
+                value={values.staffCode}
+                readOnly
+                placeholder={mode === "create" ? "Generated after creation" : ""}
+                className="bg-muted/40 text-muted-foreground"
+              />
+              <p className="text-xs text-muted-foreground">
+                Unique identifier used for the staff roster and physical ID cards.
+              </p>
+              <FieldError errors={state.fieldErrors} name="staffCode" />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="role">Role</Label>
               <select
                 id="role"
@@ -76,7 +92,7 @@ export function StaffForm({
               <FieldError errors={state.fieldErrors} name="role" />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 md:col-span-2">
               <Label htmlFor="documentTitle">Document title / Print title</Label>
               <Input
                 id="documentTitle"

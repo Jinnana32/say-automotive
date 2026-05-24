@@ -97,6 +97,7 @@ export default async function StaffPage({ searchParams }: StaffPageProps) {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Staff ID</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Role</TableHead>
                     <TableHead>Contact</TableHead>
@@ -107,6 +108,9 @@ export default async function StaffPage({ searchParams }: StaffPageProps) {
                 <TableBody>
                   {pagination.items.map((person) => (
                     <TableRow key={person.id}>
+                      <TableCell className="font-mono text-xs font-semibold tracking-[0.16em] text-slate-600">
+                        {person.staffCode ?? "Pending"}
+                      </TableCell>
                       <TableCell className="font-semibold">{person.fullName}</TableCell>
                       <TableCell className="capitalize">{person.role.replace("_", " ")}</TableCell>
                       <TableCell>{person.contactNumber ?? "No contact number"}</TableCell>

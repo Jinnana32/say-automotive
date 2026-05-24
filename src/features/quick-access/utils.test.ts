@@ -4,7 +4,9 @@ import {
   extractPlateCandidatesFromTextBlocks,
   getQuickAccessPlateTokens,
   isPossiblePlateMatch,
+  looksLikeQuickAccessPlateLookup,
   normalizeQuickAccessPlate,
+  resolveQuickAccessQuery,
 } from "@/features/quick-access/utils";
 
 describe("quick access plate helpers", () => {
@@ -23,5 +25,22 @@ describe("quick access plate helpers", () => {
   it("supports fuzzy fallback matching for formatted plate numbers", () => {
     expect(isPossiblePlateMatch("ABC 1234", "abc1234")).toBe(true);
     expect(isPossiblePlateMatch("XYZ 9876", "abc1234")).toBe(false);
+  });
+
+  it("detects whether a quick access query should be treated as a plate lookup", () => {
+    expect(looksLikeQuickAccessPlateLookup("ABC-1234")).toBe(true);
+    expect(looksLikeQuickAccessPlateLookup("Juan Dela Cruz")).toBe(false);
+  });
+
+  it("resolves a generic quick access query into plate or customer lookup input", () => {
+    expect(resolveQuickAccessQuery("abc-1234")).toEqual({
+      plateQuery: "ABC1234",
+      customerLastNameQuery: "",
+    });
+
+    expect(resolveQuickAccessQuery("Dela Cruz")).toEqual({
+      plateQuery: "",
+      customerLastNameQuery: "Dela Cruz",
+    });
   });
 });

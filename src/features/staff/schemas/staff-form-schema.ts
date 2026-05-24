@@ -4,6 +4,7 @@ import type { StaffFormValues } from "@/features/staff/types";
 
 export const staffFormSchema = z.object({
   staffId: z.string().uuid().optional(),
+  staffCode: z.string().trim(),
   firstName: z.string().trim().min(1, "First name is required."),
   lastName: z.string().trim().min(1, "Last name is required."),
   documentTitle: z.string().trim(),
@@ -21,6 +22,7 @@ export const staffFormSchema = z.object({
 export function parseStaffFormData(formData: FormData): StaffFormValues {
   return {
     staffId: readString(formData, "staffId") || undefined,
+    staffCode: readString(formData, "staffCode"),
     firstName: readString(formData, "firstName"),
     lastName: readString(formData, "lastName"),
     documentTitle: readString(formData, "documentTitle"),

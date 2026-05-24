@@ -242,9 +242,8 @@ export function InventoryMovementDialog({
                   <QuickCreateProductDialog
                     triggerLabel="Add new product"
                     onCreated={(product) => {
-                      setProductOptions((current) => [
-                        ...current,
-                        {
+                      setProductOptions((current) => {
+                        const nextProduct = {
                           id: product.id,
                           label: product.label,
                           sku: product.sku,
@@ -253,8 +252,14 @@ export function InventoryMovementDialog({
                           reorderLevel: product.reorderLevel,
                           shelfLocation: product.shelfLocation,
                           hasStockRecord: false,
-                        },
-                      ]);
+                        };
+
+                        return current.some((entry) => entry.id === product.id)
+                          ? current.map((entry) =>
+                              entry.id === product.id ? nextProduct : entry,
+                            )
+                          : [...current, nextProduct];
+                      });
                       setProductId(product.id);
                     }}
                   />

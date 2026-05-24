@@ -1,4 +1,5 @@
 import type { CustomerOption } from "@/features/customers/types";
+import type { ProductFormOptionsData } from "@/features/products/types";
 import type { VehicleFormLookupData } from "@/features/vehicles/types";
 
 export type QuotationStatus =
@@ -106,6 +107,7 @@ export type QuotationFormOptions = {
   vehicles: QuotationVehicleOption[];
   products: QuotationProductOption[];
   services: QuotationServiceOption[];
+  productFormOptions: ProductFormOptionsData | null;
   permissions: {
     canCreateProducts: boolean;
     canCreateServices: boolean;

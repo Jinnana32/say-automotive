@@ -1565,6 +1565,7 @@ export type Database = {
           id: string;
           linked_user_id: string | null;
           branch_id: string | null;
+          staff_code: string | null;
           first_name: string;
           last_name: string;
           document_title: string | null;
@@ -1584,6 +1585,7 @@ export type Database = {
           id?: string;
           linked_user_id?: string | null;
           branch_id?: string | null;
+          staff_code?: string | null;
           first_name: string;
           last_name: string;
           document_title?: string | null;

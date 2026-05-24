@@ -2,6 +2,10 @@ import type { CustomerOption } from "@/features/customers/types";
 import type { QuotationFormItem, QuotationVehicleOption } from "@/features/quotations/types";
 import { formatMoneyInputValue, roundCurrency } from "@/lib/currency";
 
+type OptionWithId = {
+  id: string;
+};
+
 export function createQuotationItem(
   initial?: Partial<QuotationFormItem>,
 ): QuotationFormItem {
@@ -36,6 +40,16 @@ export function calculateQuotationGrandTotal(params: {
 export function toNumeric(value: string) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+export function dedupeOptionsById<T extends OptionWithId>(options: T[]) {
+  const optionsById = new Map<string, T>();
+
+  for (const option of options) {
+    optionsById.set(option.id, option);
+  }
+
+  return Array.from(optionsById.values());
 }
 
 export function resolveQuotationCreateFlowSelection(params: {

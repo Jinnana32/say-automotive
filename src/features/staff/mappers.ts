@@ -7,6 +7,7 @@ type StaffRow = TableRow<"staff">;
 export function mapStaffRowToListItem(row: StaffRow): StaffListItem {
   return {
     id: row.id,
+    staffCode: row.staff_code ?? null,
     fullName: `${row.first_name} ${row.last_name}`.trim(),
     role: row.role,
     contactNumber: row.contact_number,
@@ -19,6 +20,7 @@ export function mapStaffRowToListItem(row: StaffRow): StaffListItem {
 export function mapStaffRowToFormValues(row: StaffRow): StaffFormValues {
   return {
     staffId: row.id,
+    staffCode: row.staff_code ?? "",
     firstName: row.first_name,
     lastName: row.last_name,
     documentTitle: row.document_title ?? "",

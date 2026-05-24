@@ -40,6 +40,7 @@ import {
   calculateQuotationLineTotal,
   calculateQuotationSubtotal,
   createQuotationItem,
+  dedupeOptionsById,
   toNumeric,
 } from '@/features/quotations/utils';
 import {
@@ -89,10 +90,18 @@ export function QuotationCreateFlow({
     createQuotationAction,
     INITIAL_FORM_ACTION_STATE,
   );
-  const [customerOptions, setCustomerOptions] = useState(options.customers);
-  const [vehicleOptions, setVehicleOptions] = useState(options.vehicles);
-  const [productOptions, setProductOptions] = useState(options.products);
-  const [serviceOptions, setServiceOptions] = useState(options.services);
+  const [customerOptions, setCustomerOptions] = useState(() =>
+    dedupeOptionsById(options.customers),
+  );
+  const [vehicleOptions, setVehicleOptions] = useState(() =>
+    dedupeOptionsById(options.vehicles),
+  );
+  const [productOptions, setProductOptions] = useState(() =>
+    dedupeOptionsById(options.products),
+  );
+  const [serviceOptions, setServiceOptions] = useState(() =>
+    dedupeOptionsById(options.services),
+  );
   const [customerSearch, setCustomerSearch] = useState('');
   const [customerMode, setCustomerMode] =
     useState<IntakeSelectionMode>('choose');
@@ -299,14 +308,14 @@ export function QuotationCreateFlow({
             ) : null}
 
             {customerMode === 'new' ? (
-              <QuickCustomerCreateForm
-                onBack={() => setCustomerMode('choose')}
-                onCreated={(customer) => {
-                  setCustomerOptions((current) =>
-                    sortCustomers([...current, customer]),
-                  );
-                  updateFormValue('customerId', customer.id);
-                  updateFormValue('vehicleId', '');
+                <QuickCustomerCreateForm
+                  onBack={() => setCustomerMode('choose')}
+                  onCreated={(customer) => {
+                    setCustomerOptions((current) =>
+                      sortCustomers(dedupeOptionsById([...current, customer])),
+                    );
+                    updateFormValue('customerId', customer.id);
+                    updateFormValue('vehicleId', '');
                   setCustomerMode('choose');
                   setVehicleMode('choose');
                   setCurrentStep('vehicle');
@@ -472,7 +481,7 @@ export function QuotationCreateFlow({
                     onBack={() => setVehicleMode('choose')}
                     onCreated={(vehicle) => {
                       setVehicleOptions((current) =>
-                        sortVehicles([...current, vehicle]),
+                        sortVehicles(dedupeOptionsById([...current, vehicle])),
                       );
                       updateFormValue('vehicleId', vehicle.id);
                       setVehicleMode('choose');
@@ -690,16 +699,23 @@ export function QuotationCreateFlow({
                                   <div className="pt-1">
                                     <QuickCreateProductDialog
                                       triggerLabel="Add new product"
+                                      initialOptions={
+                                        options.productFormOptions ?? undefined
+                                      }
                                       onCreated={(product) => {
-                                        setProductOptions((current) => [
-                                          ...current,
-                                          {
+                                        setProductOptions((current) => {
+                                          const nextProduct = {
                                             id: product.id,
                                             label: product.label,
                                             sku: product.sku,
                                             unitPrice: product.unitPrice,
-                                          },
-                                        ]);
+                                          };
+
+                                          return dedupeOptionsById([
+                                            ...current,
+                                            nextProduct,
+                                          ]);
+                                        });
                                         updateQuotationItem(setValues, item.key, {
                                           itemType: 'product',
                                           productId: product.id,
@@ -750,15 +766,19 @@ export function QuotationCreateFlow({
                                     <QuickCreateServiceDialog
                                       triggerLabel="Add new service"
                                       onCreated={(service) => {
-                                        setServiceOptions((current) => [
-                                          ...current,
-                                          {
+                                        setServiceOptions((current) => {
+                                          const nextService = {
                                             id: service.id,
                                             label: service.label,
                                             category: service.category,
                                             unitPrice: service.unitPrice,
-                                          },
-                                        ]);
+                                          };
+
+                                          return dedupeOptionsById([
+                                            ...current,
+                                            nextService,
+                                          ]);
+                                        });
                                         updateQuotationItem(setValues, item.key, {
                                           itemType: 'service',
                                           serviceId: service.id,

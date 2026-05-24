@@ -25,6 +25,7 @@ import {
   calculateQuotationLineTotal,
   calculateQuotationSubtotal,
   createQuotationItem,
+  dedupeOptionsById,
 } from "@/features/quotations/utils";
 import {
   formatCurrencyNumber,
@@ -53,13 +54,19 @@ export function QuotationForm({
   const [inspectionNotes, setInspectionNotes] = useState(initialValues.inspectionNotes);
   const [discount, setDiscount] = useState(initialValues.discount);
   const [tax, setTax] = useState(initialValues.tax);
+  const customerOptions = dedupeOptionsById(options.customers);
+  const vehicleOptions = dedupeOptionsById(options.vehicles);
   const [items, setItems] = useState<QuotationFormItem[]>(
     initialValues.items.length > 0 ? initialValues.items : [createQuotationItem()],
   );
-  const [productOptions, setProductOptions] = useState(options.products);
-  const [serviceOptions, setServiceOptions] = useState(options.services);
+  const [productOptions, setProductOptions] = useState(() =>
+    dedupeOptionsById(options.products),
+  );
+  const [serviceOptions, setServiceOptions] = useState(() =>
+    dedupeOptionsById(options.services),
+  );
 
-  const availableVehicles = options.vehicles.filter((vehicle) => vehicle.customerId === customerId);
+  const availableVehicles = vehicleOptions.filter((vehicle) => vehicle.customerId === customerId);
   const subtotal = calculateQuotationSubtotal(items);
   const grandTotal = calculateQuotationGrandTotal({ items, discount, tax });
 
@@ -93,7 +100,7 @@ export function QuotationForm({
                     value={customerId}
                     onChange={(event) => {
                       const nextCustomerId = event.target.value;
-                      const nextAvailableVehicles = options.vehicles.filter(
+                      const nextAvailableVehicles = vehicleOptions.filter(
                         (vehicle) => vehicle.customerId === nextCustomerId,
                       );
 
@@ -106,7 +113,7 @@ export function QuotationForm({
                     className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <option value="">Select customer</option>
-                    {options.customers.map((customer) => (
+                    {customerOptions.map((customer) => (
                       <option key={customer.id} value={customer.id}>
                         {customer.label}
                       </option>
@@ -241,13 +248,21 @@ export function QuotationForm({
                             {options.permissions.canCreateProducts ? (
                               <QuickCreateProductDialog
                                 triggerLabel="Add new product"
+                                initialOptions={options.productFormOptions ?? undefined}
                                 onCreated={(product) => {
-                                  setProductOptions((current) => [...current, {
-                                    id: product.id,
-                                    label: product.label,
-                                    sku: product.sku,
-                                    unitPrice: product.unitPrice,
-                                  }]);
+                                  setProductOptions((current) => {
+                                    const nextProduct = {
+                                      id: product.id,
+                                      label: product.label,
+                                      sku: product.sku,
+                                      unitPrice: product.unitPrice,
+                                    };
+
+                                    return dedupeOptionsById([
+                                      ...current,
+                                      nextProduct,
+                                    ]);
+                                  });
                                   updateItem(setItems, item.key, {
                                     itemType: "product",
                                     productId: product.id,
@@ -289,12 +304,19 @@ export function QuotationForm({
                               <QuickCreateServiceDialog
                                 triggerLabel="Add new service"
                                 onCreated={(service) => {
-                                  setServiceOptions((current) => [...current, {
-                                    id: service.id,
-                                    label: service.label,
-                                    category: service.category,
-                                    unitPrice: service.unitPrice,
-                                  }]);
+                                  setServiceOptions((current) => {
+                                    const nextService = {
+                                      id: service.id,
+                                      label: service.label,
+                                      category: service.category,
+                                      unitPrice: service.unitPrice,
+                                    };
+
+                                    return dedupeOptionsById([
+                                      ...current,
+                                      nextService,
+                                    ]);
+                                  });
                                   updateItem(setItems, item.key, {
                                     itemType: "service",
                                     serviceId: service.id,
