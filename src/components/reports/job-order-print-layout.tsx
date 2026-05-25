@@ -16,8 +16,8 @@ import {
 import { formatCurrency, formatPrintCurrencyNumber } from "@/lib/currency";
 import { formatDocumentDate, formatDateTime } from "@/lib/dates";
 
-const JOB_ORDER_PAGE_CAPACITY = 17.9;
-const JOB_ORDER_CONTINUATION_CAPACITY = 18.1;
+const JOB_ORDER_PAGE_CAPACITY = 18.8;
+const JOB_ORDER_CONTINUATION_CAPACITY = 19;
 
 type JobOrderWorkGroupLabel = "Services / Labor" | "Parts / Products";
 
@@ -53,12 +53,14 @@ export function JobOrderPrintLayout({
   });
 
   return (
-    <PrintPageStack className="leading-[1.35]">
+    <PrintPageStack className="job-order-print-document leading-[1.32]">
       {pages.map((page, index) => (
         <PrintDocumentPage
           key={page.key}
-          className="leading-[1.35]"
-          bodyClassName="pb-[9mm]"
+          className="job-order-print-page leading-[1.32]"
+          bodyClassName="job-order-print-body pb-[5mm]"
+          topPaddingClassName="pt-[7mm]"
+          bottomPaddingClassName="pb-[6mm]"
           compactHeader={index > 0}
           businessProfile={businessProfile}
           documentTitle="Job Order"
@@ -70,7 +72,7 @@ export function JobOrderPrintLayout({
         >
           {page.includeIntro ? (
             <>
-              <section className="report-section-keep mt-4 grid gap-x-7 gap-y-1.5 sm:grid-cols-2">
+              <section className="report-section-keep mt-3.5 grid gap-x-7 gap-y-1.25 sm:grid-cols-2">
                 <MetadataColumn
                   items={[
                     { label: "Job Order No.", value: jobOrder.jobOrderNumber },
@@ -98,7 +100,7 @@ export function JobOrderPrintLayout({
                 />
               </section>
 
-              <section className="report-section-keep mt-2.5 grid gap-x-7 gap-y-1.5 sm:grid-cols-2">
+              <section className="report-section-keep mt-2 grid gap-x-7 gap-y-1.25 sm:grid-cols-2">
                 <MetadataColumn
                   items={[
                     {
@@ -124,7 +126,7 @@ export function JobOrderPrintLayout({
               </section>
 
               {optionalNarratives.length > 0 ? (
-                <section className="report-section-keep mt-3.5 grid gap-2.5 sm:grid-cols-2">
+                <section className="report-section-keep mt-3 grid gap-2.5 sm:grid-cols-2">
                   {optionalNarratives.map((block) => (
                     <NarrativeBlock
                       key={block.title}
@@ -142,14 +144,14 @@ export function JobOrderPrintLayout({
           ) : null}
 
           {page.includeClosing ? (
-            <div className="flex flex-col gap-3 pt-3">
+            <div className="job-order-print-closing flex flex-col gap-2.5 pt-2">
               {page.partUsageRows.length > 0 ? (
                 <PartUsageSection rows={page.partUsageRows} />
               ) : null}
               <section
-                className={`report-section-keep grid gap-4 ${hidePrices ? "sm:grid-cols-1" : "sm:grid-cols-[1fr_242px]"}`}
+                className={`job-order-print-closing report-section-keep grid gap-3 ${hidePrices ? "sm:grid-cols-1" : "sm:grid-cols-[1fr_236px]"}`}
               >
-                <div className="space-y-3.5">
+                <div className="space-y-3">
                   {jobOrder.mechanics.length > 0 ? (
                     <div>
                       <ReportSectionHeading title="MECHANICS" />
@@ -157,7 +159,7 @@ export function JobOrderPrintLayout({
                         <table className="w-full border-collapse text-[11px]">
                           <thead className="bg-brand-navy text-white">
                             <tr>
-                              <th className="px-2 py-1.25 text-left font-semibold">
+                              <th className="px-2 py-1 text-left font-semibold">
                                 Name
                               </th>
                             </tr>
@@ -168,7 +170,7 @@ export function JobOrderPrintLayout({
                                 key={mechanic.id}
                                 className="report-row-avoid border-t border-slate-200"
                               >
-                                <td className="px-2 py-1.25 align-top">
+                                <td className="px-2 py-1 align-top">
                                   {mechanic.fullName}
                                 </td>
                               </tr>
@@ -180,6 +182,7 @@ export function JobOrderPrintLayout({
                   ) : null}
 
                   <ReportSignatureBlock
+                    className="job-order-print-prepared-by"
                     label="Prepared by:"
                     name={jobOrder.preparedByName || "Prepared by current user"}
                     subtitle={jobOrder.preparedByTitle}
@@ -187,9 +190,9 @@ export function JobOrderPrintLayout({
                 </div>
 
                 {!hidePrices ? (
-                  <div className="justify-self-end space-y-1.25">
+                  <div className="job-order-print-summary justify-self-end space-y-1">
                     <ReportSectionHeading title="JOB ORDER SUMMARY" />
-                    <div className="overflow-hidden border border-brand-border bg-brand-soft/35 px-3 py-2">
+                    <div className="overflow-hidden border border-brand-border bg-brand-soft/35 px-3 py-1.5">
                       <ReportTotals
                         lines={[
                           {
@@ -250,21 +253,21 @@ function WorkItemsSection({
   hidePrices: boolean;
 }) {
   return (
-    <section className="mt-3.5">
+    <section className="report-section-keep mt-3">
       <ReportSectionHeading title="WORK ITEMS" />
       <div className="overflow-hidden border border-brand-border">
         <table className="w-full border-collapse text-[11px]">
           <thead className="bg-brand-navy text-white">
             <tr>
-              <th className="w-10 px-2 py-1.25 text-center font-semibold">Done</th>
-              <th className="px-2 py-1.25 text-left font-semibold">Description</th>
-              <th className="w-[52px] px-2 py-1.25 text-right font-semibold">Qty</th>
+              <th className="w-10 px-2 py-1 text-center font-semibold">Done</th>
+              <th className="px-2 py-1 text-left font-semibold">Description</th>
+              <th className="w-[52px] px-2 py-1 text-right font-semibold">Qty</th>
               {!hidePrices ? (
                 <>
-                  <th className="w-24 px-2 py-1.25 text-right font-semibold">
+                  <th className="w-24 px-2 py-1 text-right font-semibold">
                     Unit Price
                   </th>
-                  <th className="w-24 px-2 py-1.25 text-right font-semibold">
+                  <th className="w-24 px-2 py-1 text-right font-semibold">
                     Total
                   </th>
                 </>
@@ -278,18 +281,18 @@ function WorkItemsSection({
                   <tr key={row.key} className="border-t border-slate-200 bg-brand-soft/40">
                     <td
                       colSpan={hidePrices ? 3 : 5}
-                      className="px-2 py-1.25 text-left text-[9.75px] font-semibold uppercase tracking-[0.12em] text-brand-navy"
+                      className="px-2 py-1 text-left text-[9.75px] font-semibold uppercase tracking-[0.12em] text-brand-navy"
                     >
                       {row.label}
                     </td>
                   </tr>
                 ) : (
                   <tr key={row.key} className="report-row-avoid border-t border-slate-200">
-                    <td className="px-2 py-1.25 text-center align-top">
+                    <td className="px-2 py-1 text-center align-top">
                       <ChecklistGlyph completed={row.item.checklistCompleted} />
                     </td>
-                    <td className="px-2 py-1.25 align-top">
-                      <p className="leading-[1.28]">{row.item.description}</p>
+                    <td className="px-2 py-1 align-top">
+                      <p className="leading-[1.24]">{row.item.description}</p>
                       {row.item.isAdditional ||
                       (row.item.checklistCompleted && row.item.checklistCheckedAt) ? (
                         <div className="mt-0.5 space-y-0.5 text-[9.75px] leading-[1.25] text-slate-500">
@@ -305,15 +308,15 @@ function WorkItemsSection({
                         </div>
                       ) : null}
                     </td>
-                    <td className="px-2 py-1.25 text-right align-top">
+                    <td className="px-2 py-1 text-right align-top">
                       {row.item.quantityLabel}
                     </td>
                     {!hidePrices ? (
                       <>
-                        <td className="px-2 py-1.25 text-right align-top">
+                        <td className="px-2 py-1 text-right align-top">
                           {formatPrintCurrencyNumber(row.item.unitPrice)}
                         </td>
-                        <td className="px-2 py-1.25 text-right align-top">
+                        <td className="px-2 py-1 text-right align-top">
                           {formatPrintCurrencyNumber(row.item.total)}
                         </td>
                       </>
@@ -344,30 +347,30 @@ function PartUsageSection({
   rows: JobOrderPrintPartsUsageLine[];
 }) {
   return (
-    <section className="mt-3.5">
+    <section className="report-section-keep mt-2.5">
       <ReportSectionHeading title="PARTS USAGE" />
       <div className="overflow-hidden border border-brand-border">
         <table className="w-full border-collapse text-[11px]">
           <thead className="bg-brand-navy text-white">
             <tr>
-              <th className="px-2 py-1.25 text-left font-semibold">Part</th>
-              <th className="w-16 px-2 py-1.25 text-right font-semibold">Planned</th>
-              <th className="w-16 px-2 py-1.25 text-right font-semibold">Used</th>
-              <th className="w-16 px-2 py-1.25 text-right font-semibold">Returned</th>
-              <th className="w-16 px-2 py-1.25 text-right font-semibold">Remaining</th>
-              <th className="w-20 px-2 py-1.25 text-right font-semibold">Avail.</th>
+              <th className="px-2 py-1 text-left font-semibold">Part</th>
+              <th className="w-16 px-2 py-1 text-right font-semibold">Planned</th>
+              <th className="w-16 px-2 py-1 text-right font-semibold">Used</th>
+              <th className="w-16 px-2 py-1 text-right font-semibold">Returned</th>
+              <th className="w-16 px-2 py-1 text-right font-semibold">Remaining</th>
+              <th className="w-20 px-2 py-1 text-right font-semibold">Avail.</th>
             </tr>
           </thead>
           <tbody>
             {rows.length > 0 ? (
               rows.map((item) => (
                 <tr key={item.id} className="report-row-avoid border-t border-slate-200">
-                  <td className="px-2 py-1.25 align-top">{item.description}</td>
-                  <td className="px-2 py-1.25 text-right align-top">{item.plannedQuantity}</td>
-                  <td className="px-2 py-1.25 text-right align-top">{item.usedQuantity}</td>
-                  <td className="px-2 py-1.25 text-right align-top">{item.returnedQuantity}</td>
-                  <td className="px-2 py-1.25 text-right align-top">{item.remainingQuantity}</td>
-                  <td className="px-2 py-1.25 text-right align-top">{item.stockAvailability}</td>
+                  <td className="px-2 py-1 align-top">{item.description}</td>
+                  <td className="px-2 py-1 text-right align-top">{item.plannedQuantity}</td>
+                  <td className="px-2 py-1 text-right align-top">{item.usedQuantity}</td>
+                  <td className="px-2 py-1 text-right align-top">{item.returnedQuantity}</td>
+                  <td className="px-2 py-1 text-right align-top">{item.remainingQuantity}</td>
+                  <td className="px-2 py-1 text-right align-top">{item.stockAvailability}</td>
                 </tr>
               ))
             ) : (
@@ -487,10 +490,10 @@ function buildJobOrderPrintPages(params: {
   } = params;
   const introUnits = getJobOrderIntroUnits(optionalNarrativeCount);
   const mechanicsUnits =
-    mechanicCount > 0 ? Math.min(mechanicCount * 0.28 + 0.9, 2.15) : 0;
-  const signatureUnits = 0.95;
-  const summaryUnits = hidePrices ? 1.05 : 2.65;
-  const closingBaseUnits = mechanicsUnits + signatureUnits + summaryUnits + 0.9;
+    mechanicCount > 0 ? Math.min(mechanicCount * 0.24 + 0.75, 1.95) : 0;
+  const signatureUnits = 0.78;
+  const summaryUnits = hidePrices ? 0.92 : 2.25;
+  const closingBaseUnits = mechanicsUnits + signatureUnits + summaryUnits + 0.6;
   const totalWorkUnits = estimateJobOrderWorkRowsUnits(workRows);
   const totalPartUsageUnits = estimatePartUsageRowsUnits(partUsageRows);
 
@@ -748,25 +751,25 @@ function estimateJobOrderWorkRowsUnits(rows: JobOrderWorkTableRow[]) {
 
 function estimateJobOrderWorkRowUnits(row: JobOrderWorkTableRow) {
   if (row.kind === "group") {
-    return 0.56;
+    return 0.48;
   }
 
-  let units = 1.02;
+  let units = 0.9;
 
   if (row.item.description.length > 52) {
-    units += 0.18;
+    units += 0.15;
   }
 
   if (row.item.description.length > 92) {
-    units += 0.16;
+    units += 0.12;
   }
 
   if (row.item.isAdditional) {
-    units += 0.1;
+    units += 0.08;
   }
 
   if (row.item.checklistCompleted && row.item.checklistCheckedAt) {
-    units += 0.12;
+    units += 0.09;
   }
 
   return units;
@@ -841,10 +844,10 @@ function findTrailingPartUsageStartIndex(
 }
 
 function estimatePartUsageRowUnits(row: JobOrderPrintPartsUsageLine) {
-  let units = 0.74;
+  let units = 0.66;
 
   if (row.description.length > 42) {
-    units += 0.14;
+    units += 0.12;
   }
 
   return units;
@@ -852,7 +855,7 @@ function estimatePartUsageRowUnits(row: JobOrderPrintPartsUsageLine) {
 
 function getJobOrderIntroUnits(optionalNarrativeCount: number) {
   const narrativeRows = optionalNarrativeCount > 0 ? Math.ceil(optionalNarrativeCount / 2) : 0;
-  return 4.4 + narrativeRows * 0.95;
+  return 3.95 + narrativeRows * 0.86;
 }
 
 function buildOptionalNarrativeBlocks(jobOrder: JobOrderPrintDocument["jobOrder"]) {

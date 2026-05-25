@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { updateBusinessProfileSettingsAction } from "@/features/settings/actions/settings-actions";
+import { BUSINESS_LOGO_MAX_FILE_SIZE_MB } from "@/features/settings/constants";
 import type { BusinessSettingsValues } from "@/features/settings/types";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 import { useFormValues } from "@/lib/use-form-values";
@@ -72,7 +73,8 @@ export function BusinessProfileForm({
               accept="image/png,image/jpeg,image/webp,image/svg+xml"
             />
             <p className="text-xs text-muted-foreground">
-              Upload a new logo to replace the current one. PNG, JPG, WebP, or SVG up to 2 MB.
+              Upload a new logo to replace the current one. PNG, JPG, WebP, or
+              SVG up to {BUSINESS_LOGO_MAX_FILE_SIZE_MB} MB.
             </p>
           </div>
         </div>

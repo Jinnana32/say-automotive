@@ -1,11 +1,11 @@
-import { DEFAULT_BRAND_LOGO_SRC } from "@/components/shared/brand-assets";
+import { DEFAULT_BRAND_LOGO_TIGHT_SRC } from "@/components/shared/brand-assets";
 import { BrandLogo } from "@/components/shared/brand-logo";
 
 export function DocumentHeader({
   businessName,
   documentTitle,
   documentMeta,
-  logoSrc = DEFAULT_BRAND_LOGO_SRC,
+  logoSrc = DEFAULT_BRAND_LOGO_TIGHT_SRC,
   compact = false,
 }: {
   businessName: string;
@@ -17,33 +17,33 @@ export function DocumentHeader({
   return (
     <header
       className={`report-section-keep border-b-2 border-brand-border ${
-        compact ? "pb-2.5" : "pb-3"
+        compact ? "pb-2.5" : "pb-3.5"
       }`}
     >
       <div
         className={`grid gap-2.5 ${
           compact
-            ? "sm:grid-cols-[minmax(0,1fr)_minmax(0,0.82fr)]"
-            : "sm:grid-cols-[minmax(0,1fr)_minmax(0,0.88fr)]"
+            ? "sm:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)]"
+            : "sm:grid-cols-[minmax(0,1fr)_minmax(0,0.84fr)]"
         } sm:items-center`}
       >
         <div className="flex min-w-0 items-center">
           <div
             className={`flex max-w-full shrink-0 items-center justify-start ${
-              compact ? "w-[176px]" : "w-[208px]"
+              compact ? "w-[208px]" : "w-[244px]"
             }`}
           >
             <BrandLogo
-              src={logoSrc || DEFAULT_BRAND_LOGO_SRC}
+              src={logoSrc || DEFAULT_BRAND_LOGO_TIGHT_SRC}
               alt={businessName}
-              width={320}
-              height={150}
+              width={400}
+              height={176}
               priority
               unoptimized
               className={`h-auto w-auto object-left ${
                 compact
-                  ? "max-h-[64px] max-w-[176px]"
-                  : "max-h-[84px] max-w-[208px]"
+                  ? "max-h-[76px] max-w-[208px]"
+                  : "max-h-[98px] max-w-[244px]"
               }`}
             />
           </div>

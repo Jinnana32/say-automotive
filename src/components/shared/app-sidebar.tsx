@@ -27,7 +27,7 @@ import {
   X,
 } from 'lucide-react';
 
-import { DEFAULT_BRAND_LOGO_SRC } from '@/components/shared/brand-assets';
+import { DEFAULT_BRAND_LOGO_TIGHT_SRC } from '@/components/shared/brand-assets';
 import { Button } from '@/components/ui/button';
 import { BrandLogo } from '@/components/shared/brand-logo';
 import {
@@ -148,28 +148,28 @@ export function AppSidebar({
         >
           <div className="min-w-0 flex-1">
             {collapsed ? (
-              <div className="flex min-h-[3.75rem] items-center justify-center py-0.5">
+              <div className="flex min-h-[4.75rem] items-center justify-center py-0.5">
                 <BrandLogo
                   alt={`${businessName} mark`}
                   variant="mark"
-                  width={64}
-                  height={64}
-                  className="size-[3.4rem] object-contain"
+                  width={80}
+                  height={80}
+                  className="size-[4.25rem] object-contain"
                   priority
-                  fallbackClassName="size-[3.4rem]"
+                  fallbackClassName="size-[4.25rem]"
                 />
               </div>
             ) : showBusinessName ? (
               <div className="flex items-start gap-3">
-                <div className="flex min-h-[3.25rem] shrink-0 items-center py-0.5">
+                <div className="flex min-h-[4.1rem] shrink-0 items-center py-0.5">
                   <BrandLogo
-                    src={businessLogoUrl ?? DEFAULT_BRAND_LOGO_SRC}
+                    src={businessLogoUrl ?? DEFAULT_BRAND_LOGO_TIGHT_SRC}
                     alt={businessName}
-                    width={220}
-                    height={66}
-                    className="h-auto w-[10.75rem] object-contain object-left mix-blend-multiply"
+                    width={272}
+                    height={84}
+                    className="h-auto w-[13rem] object-contain object-left mix-blend-multiply"
                     priority
-                    fallbackClassName="w-[10.75rem]"
+                    fallbackClassName="w-[13rem]"
                   />
                 </div>
                 <div className="min-w-0">
@@ -185,15 +185,15 @@ export function AppSidebar({
                 </div>
               </div>
             ) : (
-              <div className="flex min-h-[3.25rem] w-full items-center py-0.5 pl-0.5 pr-1">
+              <div className="flex min-h-[4.5rem] w-full items-center py-0.5 pl-0.5 pr-1">
                 <BrandLogo
-                  src={businessLogoUrl ?? DEFAULT_BRAND_LOGO_SRC}
+                  src={businessLogoUrl ?? DEFAULT_BRAND_LOGO_TIGHT_SRC}
                   alt={businessName}
-                  width={520}
-                  height={140}
-                  className="h-auto w-full max-w-[12.5rem] object-contain object-left mix-blend-multiply"
+                  width={660}
+                  height={188}
+                  className="h-auto w-full max-w-[14rem] object-contain object-left mix-blend-multiply"
                   priority
-                  fallbackClassName="w-full max-w-[12.5rem]"
+                  fallbackClassName="w-full max-w-[14rem]"
                 />
               </div>
             )}

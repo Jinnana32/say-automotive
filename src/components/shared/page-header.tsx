@@ -8,12 +8,16 @@ export function PageHeader({
   actions?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-      <div className="space-y-1">
+    <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+      <div className="min-w-0 flex-1 space-y-1">
         <h1 className="text-[1.75rem] font-semibold tracking-tight text-foreground">{title}</h1>
         {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
       </div>
-      {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
+      {actions ? (
+        <div className="flex w-full flex-wrap items-center gap-2 md:w-auto md:shrink-0 md:justify-end">
+          {actions}
+        </div>
+      ) : null}
     </div>
   );
 }

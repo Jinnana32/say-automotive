@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element, jsx-a11y/alt-text */
+
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -207,6 +209,68 @@ describe("JobOrderPrintLayout", () => {
     expect(screen.queryByText("Inspection Notes")).not.toBeInTheDocument();
     expect(screen.queryByText("Diagnosis")).not.toBeInTheDocument();
     expect(screen.queryByText("Work Performed")).not.toBeInTheDocument();
+  });
+
+  it("keeps the with-prices summary and prepared-by block on page 1 for moderate job orders", () => {
+    const moderateDocument: JobOrderPrintDocument = {
+      ...documentFixture,
+      jobOrder: {
+        ...documentFixture.jobOrder,
+        customerConcern: null,
+        inspectionNotes: null,
+        diagnosis: null,
+        workPerformed: null,
+        mechanics: Array.from({ length: 2 }, (_, index) => ({
+          id: `assignment-${index + 1}`,
+          staffId: `staff-${index + 1}`,
+          fullName: `Mechanic ${index + 1}`,
+          taskDescription: `Task ${index + 1}`,
+          startedAt: "2026-05-20T09:00:00.000Z",
+          completedAt: null,
+        })),
+        items: Array.from({ length: 4 }, (_, index) => ({
+          id: `product-item-${index + 1}`,
+          sourceQuotationItemId: null,
+          lineNumber: index + 1,
+          itemType: "product" as const,
+          productId: `product-${index + 1}`,
+          serviceId: null,
+          description: `Brake part ${index + 1} with a longer description for print pagination coverage`,
+          quantity: 1,
+          unitPrice: 900 + index * 125,
+          total: 900 + index * 125,
+          isAdditional: false,
+          approvalStatus: "approved" as const,
+          usageStatus: "used" as const,
+          checklistCompleted: index % 2 === 0,
+          checklistCheckedAt: index % 2 === 0 ? "2026-05-20T10:00:00.000Z" : null,
+          checklistCheckedByStaffId: index % 2 === 0 ? "staff-1" : null,
+          checklistCheckedByName: index % 2 === 0 ? "Alex Mechanic" : null,
+          approvedAt: "2026-05-20T08:30:00.000Z",
+          rejectedAt: null,
+          inventoryTracking: {
+            hasStockRecord: true,
+            quantityOnHand: 20,
+            availableQuantity: 16 - index,
+            reorderLevel: 2,
+            shelfLocation: "A-02",
+            isLowStock: false,
+            usedQuantity: 1,
+            returnedQuantity: 0,
+            netUsedQuantity: 1,
+            remainingUsageQuantity: 0,
+            usageHistory: [],
+          },
+        })),
+      },
+    };
+
+    const { container } = render(<JobOrderPrintLayout document={moderateDocument} />);
+    const pages = container.querySelectorAll(".print-page");
+
+    expect(pages).toHaveLength(1);
+    expect(pages[0]?.textContent).toContain("JOB ORDER SUMMARY");
+    expect(pages[0]?.textContent).toContain("Prepared by:");
   });
 
   it("does not repeat work items on page 2 when the work list already fits on page 1", () => {

@@ -22,6 +22,10 @@ import {
   parseDocumentSequenceSettingsFormData,
   parseOperationalRulesSettingsFormData,
 } from "@/features/settings/schemas/settings-forms";
+import {
+  BUSINESS_LOGO_MAX_FILE_SIZE_BYTES,
+  BUSINESS_LOGO_MAX_FILE_SIZE_MB,
+} from "@/features/settings/constants";
 
 export async function updateBusinessProfileSettingsAction(
   _prevState: FormActionState = INITIAL_FORM_ACTION_STATE,
@@ -281,8 +285,8 @@ function validateBusinessLogoFile(file: File) {
     return "Upload a PNG, JPG, WebP, or SVG logo image.";
   }
 
-  if (file.size > 2 * 1024 * 1024) {
-    return "Logo file must be 2 MB or smaller.";
+  if (file.size > BUSINESS_LOGO_MAX_FILE_SIZE_BYTES) {
+    return `Logo file must be ${BUSINESS_LOGO_MAX_FILE_SIZE_MB} MB or smaller.`;
   }
 
   return null;

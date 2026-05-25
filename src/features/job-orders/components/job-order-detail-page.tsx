@@ -66,7 +66,7 @@ export function JobOrderDetailPage({
   return (
     <div className="space-y-5">
       <div className="rounded-2xl border border-border/70 bg-background/95 px-5 py-4 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/90 lg:top-[5.25rem]">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0 space-y-2">
             <Breadcrumbs
               items={[
@@ -94,7 +94,7 @@ export function JobOrderDetailPage({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex w-full flex-wrap items-center gap-2 md:w-auto md:shrink-0 md:justify-end">
             <ActionDropdown
               label="Print job order"
               variant="outline"
