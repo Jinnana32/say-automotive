@@ -119,6 +119,12 @@ export function QuotationCreateFlow({
   const availableVehicles = vehicleOptions.filter(
     (vehicle) => vehicle.customerId === values.customerId,
   );
+  const shouldSkipVehicleChoice =
+    currentStep === 'vehicle' &&
+    selectedCustomer !== null &&
+    availableVehicles.length === 0 &&
+    selectedVehicle === null &&
+    vehicleMode === 'choose';
   const filteredCustomers = useMemo(() => {
     const normalizedQuery = customerSearch.trim().toLowerCase();
 
@@ -308,14 +314,14 @@ export function QuotationCreateFlow({
             ) : null}
 
             {customerMode === 'new' ? (
-                <QuickCustomerCreateForm
-                  onBack={() => setCustomerMode('choose')}
-                  onCreated={(customer) => {
-                    setCustomerOptions((current) =>
-                      sortCustomers(dedupeOptionsById([...current, customer])),
-                    );
-                    updateFormValue('customerId', customer.id);
-                    updateFormValue('vehicleId', '');
+              <QuickCustomerCreateForm
+                onBack={() => setCustomerMode('choose')}
+                onCreated={(customer) => {
+                  setCustomerOptions((current) =>
+                    sortCustomers(dedupeOptionsById([...current, customer])),
+                  );
+                  updateFormValue('customerId', customer.id);
+                  updateFormValue('vehicleId', '');
                   setCustomerMode('choose');
                   setVehicleMode('choose');
                   setCurrentStep('vehicle');
@@ -329,10 +335,16 @@ export function QuotationCreateFlow({
 
       {currentStep === 'vehicle' ? (
         <SectionCard
-          title="Step 2. Choose the vehicle"
+          title={
+            selectedCustomer && availableVehicles.length === 0
+              ? 'Step 2. Add the vehicle'
+              : 'Step 2. Choose the vehicle'
+          }
           description={
             selectedCustomer
-              ? `Working under ${selectedCustomer.label}. Choose whether to use an existing vehicle or capture a new one now.`
+              ? availableVehicles.length === 0
+                ? `Working under ${selectedCustomer.label}. No vehicles are linked yet, so add the first one now.`
+                : `Working under ${selectedCustomer.label}. Choose whether to use an existing vehicle or capture a new one now.`
               : 'Choose the customer first.'
           }
         >
@@ -353,7 +365,23 @@ export function QuotationCreateFlow({
               />
             ) : (
               <>
-                {vehicleMode === 'choose' ? (
+                {shouldSkipVehicleChoice ? (
+                  <QuickVehicleCreateForm
+                    customerId={selectedCustomer.id}
+                    customerLabel={selectedCustomer.label}
+                    lookupData={options.vehicleLookups}
+                    onCreated={(vehicle) => {
+                      setVehicleOptions((current) =>
+                        sortVehicles(dedupeOptionsById([...current, vehicle])),
+                      );
+                      updateFormValue('vehicleId', vehicle.id);
+                      setVehicleMode('choose');
+                      setCurrentStep('items');
+                    }}
+                  />
+                ) : null}
+
+                {vehicleMode === 'choose' && !shouldSkipVehicleChoice ? (
                   <>
                     <IntakeChoiceGrid
                       existingLabel="Use existing vehicle"
@@ -1380,12 +1408,14 @@ function QuickCustomerCreateForm({
 
 function QuickVehicleCreateForm({
   onBack,
+  backLabel = 'Back to choices',
   customerId,
   customerLabel,
   lookupData,
   onCreated,
 }: {
-  onBack: () => void;
+  onBack?: () => void;
+  backLabel?: string;
   customerId: string;
   customerLabel: string;
   lookupData: VehicleFormLookupData;
@@ -1442,11 +1472,13 @@ function QuickVehicleCreateForm({
       className="border-dashed"
     >
       <form action={formAction} className="space-y-4">
-        <div className="flex justify-end">
-          <Button type="button" variant="outline" onClick={onBack}>
-            Back to choices
-          </Button>
-        </div>
+        {onBack ? (
+          <div className="flex justify-end">
+            <Button type="button" variant="outline" onClick={onBack}>
+              {backLabel}
+            </Button>
+          </div>
+        ) : null}
 
         <input type="hidden" name="customerId" value={customerId} />
 
