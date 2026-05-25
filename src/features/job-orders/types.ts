@@ -9,6 +9,13 @@ export type JobOrderStatus =
   | "released"
   | "cancelled";
 
+export type SimplifiedJobOrderStatus =
+  | "pending"
+  | "in_progress"
+  | "completed"
+  | "released"
+  | "cancelled";
+
 export const JOB_ORDER_DETAIL_TABS = [
   "overview",
   "billing",

@@ -73,7 +73,27 @@ export async function updateJobOrderStatusAction(
 
   const values = parsed.data;
   const redirectTab = resolveJobOrderDetailTab(readOptionalValue(formData, "redirectTab"));
-  const { supabase } = await getAuthorizedSupabaseServerClient("job_orders:write");
+  const { context, supabase } = await getAuthorizedSupabaseServerClient("job_orders:write");
+  const { data: beforeJobOrder, error: beforeError } = await supabase
+    .from("job_orders")
+    .select("id, status")
+    .eq("id", values.jobOrderId)
+    .maybeSingle();
+
+  if (beforeError) {
+    return {
+      status: "error",
+      message: beforeError.message,
+    };
+  }
+
+  if (!beforeJobOrder) {
+    return {
+      status: "error",
+      message: "Job order does not exist.",
+    };
+  }
+
   const { error } = await supabase.rpc("update_job_order_status", {
     p_job_order_id: values.jobOrderId,
     p_next_status: values.nextStatus,
@@ -85,6 +105,26 @@ export async function updateJobOrderStatusAction(
       message: error.message,
     };
   }
+
+  await writeAuditLog(supabase, {
+    action:
+      values.nextStatus === "cancelled"
+        ? "Cancelled job order"
+        : "Updated job order status",
+    entityType: "job_order",
+    entityId: values.jobOrderId,
+    userId: context.userId,
+    beforeData: {
+      status: beforeJobOrder.status,
+    },
+    afterData: {
+      status: values.nextStatus,
+      cancellationReason:
+        values.nextStatus === "cancelled"
+          ? values.cancellationReason || null
+          : null,
+    },
+  });
 
   revalidateJobOrderPaths(values.jobOrderId);
   redirect(buildJobOrderRedirectPath(values.jobOrderId, redirectTab));

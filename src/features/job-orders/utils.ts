@@ -6,6 +6,7 @@ import {
   type JobOrderItemInventoryTracking,
   type JobOrderPartUsageEntry,
   type JobOrderStatus,
+  type SimplifiedJobOrderStatus,
 } from "@/features/job-orders/types";
 import { roundCurrency } from "@/lib/currency";
 
@@ -29,46 +30,49 @@ const DETAIL_LOCKED_STATUSES: JobOrderStatus[] = ["released", "cancelled"];
 
 export const JOB_ORDER_STATUS_WORKFLOW: JobOrderStatus[] = [
   "pending",
-  "waiting_for_parts",
-  "waiting_for_customer_approval",
   "in_progress",
   "completed",
   "released",
   "cancelled",
 ];
 
-const JOB_ORDER_STATUS_LABELS: Record<JobOrderStatus, string> = {
+const SIMPLIFIED_JOB_ORDER_STATUS_LABELS: Record<SimplifiedJobOrderStatus, string> = {
   pending: "Pending",
   in_progress: "In Progress",
-  waiting_for_parts: "Waiting for Parts",
-  waiting_for_customer_approval: "Waiting for Customer Approval",
   completed: "Completed",
-  ready_for_billing: "Ready for Billing",
-  paid: "Paid",
   released: "Released",
   cancelled: "Cancelled",
 };
 
-const JOB_ORDER_STATUS_DESCRIPTIONS: Record<JobOrderStatus, string> = {
+const SIMPLIFIED_JOB_ORDER_STATUS_DESCRIPTIONS: Record<SimplifiedJobOrderStatus, string> = {
   pending: "Job created but work has not started.",
   in_progress: "Vehicle is currently being worked on.",
-  waiting_for_parts: "Work is paused while waiting for parts availability.",
-  waiting_for_customer_approval:
-    "Work is paused while waiting for customer approval on additional items.",
-  ready_for_billing:
-    "Work is staged for billing or adviser review before the final handoff.",
-  completed: "Work is finished and the vehicle is ready for release or billing follow-up.",
-  paid: "The invoice is fully settled and ready for customer release.",
+  completed: "Work has been completed.",
   released: "Vehicle has been released to the customer.",
-  cancelled: "Job order has been cancelled and is no longer active.",
+  cancelled: "This job order was cancelled.",
 };
 
+export function getSimplifiedJobOrderStatus(
+  status: JobOrderStatus,
+): SimplifiedJobOrderStatus {
+  switch (status) {
+    case "waiting_for_parts":
+    case "waiting_for_customer_approval":
+      return "in_progress";
+    case "ready_for_billing":
+    case "paid":
+      return "completed";
+    default:
+      return status;
+  }
+}
+
 export function formatJobOrderStatus(status: JobOrderStatus) {
-  return JOB_ORDER_STATUS_LABELS[status] ?? status.replaceAll("_", " ");
+  return SIMPLIFIED_JOB_ORDER_STATUS_LABELS[getSimplifiedJobOrderStatus(status)];
 }
 
 export function getJobOrderStatusDescription(status: JobOrderStatus) {
-  return JOB_ORDER_STATUS_DESCRIPTIONS[status];
+  return SIMPLIFIED_JOB_ORDER_STATUS_DESCRIPTIONS[getSimplifiedJobOrderStatus(status)];
 }
 
 export function toTitleCaseWords(value: string) {
@@ -83,7 +87,7 @@ export function resolveJobOrderDetailTab(value: string | undefined): JobOrderDet
 
 export function getAllowedJobOrderStatusTransitions(
   status: JobOrderStatus,
-  options?: {
+  _options?: {
     invoiceId?: string | null;
     requireInvoiceBeforeJobCompletion?: boolean;
   },
@@ -92,20 +96,9 @@ export function getAllowedJobOrderStatusTransitions(
     case "pending":
       return ["in_progress", "cancelled"];
     case "in_progress":
-      return [
-        "waiting_for_parts",
-        "waiting_for_customer_approval",
-        "completed",
-        "cancelled",
-      ];
     case "waiting_for_parts":
-      return ["in_progress", "cancelled"];
     case "waiting_for_customer_approval":
-      return ["in_progress", "cancelled"];
-    case "completed":
-      return [];
-    case "ready_for_billing":
-      return ["completed"];
+      return ["completed", "cancelled"];
     default:
       return [];
   }
@@ -136,7 +129,9 @@ export function canResolveAdditionalItems(status: JobOrderStatus) {
 }
 
 export function canGenerateJobOrderInvoice(status: JobOrderStatus, invoiceId: string | null) {
-  return ["completed", "ready_for_billing", "released"].includes(status) && invoiceId === null;
+  const simplifiedStatus = getSimplifiedJobOrderStatus(status);
+
+  return ["completed", "released"].includes(simplifiedStatus) && invoiceId === null;
 }
 
 export function canReleaseJobOrderVehicle(params: {
@@ -149,8 +144,9 @@ export function canReleaseJobOrderVehicle(params: {
   releasedAt: string | null;
 }) {
   const eligibleStatus =
-    ["in_progress", "completed", "ready_for_billing", "paid"].includes(params.status) &&
+    getSimplifiedJobOrderStatus(params.status) === "completed" &&
     params.status !== "released" &&
+    params.status !== "cancelled" &&
     params.releasedAt === null;
 
   if (!eligibleStatus) {
@@ -172,6 +168,17 @@ export function canReleaseJobOrderVehicle(params: {
   }
 
   return true;
+}
+
+export function expandJobOrderStatusFilter(status: JobOrderStatus): JobOrderStatus[] {
+  switch (status) {
+    case "in_progress":
+      return ["in_progress", "waiting_for_parts", "waiting_for_customer_approval"];
+    case "completed":
+      return ["completed", "ready_for_billing", "paid"];
+    default:
+      return [status];
+  }
 }
 
 export function calculateJobOrderBillableTotal(items: JobOrderItemDetail[]) {

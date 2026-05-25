@@ -14,6 +14,8 @@ import {
 } from "@/components/shared/table-row-actions-menu";
 import { JobOrderStatusBadge } from "@/features/job-orders/components/job-order-status-badge";
 import { listJobOrders } from "@/features/job-orders/queries/job-order-queries";
+import type { JobOrderStatus } from "@/features/job-orders/types";
+import { getSimplifiedJobOrderStatus } from "@/features/job-orders/utils";
 import { formatCurrency } from "@/lib/currency";
 import { formatDate, formatDateTime } from "@/lib/dates";
 import { paginateItems } from "@/lib/pagination";
@@ -23,22 +25,14 @@ export const dynamic = "force-dynamic";
 type JobOrdersPageProps = {
   searchParams: Promise<{
     search?: string;
-    status?:
-      | "pending"
-      | "in_progress"
-      | "waiting_for_parts"
-      | "waiting_for_customer_approval"
-      | "completed"
-      | "ready_for_billing"
-      | "paid"
-      | "released"
-      | "cancelled";
+    status?: JobOrderStatus | "";
     page?: string;
   }>;
 };
 
 export default async function JobOrdersPage({ searchParams }: JobOrdersPageProps) {
-  const { search = "", status = "", page } = await searchParams;
+  const { search = "", status: rawStatus = "", page } = await searchParams;
+  const status = rawStatus ? getSimplifiedJobOrderStatus(rawStatus) : "";
   const jobOrders = await listJobOrders({ search, status });
   const pagination = paginateItems(jobOrders, page);
 
@@ -74,11 +68,7 @@ export default async function JobOrdersPage({ searchParams }: JobOrdersPageProps
                   { value: "", label: "All statuses" },
                   { value: "pending", label: "Pending" },
                   { value: "in_progress", label: "In progress" },
-                  { value: "waiting_for_parts", label: "Waiting for parts" },
-                  { value: "waiting_for_customer_approval", label: "Waiting for customer approval" },
                   { value: "completed", label: "Completed" },
-                  { value: "ready_for_billing", label: "Ready for billing" },
-                  { value: "paid", label: "Paid" },
                   { value: "released", label: "Released" },
                   { value: "cancelled", label: "Cancelled" },
                 ],

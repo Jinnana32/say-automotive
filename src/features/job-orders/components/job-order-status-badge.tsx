@@ -1,18 +1,20 @@
 import { StatusBadge } from "@/components/shared/status-badge";
 import type { JobOrderApprovalStatus, JobOrderStatus, JobOrderUsageStatus } from "@/features/job-orders/types";
-import { formatJobOrderStatus } from "@/features/job-orders/utils";
+import {
+  formatJobOrderStatus,
+  getSimplifiedJobOrderStatus,
+} from "@/features/job-orders/utils";
 
 export function JobOrderStatusBadge({ status }: { status: JobOrderStatus }) {
+  const simplifiedStatus = getSimplifiedJobOrderStatus(status);
   const variant =
-    status === "released" || status === "paid"
+    simplifiedStatus === "released"
       ? "success"
-      : status === "cancelled"
+      : simplifiedStatus === "cancelled"
         ? "destructive"
-        : status === "waiting_for_parts" || status === "waiting_for_customer_approval"
-          ? "warning"
-          : status === "in_progress" || status === "completed" || status === "ready_for_billing"
-            ? "info"
-            : "neutral";
+        : simplifiedStatus === "in_progress" || simplifiedStatus === "completed"
+          ? "info"
+          : "neutral";
 
   return <StatusBadge tone={variant}>{formatJobOrderStatus(status)}</StatusBadge>;
 }

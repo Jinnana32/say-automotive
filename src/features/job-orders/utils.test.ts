@@ -9,9 +9,11 @@ import {
   canGenerateJobOrderInvoice,
   canEditJobOrderItems,
   canReleaseJobOrderVehicle,
+  formatJobOrderStatus,
   getAllowedJobOrderStatusTransitions,
   getJobOrderChecklistStatus,
   groupJobOrderChecklistItems,
+  getSimplifiedJobOrderStatus,
 } from "@/features/job-orders/utils";
 
 const items = [
@@ -93,15 +95,20 @@ describe("job order utils", () => {
   it("returns the operationally allowed next statuses", () => {
     expect(getAllowedJobOrderStatusTransitions("pending")).toEqual(["in_progress", "cancelled"]);
     expect(getAllowedJobOrderStatusTransitions("waiting_for_parts")).toEqual([
-      "in_progress",
+      "completed",
       "cancelled",
     ]);
     expect(getAllowedJobOrderStatusTransitions("completed")).toEqual([]);
     expect(getAllowedJobOrderStatusTransitions("released")).toEqual([]);
   });
 
-  it("keeps legacy ready-for-billing records able to reach completion", () => {
-    expect(getAllowedJobOrderStatusTransitions("ready_for_billing")).toEqual(["completed"]);
+  it("maps legacy operational statuses into the simplified display flow", () => {
+    expect(getSimplifiedJobOrderStatus("waiting_for_parts")).toBe("in_progress");
+    expect(getSimplifiedJobOrderStatus("waiting_for_customer_approval")).toBe("in_progress");
+    expect(getSimplifiedJobOrderStatus("ready_for_billing")).toBe("completed");
+    expect(getSimplifiedJobOrderStatus("paid")).toBe("completed");
+    expect(formatJobOrderStatus("waiting_for_parts")).toBe("In Progress");
+    expect(formatJobOrderStatus("ready_for_billing")).toBe("Completed");
   });
 
   it("allows work item editing until the job order is finalized", () => {
@@ -128,11 +135,23 @@ describe("job order utils", () => {
         requireInvoiceBeforeVehicleRelease: false,
         releasedAt: null,
       }),
-    ).toBe(true);
+    ).toBe(false);
 
     expect(
       canReleaseJobOrderVehicle({
         status: "completed",
+        invoiceId: null,
+        invoiceStatus: null,
+        allowReleaseWithBalance: false,
+        requireFullPaymentBeforeRelease: true,
+        requireInvoiceBeforeVehicleRelease: false,
+        releasedAt: null,
+      }),
+    ).toBe(true);
+
+    expect(
+      canReleaseJobOrderVehicle({
+        status: "ready_for_billing",
         invoiceId: null,
         invoiceStatus: null,
         allowReleaseWithBalance: false,

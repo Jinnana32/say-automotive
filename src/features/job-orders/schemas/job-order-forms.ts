@@ -53,6 +53,10 @@ export const jobOrderStatusTransitionSchema = z.object({
     "released",
     "cancelled",
   ]),
+  cancellationReason: z
+    .string()
+    .trim()
+    .max(1000, "Cancellation reason is too long."),
 });
 
 export const mechanicAssignmentSchema = z.object({
@@ -172,6 +176,7 @@ export function parseJobOrderStatusTransitionFormData(formData: FormData) {
   return {
     jobOrderId: readString(formData, "jobOrderId"),
     nextStatus: readString(formData, "nextStatus"),
+    cancellationReason: readString(formData, "cancellationReason"),
   };
 }
 

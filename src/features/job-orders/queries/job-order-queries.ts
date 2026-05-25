@@ -27,6 +27,7 @@ import type {
   JobOrderListItem,
   JobOrderMechanicOption,
 } from "@/features/job-orders/types";
+import { expandJobOrderStatusFilter } from "@/features/job-orders/utils";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 type JobOrderRow = TableRow<"job_orders">;
@@ -71,7 +72,11 @@ export async function listJobOrders(filters?: {
   );
 
   if (filters?.status) {
-    query = query.eq("status", filters.status);
+    const matchingStatuses = expandJobOrderStatusFilter(filters.status);
+    query =
+      matchingStatuses.length === 1
+        ? query.eq("status", matchingStatuses[0])
+        : query.in("status", matchingStatuses);
   }
 
   if (filters?.search) {

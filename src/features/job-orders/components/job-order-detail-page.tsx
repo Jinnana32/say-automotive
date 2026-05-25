@@ -62,6 +62,7 @@ export function JobOrderDetailPage({
   activeTab: JobOrderDetailTab;
 }) {
   const isReleased = jobOrder.status === 'released';
+  const jobProgressLines = buildJobProgressLines(jobOrder);
 
   return (
     <div className="space-y-5">
@@ -135,8 +136,6 @@ export function JobOrderDetailPage({
         </div>
       </div>
 
-      <JobOrderStatusWorkflow jobOrder={jobOrder} redirectTab={activeTab} />
-
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <SummaryCard
           title="Customer & vehicle"
@@ -172,24 +171,9 @@ export function JobOrderDetailPage({
               {formatJobOrderStatus(jobOrder.status)}
             </span>
           }
-          lines={[
-            `Created ${formatDateTime(jobOrder.createdAt)}`,
-            jobOrder.releasedAt
-              ? `Released ${formatDateTime(jobOrder.releasedAt)}`
-              : jobOrder.completedAt
-                ? `Completed ${formatDateTime(jobOrder.completedAt)}`
-                : '',
-          ]}
+          lines={jobProgressLines}
         >
-          <div className="mt-3 flex items-center gap-2">
-            <JobOrderStatusBadge status={jobOrder.status} />
-          </div>
-          {jobOrder.availableNextStatuses.length === 0 &&
-          !jobOrder.canReleaseVehicle ? (
-            <p className="mt-2 text-xs leading-5 text-muted-foreground">
-              No status changes available for this job order.
-            </p>
-          ) : null}
+          <JobOrderStatusWorkflow jobOrder={jobOrder} redirectTab={activeTab} />
         </SummaryCard>
         <SummaryCard
           title="Invoice & payment"
@@ -224,7 +208,7 @@ export function JobOrderDetailPage({
               ? `Balance ${formatCurrency(jobOrder.invoiceBalance ?? 0)}`
               : jobOrder.requireInvoiceBeforeJobCompletion ||
                   jobOrder.requireInvoiceBeforeVehicleRelease
-                ? 'Status workflow will flag when an invoice is required.'
+                ? 'The Job Progress card will reflect when an invoice is required before release.'
                 : 'Operational completion can continue without invoice.',
           ]}
         />
@@ -397,15 +381,15 @@ export function JobOrderDetailPage({
                       {jobOrder.requireInvoiceBeforeJobCompletion ||
                       jobOrder.requireInvoiceBeforeVehicleRelease
                         ? 'Invoice generation is required for at least one downstream workflow step on this branch.'
-                        : 'Invoice generation is optional for this branch. Operational completion and release can continue without an invoice when the status workflow allows it.'}
+                        : 'Invoice generation is optional for this branch. Operational completion and release can continue without an invoice when branch rules allow it.'}
                     </p>
                     <p className="text-xs leading-5 text-muted-foreground">
                       {jobOrder.status === 'pending' ||
                       jobOrder.status === 'in_progress' ||
                       jobOrder.status === 'waiting_for_parts' ||
                       jobOrder.status === 'waiting_for_customer_approval'
-                        ? 'Move the job order to Ready for Billing or Completed before generating an invoice.'
-                        : 'Use the status workflow above to continue without invoice, or return here once the job reaches a billable stage.'}
+                        ? 'Move the job order to Completed before generating an invoice.'
+                        : 'Use the Job Progress card to continue without invoice, or return here once the job reaches a billable stage.'}
                     </p>
                   </div>
                 )}
@@ -649,6 +633,24 @@ function SummaryCard({
       </CardContent>
     </Card>
   );
+}
+
+function buildJobProgressLines(jobOrder: JobOrderDetail) {
+  const lines = [`Created ${formatDateTime(jobOrder.createdAt)}`];
+
+  if (jobOrder.startedAt) {
+    lines.push(`Started ${formatDateTime(jobOrder.startedAt)}`);
+  }
+
+  if (jobOrder.completedAt) {
+    lines.push(`Completed ${formatDateTime(jobOrder.completedAt)}`);
+  }
+
+  if (jobOrder.releasedAt) {
+    lines.push(`Released ${formatDateTime(jobOrder.releasedAt)}`);
+  }
+
+  return lines;
 }
 
 function ReadOnlyOperationalNotes({ detail }: { detail: JobOrderDetail }) {
