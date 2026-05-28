@@ -6,18 +6,21 @@ describe("summarizePayrollAttendance", () => {
   it("counts attendance states, worked minutes, and missing time-outs", () => {
     const result = summarizePayrollAttendance([
       {
+        attendanceDate: "2026-05-01",
         status: "present",
         timeIn: "2026-05-01T00:00:00.000Z",
         timeOut: "2026-05-01T09:00:00.000Z",
         approvedAt: "2026-05-01T10:00:00.000Z",
       },
       {
+        attendanceDate: "2026-05-02",
         status: "late",
         timeIn: "2026-05-02T01:00:00.000Z",
         timeOut: null,
         approvedAt: null,
       },
       {
+        attendanceDate: "2026-05-03",
         status: "absent",
         timeIn: null,
         timeOut: null,
@@ -33,6 +36,27 @@ describe("summarizePayrollAttendance", () => {
     expect(result.approvedCount).toBe(1);
     expect(result.pendingApprovalCount).toBe(2);
     expect(result.workedMinutes).toBe(540);
+  });
+
+  it("ignores missing time-outs on branch holiday dates", () => {
+    const result = summarizePayrollAttendance(
+      [
+        {
+          attendanceDate: "2026-05-02",
+          status: "late",
+          timeIn: "2026-05-02T01:00:00.000Z",
+          timeOut: null,
+          approvedAt: null,
+        },
+      ],
+      {
+        ignoredMissingTimeoutDates: new Set(["2026-05-02"]),
+      },
+    );
+
+    expect(result.recordedDays).toBe(1);
+    expect(result.missingTimeoutCount).toBe(0);
+    expect(result.pendingApprovalCount).toBe(1);
   });
 });
 

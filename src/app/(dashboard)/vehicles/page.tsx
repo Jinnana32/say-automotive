@@ -168,7 +168,7 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
                       </TableCellLink>
                     </TableCell>
                     {canManageVehicles ? (
-                      <TableCell className="text-right">
+                      <TableCell className="w-14 text-right">
                         <VehicleRowActions
                           vehicleId={vehicle.id}
                           vehicleLabel={`${vehicle.make} ${vehicle.model}${vehicle.plateNumber ? ` (${vehicle.plateNumber})` : ""}`}

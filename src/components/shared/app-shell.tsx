@@ -28,7 +28,6 @@ export function AppShell({
   capabilities,
   businessName,
   businessLogoUrl,
-  branchScope,
   showSidebarBusinessName = false,
 }: Readonly<{
   children: React.ReactNode;
@@ -46,16 +45,6 @@ export function AppShell({
   capabilities: readonly AppCapability[];
   businessName: string;
   businessLogoUrl: string | null;
-  branchScope: {
-    canAccessAllBranches: boolean;
-    accessibleBranches: Array<{
-      id: string;
-      code: string;
-      name: string;
-    }>;
-    selectedBranchId: string | null;
-    selectedBranchLabel: string;
-  };
   showSidebarBusinessName?: boolean;
 }>) {
   const pathname = usePathname();
@@ -65,20 +54,12 @@ export function AppShell({
   void capabilities;
 
   useEffect(() => {
-    try {
-      const storedValue = window.localStorage.getItem(SIDEBAR_COLLAPSE_STORAGE_KEY);
+    const initialSidebarCollapsed = resolveInitialSidebarCollapsed();
+    const timeoutId = window.setTimeout(() => {
+      setIsDesktopSidebarCollapsed(initialSidebarCollapsed);
+    }, 0);
 
-      if (storedValue === "true" || storedValue === "false") {
-        setIsDesktopSidebarCollapsed(storedValue === "true");
-        return;
-      }
-
-      setIsDesktopSidebarCollapsed(
-        window.matchMedia(TABLET_SIDEBAR_MEDIA_QUERY).matches,
-      );
-    } catch {
-      setIsDesktopSidebarCollapsed(false);
-    }
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   function handleToggleDesktopSidebar() {
@@ -140,7 +121,7 @@ export function AppShell({
             activeLabel={activeItem?.label ?? "Dashboard"}
             userDisplayName={userDisplayName}
             userRoleLabel={userRoleLabel}
-            branchScope={branchScope}
+            capabilities={capabilities}
             onOpenNavigation={() => setIsMobileSidebarOpen(true)}
           />
         </div>
@@ -150,4 +131,18 @@ export function AppShell({
       </div>
     </div>
   );
+}
+
+function resolveInitialSidebarCollapsed() {
+  try {
+    const storedValue = window.localStorage.getItem(SIDEBAR_COLLAPSE_STORAGE_KEY);
+
+    if (storedValue === "true" || storedValue === "false") {
+      return storedValue === "true";
+    }
+
+    return window.matchMedia(TABLET_SIDEBAR_MEDIA_QUERY).matches;
+  } catch {
+    return false;
+  }
 }

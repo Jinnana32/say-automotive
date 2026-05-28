@@ -1,15 +1,15 @@
-import { DateTime } from "luxon";
 import { z } from "zod";
 
+import { isValidStaffScheduleTime, parseStaffScheduleTime } from "@/features/attendance/schedule-time-utils";
 import type { StaffScheduleFormValues } from "@/features/attendance/types";
 
 export const staffScheduleSchema = z
   .object({
     staffId: z.string().uuid("Select a staff member."),
-    shiftStartTime: z.string().trim().refine((value) => isValidTime(value), {
+    shiftStartTime: z.string().trim().refine((value) => isValidStaffScheduleTime(value), {
       message: "Enter a valid shift start time.",
     }),
-    shiftEndTime: z.string().trim().refine((value) => isValidTime(value), {
+    shiftEndTime: z.string().trim().refine((value) => isValidStaffScheduleTime(value), {
       message: "Enter a valid shift end time.",
     }),
     graceMinutes: z
@@ -84,11 +84,6 @@ function readCheckbox(formData: FormData, key: string) {
   return formData.get(key) === "on";
 }
 
-function isValidTime(value: string) {
-  return parseTime(value) !== null;
-}
-
 function parseTime(value: string) {
-  const parsed = DateTime.fromFormat(value, "HH:mm");
-  return parsed.isValid ? parsed : null;
+  return parseStaffScheduleTime(value);
 }

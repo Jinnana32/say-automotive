@@ -1,13 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Eye } from "lucide-react";
 
 import { DetailSummaryGrid, DetailSummaryItem } from "@/components/shared/detail-summary-grid";
+import { IconActionLink } from "@/components/shared/icon-action";
 import { SectionCard } from "@/components/shared/section-card";
 import { PageHeader } from "@/components/shared/page-header";
-import {
-  TableRowActionsMenu,
-  TableRowActionsMenuLink,
-} from "@/components/shared/table-row-actions-menu";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PaymentMethodBadge, InvoiceStatusBadge } from "@/features/invoices/components/invoice-status-badge";
@@ -133,10 +131,12 @@ export default async function CustomerDetailPage({ params }: CustomerDetailPageP
                       {vehicle.plateNumber ?? "No plate"} / {vehicle.vin ?? "No VIN"}
                     </TableCell>
                     <TableCell className="capitalize">{vehicle.status}</TableCell>
-                    <TableCell className="text-right">
-                      <TableRowActionsMenu label={`Vehicle actions for ${vehicle.make} ${vehicle.model}`}>
-                        <TableRowActionsMenuLink href={`/vehicles/${vehicle.id}`} label="Open vehicle" />
-                      </TableRowActionsMenu>
+                    <TableCell className="w-14 text-right">
+                      <IconActionLink
+                        href={`/vehicles/${vehicle.id}`}
+                        label={`Open vehicle ${vehicle.make} ${vehicle.model}`}
+                        icon={Eye}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -210,10 +210,12 @@ export default async function CustomerDetailPage({ params }: CustomerDetailPageP
                         </div>
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <TableRowActionsMenu label={`Document actions for ${entry.documentLabel}`}>
-                        <TableRowActionsMenuLink href={entry.documentHref} label="Open document" />
-                      </TableRowActionsMenu>
+                    <TableCell className="w-14 text-right">
+                      <IconActionLink
+                        href={entry.documentHref}
+                        label={`Open document ${entry.documentLabel}`}
+                        icon={Eye}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

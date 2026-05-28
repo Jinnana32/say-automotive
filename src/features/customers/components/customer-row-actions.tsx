@@ -4,11 +4,7 @@ import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 
 import { ConfirmActionDialog } from "@/components/shared/confirm-action-dialog";
-import {
-  TableRowActionsMenu,
-  TableRowActionsMenuButton,
-  TableRowActionsMenuLink,
-} from "@/components/shared/table-row-actions-menu";
+import { TableRowActionsMenu, TableRowActionsMenuButton, TableRowActionsMenuLink } from "@/components/shared/table-row-actions-menu";
 import { deleteCustomerAction } from "@/features/customers/actions/customer-actions";
 
 export function CustomerRowActions({
@@ -22,7 +18,7 @@ export function CustomerRowActions({
 
   return (
     <>
-      <TableRowActionsMenu label={`Customer actions for ${customerLabel}`}>
+      <TableRowActionsMenu label={`Open row actions for ${customerLabel}`}>
         <TableRowActionsMenuLink href={`/customers/${customerId}/edit`} label="Edit customer" icon={Pencil} />
         <TableRowActionsMenuButton
           label="Delete customer"

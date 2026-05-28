@@ -1,6 +1,7 @@
 import { DateTime } from "luxon";
 
 import { getBusinessNow, fromUtcIso } from "@/lib/dates";
+import { normalizeStaffScheduleTimeInput, parseStaffScheduleTime } from "@/features/attendance/schedule-time-utils";
 import type { StaffRole } from "@/lib/auth/permissions";
 import type {
   AttendanceAccessSettings,
@@ -16,6 +17,7 @@ import type {
   AttendanceStatus,
   BranchHolidayFormValues,
   BranchHolidayKind,
+  BranchHolidayPayTreatment,
   BranchHolidaySummary,
   DtrAmendmentFormValues,
   DtrAmendmentStatus,
@@ -69,10 +71,19 @@ export const BRANCH_HOLIDAY_KIND_OPTIONS: Array<{
   value: BranchHolidayKind;
   label: string;
 }> = [
-  { value: "regular", label: "Regular holiday" },
-  { value: "special", label: "Special non-working" },
-  { value: "branch_closure", label: "Branch closure" },
-  { value: "other", label: "Other" },
+  { value: "branch_closure", label: "Branch Closure" },
+  { value: "public_holiday", label: "Public Holiday" },
+  { value: "company_holiday", label: "Company Holiday" },
+  { value: "special_non_working_day", label: "Special Non-working Day" },
+];
+
+export const BRANCH_HOLIDAY_PAY_TREATMENT_OPTIONS: Array<{
+  value: BranchHolidayPayTreatment;
+  label: string;
+}> = [
+  { value: "unpaid", label: "Unpaid" },
+  { value: "paid_regular_day", label: "Paid regular day" },
+  { value: "custom", label: "Custom pay rule" },
 ];
 
 export const STAFF_LEAVE_TYPE_OPTIONS: Array<{
@@ -219,8 +230,8 @@ export function buildStaffScheduleFormValues(
 ): StaffScheduleFormValues {
   return {
     staffId,
-    shiftStartTime: schedule?.shiftStartTime ?? "08:00",
-    shiftEndTime: schedule?.shiftEndTime ?? "17:00",
+    shiftStartTime: normalizeStaffScheduleTimeInput(schedule?.shiftStartTime, "08:00"),
+    shiftEndTime: normalizeStaffScheduleTimeInput(schedule?.shiftEndTime, "17:00"),
     graceMinutes: schedule ? String(schedule.graceMinutes) : "0",
     mondayIsWorkday: schedule?.mondayIsWorkday ?? false,
     tuesdayIsWorkday: schedule?.tuesdayIsWorkday ?? false,
@@ -236,11 +247,14 @@ export function buildStaffScheduleFormValues(
 export function buildBranchHolidayFormValues(
   holiday: BranchHolidaySummary | null,
 ): BranchHolidayFormValues {
+  const holidayKind = holiday?.holidayKind ?? "branch_closure";
+
   return {
     holidayId: holiday?.id ?? "",
     holidayDate: holiday?.holidayDate ?? getDefaultAttendanceDate(),
     label: holiday?.label ?? "",
-    holidayKind: holiday?.holidayKind ?? "regular",
+    holidayKind,
+    payTreatment: holiday?.payTreatment ?? getDefaultPayTreatmentForBranchHolidayKind(holidayKind),
     notes: holiday?.notes ?? "",
   };
 }
@@ -433,6 +447,25 @@ export function formatBranchHolidayKindLabel(kind: BranchHolidayKind) {
   return BRANCH_HOLIDAY_KIND_OPTIONS.find((option) => option.value === kind)?.label ?? kind;
 }
 
+export function formatBranchHolidayPayTreatmentLabel(payTreatment: BranchHolidayPayTreatment) {
+  return (
+    BRANCH_HOLIDAY_PAY_TREATMENT_OPTIONS.find((option) => option.value === payTreatment)?.label
+    ?? payTreatment
+  );
+}
+
+export function formatBranchHolidayStatusLabel(holiday: BranchHolidaySummary) {
+  return holiday.holidayKind === "branch_closure"
+    ? "Branch closed"
+    : formatBranchHolidayKindLabel(holiday.holidayKind);
+}
+
+export function getDefaultPayTreatmentForBranchHolidayKind(
+  _kind: BranchHolidayKind,
+): BranchHolidayPayTreatment {
+  return "unpaid";
+}
+
 export function formatStaffLeaveTypeLabel(type: StaffLeaveType) {
   return STAFF_LEAVE_TYPE_OPTIONS.find((option) => option.value === type)?.label ?? type;
 }
@@ -448,16 +481,10 @@ export function formatLeaveDateRange(leaveEntry: Pick<StaffLeaveEntrySummary, "s
 }
 
 export function formatScheduleTimeRange(schedule: StaffScheduleSummary) {
-  const shiftStart =
-    DateTime.fromFormat(schedule.shiftStartTime, "HH:mm:ss").isValid
-      ? DateTime.fromFormat(schedule.shiftStartTime, "HH:mm:ss")
-      : DateTime.fromFormat(schedule.shiftStartTime, "HH:mm");
-  const shiftEnd =
-    DateTime.fromFormat(schedule.shiftEndTime, "HH:mm:ss").isValid
-      ? DateTime.fromFormat(schedule.shiftEndTime, "HH:mm:ss")
-      : DateTime.fromFormat(schedule.shiftEndTime, "HH:mm");
+  const shiftStart = parseStaffScheduleTime(schedule.shiftStartTime);
+  const shiftEnd = parseStaffScheduleTime(schedule.shiftEndTime);
 
-  if (!shiftStart.isValid || !shiftEnd.isValid) {
+  if (!shiftStart || !shiftEnd) {
     return `${schedule.shiftStartTime} - ${schedule.shiftEndTime}`;
   }
 
@@ -611,23 +638,31 @@ export function isScheduledWorkdayForDate(
 export function matchesAttendanceStatusFilter(
   item: AttendanceRosterItem,
   statusFilter: AttendanceFilterStatus | "",
+  options: {
+    branchHoliday?: BranchHolidaySummary | null;
+  } = {},
 ) {
   if (!statusFilter) {
     return true;
   }
 
   if (statusFilter === "missing_timeout") {
-    return item.hasMissingTimeout;
+    return !options.branchHoliday && item.hasMissingTimeout;
   }
 
   if (statusFilter === "unrecorded") {
-    return item.attendance === null;
+    return !options.branchHoliday && item.attendance === null;
   }
 
   return item.attendance?.status === statusFilter;
 }
 
-export function buildAttendanceSummary(items: AttendanceRosterItem[]): AttendanceDailySummary {
+export function buildAttendanceSummary(
+  items: AttendanceRosterItem[],
+  options: {
+    branchHoliday?: BranchHolidaySummary | null;
+  } = {},
+) {
   return items.reduce<AttendanceDailySummary>(
     (summary, item) => {
       summary.totalStaff += 1;
@@ -637,7 +672,9 @@ export function buildAttendanceSummary(items: AttendanceRosterItem[]): Attendanc
       }
 
       if (!item.attendance) {
-        summary.unrecordedCount += 1;
+        if (!options.branchHoliday) {
+          summary.unrecordedCount += 1;
+        }
         return summary;
       }
 
@@ -663,7 +700,7 @@ export function buildAttendanceSummary(items: AttendanceRosterItem[]): Attendanc
         summary.absentCount += 1;
       }
 
-      if (item.hasMissingTimeout) {
+      if (item.hasMissingTimeout && !options.branchHoliday) {
         summary.missingTimeoutCount += 1;
       }
 
@@ -685,7 +722,9 @@ export function buildAttendanceSummary(items: AttendanceRosterItem[]): Attendanc
 }
 
 export function formatHolidayBannerLabel(holiday: BranchHolidaySummary) {
-  return `${holiday.label} · ${formatBranchHolidayKindLabel(holiday.holidayKind)}`;
+  return holiday.holidayKind === "branch_closure"
+    ? holiday.label
+    : `${holiday.label} · ${formatBranchHolidayKindLabel(holiday.holidayKind)}`;
 }
 
 function isIsoDate(value: string | undefined): value is string {

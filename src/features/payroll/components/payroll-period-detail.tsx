@@ -8,15 +8,10 @@ import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {
-  TableRowActionsMenu,
-  TableRowActionsMenuButton,
-} from "@/components/shared/table-row-actions-menu";
 import { formatScheduleSummary } from "@/features/attendance/utils";
-import { StaffScheduleDialog } from "@/features/attendance/components/staff-schedule-dialog";
-import { CompensationProfileDialog } from "@/features/payroll/components/compensation-profile-dialog";
 import { PayrollPeriodStatusBadge } from "@/features/payroll/components/payroll-period-status-badge";
 import { PayrollPeriodStatusForm } from "@/features/payroll/components/payroll-period-status-form";
+import { PayrollStaffRowActions } from "@/features/payroll/components/payroll-staff-row-actions";
 import type { PayrollPeriodDetailData } from "@/features/payroll/types";
 import {
   formatPayBasisLabel,
@@ -208,27 +203,13 @@ export function PayrollPeriodDetail({ data }: { data: PayrollPeriodDetailData })
                     </StatusBadge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <TableRowActionsMenu label={`Staff readiness actions for ${item.fullName}`}>
-                      <StaffScheduleDialog
-                        staffId={item.staffId}
-                        staffName={item.fullName}
-                        schedule={item.schedule}
-                        trigger={({ openDialog }) => (
-                          <TableRowActionsMenuButton label="Edit schedule" onSelect={openDialog} />
-                        )}
-                      />
-                      <CompensationProfileDialog
-                        staffId={item.staffId}
-                        staffName={item.fullName}
-                        profile={item.compensationProfile}
-                        trigger={({ openDialog }) => (
-                          <TableRowActionsMenuButton
-                            label="Edit compensation"
-                            onSelect={openDialog}
-                          />
-                        )}
-                      />
-                    </TableRowActionsMenu>
+                    <PayrollStaffRowActions
+                      staffId={item.staffId}
+                      staffName={item.fullName}
+                      schedule={item.schedule}
+                      profile={item.compensationProfile}
+                      label={`Staff readiness actions for ${item.fullName}`}
+                    />
                   </TableCell>
                 </TableRow>
               ))}

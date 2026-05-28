@@ -618,6 +618,7 @@ function mapBranchHoliday(row: BranchHolidayRow): BranchHolidaySummary {
     holidayDate: row.holiday_date,
     label: row.label,
     holidayKind: row.holiday_kind as BranchHolidaySummary["holidayKind"],
+    payTreatment: row.pay_treatment as BranchHolidaySummary["payTreatment"],
     notes: row.notes,
   };
 }

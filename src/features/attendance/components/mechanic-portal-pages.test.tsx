@@ -3,7 +3,6 @@ import { describe, expect, it, vi } from "vitest";
 
 import { OFFICIAL_BRAND_MARK_SRC } from "@/components/shared/brand-assets";
 import { MechanicPortalAttendancePage } from "@/features/attendance/components/mechanic-portal-attendance-page";
-import { MechanicPortalBottomNav } from "@/features/attendance/components/mechanic-portal-bottom-nav";
 import { MechanicPortalHeaderCard } from "@/features/attendance/components/mechanic-portal-header-card";
 import { MechanicPortalHistoryPage } from "@/features/attendance/components/mechanic-portal-history-page";
 import type {
@@ -191,14 +190,9 @@ describe("mechanic portal pages", () => {
     expect(screen.getByText("May 2026")).toBeInTheDocument();
   });
 
-  it("renders the shared mechanic identity header and history bottom-nav label", () => {
+  it("renders the shared mechanic identity header", () => {
     pathname = "/portal/history";
-    render(
-      <>
-        <MechanicPortalHeaderCard displayName="Jerick B. Tayona" />
-        <MechanicPortalBottomNav />
-      </>,
-    );
+    render(<MechanicPortalHeaderCard displayName="Jerick B. Tayona" />);
 
     expect(screen.getByLabelText("Mechanic identity")).toBeInTheDocument();
     expect(screen.queryByLabelText("Portal branding")).not.toBeInTheDocument();
@@ -208,6 +202,5 @@ describe("mechanic portal pages", () => {
       "src",
       OFFICIAL_BRAND_MARK_SRC,
     );
-    expect(screen.getAllByRole("link", { name: /History/i }).length).toBeGreaterThan(0);
   });
 });

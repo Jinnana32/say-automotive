@@ -21,4 +21,23 @@ describe("staffScheduleSchema", () => {
 
     expect(result.success).toBe(false);
   });
+
+  it("accepts common schedule time formats used by the form and stored records", () => {
+    const result = staffScheduleSchema.safeParse({
+      staffId: "6f85967c-31db-43ae-8d70-cdb34abd57b2",
+      shiftStartTime: "07:00:00",
+      shiftEndTime: "05:00 PM",
+      graceMinutes: "0",
+      mondayIsWorkday: true,
+      tuesdayIsWorkday: true,
+      wednesdayIsWorkday: true,
+      thursdayIsWorkday: true,
+      fridayIsWorkday: true,
+      saturdayIsWorkday: true,
+      sundayIsWorkday: false,
+      notes: "",
+    });
+
+    expect(result.success).toBe(true);
+  });
 });

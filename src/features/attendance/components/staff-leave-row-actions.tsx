@@ -22,7 +22,7 @@ export function StaffLeaveRowActions({
   activeStaff: TimekeepingCalendarStaffOption[];
 }) {
   return (
-    <TableRowActionsMenu label={`Leave actions for ${leaveEntry.staffName}`}>
+    <TableRowActionsMenu label={`Open row actions for ${leaveEntry.staffName}`}>
       <StaffLeaveDialog
         activeStaff={activeStaff}
         leaveEntry={leaveEntry}

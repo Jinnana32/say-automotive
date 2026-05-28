@@ -53,7 +53,7 @@ export function TabsList({ className, ...props }: React.HTMLAttributes<HTMLDivEl
     <div
       role="tablist"
       className={cn(
-        "flex gap-2 overflow-x-auto rounded-2xl border border-border/70 bg-muted/25 p-1.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        "flex gap-2 overflow-x-auto rounded-2xl border border-slate-200/80 bg-slate-100/90 p-1.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
         className,
       )}
       {...props}
@@ -81,10 +81,10 @@ export function TabsTrigger({
       aria-selected={isActive}
       data-state={isActive ? "active" : "inactive"}
       className={cn(
-        "inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-transparent px-4 py-2 text-sm font-medium transition-[background-color,color,box-shadow,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B1F4D]/30 focus-visible:ring-offset-2",
         isActive
-          ? "bg-background text-foreground shadow-sm"
-          : "text-muted-foreground hover:bg-background/70 hover:text-foreground",
+          ? "border-[#0B1F4D] bg-[#0B1F4D] text-white shadow-[0_10px_24px_-18px_rgba(11,31,77,0.9)]"
+          : "text-slate-600 hover:bg-white/80 hover:text-[#0B1F4D]",
         className,
       )}
       onClick={() => context.setValue(value)}

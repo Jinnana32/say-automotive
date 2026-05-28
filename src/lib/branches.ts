@@ -1,13 +1,11 @@
 import "server-only";
 
 import { cache } from "react";
-import { cookies } from "next/headers";
 
 import { requireAuthenticatedStaff } from "@/lib/auth/session";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type { AppCapability, StaffRole } from "@/lib/auth/permissions";
 import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
-import { ALL_BRANCHES_SCOPE_VALUE, BRANCH_SCOPE_COOKIE_NAME } from "@/lib/branch-scope";
 import type { TableRow } from "@/types/database";
 
 type BranchRow = Pick<
@@ -104,21 +102,10 @@ export async function getCurrentUserBranch() {
 export async function getBranchScope(): Promise<BranchScope> {
   const [{ accessibleBranches, canAccessAllBranches: hasGlobalAccess, currentUserBranchId }, mainBranch] =
     await Promise.all([listAccessibleBranchesCached(), getMainBranch()]);
-  const cookieStore = await cookies();
-  const rawSelection = cookieStore.get(BRANCH_SCOPE_COOKIE_NAME)?.value ?? "";
-  const selectedBranch =
-    rawSelection && rawSelection !== ALL_BRANCHES_SCOPE_VALUE
-      ? accessibleBranches.find((branch) => branch.id === rawSelection) ?? null
-      : null;
-  const selectedBranchId =
-    hasGlobalAccess && rawSelection === ALL_BRANCHES_SCOPE_VALUE
-      ? null
-      : selectedBranch?.id ?? currentUserBranchId ?? mainBranch.id;
+  const selectedBranchId = currentUserBranchId ?? mainBranch.id;
   const resolvedSelectedBranch =
-    selectedBranchId === null
-      ? null
-      : accessibleBranches.find((branch) => branch.id === selectedBranchId) ??
-        (selectedBranchId === mainBranch.id ? mainBranch : null);
+    accessibleBranches.find((branch) => branch.id === selectedBranchId) ??
+    (selectedBranchId === mainBranch.id ? mainBranch : null);
   const writeBranchId =
     selectedBranchId ??
     currentUserBranchId ??
@@ -131,7 +118,7 @@ export async function getBranchScope(): Promise<BranchScope> {
     currentUserBranchId,
     selectedBranchId,
     selectedBranch: resolvedSelectedBranch,
-    selectedBranchLabel: selectedBranchId === null ? "All branches" : resolvedSelectedBranch?.name ?? "Branch",
+    selectedBranchLabel: resolvedSelectedBranch?.name ?? "Branch",
     writeBranchId,
   };
 }

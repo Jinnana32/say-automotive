@@ -36,7 +36,10 @@ export function TableRowActionsMenu({
           type="button"
           variant="ghost"
           size="icon"
-          className={cn("size-8 text-muted-foreground hover:bg-muted/70 hover:text-foreground", className)}
+          className={cn(
+            "size-8 text-slate-500 hover:bg-[#071F4A]/8 hover:text-[#071F4A] focus-visible:ring-[#071F4A]/25",
+            className,
+          )}
           aria-label={label}
           title={label}
         >

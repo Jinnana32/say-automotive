@@ -271,11 +271,15 @@ export async function getPayrollPeriodDetailData(periodId: string): Promise<Payr
       const schedule = scheduleByStaffId.get(staffMember.id) ?? null;
       const attendanceSummary = summarizePayrollAttendance(
         (attendanceByStaffId.get(staffMember.id) ?? []).map((record) => ({
+          attendanceDate: record.attendance_date,
           status: record.status,
           timeIn: record.time_in,
           timeOut: record.time_out,
           approvedAt: record.approved_at,
         })),
+        {
+          ignoredMissingTimeoutDates: holidayDates,
+        },
       );
       const compensationProfile = compensationByStaffId.get(staffMember.id) ?? null;
       const hadAttendanceActivity = attendanceSummary.recordedDays > 0;

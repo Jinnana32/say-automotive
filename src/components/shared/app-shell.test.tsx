@@ -1,12 +1,15 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AppShell } from "@/components/shared/app-shell";
 
+const routerPush = vi.fn();
+
 vi.mock("next/navigation", () => ({
   usePathname: () => "/dashboard",
   useRouter: () => ({
-    push: vi.fn(),
+    push: routerPush,
   }),
   useSearchParams: () => new URLSearchParams(),
 }));
@@ -22,13 +25,10 @@ vi.mock("@/features/auth/actions/auth-actions", () => ({
   signOutAction: vi.fn(),
 }));
 
-vi.mock("@/components/shared/branch-scope-selector", () => ({
-  BranchScopeSelector: () => <div>Branch scope selector</div>,
-}));
-
 describe("AppShell", () => {
   beforeEach(() => {
     window.localStorage.clear();
+    routerPush.mockReset();
     Object.defineProperty(window, "matchMedia", {
       writable: true,
       value: vi.fn().mockImplementation((query: string) => ({
@@ -68,12 +68,6 @@ describe("AppShell", () => {
         capabilities={[]}
         businessName="SAY Auto Care Center"
         businessLogoUrl={null}
-        branchScope={{
-          canAccessAllBranches: false,
-          accessibleBranches: [],
-          selectedBranchId: "branch-main",
-          selectedBranchLabel: "Main Branch",
-        }}
       >
         <div>Dashboard content</div>
       </AppShell>,
@@ -121,12 +115,6 @@ describe("AppShell", () => {
         capabilities={[]}
         businessName="SAY Auto Care Center"
         businessLogoUrl={null}
-        branchScope={{
-          canAccessAllBranches: false,
-          accessibleBranches: [],
-          selectedBranchId: "branch-main",
-          selectedBranchLabel: "Main Branch",
-        }}
       >
         <div>Dashboard content</div>
       </AppShell>,
@@ -141,7 +129,7 @@ describe("AppShell", () => {
     expect(screen.getAllByRole("link", { name: "Customers" }).length).toBeGreaterThan(0);
   });
 
-  it("defaults to a collapsed sidebar on tablet widths but still allows expanding", () => {
+  it("defaults to a collapsed sidebar on tablet widths but still allows expanding", async () => {
     vi.mocked(window.matchMedia).mockImplementation((query: string) => ({
       matches: query === "(min-width: 768px) and (max-width: 1023px)",
       media: query,
@@ -176,19 +164,15 @@ describe("AppShell", () => {
         capabilities={[]}
         businessName="SAY Auto Care Center"
         businessLogoUrl={null}
-        branchScope={{
-          canAccessAllBranches: false,
-          accessibleBranches: [],
-          selectedBranchId: "branch-main",
-          selectedBranchLabel: "Main Branch",
-        }}
       >
         <div>Dashboard content</div>
       </AppShell>,
     );
 
-    expect(screen.queryByText("Customers")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Expand sidebar" })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText("Customers")).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Expand sidebar" })).toBeInTheDocument();
+    });
 
     fireEvent.click(screen.getByRole("button", { name: "Expand sidebar" }));
 
@@ -213,12 +197,6 @@ describe("AppShell", () => {
         capabilities={[]}
         businessName="SAY Auto Care Center"
         businessLogoUrl={null}
-        branchScope={{
-          canAccessAllBranches: false,
-          accessibleBranches: [],
-          selectedBranchId: "branch-main",
-          selectedBranchLabel: "Main Branch",
-        }}
         showSidebarBusinessName
       >
         <div>Dashboard content</div>
@@ -229,5 +207,40 @@ describe("AppShell", () => {
 
     expect(screen.getAllByText("SAY Auto Care Center").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Workshop administration").length).toBeGreaterThan(0);
+  });
+
+  it("shows a create menu in the topbar for quotation, customer, and vehicle shortcuts", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <AppShell
+        navigationItems={[
+          {
+            href: "/dashboard",
+            label: "Dashboard",
+            description: "Overview of shop activity",
+            group: "Overview",
+            iconName: "dashboard",
+          },
+        ]}
+        userDisplayName="Alex"
+        userRoleLabel="Administrator"
+        capabilities={["quotations:write", "customers:write", "vehicles:write"]}
+        businessName="SAY Auto Care Center"
+        businessLogoUrl={null}
+      >
+        <div>Dashboard content</div>
+      </AppShell>,
+    );
+
+    await user.click(screen.getAllByRole("button", { name: "Create new" })[0]);
+
+    expect(await screen.findByText("New quotation")).toBeInTheDocument();
+    expect(screen.getByText("New customer")).toBeInTheDocument();
+    expect(screen.getByText("New vehicle")).toBeInTheDocument();
+
+    await user.click(screen.getByText("New quotation"));
+
+    expect(routerPush).toHaveBeenCalledWith("/quotations/new");
   });
 });

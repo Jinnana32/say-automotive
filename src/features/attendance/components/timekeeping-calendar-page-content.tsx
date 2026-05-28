@@ -24,8 +24,11 @@ import { AttendanceAllowedIpRowActions } from "@/features/attendance/components/
 import { AttendanceDevicesPageContent } from "@/features/attendance/components/attendance-devices-page-content";
 import { BranchHolidayDialog } from "@/features/attendance/components/branch-holiday-dialog";
 import { BranchHolidayRowActions } from "@/features/attendance/components/branch-holiday-row-actions";
-import type { TimekeepingCalendarPageData } from "@/features/attendance/types";
-import { formatBranchHolidayKindLabel } from "@/features/attendance/utils";
+import type { BranchHolidaySummary, TimekeepingCalendarPageData } from "@/features/attendance/types";
+import {
+  formatBranchHolidayKindLabel,
+  formatBranchHolidayPayTreatmentLabel,
+} from "@/features/attendance/utils";
 import { formatDate, getBusinessNow } from "@/lib/dates";
 
 export function TimekeepingCalendarPageContent({
@@ -67,7 +70,7 @@ export function TimekeepingCalendarPageContent({
     <div className="space-y-6">
       <PageHeader
         title="Timekeeping"
-        description="Manage branch attendance rules, device approvals, and holiday calendars from one place."
+        description="Manage branch attendance rules, device approvals, and branch closure or holiday calendars from one place."
       />
 
       <MetricGrid className="xl:grid-cols-4">
@@ -77,9 +80,9 @@ export function TimekeepingCalendarPageContent({
           description="Current calendar scope for attendance and payroll"
         />
         <StatCard
-          title="Holiday dates"
+          title="Calendar dates"
           value={String(data.holidays.length)}
-          description="Configured branch non-working dates"
+          description="Configured branch closures and holiday exceptions"
           badge={`${upcomingHolidayCount} upcoming`}
           tone={upcomingHolidayCount > 0 ? "info" : "neutral"}
         />
@@ -220,7 +223,7 @@ export function TimekeepingCalendarPageContent({
                             <TableCell className="text-sm text-muted-foreground">
                               {formatDate(allowedIp.updatedAt)}
                             </TableCell>
-                            <TableCell className="text-right">
+                            <TableCell className="w-14 text-right">
                               <AttendanceAllowedIpRowActions
                                 allowedIp={allowedIp}
                               />
@@ -246,15 +249,15 @@ export function TimekeepingCalendarPageContent({
 
         <TabsContent value="holidays" className="space-y-6">
           <DataTableCard
-            title="Branch holidays"
-            description="These dates remove expected attendance for the whole branch."
-            action={<BranchHolidayDialog />}
+            title="Branch calendar dates"
+            description="These dates remove expected attendance for the whole branch and record how payroll should treat the day."
+            action={<BranchHolidayDialog triggerLabel="Add calendar date" />}
           >
             {data.holidays.length === 0 ? (
               <EmptyState
-                title="No branch holidays yet"
-                description="Add official holidays or planned branch closures so payroll does not treat those dates as missing attendance."
-                action={<BranchHolidayDialog />}
+                title="No branch calendar dates yet"
+                description="Add branch closures or holidays so attendance is not expected and payroll treatment is explicit."
+                action={<BranchHolidayDialog triggerLabel="Add calendar date" />}
               />
             ) : (
               <div className="overflow-x-auto">
@@ -263,7 +266,8 @@ export function TimekeepingCalendarPageContent({
                     <TableRow>
                       <TableHead>Date</TableHead>
                       <TableHead>Label</TableHead>
-                      <TableHead>Type</TableHead>
+                      <TableHead>Event type</TableHead>
+                      <TableHead>Pay treatment</TableHead>
                       <TableHead>Notes</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -276,8 +280,16 @@ export function TimekeepingCalendarPageContent({
                         </TableCell>
                         <TableCell>{holiday.label}</TableCell>
                         <TableCell>
-                          <StatusBadge tone="info">
+                          <StatusBadge tone="neutral" className={getBranchHolidayTypeBadgeClass(holiday)}>
                             {formatBranchHolidayKindLabel(holiday.holidayKind)}
+                          </StatusBadge>
+                        </TableCell>
+                        <TableCell>
+                          <StatusBadge
+                            tone="neutral"
+                            className={getBranchHolidayPayTreatmentBadgeClass(holiday)}
+                          >
+                            {formatBranchHolidayPayTreatmentLabel(holiday.payTreatment)}
                           </StatusBadge>
                         </TableCell>
                         <TableCell className="max-w-[320px] text-sm text-muted-foreground">
@@ -285,7 +297,7 @@ export function TimekeepingCalendarPageContent({
                             {holiday.notes?.trim() ? holiday.notes : "No notes"}
                           </span>
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="w-14 text-right">
                           <BranchHolidayRowActions holiday={holiday} />
                         </TableCell>
                       </TableRow>
@@ -299,4 +311,27 @@ export function TimekeepingCalendarPageContent({
       </Tabs>
     </div>
   );
+}
+
+function getBranchHolidayTypeBadgeClass(holiday: BranchHolidaySummary) {
+  switch (holiday.holidayKind) {
+    case "branch_closure":
+      return "border-transparent bg-sky-100 text-sky-800";
+    case "public_holiday":
+    case "company_holiday":
+      return "border-transparent bg-violet-100 text-violet-800";
+    case "special_non_working_day":
+      return "border-transparent bg-amber-100 text-amber-800";
+  }
+}
+
+function getBranchHolidayPayTreatmentBadgeClass(holiday: BranchHolidaySummary) {
+  switch (holiday.payTreatment) {
+    case "unpaid":
+      return "border-transparent bg-slate-100 text-slate-700";
+    case "paid_regular_day":
+      return "border-transparent bg-emerald-100 text-emerald-800";
+    case "custom":
+      return "border-transparent bg-amber-100 text-amber-800";
+  }
 }

@@ -1,22 +1,19 @@
+import { Eye } from "lucide-react";
+
 import { DataTableCard } from "@/components/shared/data-table-card";
 import { DataTableFilters } from "@/components/shared/data-table-filters";
 import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
+import { IconActionLink } from "@/components/shared/icon-action";
 import { MetricGrid } from "@/components/shared/metric-grid";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { TableCellLink } from "@/components/shared/table-cell-link";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {
-  TableRowActionsMenu,
-  TableRowActionsMenuButton,
-  TableRowActionsMenuLink,
-} from "@/components/shared/table-row-actions-menu";
 import { formatScheduleSummary } from "@/features/attendance/utils";
-import { StaffScheduleDialog } from "@/features/attendance/components/staff-schedule-dialog";
-import { CompensationProfileDialog } from "@/features/payroll/components/compensation-profile-dialog";
 import { PayrollPeriodDialog } from "@/features/payroll/components/payroll-period-dialog";
+import { PayrollStaffRowActions } from "@/features/payroll/components/payroll-staff-row-actions";
 import { PayrollPeriodStatusBadge } from "@/features/payroll/components/payroll-period-status-badge";
 import type { PayrollPageData } from "@/features/payroll/types";
 import {
@@ -182,10 +179,12 @@ export function PayrollPageContent({
                         {period.notes?.trim() ? period.notes : "No notes"}
                       </TableCellLink>
                     </TableCell>
-                    <TableCell className="text-right">
-                      <TableRowActionsMenu label={`Payroll period actions for ${period.label}`}>
-                        <TableRowActionsMenuLink href={`/payroll/${period.id}`} label="Open payroll period" />
-                      </TableRowActionsMenu>
+                    <TableCell className="w-14 text-right">
+                      <IconActionLink
+                        href={`/payroll/${period.id}`}
+                        label={`Open payroll period ${period.label}`}
+                        icon={Eye}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -277,27 +276,13 @@ export function PayrollPageContent({
                       {item.profile ? formatDate(item.profile.effectiveStartDate) : "Not configured"}
                     </TableCell>
                     <TableCell className="text-right">
-                      <TableRowActionsMenu label={`Compensation actions for ${item.fullName}`}>
-                        <StaffScheduleDialog
-                          staffId={item.staffId}
-                          staffName={item.fullName}
-                          schedule={item.schedule}
-                          trigger={({ openDialog }) => (
-                            <TableRowActionsMenuButton label="Edit schedule" onSelect={openDialog} />
-                          )}
-                        />
-                        <CompensationProfileDialog
-                          staffId={item.staffId}
-                          staffName={item.fullName}
-                          profile={item.profile}
-                          trigger={({ openDialog }) => (
-                            <TableRowActionsMenuButton
-                              label="Edit compensation"
-                              onSelect={openDialog}
-                            />
-                          )}
-                        />
-                      </TableRowActionsMenu>
+                      <PayrollStaffRowActions
+                        staffId={item.staffId}
+                        staffName={item.fullName}
+                        schedule={item.schedule}
+                        profile={item.profile}
+                        label={`Compensation actions for ${item.fullName}`}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

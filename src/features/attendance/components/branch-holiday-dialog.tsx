@@ -11,7 +11,7 @@ import { buildBranchHolidayFormValues } from "@/features/attendance/utils";
 
 export function BranchHolidayDialog({
   holiday,
-  triggerLabel = "Add holiday",
+  triggerLabel = "Add calendar date",
   trigger,
 }: {
   holiday?: BranchHolidaySummary | null;
@@ -26,8 +26,8 @@ export function BranchHolidayDialog({
 
   return (
     <ModalDialog
-      title={holiday ? "Edit branch holiday" : "Add branch holiday"}
-      description="Branch holidays remove expected attendance for that day across payroll coverage."
+      title={holiday ? "Edit branch calendar date" : "Add branch calendar date"}
+      description="Branch calendar dates remove expected attendance for that day and store the payroll treatment for future payroll runs."
       size="lg"
       trigger={({ openDialog }) =>
         trigger ? (

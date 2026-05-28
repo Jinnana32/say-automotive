@@ -10,14 +10,20 @@ import type { DtrAmendmentSummary } from "@/features/attendance/types";
 export function DtrAmendmentReviewDialog({
   amendment,
   trigger,
+  open,
+  onOpenChange,
 }: {
   amendment: DtrAmendmentSummary;
   trigger?: (controls: { openDialog: () => void }) => React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   return (
     <ModalDialog
       title="Review DTR amendment"
       description="Approve, reject, or adjust the final attendance time before payroll uses this date."
+      open={open}
+      onOpenChange={onOpenChange}
       trigger={({ openDialog }) =>
         trigger ? (
           trigger({ openDialog })

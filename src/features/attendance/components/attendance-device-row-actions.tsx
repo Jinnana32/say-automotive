@@ -4,10 +4,8 @@ import { useState } from "react";
 import { Check, Power, RotateCcw } from "lucide-react";
 
 import { ConfirmActionDialog } from "@/components/shared/confirm-action-dialog";
-import {
-  TableRowActionsMenu,
-  TableRowActionsMenuButton,
-} from "@/components/shared/table-row-actions-menu";
+import { IconActionConfirm } from "@/components/shared/icon-action";
+import { TableRowActionsMenu, TableRowActionsMenuButton } from "@/components/shared/table-row-actions-menu";
 import {
   approveStaffDeviceAction,
   revokeStaffDeviceAction,
@@ -25,22 +23,33 @@ export function AttendanceDeviceRowActions({
 
   return (
     <>
-      <TableRowActionsMenu label={`Device actions for ${displayName}`}>
-        {device.status !== "approved" ? (
+      {device.status === "approved" ? (
+        <IconActionConfirm
+          label="Reset device access"
+          icon={RotateCcw}
+          title={`Reset ${displayName}?`}
+          description="This will immediately block the mechanic from using this phone or browser for time-in/time-out."
+          confirmLabel="Reset device access"
+          cancelLabel="Cancel"
+          action={revokeStaffDeviceAction}
+          fields={[{ name: "deviceId", value: device.id }]}
+          tone="destructive"
+        />
+      ) : (
+        <TableRowActionsMenu label={`Open row actions for ${displayName}`}>
           <TableRowActionsMenuButton
             label="Approve device"
             icon={Check}
             onSelect={() => setIsApproveOpen(true)}
           />
-        ) : null}
-
-        <TableRowActionsMenuButton
-          label={device.status === "approved" ? "Reset device access" : "Revoke device"}
-          icon={device.status === "approved" ? RotateCcw : Power}
-          tone="destructive"
-          onSelect={() => setIsRevokeOpen(true)}
-        />
-      </TableRowActionsMenu>
+          <TableRowActionsMenuButton
+            label="Revoke device"
+            icon={Power}
+            tone="destructive"
+            onSelect={() => setIsRevokeOpen(true)}
+          />
+        </TableRowActionsMenu>
+      )}
 
       {device.status !== "approved" ? (
         <ConfirmActionDialog
@@ -56,20 +65,18 @@ export function AttendanceDeviceRowActions({
         />
       ) : null}
 
-      <ConfirmActionDialog
-        title={`${device.status === "approved" ? "Reset" : "Revoke"} ${displayName}?`}
-        description={
-          device.status === "approved"
-            ? "This will immediately block the mechanic from using this phone or browser for time-in/time-out."
-            : "This keeps the device blocked for attendance until it is approved again."
-        }
-        confirmLabel={device.status === "approved" ? "Reset device access" : "Revoke device"}
-        cancelLabel="Cancel"
-        action={revokeStaffDeviceAction}
-        fields={[{ name: "deviceId", value: device.id }]}
-        open={isRevokeOpen}
-        onOpenChange={setIsRevokeOpen}
-      />
+      {device.status !== "approved" ? (
+        <ConfirmActionDialog
+          title={`Revoke ${displayName}?`}
+          description="This keeps the device blocked for attendance until it is approved again."
+          confirmLabel="Revoke device"
+          cancelLabel="Cancel"
+          action={revokeStaffDeviceAction}
+          fields={[{ name: "deviceId", value: device.id }]}
+          open={isRevokeOpen}
+          onOpenChange={setIsRevokeOpen}
+        />
+      ) : null}
     </>
   );
 }

@@ -65,4 +65,17 @@ describe("PublicSiteShell", () => {
       "page",
     );
   });
+
+  it("uses the official full logo fallback consistently in the public header", () => {
+    render(
+      <PublicSiteShell shellData={shellData}>
+        <div>Home page content</div>
+      </PublicSiteShell>,
+    );
+
+    const logo = screen.getByAltText("SAY Auto Care Center");
+
+    expect(logo).toHaveAttribute("src", expect.stringContaining("/say-auto-care-logo-tight.png"));
+    expect(screen.queryByAltText("SAY Auto Care Center shield")).not.toBeInTheDocument();
+  });
 });

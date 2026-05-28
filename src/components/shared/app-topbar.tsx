@@ -2,39 +2,37 @@
 
 import { useId, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, Menu, Search } from 'lucide-react';
+import { CarFront, FileText, Menu, Plus, Search, UserPlus } from 'lucide-react';
 
-import { BranchScopeSelector } from '@/components/shared/branch-scope-selector';
 import { UserAccountMenu } from '@/components/shared/user-account-menu';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { resolveQuickAccessQuery } from '@/features/quick-access/utils';
+import type { AppCapability } from '@/lib/auth/permissions';
 
 export function AppTopbar({
   activeLabel,
   userDisplayName,
   userRoleLabel,
-  branchScope,
+  capabilities,
   onOpenNavigation,
 }: {
   activeLabel: string;
   userDisplayName: string;
   userRoleLabel: string;
-  branchScope: {
-    canAccessAllBranches: boolean;
-    accessibleBranches: Array<{
-      id: string;
-      code: string;
-      name: string;
-    }>;
-    selectedBranchId: string | null;
-    selectedBranchLabel: string;
-  };
+  capabilities: readonly AppCapability[];
   onOpenNavigation?: () => void;
 }) {
   const router = useRouter();
   const searchInputBaseId = useId();
   const [searchQuery, setSearchQuery] = useState('');
+  const createActions = buildCreateActions(capabilities);
 
   function handleSearchSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -71,22 +69,12 @@ export function AppTopbar({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <HeaderIconButton label="Notifications coming soon">
-              <Bell className="size-4" />
-            </HeaderIconButton>
+            <CreateActionsMenu actions={createActions} />
             <UserAccountMenu userDisplayName={userDisplayName} userRoleLabel={userRoleLabel} compact />
           </div>
         </div>
 
         <div className="md:hidden">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-primary/70">
-                Branch scope
-              </p>
-            </div>
-            <BranchScopeSelector {...branchScope} />
-          </div>
           <GlobalSearchForm
             inputId={`${searchInputBaseId}-mobile`}
             value={searchQuery}
@@ -107,10 +95,7 @@ export function AppTopbar({
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <BranchScopeSelector {...branchScope} />
-            <HeaderIconButton label="Notifications coming soon">
-              <Bell className="size-4" />
-            </HeaderIconButton>
+            <CreateActionsMenu actions={createActions} />
             <UserAccountMenu userDisplayName={userDisplayName} userRoleLabel={userRoleLabel} />
           </div>
         </div>
@@ -149,24 +134,51 @@ function GlobalSearchForm({
   );
 }
 
-function HeaderIconButton({
-  label,
-  children,
+function CreateActionsMenu({
+  actions,
 }: {
-  label: string;
-  children: React.ReactNode;
+  actions: ReadonlyArray<{
+    href: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }>;
 }) {
+  const router = useRouter();
+
+  if (actions.length === 0) {
+    return null;
+  }
+
   return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="icon"
-      className="rounded-2xl border border-border/70 bg-background shadow-sm"
-      aria-label={label}
-      title={label}
-    >
-      {children}
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="rounded-2xl border border-border/70 bg-background shadow-sm"
+          aria-label="Create new"
+          title="Create new"
+        >
+          <Plus className="size-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56">
+        {actions.map((action) => {
+          const Icon = action.icon;
+
+          return (
+            <DropdownMenuItem
+              key={action.href}
+              onSelect={() => router.push(action.href)}
+            >
+              <Icon className="size-4" />
+              {action.label}
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -184,4 +196,38 @@ function resolveGlobalSearchDestination(query: string) {
   return lookupValue
     ? `/quick-access?q=${encodeURIComponent(lookupValue)}`
     : null;
+}
+
+function buildCreateActions(capabilities: readonly AppCapability[]) {
+  const actions: Array<{
+    href: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }> = [];
+
+  if (capabilities.includes('quotations:write')) {
+    actions.push({
+      href: '/quotations/new',
+      label: 'New quotation',
+      icon: FileText,
+    });
+  }
+
+  if (capabilities.includes('customers:write')) {
+    actions.push({
+      href: '/customers/new',
+      label: 'New customer',
+      icon: UserPlus,
+    });
+  }
+
+  if (capabilities.includes('vehicles:write')) {
+    actions.push({
+      href: '/vehicles/new',
+      label: 'New vehicle',
+      icon: CarFront,
+    });
+  }
+
+  return actions;
 }

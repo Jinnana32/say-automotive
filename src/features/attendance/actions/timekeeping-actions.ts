@@ -61,7 +61,7 @@ export async function upsertBranchHolidayAction(
   if (duplicateHoliday) {
     return {
       status: "error",
-      message: "A branch holiday already exists for that date.",
+      message: "A branch calendar date already exists for that date.",
     };
   }
 
@@ -70,6 +70,7 @@ export async function upsertBranchHolidayAction(
     holiday_date: values.holidayDate,
     label: values.label.trim(),
     holiday_kind: values.holidayKind,
+    pay_treatment: values.payTreatment,
     notes: normalizeNullable(values.notes),
   };
 
@@ -144,7 +145,7 @@ export async function upsertBranchHolidayAction(
 
   return {
     status: "success",
-    message: "Branch holiday saved.",
+    message: "Branch calendar date saved.",
   };
 }
 

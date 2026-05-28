@@ -164,7 +164,12 @@ export function buildDefaultPayrollPeriodFormValues(): PayrollPeriodFormValues {
   };
 }
 
-export function summarizePayrollAttendance(records: PayrollAttendanceSourceRecord[]) {
+export function summarizePayrollAttendance(
+  records: PayrollAttendanceSourceRecord[],
+  options: {
+    ignoredMissingTimeoutDates?: Set<string>;
+  } = {},
+) {
   return records.reduce(
     (summary, record) => {
       summary.recordedDays += 1;
@@ -191,7 +196,11 @@ export function summarizePayrollAttendance(records: PayrollAttendanceSourceRecor
         summary.absentCount += 1;
       }
 
-      if (record.timeIn && !record.timeOut) {
+      if (
+        record.timeIn &&
+        !record.timeOut &&
+        !options.ignoredMissingTimeoutDates?.has(record.attendanceDate)
+      ) {
         summary.missingTimeoutCount += 1;
       }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { HandCoins } from "lucide-react";
 
 import { IconActionButton } from "@/components/shared/icon-action";
@@ -14,20 +14,33 @@ export function CompensationProfileDialog({
   staffName,
   profile,
   trigger,
+  showTrigger = true,
+  open,
+  onOpenChange,
 }: {
   staffId: string;
   staffName: string;
   profile: CompensationProfileSummary | null;
   trigger?: (controls: { openDialog: () => void }) => React.ReactNode;
+  showTrigger?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const [dialogInstance, setDialogInstance] = useState(0);
+  const previousOpenRef = useRef(false);
 
-  return (
-    <ModalDialog
-      title="Compensation profile"
-      description={`Configure how ${staffName} should be treated in payroll.`}
-      size="lg"
-      trigger={({ openDialog }) =>
+  useEffect(() => {
+    const isOpen = open ?? false;
+
+    if (isOpen && !previousOpenRef.current) {
+      setDialogInstance((currentValue) => currentValue + 1);
+    }
+
+    previousOpenRef.current = isOpen;
+  }, [open]);
+
+  const resolvedTrigger = showTrigger
+    ? ({ openDialog }: { openDialog: () => void }) =>
         trigger ? (
           trigger({
             openDialog: () => {
@@ -45,7 +58,16 @@ export function CompensationProfileDialog({
             }}
           />
         )
-      }
+    : undefined;
+
+  return (
+    <ModalDialog
+      title="Compensation profile"
+      description={`Configure how ${staffName} should be treated in payroll.`}
+      size="lg"
+      open={open}
+      onOpenChange={onOpenChange}
+      trigger={resolvedTrigger}
     >
       {({ closeDialog }) => (
         <CompensationProfileForm

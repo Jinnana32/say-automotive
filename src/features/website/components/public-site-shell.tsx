@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 
-import { DEFAULT_BRAND_LOGO_SRC } from '@/components/shared/brand-assets';
+import { DEFAULT_BRAND_LOGO_TIGHT_SRC } from '@/components/shared/brand-assets';
 import { BrandLogo } from '@/components/shared/brand-logo';
 import { Button } from '@/components/ui/button';
 import type { WebsiteShellData } from '@/features/website/types';
@@ -76,54 +76,26 @@ export function PublicSiteShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileMenuPathname, setMobileMenuPathname] = useState<string | null>(null);
   const isQuoteActive = isActivePath(pathname, '/get-quote');
-
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
+  const websiteLogoSrc = shellData.businessLogoUrl ?? DEFAULT_BRAND_LOGO_TIGHT_SRC;
+  const mobileMenuOpen = mobileMenuPathname === pathname;
 
   return (
     <div className="min-h-screen overflow-x-clip bg-[#f3f5fa] text-[#10224d]">
       <header className="sticky top-0 z-20 border-b border-[#d6deef] bg-white/96 shadow-[0_12px_30px_rgba(9,26,79,0.08)] backdrop-blur">
         <div className="h-1 w-full bg-[linear-gradient(90deg,#ffd24a_0%,#0f2d83_38%,#173c99_100%)]" />
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
-          <Link href="/" className="flex min-w-0 flex-1 items-center gap-3 md:flex-none">
-            <div className="flex min-w-0 items-center gap-2.5 md:hidden">
-              <BrandLogo
-                alt={`${shellData.businessName} shield`}
-                variant="mark"
-                width={56}
-                height={56}
-                className="h-11 w-11 shrink-0 object-contain"
-                priority
-              />
-              <div className="min-w-0 leading-none">
-                <p className="truncate text-[1.55rem] font-black italic tracking-[-0.08em] text-[#173c99]">
-                  SAY
-                </p>
-                <p className="truncate text-[0.68rem] font-bold uppercase tracking-[0.24em] text-[#5c6a8a]">
-                  Auto Care
-                </p>
-              </div>
-            </div>
-
+          <Link href="/" className="flex min-w-0 flex-1 items-center md:flex-none">
             <BrandLogo
-              src={shellData.businessLogoUrl ?? DEFAULT_BRAND_LOGO_SRC}
+              src={websiteLogoSrc}
               alt={shellData.businessName}
               width={240}
               height={192}
-              className="hidden h-11 w-auto sm:h-12 md:block md:h-14 md:max-w-none"
+              className="h-10 w-auto max-w-[150px] shrink-0 sm:h-11 sm:max-w-[170px] md:h-12 md:max-w-[220px]"
               priority
+              sizes="(max-width: 639px) 150px, (max-width: 767px) 170px, 220px"
             />
-            <div className="hidden min-w-0 md:block">
-              <p className="truncate text-base font-semibold uppercase tracking-[0.12em] text-[#173c99]">
-                {shellData.businessName}
-              </p>
-              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#5c6a8a]">
-                Pinoy craftsmanship. American precision.
-              </p>
-            </div>
           </Link>
 
           <nav className="hidden items-center gap-x-2 gap-y-2 text-[15px] font-medium md:flex">
@@ -162,7 +134,11 @@ export function PublicSiteShell({
             className="shrink-0 rounded-2xl border border-[#d6deef] bg-white text-[#173c99] shadow-sm md:hidden"
             aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={mobileMenuOpen}
-            onClick={() => setMobileMenuOpen((open) => !open)}
+            onClick={() =>
+              setMobileMenuPathname((currentPathname) =>
+                currentPathname === pathname ? null : pathname,
+              )
+            }
           >
             {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
           </Button>
@@ -177,7 +153,7 @@ export function PublicSiteShell({
                   href={link.href}
                   label={link.label}
                   exact={link.exact}
-                  onSelect={() => setMobileMenuOpen(false)}
+                  onSelect={() => setMobileMenuPathname(null)}
                 />
               ))}
 
@@ -194,7 +170,7 @@ export function PublicSiteShell({
                 <Link
                   href="/get-quote"
                   aria-current={isQuoteActive ? 'page' : undefined}
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={() => setMobileMenuPathname(null)}
                 >
                   Service Quote
                 </Link>

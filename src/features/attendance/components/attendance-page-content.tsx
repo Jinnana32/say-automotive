@@ -21,24 +21,25 @@ import { ApprovedLeaveManagementSection } from "@/features/attendance/components
 import { AttendanceRosterRowActions } from "@/features/attendance/components/attendance-roster-row-actions";
 import type {
   AttendanceCalendarDaySummary,
-  AttendanceCalendarStatus,
   AttendancePageData,
+  BranchHolidaySummary,
 } from "@/features/attendance/types";
 import {
   ATTENDANCE_FILTER_OPTIONS,
   ATTENDANCE_ROLE_OPTIONS,
   canApproveAttendanceForLockedPeriod,
   canEditAttendanceForLockedPeriod,
-  formatAttendanceApprovalLabel,
   formatAttendanceLockMessage,
   formatAttendanceStatusLabel,
   formatAttendanceTime,
+  formatBranchHolidayKindLabel,
+  formatBranchHolidayPayTreatmentLabel,
+  formatBranchHolidayStatusLabel,
   formatHolidayBannerLabel,
   formatLeaveDateRange,
   formatScheduleSummary,
   formatStaffLeaveTypeLabel,
   formatStaffRoleLabel,
-  getAttendanceApprovalTone,
   getAttendanceStatusTone,
   getDefaultAttendanceDate,
 } from "@/features/attendance/utils";
@@ -58,6 +59,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
   const selectedDateLabel = formatDate(selectedDate);
   const activeTab = resolveAttendanceTab(searchParams.get("tab"));
   const selectedMonth = DateTime.fromISO(attendanceCalendar.monthStartDate);
+  const isBranchHolidayDate = attendanceData.branchHoliday !== null;
   const yearOptions = buildYearOptions(selectedMonth.year, DateTime.fromISO(today).year);
   const calendarCells = buildCalendarCells(attendanceCalendar.days, attendanceCalendar.monthStartDate);
   const rosterPagination = paginateItems(
@@ -97,7 +99,9 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
     {
       label: "Recorded",
       value: attendanceData.summary.recordedCount,
-      helper: `${attendanceData.summary.unrecordedCount} still unrecorded`,
+      helper: isBranchHolidayDate
+        ? "Real punch records still appear on non-working branch dates"
+        : `${attendanceData.summary.unrecordedCount} still unrecorded`,
     },
     {
       label: "Approved",
@@ -107,12 +111,16 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
     {
       label: "Missing timeout",
       value: attendanceData.summary.missingTimeoutCount,
-      helper: "Open shifts needing completion",
+      helper: isBranchHolidayDate
+        ? "Not treated as a blocker on branch closures or holidays"
+        : "Open shifts needing completion",
     },
     {
       label: "Absent / unrecorded",
       value: attendanceData.summary.absentCount + attendanceData.summary.unrecordedCount,
-      helper: `For ${selectedDateLabel}`,
+      helper: isBranchHolidayDate
+        ? "No attendance required for this branch calendar date"
+        : `For ${selectedDateLabel}`,
     },
   ];
 
@@ -188,11 +196,30 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
       ) : null}
 
       {attendanceData.branchHoliday ? (
-        <div className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900">
-          {formatHolidayBannerLabel(attendanceData.branchHoliday)}
-          {attendanceData.branchHoliday.notes?.trim()
-            ? ` · ${attendanceData.branchHoliday.notes}`
-            : ""}
+        <div
+          className={cn(
+            "rounded-2xl border px-4 py-3 text-sm",
+            getBranchHolidayPanelClass(attendanceData.branchHoliday),
+          )}
+        >
+          <p className="font-semibold">
+            {formatBranchHolidayStatusLabel(attendanceData.branchHoliday)}
+          </p>
+          <p className="mt-1">
+            {selectedDateLabel}
+            {attendanceData.branchName ? ` · ${attendanceData.branchName}` : ""}
+          </p>
+          <p className="mt-1">
+            {attendanceData.branchHoliday.holidayKind === "branch_closure" ? "Reason" : "Event"}:{" "}
+            {formatHolidayBannerLabel(attendanceData.branchHoliday)}
+          </p>
+          <p className="mt-1">
+            Pay treatment: {formatBranchHolidayPayTreatmentLabel(attendanceData.branchHoliday.payTreatment)}
+          </p>
+          <p className="mt-1">No attendance required for this date.</p>
+          {attendanceData.branchHoliday.notes?.trim() ? (
+            <p className="mt-1">{attendanceData.branchHoliday.notes}</p>
+          ) : null}
         </div>
       ) : null}
 
@@ -321,8 +348,9 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                           "relative flex aspect-square min-h-[3rem] flex-col items-center justify-center rounded-2xl border text-sm transition",
                           selectedDate === day.date
                             ? "border-brand-navy bg-brand-navy text-white shadow-[0_10px_24px_rgba(8,23,53,0.18)]"
-                            : "border-border/80 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50",
+                            : getCalendarStatusCellClass(day),
                         )}
+                        aria-label={buildAttendanceCalendarDayAriaLabel(day)}
                       >
                         <span className="font-semibold">
                           {DateTime.fromISO(day.date).toFormat("d")}
@@ -330,7 +358,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                         <span
                           className={cn(
                             "mt-1 size-2 rounded-full",
-                            selectedDate === day.date ? "bg-white" : getCalendarStatusDotClass(day.status),
+                            selectedDate === day.date ? "bg-white" : getCalendarStatusDotClass(day),
                           )}
                         />
                       </button>
@@ -344,7 +372,10 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                   <LegendItem colorClass="bg-emerald-500" label="Present" />
                   <LegendItem colorClass="bg-amber-500" label="Incomplete" />
                   <LegendItem colorClass="bg-red-500" label="Absent" />
-                  <LegendItem colorClass="bg-slate-300" label="No record" />
+                  <LegendItem colorClass="bg-sky-500" label="Branch closure" />
+                  <LegendItem colorClass="bg-violet-500" label="Public / company holiday" />
+                  <LegendItem colorClass="bg-amber-400" label="Special non-working day" />
+                  <LegendItem colorClass="bg-slate-300" label="No record / rest day" />
                 </div>
               </CardContent>
             </Card>
@@ -398,6 +429,22 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                   </p>
                 </div>
 
+                {attendanceData.branchHoliday ? (
+                  <div
+                    className={cn(
+                      "rounded-2xl border px-4 py-3 text-sm",
+                      getBranchHolidayPanelClass(attendanceData.branchHoliday),
+                    )}
+                  >
+                    <p>
+                      {formatBranchHolidayStatusLabel(attendanceData.branchHoliday)} on this date. Attendance is not required. Real punch records will still appear below.
+                    </p>
+                    <p className="mt-1">
+                      Pay treatment: {formatBranchHolidayPayTreatmentLabel(attendanceData.branchHoliday.payTreatment)}
+                    </p>
+                  </div>
+                ) : null}
+
                 {attendancePagination.totalItems === 0 ? (
                   <EmptyState
                     title="No attendance entries found"
@@ -405,91 +452,111 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                   />
                 ) : (
                   <div className="overflow-hidden rounded-[1.25rem] border border-border/70">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Staff member</TableHead>
-                          <TableHead>Role</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Approval</TableHead>
-                          <TableHead>Time in</TableHead>
-                          <TableHead>Time out</TableHead>
-                          <TableHead>Notes</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {attendancePagination.items.map((item) => (
-                          <TableRow key={item.staffId}>
-                            <TableCell>
-                              <div className="space-y-1">
-                                <p className="font-semibold text-foreground">{item.fullName}</p>
-                                <p className="text-sm text-muted-foreground">
-                                  {item.contactNumber ?? "No contact number"}
-                                </p>
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-sm text-muted-foreground">
-                              {formatStaffRoleLabel(item.role)}
-                            </TableCell>
-                            <TableCell>
-                              <div className="space-y-2">
-                                <StatusBadge
-                                  tone={getAttendanceStatusTone(item.attendance?.status ?? "unrecorded")}
-                                >
-                                  {formatAttendanceStatusLabel(item.attendance?.status ?? "unrecorded")}
-                                </StatusBadge>
-                                {item.leaveEntry ? (
-                                  <p className="text-xs font-medium text-sky-700">
-                                    Approved leave · {formatStaffLeaveTypeLabel(item.leaveEntry.leaveType)} ·{" "}
-                                    {formatLeaveDateRange(item.leaveEntry)}
-                                  </p>
-                                ) : null}
-                                {item.hasMissingTimeout ? (
-                                  <p className="text-xs font-medium text-amber-700">
-                                    Time out still missing
-                                  </p>
-                                ) : null}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="space-y-2">
-                                <StatusBadge tone={getAttendanceApprovalTone(item.attendance)}>
-                                  {formatAttendanceApprovalLabel(item.attendance)}
-                                </StatusBadge>
-                                {item.attendance?.approvedAt ? (
-                                  <p className="text-xs text-muted-foreground">
-                                    {formatDate(item.attendance.approvedAt)}
-                                  </p>
-                                ) : null}
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-sm text-muted-foreground">
-                              {formatAttendanceTime(item.attendance?.timeIn)}
-                            </TableCell>
-                            <TableCell className="text-sm text-muted-foreground">
-                              {formatAttendanceTime(item.attendance?.timeOut)}
-                            </TableCell>
-                            <TableCell className="max-w-[240px] text-sm text-muted-foreground">
-                              <span className="line-clamp-2">
-                                {item.attendance?.notes?.trim() ? item.attendance.notes : "No notes"}
-                              </span>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <AttendanceDayRowActions
-                                attendance={item.attendance}
-                                attendanceDate={attendanceData.filters.date}
-                                canApprove={canApproveAttendanceForLockedPeriod(attendanceData.lockedPeriod)}
-                                canEdit={canEditAttendanceForLockedPeriod(attendanceData.lockedPeriod)}
-                                isApproved={item.isApproved}
-                                staffId={item.staffId}
-                                staffName={item.fullName}
-                              />
-                            </TableCell>
+                    <div className="overflow-x-auto">
+                      <Table className="min-w-[720px] table-fixed md:min-w-0">
+                        <colgroup>
+                          <col className="w-[27%]" />
+                          <col className="w-[12%]" />
+                          <col className="w-[18%]" />
+                          <col className="w-[12%]" />
+                          <col className="w-[12%]" />
+                          <col className="w-[13%]" />
+                          <col className="w-[6%]" />
+                        </colgroup>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Staff member</TableHead>
+                            <TableHead>Role</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead className="whitespace-nowrap">Time in</TableHead>
+                            <TableHead className="whitespace-nowrap">Time out</TableHead>
+                            <TableHead>Notes</TableHead>
+                            <TableHead className="px-2 text-right">Actions</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {attendancePagination.items.map((item) => (
+                            <TableRow key={item.staffId}>
+                              <TableCell className="min-w-0">
+                                <div className="space-y-1">
+                                  <p className="break-words font-semibold leading-snug text-foreground">
+                                    {item.fullName}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {item.contactNumber ?? "No contact number"}
+                                  </p>
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-sm text-muted-foreground">
+                                {formatStaffRoleLabel(item.role)}
+                              </TableCell>
+                              <TableCell className="min-w-0">
+                                <div className="space-y-2">
+                                  {attendanceData.branchHoliday && !item.attendance ? (
+                                    <StatusBadge
+                                      tone="neutral"
+                                      className={getBranchHolidayBadgeClass(attendanceData.branchHoliday)}
+                                    >
+                                      {formatBranchHolidayStatusLabel(attendanceData.branchHoliday)}
+                                    </StatusBadge>
+                                  ) : (
+                                    <StatusBadge
+                                      tone={getAttendanceStatusTone(item.attendance?.status ?? "unrecorded")}
+                                    >
+                                      {formatAttendanceStatusLabel(item.attendance?.status ?? "unrecorded")}
+                                    </StatusBadge>
+                                  )}
+                                  {attendanceData.branchHoliday && item.attendance ? (
+                                    <p className="text-xs font-medium text-sky-700">
+                                      Worked during {formatBranchHolidayKindLabel(attendanceData.branchHoliday.holidayKind).toLowerCase()}
+                                    </p>
+                                  ) : null}
+                                  {item.leaveEntry ? (
+                                    <p className="text-xs font-medium text-sky-700">
+                                      Approved leave · {formatStaffLeaveTypeLabel(item.leaveEntry.leaveType)} ·{" "}
+                                      {formatLeaveDateRange(item.leaveEntry)}
+                                    </p>
+                                  ) : null}
+                                  {item.hasMissingTimeout && !attendanceData.branchHoliday ? (
+                                    <p className="text-xs font-medium text-amber-700">
+                                      Time out still missing
+                                    </p>
+                                  ) : null}
+                                </div>
+                              </TableCell>
+                              <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                                {formatAttendanceTableTime(item.attendance?.timeIn)}
+                              </TableCell>
+                              <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                                {formatAttendanceTableTime(item.attendance?.timeOut)}
+                              </TableCell>
+                              <TableCell className="min-w-0 text-sm text-muted-foreground">
+                                <span className="block break-words leading-snug line-clamp-2">
+                                  {item.attendance?.notes?.trim()
+                                    ? item.attendance.notes
+                                      : attendanceData.branchHoliday?.notes?.trim()
+                                        ? attendanceData.branchHoliday.notes
+                                      : attendanceData.branchHoliday
+                                        ? formatBranchHolidayStatusLabel(attendanceData.branchHoliday)
+                                        : "No notes"}
+                                </span>
+                              </TableCell>
+                              <TableCell className="w-14 px-2 text-right">
+                                <AttendanceDayRowActions
+                                  attendance={item.attendance}
+                                  attendanceDate={attendanceData.filters.date}
+                                  canApprove={canApproveAttendanceForLockedPeriod(attendanceData.lockedPeriod)}
+                                  canEdit={canEditAttendanceForLockedPeriod(attendanceData.lockedPeriod)}
+                                  isApproved={item.isApproved}
+                                  staffId={item.staffId}
+                                  staffName={item.fullName}
+                                />
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
                   </div>
                 )}
 
@@ -562,6 +629,22 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                 <p>{rosterData.summary.totalStaff} active staff included in this day&apos;s roster.</p>
               </div>
 
+              {rosterData.branchHoliday ? (
+                <div
+                  className={cn(
+                    "rounded-2xl border px-4 py-3 text-sm",
+                    getBranchHolidayPanelClass(rosterData.branchHoliday),
+                  )}
+                >
+                  <p>
+                    {formatBranchHolidayStatusLabel(rosterData.branchHoliday)}. No attendance required for this date.
+                  </p>
+                  <p className="mt-1">
+                    Pay treatment: {formatBranchHolidayPayTreatmentLabel(rosterData.branchHoliday.payTreatment)}
+                  </p>
+                </div>
+              ) : null}
+
               {rosterPagination.totalItems === 0 ? (
                 <EmptyState
                   title="No roster entries found"
@@ -603,7 +686,19 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                             </div>
                           </TableCell>
                           <TableCell className="max-w-[240px] text-sm text-muted-foreground">
-                            {item.leaveEntry ? (
+                            {rosterData.branchHoliday ? (
+                              <div className="space-y-1">
+                                <p className={cn("font-medium", getBranchHolidayTextClass(rosterData.branchHoliday))}>
+                                  {item.attendance
+                                    ? `${formatBranchHolidayStatusLabel(rosterData.branchHoliday)} · attendance recorded`
+                                    : formatBranchHolidayStatusLabel(rosterData.branchHoliday)}
+                                </p>
+                                <p>
+                                  {formatHolidayBannerLabel(rosterData.branchHoliday)} · Pay treatment:{" "}
+                                  {formatBranchHolidayPayTreatmentLabel(rosterData.branchHoliday.payTreatment)}
+                                </p>
+                              </div>
+                            ) : item.leaveEntry ? (
                               <div className="space-y-1">
                                 <p className="font-medium text-sky-700">
                                   {formatStaffLeaveTypeLabel(item.leaveEntry.leaveType)}
@@ -616,10 +711,13 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                           </TableCell>
                           <TableCell className="max-w-[240px] text-sm text-muted-foreground">
                             <span className="line-clamp-2">
-                              {item.schedule?.notes?.trim() || item.leaveEntry?.notes?.trim() || "No notes"}
+                              {item.schedule?.notes?.trim()
+                                || item.leaveEntry?.notes?.trim()
+                                || rosterData.branchHoliday?.notes?.trim()
+                                || "No notes"}
                             </span>
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="w-14 px-2 text-right">
                             <AttendanceRosterRowActions
                               staffId={item.staffId}
                               staffName={item.fullName}
@@ -721,17 +819,107 @@ function buildYearOptions(selectedYear: number, currentYear: number) {
   return Array.from({ length: endYear - startYear + 1 }, (_, index) => startYear + index);
 }
 
-function getCalendarStatusDotClass(status: AttendanceCalendarStatus) {
-  switch (status) {
+function getCalendarStatusDotClass(day: AttendanceCalendarDaySummary) {
+  if (day.branchHoliday) {
+    return getBranchHolidayDotClass(day.branchHoliday);
+  }
+
+  switch (day.status) {
     case "complete":
       return "bg-emerald-500";
     case "attention":
       return "bg-amber-500";
     case "absent":
       return "bg-red-500";
+    case "holiday":
     case "none":
       return "bg-slate-300";
   }
+}
+
+function getCalendarStatusCellClass(day: AttendanceCalendarDaySummary) {
+  if (day.branchHoliday) {
+    return getBranchHolidayCellClass(day.branchHoliday);
+  }
+
+  switch (day.status) {
+    default:
+      return "border-border/80 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50";
+  }
+}
+
+function formatAttendanceTableTime(value: string | null | undefined) {
+  return value ? formatAttendanceTime(value) : "--";
+}
+
+function getBranchHolidayDotClass(holiday: BranchHolidaySummary) {
+  switch (holiday.holidayKind) {
+    case "branch_closure":
+      return "bg-sky-500";
+    case "public_holiday":
+    case "company_holiday":
+      return "bg-violet-500";
+    case "special_non_working_day":
+      return "bg-amber-400";
+  }
+}
+
+function getBranchHolidayCellClass(holiday: BranchHolidaySummary) {
+  switch (holiday.holidayKind) {
+    case "branch_closure":
+      return "border-sky-200 bg-sky-50 text-sky-900 hover:border-sky-300 hover:bg-sky-100";
+    case "public_holiday":
+    case "company_holiday":
+      return "border-violet-200 bg-violet-50 text-violet-900 hover:border-violet-300 hover:bg-violet-100";
+    case "special_non_working_day":
+      return "border-amber-200 bg-amber-50 text-amber-900 hover:border-amber-300 hover:bg-amber-100";
+  }
+}
+
+function getBranchHolidayPanelClass(holiday: BranchHolidaySummary) {
+  switch (holiday.holidayKind) {
+    case "branch_closure":
+      return "border-sky-200 bg-sky-50 text-sky-900";
+    case "public_holiday":
+    case "company_holiday":
+      return "border-violet-200 bg-violet-50 text-violet-900";
+    case "special_non_working_day":
+      return "border-amber-200 bg-amber-50 text-amber-900";
+  }
+}
+
+function getBranchHolidayBadgeClass(holiday: BranchHolidaySummary) {
+  switch (holiday.holidayKind) {
+    case "branch_closure":
+      return "border-transparent bg-sky-100 text-sky-800";
+    case "public_holiday":
+    case "company_holiday":
+      return "border-transparent bg-violet-100 text-violet-800";
+    case "special_non_working_day":
+      return "border-transparent bg-amber-100 text-amber-800";
+  }
+}
+
+function getBranchHolidayTextClass(holiday: BranchHolidaySummary) {
+  switch (holiday.holidayKind) {
+    case "branch_closure":
+      return "text-sky-700";
+    case "public_holiday":
+    case "company_holiday":
+      return "text-violet-700";
+    case "special_non_working_day":
+      return "text-amber-700";
+  }
+}
+
+function buildAttendanceCalendarDayAriaLabel(day: AttendanceCalendarDaySummary) {
+  const formattedDate = DateTime.fromISO(day.date).toFormat("LLLL d, yyyy");
+
+  if (day.branchHoliday) {
+    return `${formattedDate}. ${formatBranchHolidayStatusLabel(day.branchHoliday)}. ${day.branchHoliday.label}. Pay treatment: ${formatBranchHolidayPayTreatmentLabel(day.branchHoliday.payTreatment)}. No attendance required.`;
+  }
+
+  return `${formattedDate}. ${day.staffCount} staff tracked.`;
 }
 
 function resolveAttendanceTab(tab: string | null) {

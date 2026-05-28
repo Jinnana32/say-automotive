@@ -1,17 +1,15 @@
 import Link from "next/link";
+import { Eye } from "lucide-react";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
 import { DataTableFilters } from "@/components/shared/data-table-filters";
 import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
+import { IconActionLink } from "@/components/shared/icon-action";
 import { PageHeader } from "@/components/shared/page-header";
 import { TableCellLink } from "@/components/shared/table-cell-link";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {
-  TableRowActionsMenu,
-  TableRowActionsMenuLink,
-} from "@/components/shared/table-row-actions-menu";
 import { InvoiceStatusBadge } from "@/features/invoices/components/invoice-status-badge";
 import { listInvoices } from "@/features/invoices/queries/invoice-queries";
 import { formatCurrency } from "@/lib/currency";
@@ -153,13 +151,12 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
                         {formatDate(invoice.invoiceDate)}
                       </TableCellLink>
                     </TableCell>
-                    <TableCell className="text-right">
-                      <TableRowActionsMenu label={`Invoice actions for ${invoice.invoiceNumber}`}>
-                        <TableRowActionsMenuLink
-                          href={`/invoices/${invoice.id}`}
-                          label="Open invoice"
-                        />
-                      </TableRowActionsMenu>
+                    <TableCell className="w-14 text-right">
+                      <IconActionLink
+                        href={`/invoices/${invoice.id}`}
+                        label={`Open invoice ${invoice.invoiceNumber}`}
+                        icon={Eye}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

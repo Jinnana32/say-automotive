@@ -1,5 +1,7 @@
 import Link from 'next/link';
+import { Eye } from 'lucide-react';
 
+import { IconActionLink } from '@/components/shared/icon-action';
 import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,10 +19,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  TableRowActionsMenu,
-  TableRowActionsMenuLink,
-} from '@/components/shared/table-row-actions-menu';
 import { InventoryMovementTypeBadge } from '@/features/inventory/components/inventory-status-badge';
 import { OperationalAlerts } from '@/features/reports/components/operational-alerts';
 import { PaymentMethodMix } from '@/features/reports/components/payment-method-mix';
@@ -182,13 +180,12 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                         <TableCell>
                           {formatDateTime(invoice.createdAt)}
                         </TableCell>
-                        <TableCell className="text-right">
-                          <TableRowActionsMenu label={`Invoice actions for ${invoice.invoiceNumber}`}>
-                            <TableRowActionsMenuLink
-                              href={`/invoices/${invoice.invoiceId}`}
-                              label="Open invoice"
-                            />
-                          </TableRowActionsMenu>
+                        <TableCell className="w-14 text-right">
+                          <IconActionLink
+                            href={`/invoices/${invoice.invoiceId}`}
+                            label={`Open invoice ${invoice.invoiceNumber}`}
+                            icon={Eye}
+                          />
                         </TableCell>
                       </TableRow>
                     ))}

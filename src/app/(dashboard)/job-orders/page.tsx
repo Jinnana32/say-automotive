@@ -1,17 +1,15 @@
 import Link from "next/link";
+import { Eye } from "lucide-react";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
 import { DataTableFilters } from "@/components/shared/data-table-filters";
 import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
+import { IconActionLink } from "@/components/shared/icon-action";
 import { PageHeader } from "@/components/shared/page-header";
 import { TableCellLink } from "@/components/shared/table-cell-link";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {
-  TableRowActionsMenu,
-  TableRowActionsMenuLink,
-} from "@/components/shared/table-row-actions-menu";
 import { JobOrderStatusBadge } from "@/features/job-orders/components/job-order-status-badge";
 import { listJobOrders } from "@/features/job-orders/queries/job-order-queries";
 import type { JobOrderStatus } from "@/features/job-orders/types";
@@ -159,13 +157,12 @@ export default async function JobOrdersPage({ searchParams }: JobOrdersPageProps
                         {jobOrder.startedAt ? formatDateTime(jobOrder.startedAt) : formatDate(jobOrder.createdAt)}
                       </TableCellLink>
                     </TableCell>
-                    <TableCell className="text-right">
-                      <TableRowActionsMenu label={`Job order actions for ${jobOrder.jobOrderNumber}`}>
-                        <TableRowActionsMenuLink
-                          href={`/job-orders/${jobOrder.id}`}
-                          label="Open job order"
-                        />
-                      </TableRowActionsMenu>
+                    <TableCell className="w-14 text-right">
+                      <IconActionLink
+                        href={`/job-orders/${jobOrder.id}`}
+                        label={`Open job order ${jobOrder.jobOrderNumber}`}
+                        icon={Eye}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

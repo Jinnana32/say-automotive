@@ -3,7 +3,12 @@ import type { Database } from "@/types/database";
 
 export type AttendanceStatus = Database["public"]["Enums"]["attendance_status"];
 export type AttendanceFilterStatus = AttendanceStatus | "missing_timeout" | "unrecorded";
-export type BranchHolidayKind = "regular" | "special" | "branch_closure" | "other";
+export type BranchHolidayKind =
+  | "branch_closure"
+  | "public_holiday"
+  | "company_holiday"
+  | "special_non_working_day";
+export type BranchHolidayPayTreatment = "unpaid" | "paid_regular_day" | "custom";
 export type StaffLeaveType = "vacation" | "sick" | "emergency" | "unpaid" | "other";
 export type AttendanceLogType = "time_in" | "time_out";
 export type AttendanceLogSource =
@@ -116,6 +121,7 @@ export type BranchHolidaySummary = {
   holidayDate: string;
   label: string;
   holidayKind: BranchHolidayKind;
+  payTreatment: BranchHolidayPayTreatment;
   notes: string | null;
 };
 
@@ -195,6 +201,7 @@ export type AttendanceDailySummary = {
 };
 
 export type AttendanceRosterData = {
+  branchName: string | null;
   filters: AttendancePageFilters;
   branchHoliday: BranchHolidaySummary | null;
   summary: AttendanceDailySummary;
@@ -204,11 +211,12 @@ export type AttendanceRosterData = {
   lockedPeriod: AttendanceDateLockSummary | null;
 };
 
-export type AttendanceCalendarStatus = "complete" | "attention" | "absent" | "none";
+export type AttendanceCalendarStatus = "complete" | "attention" | "absent" | "holiday" | "none";
 
 export type AttendanceCalendarDaySummary = {
   date: string;
   status: AttendanceCalendarStatus;
+  branchHoliday: BranchHolidaySummary | null;
   staffCount: number;
   recordedCount: number;
   approvedCount: number;
@@ -254,6 +262,7 @@ export type BranchHolidayFormValues = {
   holidayDate: string;
   label: string;
   holidayKind: BranchHolidayKind;
+  payTreatment: BranchHolidayPayTreatment;
   notes: string;
 };
 

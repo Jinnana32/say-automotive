@@ -205,7 +205,7 @@ export function AttendanceDevicesPageContent({
                     <TableCell className="text-sm text-muted-foreground">
                       {device.lastIp ?? "Unavailable"}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="w-14 text-right">
                       <AttendanceDeviceRowActions device={device} />
                     </TableCell>
                   </TableRow>

@@ -2,11 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 
-import { getBranchScopedServerClient } from "@/lib/branches";
+import { getBranchScopedServerClient, requireBranchAccess } from "@/lib/branches";
 import { toUtcIso } from "@/lib/dates";
 import { toFormActionState } from "@/lib/forms";
 import { parseAttendanceEntryFormData, attendanceEntrySchema } from "@/features/attendance/schemas/attendance-form-schema";
 import { parseStaffScheduleFormData, staffScheduleSchema } from "@/features/attendance/schemas/staff-schedule-schema";
+import { formatStaffScheduleTimeForStorage } from "@/features/attendance/schedule-time-utils";
 import type { AttendanceEntryActionState } from "@/features/attendance/types";
 import { INITIAL_ATTENDANCE_ENTRY_ACTION_STATE } from "@/features/attendance/utils";
 import type { TableInsert } from "@/types/database";
@@ -25,8 +26,11 @@ export async function upsertAttendanceRecordAction(
   }
 
   const values = parsed.data;
-  const { branchScope, context, supabase } = await getBranchScopedServerClient("attendance:write");
-  const branchId = branchScope.writeBranchId;
+  const { context, supabase } = await getBranchScopedServerClient("attendance:write");
+  const branchId = await getAttendanceStaffBranchId(supabase, values.staffId);
+
+  await requireBranchAccess(branchId);
+
   const { data: businessSettings, error: businessSettingsError } = await supabase
     .from("business_settings")
     .select("allow_attendance_admin_override")
@@ -230,8 +234,8 @@ export async function upsertStaffScheduleAction(
   const { error } = await supabase.from("staff_schedules").upsert(
     {
       staff_id: values.staffId,
-      shift_start_time: `${values.shiftStartTime}:00`,
-      shift_end_time: `${values.shiftEndTime}:00`,
+      shift_start_time: formatStaffScheduleTimeForStorage(values.shiftStartTime),
+      shift_end_time: formatStaffScheduleTimeForStorage(values.shiftEndTime),
       grace_minutes: Number(values.graceMinutes),
       monday_is_workday: values.mondayIsWorkday,
       tuesday_is_workday: values.tuesdayIsWorkday,
@@ -266,6 +270,23 @@ export async function upsertStaffScheduleAction(
 function normalizeNullable(value: string) {
   const trimmed = value.trim();
   return trimmed ? trimmed : null;
+}
+
+async function getAttendanceStaffBranchId(
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
+  staffId: string,
+) {
+  const { data, error } = await supabase.from("staff").select("branch_id").eq("id", staffId).maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data?.branch_id) {
+    throw new Error("Selected staff member is not assigned to a branch.");
+  }
+
+  return data.branch_id;
 }
 
 function readString(formData: FormData, key: string) {

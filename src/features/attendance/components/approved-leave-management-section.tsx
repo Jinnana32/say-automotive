@@ -187,7 +187,7 @@ export function ApprovedLeaveManagementSection({
                         {leaveEntry.notes?.trim() ? leaveEntry.notes : "No notes"}
                       </span>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="w-14 text-right">
                       <StaffLeaveRowActions
                         leaveEntry={leaveEntry}
                         activeStaff={data.activeStaff}

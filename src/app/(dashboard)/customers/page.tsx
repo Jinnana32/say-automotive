@@ -132,7 +132,7 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
                       </TableCellLink>
                     </TableCell>
                     {canManageCustomers ? (
-                      <TableCell className="text-right">
+                      <TableCell className="w-14 text-right">
                         <CustomerRowActions
                           customerId={customer.id}
                           customerLabel={customer.displayName}

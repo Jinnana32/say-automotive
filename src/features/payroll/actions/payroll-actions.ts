@@ -296,11 +296,15 @@ export async function updatePayrollPeriodStatusAction(
       const rows = attendanceByStaffId.get(staffId) ?? [];
       const attendanceSummary = summarizePayrollAttendance(
         rows.map((row) => ({
+          attendanceDate: row.attendance_date,
           status: row.status,
           timeIn: row.time_in,
           timeOut: row.time_out,
           approvedAt: row.approved_at,
         })),
+        {
+          ignoredMissingTimeoutDates: holidayDates,
+        },
       );
       const schedule = scheduleByStaffId.get(staffId)
         ? {

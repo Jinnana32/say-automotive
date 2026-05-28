@@ -49,6 +49,7 @@ export async function getAttendanceRosterData(
 ): Promise<AttendanceRosterData> {
   const { branchScope, supabase } = await getBranchScopedServerClient("attendance:read");
   const branchId = branchScope.selectedBranchId;
+  const branchName = branchScope.selectedBranch?.name ?? branchScope.selectedBranchLabel;
   let staffQuery = supabase
     .from("staff")
     .select("id, branch_id, first_name, last_name, role, status, contact_number")
@@ -162,12 +163,17 @@ export async function getAttendanceRosterData(
       isApproved: isAttendanceApproved(attendance),
     };
   });
-  const summary = buildAttendanceSummary(rosterBase);
+  const summary = buildAttendanceSummary(rosterBase, {
+    branchHoliday,
+  });
   const filteredRoster = rosterBase.filter((item) =>
-    matchesAttendanceStatusFilter(item, filters.status),
+    matchesAttendanceStatusFilter(item, filters.status, {
+      branchHoliday,
+    }),
   );
 
   return {
+    branchName,
     filters,
     branchHoliday,
     summary,
@@ -314,10 +320,11 @@ export async function getAttendanceCalendarMonthData({
   );
   const leaveEntriesByStaffId = new Map<string, StaffLeaveEntrySummary[]>();
   const pendingAmendmentsByStaffDate = new Map<string, number>();
-  const holidayDateSet = new Set(
-    ((holidayData ?? []) as BranchHolidayRow[]).map((row) =>
+  const holidayByDate = new Map(
+    ((holidayData ?? []) as BranchHolidayRow[]).map((row) => [
       buildBranchHolidayKey(row.branch_id, row.holiday_date),
-    ),
+      mapBranchHoliday(row),
+    ]),
   );
 
   for (const leaveRow of leaveEntryRows) {
@@ -356,7 +363,9 @@ export async function getAttendanceCalendarMonthData({
         attendanceByStaffDate.get(buildAttendanceCalendarKey(staffMember.id, date)) ?? null;
       const hasPendingAmendment =
         (pendingAmendmentsByStaffDate.get(buildAttendanceCalendarKey(staffMember.id, date)) ?? 0) > 0;
-      const isBranchHoliday = holidayDateSet.has(buildBranchHolidayKey(staffMember.branch_id, date));
+      const branchHoliday =
+        holidayByDate.get(buildBranchHolidayKey(staffMember.branch_id, date)) ?? null;
+      const isBranchHoliday = branchHoliday !== null;
       const isScheduledWorkday =
         !isFuture &&
         !isBranchHoliday &&
@@ -397,11 +406,14 @@ export async function getAttendanceCalendarMonthData({
     days.push({
       date,
       status: deriveAttendanceCalendarStatus({
+        branchHoliday:
+          holidayByDate.get(buildBranchHolidayKey(branchId, date)) ?? null,
         isFuture,
         recordedCount,
         attentionCount,
         absentCount,
       }),
+      branchHoliday: holidayByDate.get(buildBranchHolidayKey(branchId, date)) ?? null,
       staffCount,
       recordedCount,
       approvedCount,
@@ -466,6 +478,7 @@ function mapBranchHoliday(row: BranchHolidayRow): BranchHolidaySummary {
     holidayDate: row.holiday_date,
     label: row.label,
     holidayKind: row.holiday_kind as BranchHolidaySummary["holidayKind"],
+    payTreatment: row.pay_treatment as BranchHolidaySummary["payTreatment"],
     notes: row.notes,
   };
 }
@@ -483,16 +496,22 @@ function mapStaffLeaveEntry(row: StaffLeaveEntryRow): StaffLeaveEntrySummary {
 }
 
 function deriveAttendanceCalendarStatus({
+  branchHoliday,
   isFuture,
   recordedCount,
   attentionCount,
   absentCount,
 }: {
+  branchHoliday: BranchHolidaySummary | null;
   isFuture: boolean;
   recordedCount: number;
   attentionCount: number;
   absentCount: number;
 }) {
+  if (branchHoliday) {
+    return "holiday" as const;
+  }
+
   if (isFuture) {
     return "none" as const;
   }

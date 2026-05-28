@@ -17,7 +17,7 @@ export function BranchHolidayRowActions({
   holiday: BranchHolidaySummary;
 }) {
   return (
-    <TableRowActionsMenu label={`Holiday actions for ${holiday.label}`}>
+    <TableRowActionsMenu label={`Open row actions for ${holiday.label}`}>
       <BranchHolidayDialog
         holiday={holiday}
         trigger={({ openDialog }) => (
@@ -29,11 +29,11 @@ export function BranchHolidayRowActions({
         )}
       />
       <TableRowActionsMenuConfirm
-        label="Delete holiday"
+        label="Delete calendar date"
         title={`Delete ${holiday.label}?`}
-        description="This holiday will stop excluding attendance from payroll once removed."
-        confirmLabel="Delete holiday"
-        cancelLabel="Keep holiday"
+        description="This calendar date will stop excluding attendance from payroll readiness once removed."
+        confirmLabel="Delete calendar date"
+        cancelLabel="Keep calendar date"
         action={deleteBranchHolidayAction}
         fields={[{ name: "holidayId", value: holiday.id }]}
         icon={Trash2}

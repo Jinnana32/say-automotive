@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { Eye } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,11 +16,8 @@ import {
 } from "@/components/ui/table";
 import { DetailSummaryGrid, DetailSummaryItem } from "@/components/shared/detail-summary-grid";
 import { EmptyState } from "@/components/shared/empty-state";
+import { IconActionLink } from "@/components/shared/icon-action";
 import { SectionCard } from "@/components/shared/section-card";
-import {
-  TableRowActionsMenu,
-  TableRowActionsMenuLink,
-} from "@/components/shared/table-row-actions-menu";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { QuotationStatusBadge } from "@/features/quotations/components/quotation-status-badge";
 import { MobileServiceHistoryAccordion } from "@/features/service-history/components/mobile-service-history-accordion";
@@ -423,14 +421,13 @@ function QuickAccessRecordPanel({
                       </TableCell>
                       <TableCell>{formatCurrency(quotation.totalAmount)}</TableCell>
                       <TableCell>{formatDateTime(quotation.createdAt)}</TableCell>
-                    <TableCell className="text-right">
-                      <TableRowActionsMenu label={`Quotation actions for ${quotation.quotationNumber}`}>
-                        <TableRowActionsMenuLink
+                      <TableCell className="w-14 text-right">
+                        <IconActionLink
                           href={`/quotations/${quotation.id}`}
-                          label="Open quotation"
+                          label={`Open quotation ${quotation.quotationNumber}`}
+                          icon={Eye}
                         />
-                      </TableRowActionsMenu>
-                    </TableCell>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -521,13 +518,12 @@ function QuickAccessVehiclesTable({
                     </StatusBadge>
                   </TableCell>
                   <TableCell>{formatDateTime(vehicle.updatedAt)}</TableCell>
-                  <TableCell className="text-right">
-                    <TableRowActionsMenu label={`Vehicle actions for ${vehicle.make} ${vehicle.model}`}>
-                      <TableRowActionsMenuLink
-                        href={`/vehicles/${vehicle.id}`}
-                        label="Open vehicle"
-                      />
-                    </TableRowActionsMenu>
+                  <TableCell className="w-14 text-right">
+                    <IconActionLink
+                      href={`/vehicles/${vehicle.id}`}
+                      label={`Open vehicle ${vehicle.make} ${vehicle.model}`}
+                      icon={Eye}
+                    />
                   </TableCell>
                 </TableRow>
               );

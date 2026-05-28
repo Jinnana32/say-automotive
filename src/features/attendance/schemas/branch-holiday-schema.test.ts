@@ -9,6 +9,7 @@ describe("branchHolidaySchema", () => {
       holidayDate: "2026-13-40",
       label: "",
       holidayKind: "invalid",
+      payTreatment: "invalid",
       notes: "",
     });
 

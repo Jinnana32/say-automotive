@@ -39,16 +39,6 @@ export default async function DashboardLayout({
       capabilities={context.capabilities}
       businessName={branding.businessName}
       businessLogoUrl={branding.businessLogoUrl}
-      branchScope={{
-        canAccessAllBranches: branchScope.canAccessAllBranches,
-        accessibleBranches: branchScope.accessibleBranches.map((branch) => ({
-          id: branch.id,
-          code: branch.code,
-          name: branch.name,
-        })),
-        selectedBranchId: branchScope.selectedBranchId,
-        selectedBranchLabel: branchScope.selectedBranchLabel,
-      }}
       showSidebarBusinessName={SHOW_SIDEBAR_BUSINESS_NAME}
     >
       {children}

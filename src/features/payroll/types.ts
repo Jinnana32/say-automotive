@@ -154,6 +154,7 @@ export type PayrollPeriodDetailData = {
 };
 
 export type PayrollAttendanceSourceRecord = {
+  attendanceDate: string;
   status: Database["public"]["Enums"]["attendance_status"];
   timeIn: string | null;
   timeOut: string | null;

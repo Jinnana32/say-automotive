@@ -1,11 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { CalendarClock } from "lucide-react";
 
-import {
-  TableRowActionsMenu,
-  TableRowActionsMenuButton,
-} from "@/components/shared/table-row-actions-menu";
+import { IconActionButton } from "@/components/shared/icon-action";
 import { StaffScheduleDialog } from "@/features/attendance/components/staff-schedule-dialog";
 import type { StaffScheduleSummary } from "@/features/attendance/types";
 
@@ -18,25 +15,18 @@ export function AttendanceRosterRowActions({
   staffId: string;
   staffName: string;
 }) {
-  const [isEditOpen, setIsEditOpen] = useState(false);
-
   return (
-    <>
-      <TableRowActionsMenu label={`Roster actions for ${staffName}`}>
-        <TableRowActionsMenuButton
-          label="Edit schedule"
-          onSelect={() => setIsEditOpen(true)}
+    <StaffScheduleDialog
+      staffId={staffId}
+      staffName={staffName}
+      schedule={schedule}
+      trigger={({ openDialog }) => (
+        <IconActionButton
+          label={`Edit schedule for ${staffName}`}
+          icon={CalendarClock}
+          onClick={openDialog}
         />
-      </TableRowActionsMenu>
-
-      <StaffScheduleDialog
-        staffId={staffId}
-        staffName={staffName}
-        schedule={schedule}
-        showTrigger={false}
-        open={isEditOpen}
-        onOpenChange={setIsEditOpen}
-      />
-    </>
+      )}
+    />
   );
 }

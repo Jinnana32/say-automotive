@@ -287,6 +287,7 @@ export type Database = {
           holiday_date: string;
           label: string;
           holiday_kind: string;
+          pay_treatment: string;
           notes: string | null;
           created_at: string;
           updated_at: string;
@@ -297,6 +298,7 @@ export type Database = {
           holiday_date: string;
           label: string;
           holiday_kind: string;
+          pay_treatment?: string;
           notes?: string | null;
           created_at?: string;
           updated_at?: string;

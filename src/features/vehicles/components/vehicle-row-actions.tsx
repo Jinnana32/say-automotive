@@ -4,11 +4,7 @@ import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 
 import { ConfirmActionDialog } from "@/components/shared/confirm-action-dialog";
-import {
-  TableRowActionsMenu,
-  TableRowActionsMenuButton,
-  TableRowActionsMenuLink,
-} from "@/components/shared/table-row-actions-menu";
+import { TableRowActionsMenu, TableRowActionsMenuButton, TableRowActionsMenuLink } from "@/components/shared/table-row-actions-menu";
 import { deleteVehicleAction } from "@/features/vehicles/actions/vehicle-actions";
 
 export function VehicleRowActions({
@@ -22,7 +18,7 @@ export function VehicleRowActions({
 
   return (
     <>
-      <TableRowActionsMenu label={`Vehicle actions for ${vehicleLabel}`}>
+      <TableRowActionsMenu label={`Open row actions for ${vehicleLabel}`}>
         <TableRowActionsMenuLink href={`/vehicles/${vehicleId}/edit`} label="Edit vehicle" icon={Pencil} />
         <TableRowActionsMenuButton
           label="Delete vehicle"

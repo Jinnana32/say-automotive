@@ -1,23 +1,28 @@
-import Link from "next/link";
+import Link from 'next/link';
+import { Pencil } from 'lucide-react';
 
-import { DataTableCard } from "@/components/shared/data-table-card";
-import { DataTableFilters } from "@/components/shared/data-table-filters";
-import { DataTablePagination } from "@/components/shared/data-table-pagination";
-import { EmptyState } from "@/components/shared/empty-state";
-import { PageHeader } from "@/components/shared/page-header";
-import { StatusBadge } from "@/components/shared/status-badge";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DataTableCard } from '@/components/shared/data-table-card';
+import { DataTableFilters } from '@/components/shared/data-table-filters';
+import { DataTablePagination } from '@/components/shared/data-table-pagination';
+import { EmptyState } from '@/components/shared/empty-state';
+import { IconActionLink } from '@/components/shared/icon-action';
+import { PageHeader } from '@/components/shared/page-header';
+import { StatusBadge } from '@/components/shared/status-badge';
+import { Button } from '@/components/ui/button';
 import {
-  TableRowActionsMenu,
-  TableRowActionsMenuLink,
-} from "@/components/shared/table-row-actions-menu";
-import { formatCurrency } from "@/lib/currency";
-import { listProducts } from "@/features/products/queries/product-queries";
-import { ProductImage } from "@/features/products/components/product-image";
-import { paginateItems } from "@/lib/pagination";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { formatCurrency } from '@/lib/currency';
+import { listProducts } from '@/features/products/queries/product-queries';
+import { ProductImage } from '@/features/products/components/product-image';
+import { paginateItems } from '@/lib/pagination';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 type ProductsPageProps = {
   searchParams: Promise<{
@@ -26,8 +31,10 @@ type ProductsPageProps = {
   }>;
 };
 
-export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-  const { search = "", page } = await searchParams;
+export default async function ProductsPage({
+  searchParams,
+}: ProductsPageProps) {
+  const { search = '', page } = await searchParams;
   const products = await listProducts(search);
   const pagination = paginateItems(products, page);
 
@@ -45,14 +52,14 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
       <DataTableCard
         title="Product catalog"
-        description={`${pagination.totalItems} product${pagination.totalItems === 1 ? "" : "s"} matched.`}
+        description={`${pagination.totalItems} product${pagination.totalItems === 1 ? '' : 's'} matched.`}
         toolbar={
           <DataTableFilters
             key={search}
             className="md:grid md:grid-cols-[minmax(0,1fr)]"
             search={{
               value: search,
-              placeholder: "Search name, SKU, barcode, or part number",
+              placeholder: 'Search name, SKU, barcode, or part number',
             }}
           />
         }
@@ -67,7 +74,6 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           />
         }
       >
-
         {pagination.totalItems === 0 ? (
           <EmptyState
             title="No products found"
@@ -84,7 +90,6 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               <TableHeader>
                 <TableRow>
                   <TableHead>Product</TableHead>
-                  <TableHead>Ownership</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Website</TableHead>
                   <TableHead>Supplier</TableHead>
@@ -108,37 +113,36 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                         <div className="space-y-1">
                           <p className="font-semibold">{product.name}</p>
                           <p className="text-sm text-muted-foreground">
-                            {product.categoryName ?? "Uncategorized"} · {product.unitLabel}
+                            {product.categoryName ?? 'Uncategorized'} ·{' '}
+                            {product.unitLabel}
                           </p>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <StatusBadge tone={product.isGlobal ? "info" : "neutral"}>
-                          {product.isGlobal ? "Global" : "Branch item"}
-                        </StatusBadge>
-                        <p className="text-xs text-muted-foreground">
-                          {product.owningBranchName ?? "Unknown branch"}
-                        </p>
-                      </div>
+
+                    <TableCell className="capitalize">
+                      {product.productType}
                     </TableCell>
-                    <TableCell className="capitalize">{product.productType}</TableCell>
                     <TableCell>
                       <div className="space-y-1">
                         {product.websiteVisible ? (
-                          <StatusBadge tone={product.websiteFeatured ? "info" : "success"}>
-                            {product.websiteFeatured ? "Featured" : "Published"}
+                          <StatusBadge
+                            tone={product.websiteFeatured ? 'info' : 'success'}
+                          >
+                            {product.websiteFeatured ? 'Featured' : 'Published'}
                           </StatusBadge>
                         ) : (
                           <StatusBadge tone="neutral">Hidden</StatusBadge>
                         )}
                         <p className="text-xs text-muted-foreground">
-                          {product.websiteSlug ?? "Slug auto-generated when published"}
+                          {product.websiteSlug ??
+                            'Slug auto-generated when published'}
                         </p>
                       </div>
                     </TableCell>
-                    <TableCell>{product.supplierName ?? "No supplier"}</TableCell>
+                    <TableCell>
+                      {product.supplierName ?? 'No supplier'}
+                    </TableCell>
                     <TableCell>
                       <div>{formatCurrency(product.sellingPrice)}</div>
                       <div className="text-sm text-muted-foreground">
@@ -147,20 +151,25 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                     </TableCell>
                     <TableCell>{product.reorderLevel}</TableCell>
                     <TableCell>
-                      <StatusBadge tone={product.status === "active" ? "success" : "neutral"}>
+                      <StatusBadge
+                        tone={
+                          product.status === 'active' ? 'success' : 'neutral'
+                        }
+                      >
                         {product.status}
                       </StatusBadge>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="w-14 text-right">
                       {product.canManage ? (
-                        <TableRowActionsMenu label={`Product actions for ${product.name}`}>
-                          <TableRowActionsMenuLink
-                            href={`/products/${product.id}/edit`}
-                            label="Edit product"
-                          />
-                        </TableRowActionsMenu>
+                        <IconActionLink
+                          href={`/products/${product.id}/edit`}
+                          label={`Edit product ${product.name}`}
+                          icon={Pencil}
+                        />
                       ) : (
-                        <span className="text-xs text-muted-foreground">View only</span>
+                        <span className="text-xs text-muted-foreground">
+                          View only
+                        </span>
                       )}
                     </TableCell>
                   </TableRow>
