@@ -155,11 +155,11 @@ function CreateActionsMenu({
         <Button
           type="button"
           variant="ghost"
-          size="icon"
-          className="rounded-2xl border border-border/70 bg-background shadow-sm"
+          className="h-10 rounded-full border border-brand-red/20 bg-brand-red/[0.08] px-3 text-brand-red shadow-sm hover:bg-brand-red/[0.14] hover:text-brand-redDark focus-visible:ring-brand-red/20"
           aria-label="Create new"
           title="Create new"
         >
+          <span className="hidden text-sm font-semibold sm:inline">New</span>
           <Plus className="size-4" />
         </Button>
       </DropdownMenuTrigger>

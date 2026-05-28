@@ -453,23 +453,23 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                 ) : (
                   <div className="overflow-hidden rounded-[1.25rem] border border-border/70">
                     <div className="overflow-x-auto">
-                      <Table className="w-full table-fixed">
+                      <Table className="min-w-[1060px] table-auto [&_th]:px-5 [&_th]:tracking-[0.12em] [&_td]:px-5 [&_td]:py-5 lg:min-w-[1200px] lg:[&_th]:tracking-[0.16em]">
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="w-[32%] lg:w-[27%]">Staff member</TableHead>
-                            <TableHead className="w-[14%] lg:w-[12%]">Role</TableHead>
-                            <TableHead className="w-[22%] lg:w-[18%]">Status</TableHead>
-                            <TableHead className="w-[18%] lg:hidden">Time</TableHead>
-                            <TableHead className="hidden w-[11%] whitespace-nowrap lg:table-cell">Time in</TableHead>
-                            <TableHead className="hidden w-[11%] whitespace-nowrap lg:table-cell">Time out</TableHead>
-                            <TableHead className="w-[14%] lg:w-[13%]">Notes</TableHead>
-                            <TableHead className="w-14 px-2 text-right">Actions</TableHead>
+                            <TableHead className="min-w-[260px] lg:min-w-[280px]">Staff member</TableHead>
+                            <TableHead className="min-w-[148px] lg:min-w-[156px]">Role</TableHead>
+                            <TableHead className="min-w-[200px] lg:min-w-[220px]">Status</TableHead>
+                            <TableHead className="min-w-[180px] lg:hidden">Time</TableHead>
+                            <TableHead className="hidden min-w-[160px] whitespace-nowrap lg:table-cell">Time in</TableHead>
+                            <TableHead className="hidden min-w-[160px] whitespace-nowrap lg:table-cell">Time out</TableHead>
+                            <TableHead className="min-w-[180px] lg:min-w-[200px]">Notes</TableHead>
+                            <TableHead className="min-w-[88px] px-5 text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {attendancePagination.items.map((item) => (
                             <TableRow key={item.staffId}>
-                              <TableCell className="min-w-0 align-top">
+                              <TableCell className="min-w-[260px] align-top lg:min-w-[280px]">
                                 <div className="space-y-1">
                                   <p className="break-words font-semibold leading-snug text-foreground">
                                     {item.fullName}
@@ -479,10 +479,10 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                                   </p>
                                 </div>
                               </TableCell>
-                              <TableCell className="align-top text-sm text-muted-foreground">
+                              <TableCell className="min-w-[148px] align-top text-sm text-muted-foreground lg:min-w-[156px]">
                                 {formatStaffRoleLabel(item.role)}
                               </TableCell>
-                              <TableCell className="min-w-0 align-top">
+                              <TableCell className="min-w-[200px] align-top lg:min-w-[220px]">
                                 <div className="space-y-1.5">
                                   {attendanceData.branchHoliday && !item.attendance ? (
                                     <StatusBadge
@@ -516,7 +516,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                                   ) : null}
                                 </div>
                               </TableCell>
-                              <TableCell className="align-top text-sm text-muted-foreground lg:hidden">
+                              <TableCell className="min-w-[180px] align-top text-sm text-muted-foreground lg:hidden">
                                 <div className="space-y-1">
                                   <p className="leading-none">
                                     <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
@@ -532,18 +532,18 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                                   </p>
                                 </div>
                               </TableCell>
-                              <TableCell className="hidden whitespace-nowrap align-top text-sm text-muted-foreground lg:table-cell">
+                              <TableCell className="hidden min-w-[160px] whitespace-nowrap align-top text-sm text-muted-foreground lg:table-cell">
                                 {formatAttendanceTableTime(item.attendance?.timeIn)}
                               </TableCell>
-                              <TableCell className="hidden whitespace-nowrap align-top text-sm text-muted-foreground lg:table-cell">
+                              <TableCell className="hidden min-w-[160px] whitespace-nowrap align-top text-sm text-muted-foreground lg:table-cell">
                                 {formatAttendanceTableTime(item.attendance?.timeOut)}
                               </TableCell>
-                              <TableCell className="min-w-0 align-top text-sm text-muted-foreground">
-                                <span className="block break-words leading-snug line-clamp-2">
+                              <TableCell className="min-w-[180px] align-top text-sm text-muted-foreground lg:min-w-[200px]">
+                                <span className="block break-words leading-snug">
                                   {formatAttendanceTableNote(item.attendance?.notes, attendanceData.branchHoliday?.notes)}
                                 </span>
                               </TableCell>
-                              <TableCell className="w-14 px-2 align-top text-right">
+                              <TableCell className="min-w-[88px] px-5 align-top text-right">
                                 <AttendanceDayRowActions
                                   attendance={item.attendance}
                                   attendanceDate={attendanceData.filters.date}

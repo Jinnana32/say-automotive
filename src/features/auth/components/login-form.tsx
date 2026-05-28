@@ -41,7 +41,7 @@ export function LoginForm() {
             placeholder="Enter your email"
             value={values.email}
             onChange={(event) => updateFormValue("email", event.target.value)}
-            className="h-12 rounded-xl border-slate-200 bg-slate-50/80 pl-11 pr-4 text-sm text-slate-900 shadow-none placeholder:text-slate-400 focus-visible:border-brand-red focus-visible:ring-brand-red/20"
+            className="h-12 rounded-xl border-slate-300 bg-white pl-11 pr-4 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus-visible:border-brand-red focus-visible:ring-brand-red/20"
           />
         </div>
         <FieldError errors={state.fieldErrors} name="email" />
@@ -64,7 +64,7 @@ export function LoginForm() {
             placeholder="Enter your password"
             value={values.password}
             onChange={(event) => updateFormValue("password", event.target.value)}
-            className="h-12 rounded-xl border-slate-200 bg-slate-50/80 pl-11 pr-12 text-sm text-slate-900 shadow-none placeholder:text-slate-400 focus-visible:border-brand-red focus-visible:ring-brand-red/20"
+            className="h-12 rounded-xl border-slate-300 bg-white pl-11 pr-12 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus-visible:border-brand-red focus-visible:ring-brand-red/20"
           />
           <button
             type="button"
