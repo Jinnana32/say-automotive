@@ -176,7 +176,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       <PageHeader
         title="Attendance"
         description={`Daily time records and roster controls for ${selectedDateLabel}.`}
@@ -227,7 +227,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
         defaultValue="attendance"
         value={activeTab}
         onValueChange={updateTab}
-        className="space-y-6"
+        className="min-w-0 space-y-6"
       >
         <TabsList className="w-fit flex-wrap">
           <TabsTrigger value="attendance">Attendance</TabsTrigger>
@@ -239,7 +239,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
           <TabsTrigger value="leave">Approved leave</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="attendance" className="space-y-6">
+        <TabsContent value="attendance" className="min-w-0 space-y-6">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {attendanceCards.map((card) => (
               <SummaryCard
@@ -251,8 +251,8 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
             ))}
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
-            <Card className="border-border/70 shadow-sm">
+          <div className="grid min-w-0 gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
+            <Card className="min-w-0 border-border/70 shadow-sm">
               <CardHeader className="space-y-1 pb-4">
                 <CardTitle className="text-base font-semibold text-foreground">
                   Attendance calendar
@@ -380,7 +380,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
               </CardContent>
             </Card>
 
-            <Card className="border-border/70 shadow-sm">
+            <Card className="min-w-0 border-border/70 shadow-sm">
               <CardHeader className="space-y-1">
                 <CardTitle className="text-base font-semibold text-foreground">
                   {selectedDateLabel}
@@ -390,7 +390,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                   are excluded from this operational attendance list.
                 </p>
               </CardHeader>
-              <CardContent className="space-y-4 p-6">
+              <CardContent className="min-w-0 space-y-4 p-6">
                 <DataTableFilters
                   key={`${attendanceData.filters.search}:${attendanceData.filters.status}:${attendanceData.filters.date}`}
                   className="lg:grid lg:grid-cols-[minmax(0,1fr)_220px]"
