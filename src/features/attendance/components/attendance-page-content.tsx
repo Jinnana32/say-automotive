@@ -453,31 +453,23 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                 ) : (
                   <div className="overflow-hidden rounded-[1.25rem] border border-border/70">
                     <div className="overflow-x-auto">
-                      <Table className="min-w-[720px] table-fixed md:min-w-0">
-                        <colgroup>
-                          <col className="w-[27%]" />
-                          <col className="w-[12%]" />
-                          <col className="w-[18%]" />
-                          <col className="w-[12%]" />
-                          <col className="w-[12%]" />
-                          <col className="w-[13%]" />
-                          <col className="w-[6%]" />
-                        </colgroup>
+                      <Table className="w-full table-fixed">
                         <TableHeader>
                           <TableRow>
-                            <TableHead>Staff member</TableHead>
-                            <TableHead>Role</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead className="whitespace-nowrap">Time in</TableHead>
-                            <TableHead className="whitespace-nowrap">Time out</TableHead>
-                            <TableHead>Notes</TableHead>
-                            <TableHead className="px-2 text-right">Actions</TableHead>
+                            <TableHead className="w-[32%] lg:w-[27%]">Staff member</TableHead>
+                            <TableHead className="w-[14%] lg:w-[12%]">Role</TableHead>
+                            <TableHead className="w-[22%] lg:w-[18%]">Status</TableHead>
+                            <TableHead className="w-[18%] lg:hidden">Time</TableHead>
+                            <TableHead className="hidden w-[11%] whitespace-nowrap lg:table-cell">Time in</TableHead>
+                            <TableHead className="hidden w-[11%] whitespace-nowrap lg:table-cell">Time out</TableHead>
+                            <TableHead className="w-[14%] lg:w-[13%]">Notes</TableHead>
+                            <TableHead className="w-14 px-2 text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {attendancePagination.items.map((item) => (
                             <TableRow key={item.staffId}>
-                              <TableCell className="min-w-0">
+                              <TableCell className="min-w-0 align-top">
                                 <div className="space-y-1">
                                   <p className="break-words font-semibold leading-snug text-foreground">
                                     {item.fullName}
@@ -487,11 +479,11 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                                   </p>
                                 </div>
                               </TableCell>
-                              <TableCell className="text-sm text-muted-foreground">
+                              <TableCell className="align-top text-sm text-muted-foreground">
                                 {formatStaffRoleLabel(item.role)}
                               </TableCell>
-                              <TableCell className="min-w-0">
-                                <div className="space-y-2">
+                              <TableCell className="min-w-0 align-top">
+                                <div className="space-y-1.5">
                                   {attendanceData.branchHoliday && !item.attendance ? (
                                     <StatusBadge
                                       tone="neutral"
@@ -524,24 +516,34 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                                   ) : null}
                                 </div>
                               </TableCell>
-                              <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                              <TableCell className="align-top text-sm text-muted-foreground lg:hidden">
+                                <div className="space-y-1">
+                                  <p className="leading-none">
+                                    <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                                      In:
+                                    </span>{" "}
+                                    <span>{formatAttendanceTableTime(item.attendance?.timeIn)}</span>
+                                  </p>
+                                  <p className="leading-none">
+                                    <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                                      Out:
+                                    </span>{" "}
+                                    <span>{formatAttendanceTableTime(item.attendance?.timeOut)}</span>
+                                  </p>
+                                </div>
+                              </TableCell>
+                              <TableCell className="hidden whitespace-nowrap align-top text-sm text-muted-foreground lg:table-cell">
                                 {formatAttendanceTableTime(item.attendance?.timeIn)}
                               </TableCell>
-                              <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                              <TableCell className="hidden whitespace-nowrap align-top text-sm text-muted-foreground lg:table-cell">
                                 {formatAttendanceTableTime(item.attendance?.timeOut)}
                               </TableCell>
-                              <TableCell className="min-w-0 text-sm text-muted-foreground">
+                              <TableCell className="min-w-0 align-top text-sm text-muted-foreground">
                                 <span className="block break-words leading-snug line-clamp-2">
-                                  {item.attendance?.notes?.trim()
-                                    ? item.attendance.notes
-                                      : attendanceData.branchHoliday?.notes?.trim()
-                                        ? attendanceData.branchHoliday.notes
-                                      : attendanceData.branchHoliday
-                                        ? formatBranchHolidayStatusLabel(attendanceData.branchHoliday)
-                                        : "No notes"}
+                                  {formatAttendanceTableNote(item.attendance?.notes, attendanceData.branchHoliday?.notes)}
                                 </span>
                               </TableCell>
-                              <TableCell className="w-14 px-2 text-right">
+                              <TableCell className="w-14 px-2 align-top text-right">
                                 <AttendanceDayRowActions
                                   attendance={item.attendance}
                                   attendanceDate={attendanceData.filters.date}
@@ -850,6 +852,13 @@ function getCalendarStatusCellClass(day: AttendanceCalendarDaySummary) {
 
 function formatAttendanceTableTime(value: string | null | undefined) {
   return value ? formatAttendanceTime(value) : "--";
+}
+
+function formatAttendanceTableNote(
+  attendanceNote: string | null | undefined,
+  branchHolidayNote: string | null | undefined,
+) {
+  return attendanceNote?.trim() || branchHolidayNote?.trim() || "--";
 }
 
 function getBranchHolidayDotClass(holiday: BranchHolidaySummary) {
