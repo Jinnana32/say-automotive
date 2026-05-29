@@ -1,358 +1,508 @@
+import Image from 'next/image';
 import Link from 'next/link';
-
-import { DEFAULT_BRAND_LOGO_SRC } from '@/components/shared/brand-assets';
-import { BrandLogo } from '@/components/shared/brand-logo';
 import {
-  BatteryCharging,
-  ClipboardList,
+  ArrowRight,
+  CircleDot,
+  ClipboardCheck,
+  Clock3,
+  Cog,
+  Disc3,
   Gauge,
-  PhoneCall,
   ShieldCheck,
-  type LucideIcon,
+  Snowflake,
+  Star,
+  Thermometer,
+  Users,
   Wrench,
+  Zap,
+  type LucideIcon,
 } from 'lucide-react';
 
+import { BrandLogo } from '@/components/shared/brand-logo';
 import { Button } from '@/components/ui/button';
-import { CTASection } from '@/features/website/components/cta-section';
-import { HeroSection } from '@/features/website/components/hero-section';
-import { PageHeader } from '@/features/website/components/page-header';
-import { SectionContainer } from '@/features/website/components/section-container';
-import { ServiceCard } from '@/features/website/components/service-card';
-import { WebsiteProductCard } from '@/features/website/components/website-product-card';
-import { WebsiteStoryCard } from '@/features/website/components/website-story-card';
-import {
-  listFeaturedWebsiteProducts,
-  listPublishedWebsitePosts,
-} from '@/features/website/queries/website-queries';
 import type { WebsiteShellData } from '@/features/website/types';
 
-const FEATURE_BLOCKS = [
+const OFFICIAL_WEBSITE_LOGO_SRC = '/brand/website-official-logo-transparent.png';
+const WEBSITE_HERO_BACKGROUND_SRC = '/brand/website-hero-background.png';
+const WEBSITE_FEATURE_BACKGROUND_SRC = '/brand/website-feature-background.png';
+
+const HERO_FEATURES = [
+  { label: 'Expert Technicians', icon: Wrench },
+  { label: 'Premium Equipment', icon: Gauge },
+  { label: 'Quality Service', icon: ShieldCheck },
+  { label: 'Customer Focused', icon: Users },
+] as const;
+
+const SERVICE_CARDS = [
   {
-    eyebrow: 'Top category',
-    title: 'Tires & wheel packages',
-    description:
-      'From everyday replacements to upgrade-ready sets, make tire choices easier to browse before customers ask for pricing.',
-    icon: Gauge,
-    href: '/catalog?search=tire',
-    cta: 'Browse tires',
-  },
-  {
-    eyebrow: 'Maintenance',
-    title: 'Oils, fluids, and consumables',
-    description:
-      'Highlight oils, brake fluids, coolants, and other maintenance essentials customers often need during routine service.',
+    title: 'Engine Repair',
+    description: 'Diagnostics, repairs, and performance support for engine issues.',
     icon: Wrench,
-    href: '/catalog?type=fluid',
-    cta: 'See fluids',
   },
   {
-    eyebrow: 'Fast-moving item',
-    title: 'Batteries and electrical essentials',
-    description:
-      'Keep batteries and electrical essentials visible for customers who need immediate replacement or a fast availability check.',
-    icon: BatteryCharging,
-    href: '/catalog?search=battery',
-    cta: 'Shop batteries',
+    title: 'Electrical',
+    description: 'Electrical diagnosis, wiring checks, battery-related issues, and component repair.',
+    icon: Zap,
+  },
+  {
+    title: 'Brakes',
+    description: 'Brake inspection, repair, replacement, and safety checks.',
+    icon: Disc3,
+  },
+  {
+    title: 'Steering & Suspension',
+    description: 'Steering, suspension, shock, and handling-related service.',
+    icon: Gauge,
+  },
+  {
+    title: 'A/C',
+    description: 'Air-conditioning inspection, cooling performance checks, and A/C service.',
+    icon: Snowflake,
+  },
+  {
+    title: 'Cooling System',
+    description: 'Radiator, coolant, hose, and overheating-related service.',
+    icon: Thermometer,
+  },
+  {
+    title: 'Transmission Service',
+    description: 'Transmission inspection, fluid service, and drivetrain-related support.',
+    icon: Cog,
+  },
+  {
+    title: 'Tune-Up / Tires',
+    description: 'Tune-up service, tire checks, balancing, rotation, and related maintenance.',
+    icon: CircleDot,
   },
 ] as const;
 
-const PROCESS_STEPS = [
+const TRUST_POINTS = [
   {
-    step: '1',
-    title: 'Browse',
-    description:
-      'Explore tires, fluids, batteries, and other automotive items in a clean, easy-to-scan catalog.',
+    title: 'Certified Experts',
+    description: 'Skilled and certified technicians focused on dependable workmanship.',
+    icon: ShieldCheck,
   },
   {
-    step: '2',
-    title: 'Request service',
-    description:
-      'Use the service form when you need maintenance, repair, diagnostics, or other workshop work.',
+    title: 'Honest Pricing',
+    description: 'Clear recommendations and transparent service guidance from start to finish.',
+    icon: ClipboardCheck,
   },
   {
-    step: '3',
-    title: 'Call or visit',
-    description:
-      'For catalog items, call or visit the shop directly to confirm availability, fitment, or installation.',
-  },
-] as const;
-
-const HERO_POINTS = [
-  {
-    title: 'Tires',
-    description: 'Featured brands and fitment-friendly options.',
+    title: 'Fast Turnaround',
+    description: 'Efficient service planning that helps get you back on the road sooner.',
+    icon: Clock3,
   },
   {
-    title: 'Service',
-    description: 'Dedicated form for workshop inquiries and estimates.',
-  },
-  {
-    title: 'Updates',
-    description: 'Shop work, promos, and maintenance tips.',
+    title: 'Satisfaction Guaranteed',
+    description: 'Service quality and customer care remain at the center of every job.',
+    icon: Users,
   },
 ] as const;
 
-export async function WebsiteHomePage({
+const TESTIMONIAL_PREVIEWS = [
+  'Excellent service, clear communication, and a smooth visit from drop-off to release.',
+  'Fair pricing, professional workmanship, and a team that explains the next step clearly.',
+  'Reliable support, fast turnaround, and confidence that the job was done the right way.',
+] as const;
+
+export function WebsiteHomePage({
   shellData,
 }: {
   shellData: WebsiteShellData;
 }) {
-  const [featuredProducts, latestPosts] = await Promise.all([
-    listFeaturedWebsiteProducts(6),
-    listPublishedWebsitePosts(3),
-  ]);
+  const websiteLogoSrc = OFFICIAL_WEBSITE_LOGO_SRC;
 
   return (
-    <div className="overflow-x-clip">
-      <HeroSection
-        eyebrow="SAY Auto Care Center"
-        title="TIRES, TRUSTED PARTS, AND STRAIGHTFORWARD AUTO CARE SUPPORT."
-        description="Explore trusted tires, everyday auto care products, and workshop support from SAY Auto Care Center. Browse featured items, request a service quote, and stay updated with the latest shop news."
-        actions={
-          <>
-            <Button asChild variant="yellowPrimary" size="pill">
+    <div className="bg-[#030B18] text-white">
+      <section
+        id="home"
+        className="relative isolate overflow-hidden border-b border-white/10"
+      >
+        <Image
+          src={WEBSITE_HERO_BACKGROUND_SRC}
+          alt="Premium SAY Auto Care workshop background"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(3,11,24,0.96)_0%,rgba(3,11,24,0.86)_42%,rgba(3,11,24,0.58)_72%,rgba(3,11,24,0.4)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(215,25,32,0.16),transparent_24%)]" />
+
+        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24 xl:py-28">
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-end">
+            <div className="max-w-[620px]">
+              <div className="inline-flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.22em] text-white/66">
+                <span className="h-px w-10 bg-brand-red" />
+                Your trusted auto care center
+              </div>
+              <h1 className="mt-6 font-display text-[2.9rem] uppercase leading-[0.94] tracking-[0.04em] text-white sm:text-[4rem] lg:text-[5rem]">
+                Driven By <span className="text-brand-red">Precision.</span>
+                <br />
+                Built On <span className="text-brand-red">Trust.</span>
+              </h1>
+              <p className="mt-5 max-w-[560px] text-base leading-8 text-white/76 sm:text-lg">
+                Professional auto care services you can count on. Quality. Reliability. Performance.
+              </p>
+
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Button
+                  asChild
+                  variant="yellowPrimary"
+                  size="pill"
+                  className="h-12 rounded-xl px-6 text-sm font-semibold uppercase tracking-[0.16em]"
+                >
+                  <Link href="/get-quote">
+                    Service Quote
+                    <ArrowRight className="size-4" />
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outlineLight"
+                  size="pill"
+                  className="h-12 rounded-xl border-white/20 bg-white/5 px-6 text-sm font-semibold uppercase tracking-[0.16em]"
+                >
+                  <Link href="/#services">
+                    View Services
+                    <ArrowRight className="size-4" />
+                  </Link>
+                </Button>
+              </div>
+
+              <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {HERO_FEATURES.map(({ label, icon: Icon }) => (
+                  <HeroFeature key={label} icon={Icon} label={label} />
+                ))}
+              </div>
+            </div>
+
+            <div className="hidden lg:block" />
+          </div>
+        </div>
+      </section>
+
+      <section id="about-us" className="border-b border-white/10 bg-[#061224]">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[minmax(0,1.1fr)_auto] lg:items-center lg:px-8">
+          <div className="space-y-4">
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand-red">
+              About Us
+            </p>
+            <h2 className="text-3xl font-semibold uppercase tracking-[0.03em] text-white sm:text-4xl">
+              Your trusted SAY Auto Care destination for dependable maintenance and repair.
+            </h2>
+            <p className="max-w-3xl text-base leading-8 text-white/72">
+              SAY Auto Care delivers workshop support built around clear service communication, modern equipment, and a commitment to doing the job right. From diagnostics to preventive maintenance, the team is focused on safe, reliable results.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+            <Button
+              asChild
+              variant="yellowPrimary"
+              size="pill"
+              className="h-12 rounded-xl px-6 text-sm font-semibold uppercase tracking-[0.16em]"
+            >
               <Link href="/get-quote">Service Quote</Link>
             </Button>
-            <Button asChild variant="outlineLight" size="pill">
-              <Link href="/catalog">Browse Products</Link>
-            </Button>
-          </>
-        }
-        aside={
-          <div className="space-y-5">
-            <div className="flex justify-center px-1 pt-1 sm:px-4">
-              <BrandLogo
-                src={shellData.businessLogoUrl ?? DEFAULT_BRAND_LOGO_SRC}
-                alt={shellData.businessName}
-                width={420}
-                height={360}
-                className="h-auto w-full max-w-[320px] sm:max-w-[360px]"
-                priority
-              />
-            </div>
-            <div className="rounded-2xl bg-[#f3f5fa] p-4 sm:p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#173c99]">
-                Pinoy craftsmanship
-              </p>
-              <h2 className="mt-3 text-2xl font-semibold leading-tight text-[#10224d]">
-                American precision.
-              </h2>
-              <p className="mt-3 text-sm leading-6 text-[#4d5f7f]">
-                From product inquiries to workshop assistance, SAY Auto Care Center is ready to help you choose the right next step for your vehicle.
-              </p>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-              <HeroAsideChip
-                title="Catalog-led"
-                description="Browse featured parts, fluids, and accessories in one place."
-              />
-              <HeroAsideChip
-                title="Brand-led"
-                description="Clean product presentation with trusted SAY Auto Care branding."
-              />
-              <HeroAsideChip
-                title="Service-ready"
-                description="Request workshop help without leaving the public website."
-              />
-            </div>
-          </div>
-        }
-      >
-        <div className="grid gap-3 sm:grid-cols-3">
-          {HERO_POINTS.map((point) => (
-            <div
-              key={point.title}
-              className="rounded-2xl border border-white/12 bg-white/10 p-4 shadow-[0_16px_34px_rgba(4,12,38,0.16)] backdrop-blur sm:p-4"
+            <Button
+              asChild
+              variant="outlineLight"
+              size="pill"
+              className="h-12 rounded-xl border-white/16 bg-transparent px-6 text-sm font-semibold uppercase tracking-[0.16em]"
             >
-              <p className="text-base font-semibold text-white">
-                {point.title}
-              </p>
-              <p className="mt-2 text-sm leading-6 text-[#d8e3ff]">
-                {point.description}
-              </p>
-            </div>
-          ))}
+              <Link href="/catalog">Browse Catalog</Link>
+            </Button>
+          </div>
         </div>
-      </HeroSection>
+      </section>
 
-      <SectionContainer tone="navy" spacing="compact" className="pt-0">
-        <div className="rounded-2xl border border-white/12 bg-white/10 px-5 py-7 shadow-[0_24px_50px_rgba(5,14,44,0.24)] backdrop-blur sm:px-7 sm:py-8">
-          <PageHeader
-            eyebrow="Main website focus"
-            title="SHOWCASE THE PRODUCTS CUSTOMERS ASK ABOUT FIRST."
-            description="Browse popular categories first, then contact the shop for product availability, fitment, and service support."
-            align="center"
-            inverse
+      <section id="services" className="bg-[#030B18]">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+          <SectionHeading
+            eyebrow="Our Services"
+            title="How We Can Help"
+            description="From diagnostics to major repairs, SAY Auto Care covers the services customers ask for most."
           />
 
-          <div className="mt-8 grid gap-5 lg:grid-cols-3">
-            {FEATURE_BLOCKS.map((block) => (
-              <ServiceCard
-                key={block.title}
-                icon={block.icon}
-                eyebrow={block.eyebrow}
-                title={block.title}
-                description={block.description}
-                href={block.href}
-                cta={block.cta}
-              />
+          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            {SERVICE_CARDS.map((service) => (
+              <ServicePreviewCard key={service.title} service={service} />
             ))}
           </div>
-        </div>
-      </SectionContainer>
 
-      <SectionContainer tone="muted" width="default">
-        <div className="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
-          <PageHeader
-            eyebrow="How it works"
-            title="A clear path from browsing to the right next step."
-            description="Browse products, request a service quote, or contact the shop directly for availability, fitment, and workshop assistance."
-            align="left"
-          />
-
-          <div className="grid gap-5 md:grid-cols-3">
-            {PROCESS_STEPS.map((step) => (
-              <div
-                key={step.step}
-                className="rounded-2xl bg-white p-5 shadow-[0_18px_36px_rgba(7,18,57,0.1)] ring-1 ring-[#dbe3f5] sm:p-6"
-              >
-                <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#ffd24a] font-semibold text-[#10224d]">
-                  {step.step}
-                </div>
-                <h3 className="mt-4 text-xl font-semibold leading-tight text-[#10224d]">
-                  {step.title}
-                </h3>
-                <p className="mt-2.5 text-sm leading-6 text-[#4d5f7f]">
-                  {step.description}
+          <div className="mt-8 rounded-[1.75rem] border border-white/10 bg-[linear-gradient(135deg,rgba(8,23,53,0.96),rgba(4,12,28,0.96))] px-6 py-6 shadow-[0_24px_60px_rgba(0,0,0,0.28)] sm:px-7">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="space-y-2">
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/50">
+                  Need parts too?
+                </p>
+                <p className="max-w-2xl text-base leading-7 text-white/76">
+                  Browse tires, batteries, fluids, and other catalog items online before you contact the shop for availability and fitment.
                 </p>
               </div>
+              <Button
+                asChild
+                variant="outlineLight"
+                size="pill"
+                className="h-12 rounded-xl border-white/16 bg-white/5 px-6 text-sm font-semibold uppercase tracking-[0.16em]"
+              >
+                <Link href="/catalog">
+                  Browse Catalog
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="why-choose-us" className="border-y border-white/10 bg-[#061224]">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-center lg:px-8 lg:py-20">
+          <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#07172d] shadow-[0_26px_60px_rgba(0,0,0,0.28)]">
+            <div className="relative aspect-[16/11]">
+              <Image
+                src={WEBSITE_FEATURE_BACKGROUND_SRC}
+                alt="SAY Auto Care workshop preview"
+                fill
+                sizes="(max-width: 1023px) 100vw, 50vw"
+                className="object-cover object-center"
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,11,24,0.12),rgba(3,11,24,0.48))]" />
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <SectionHeading
+              eyebrow="Why Choose Us"
+              title="Quality Care You Can Trust"
+              description="At SAY Auto Care, we combine expert craftsmanship with honest service to keep your vehicle running at its best. Your safety and satisfaction are our top priorities."
+              align="left"
+            />
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              {TRUST_POINTS.map((point) => (
+                <TrustPoint key={point.title} point={point} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="reviews" className="bg-[#030B18]">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+          <SectionHeading
+            eyebrow="Customer Reviews"
+            title="What Our Customers Say"
+            description="Customer feedback preview for the public website presentation. Verified testimonials can be added here once approved by the shop."
+          />
+
+          <div className="mt-10 grid gap-5 lg:grid-cols-3">
+            {TESTIMONIAL_PREVIEWS.map((quote) => (
+              <ReviewPreviewCard key={quote} quote={quote} />
             ))}
           </div>
         </div>
-      </SectionContainer>
+      </section>
 
-      <SectionContainer tone="white">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <PageHeader
-            eyebrow="Featured products"
-            title="TIRES, FLUIDS, BATTERIES, AND EVERYDAY AUTO CARE ITEMS."
-            description="Browse selected tires, fluids, batteries, and everyday auto care items available through SAY Auto Care Center."
-            align="left"
-          />
-          <Button asChild variant="outlineBlue" size="pill">
-            <Link href="/catalog">View full catalog</Link>
-          </Button>
-        </div>
+      <section className="border-t border-white/10 bg-[#061224]">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(8,23,53,0.96),rgba(4,12,28,0.96))] px-6 py-7 shadow-[0_26px_70px_rgba(0,0,0,0.32)] sm:px-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="space-y-2">
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-brand-red">
+                  Ready to get started?
+                </p>
+                <h2 className="text-3xl font-semibold uppercase tracking-[0.03em] text-white sm:text-4xl">
+                  Request a service quote and experience the SAY Auto Care difference.
+                </h2>
+                <p className="max-w-2xl text-base leading-7 text-white/72">
+                  Reach the shop through the service quote form and let the team guide you to the right next step for your vehicle.
+                </p>
+              </div>
 
-        <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {featuredProducts.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-[#d2dbef] bg-[#f8faff] p-8 text-sm leading-7 text-[#5b6783]">
-              Featured products will appear here soon. Please check back later or contact the shop directly.
+              <Button
+                asChild
+                variant="yellowPrimary"
+                size="pill"
+                className="h-12 rounded-xl px-6 text-sm font-semibold uppercase tracking-[0.16em]"
+              >
+                <Link href="/get-quote">
+                  Service Quote
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
             </div>
-          ) : (
-            featuredProducts.map((product) => (
-              <WebsiteProductCard key={product.id} product={product} />
-            ))
-          )}
-        </div>
-      </SectionContainer>
-
-      <SectionContainer tone="navy">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <PageHeader
-            eyebrow="Shop updates and tips"
-            title="REAL WORK, PROMOS, AND PRACTICAL MAINTENANCE ADVICE."
-            description="See recent shop updates, promos, and practical maintenance tips from the SAY Auto Care team."
-            align="left"
-            inverse
-          />
-          <Button asChild variant="yellowPrimary" size="pill">
-            <Link href="/garage-journal">Open journal</Link>
-          </Button>
-        </div>
-
-        <div className="mt-8 grid gap-5 lg:grid-cols-3">
-          {latestPosts.length === 0 ? (
-            <div className="rounded-2xl bg-white p-8 text-sm leading-7 text-[#5b6783] shadow-[0_22px_48px_rgba(7,18,57,0.18)]">
-              No shop updates are available right now. Please check back soon for promos, maintenance tips, and recent work highlights.
-            </div>
-          ) : (
-            latestPosts.map((post) => (
-              <WebsiteStoryCard key={post.id} post={post} />
-            ))
-          )}
-        </div>
-      </SectionContainer>
-
-      <CTASection
-        eyebrow="Need service help?"
-        title="SEND YOUR SERVICE CONCERN IN ONE CLEAR REQUEST."
-        description="Use the service quote form for maintenance, repairs, inspections, and other workshop concerns. For products, you can still call or visit the shop directly."
-        actions={
-          <>
-            <Button asChild variant="yellowPrimary" size="pill">
-              <Link href="/get-quote">Service Quote</Link>
-            </Button>
-            <Button asChild variant="outlineLight" size="pill">
-              <Link href="/contact">Contact the shop</Link>
-            </Button>
-          </>
-        }
-        aside={
-          <div className="grid gap-4 md:grid-cols-3">
-            <CTANote
-              icon={ClipboardList}
-              title="Vehicle details"
-              description="Capture the make, model, service need, and customer concern in one go."
-            />
-            <CTANote
-              icon={ShieldCheck}
-              title="In-store product shopping"
-              description="Use the catalog for pricing, then call or visit the shop for availability, fitment, or install advice."
-            />
-            <CTANote
-              icon={PhoneCall}
-              title="Direct follow-up"
-              description="Keep a clear phone contact path visible for customers who prefer to call."
-            />
           </div>
-        }
-      />
+        </div>
+      </section>
+
+      <section className="border-t border-white/10 bg-[#030B18]">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-4 rounded-[1.75rem] border border-white/10 bg-white/[0.03] px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <div className="flex items-center gap-4">
+              <BrandLogo
+                src={websiteLogoSrc}
+                alt={shellData.businessName}
+                width={300}
+                height={112}
+                className="h-10 w-auto max-w-[150px] object-contain"
+                surface="dark"
+              />
+              <div className="hidden h-10 w-px bg-white/10 sm:block" />
+              <p className="max-w-xl text-sm leading-7 text-white/66">
+                Need workshop support right away? Use the service quote form or contact the shop directly for assistance.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button
+                asChild
+                variant="outlineLight"
+                size="pill"
+                className="h-11 rounded-xl border-white/16 bg-transparent px-5 text-sm font-semibold uppercase tracking-[0.16em]"
+              >
+                <Link href="/contact">Contact Us</Link>
+              </Button>
+              <Button
+                asChild
+                variant="yellowPrimary"
+                size="pill"
+                className="h-11 rounded-xl px-5 text-sm font-semibold uppercase tracking-[0.16em]"
+              >
+                <Link href="/get-quote">Service Quote</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
 
-function HeroAsideChip({
+function SectionHeading({
+  eyebrow,
   title,
   description,
+  align = 'center',
 }: {
+  eyebrow: string;
   title: string;
   description: string;
+  align?: 'left' | 'center';
 }) {
+  const centered = align === 'center';
+
   return (
-    <div className="rounded-2xl border border-[#dbe3f5] bg-white px-4 py-4 shadow-[0_10px_22px_rgba(7,18,57,0.08)]">
-      <p className="text-sm font-semibold text-[#10224d]">{title}</p>
-      <p className="mt-1 text-sm leading-6 text-[#4d5f7f]">{description}</p>
+    <div className={centered ? 'mx-auto max-w-3xl text-center' : 'max-w-2xl text-left'}>
+      <div
+        className={centered ? 'justify-center' : 'justify-start'}
+      >
+        <p className="inline-flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.24em] text-brand-red">
+          <span className="h-px w-8 bg-brand-red" />
+          {eyebrow}
+          <span className="h-px w-8 bg-brand-red" />
+        </p>
+      </div>
+      <h2 className="mt-4 text-3xl font-semibold uppercase tracking-[0.03em] text-white sm:text-4xl">
+        {title}
+      </h2>
+      <p className="mt-4 text-base leading-8 text-white/72">{description}</p>
     </div>
   );
 }
 
-function CTANote({
+function HeroFeature({
   icon: Icon,
-  title,
-  description,
+  label,
 }: {
   icon: LucideIcon;
-  title: string;
-  description: string;
+  label: string;
 }) {
   return (
-    <div className="rounded-2xl border border-white/12 bg-white/10 p-5 backdrop-blur">
-      <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#ffd24a] text-[#10224d]">
-        <Icon className="h-4 w-4" />
+    <div className="rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-4 shadow-[0_18px_40px_rgba(0,0,0,0.16)] backdrop-blur-sm">
+      <div className="flex size-11 items-center justify-center rounded-2xl bg-brand-red/10 text-brand-red">
+        <Icon className="size-5" />
       </div>
-      <p className="mt-4 text-base font-semibold text-white">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-[#d8e3ff]">{description}</p>
+      <p className="mt-4 text-sm font-semibold uppercase tracking-[0.14em] text-white/90">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+function ServicePreviewCard({
+  service,
+}: {
+  service: {
+    title: string;
+    description: string;
+    icon: LucideIcon;
+  };
+}) {
+  const Icon = service.icon;
+
+  return (
+    <div className="group relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[linear-gradient(180deg,rgba(9,24,53,0.96),rgba(3,11,24,0.98))] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.22)]">
+      <div className="absolute -right-10 top-0 h-24 w-24 rounded-full bg-brand-red/10 blur-3xl transition group-hover:bg-brand-red/18" />
+      <div className="relative">
+        <div className="flex size-14 items-center justify-center rounded-2xl border border-brand-red/25 bg-brand-red/8 text-brand-red">
+          <Icon className="size-7" />
+        </div>
+        <h3 className="mt-5 text-2xl font-semibold leading-tight text-white">
+          {service.title}
+        </h3>
+        <p className="mt-3 text-sm leading-7 text-white/68">
+          {service.description}
+        </p>
+        <Link
+          href="/get-quote"
+          className="mt-5 inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-white transition hover:text-brand-red"
+        >
+          Learn More
+          <ArrowRight className="size-4" />
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function TrustPoint({
+  point,
+}: {
+  point: {
+    title: string;
+    description: string;
+    icon: LucideIcon;
+  };
+}) {
+  const Icon = point.icon;
+
+  return (
+    <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-5 py-5">
+      <div className="flex size-11 items-center justify-center rounded-2xl bg-brand-red/10 text-brand-red">
+        <Icon className="size-5" />
+      </div>
+      <p className="mt-4 text-lg font-semibold text-white">{point.title}</p>
+      <p className="mt-2 text-sm leading-7 text-white/68">{point.description}</p>
+    </div>
+  );
+}
+
+function ReviewPreviewCard({ quote }: { quote: string }) {
+  return (
+    <div className="rounded-[1.75rem] border border-white/10 bg-[linear-gradient(180deg,rgba(9,24,53,0.92),rgba(5,15,32,0.98))] p-6 shadow-[0_18px_46px_rgba(0,0,0,0.22)]">
+      <div className="flex items-center gap-1 text-brand-red">
+        {Array.from({ length: 5 }, (_, index) => (
+          <Star key={index} className="size-4 fill-current" />
+        ))}
+      </div>
+      <p className="mt-5 text-base leading-8 text-white/76">
+        {quote}
+      </p>
+      <div className="mt-6 border-t border-white/10 pt-5">
+        <p className="text-sm font-semibold text-white">Customer feedback preview</p>
+        <p className="mt-1 text-sm text-white/48">Illustrative review layout</p>
+      </div>
     </div>
   );
 }

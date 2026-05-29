@@ -19,10 +19,10 @@ import { cn } from "@/lib/utils";
 import { useFormValues } from "@/lib/use-form-values";
 
 const FIELD_CLASS_NAME =
-  "h-11 rounded-xl border border-[#d3dcee] bg-white px-3.5 text-sm text-[#10224d] shadow-[inset_0_1px_2px_rgba(15,23,42,0.03)] placeholder:text-[#7f8ba4] focus-visible:border-[#173c99] focus-visible:ring-[#173c99]/20";
+  "h-12 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-900 shadow-[inset_0_1px_2px_rgba(15,23,42,0.03)] placeholder:text-slate-400 focus-visible:border-brand-red/70 focus-visible:ring-brand-red/20";
 
 const SELECT_CLASS_NAME = cn(
-  "flex h-11 w-full rounded-xl border border-[#d3dcee] bg-white px-3.5 py-2 text-sm text-[#10224d] shadow-[inset_0_1px_2px_rgba(15,23,42,0.03)] outline-none transition focus:border-[#173c99] focus:ring-2 focus:ring-[#173c99]/20",
+  "flex h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-900 shadow-[inset_0_1px_2px_rgba(15,23,42,0.03)] outline-none transition focus:border-brand-red/70 focus:ring-2 focus:ring-brand-red/20",
 );
 
 export function QuoteRequestForm({
@@ -42,7 +42,7 @@ export function QuoteRequestForm({
   );
 
   return (
-    <form action={formAction} className="space-y-5">
+    <form action={formAction} className="space-y-5 sm:space-y-6">
       <FormStatusMessage message={state.message} />
 
       <FormSectionCard>
@@ -123,7 +123,7 @@ export function QuoteRequestForm({
         <div className="mt-5 space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="vehicleMake" className="text-sm font-medium text-[#1c2b49]">
+              <Label htmlFor="vehicleMake" className="text-sm font-medium text-slate-800">
                 Vehicle make
               </Label>
               <select
@@ -155,7 +155,7 @@ export function QuoteRequestForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="vehicleModel" className="text-sm font-medium text-[#1c2b49]">
+              <Label htmlFor="vehicleModel" className="text-sm font-medium text-slate-800">
                 Vehicle model
               </Label>
               <select
@@ -185,7 +185,7 @@ export function QuoteRequestForm({
               onChange={(value) => updateFormValue("vehicleYear", value)}
             />
             <div className="space-y-2">
-              <Label htmlFor="transmission" className="text-sm font-medium text-[#1c2b49]">
+              <Label htmlFor="transmission" className="text-sm font-medium text-slate-800">
                 Transmission
               </Label>
               <select
@@ -239,8 +239,8 @@ export function QuoteRequestForm({
           description="Keep this close to how the customer would explain the service concern over Messenger or phone."
         />
         <div className="mt-5 space-y-4">
-          <div className="space-y-2 md:max-w-[55%]">
-            <Label htmlFor="serviceNeeded" className="text-sm font-medium text-[#1c2b49]">
+          <div className="space-y-2 xl:max-w-[55%]">
+            <Label htmlFor="serviceNeeded" className="text-sm font-medium text-slate-800">
               Service needed
             </Label>
             <select
@@ -261,7 +261,7 @@ export function QuoteRequestForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="customerConcern" className="text-sm font-medium text-[#1c2b49]">
+            <Label htmlFor="customerConcern" className="text-sm font-medium text-slate-800">
               Let us know your car concern
             </Label>
             <Textarea
@@ -269,7 +269,7 @@ export function QuoteRequestForm({
               name="customerConcern"
               value={values.customerConcern}
               rows={6}
-              className="min-h-[152px] rounded-xl border-[#d3dcee] bg-white text-[#10224d] shadow-[inset_0_1px_2px_rgba(15,23,42,0.03)] focus-visible:border-[#173c99] focus-visible:ring-[#173c99]/20"
+              className="min-h-[152px] rounded-2xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 shadow-[inset_0_1px_2px_rgba(15,23,42,0.03)] placeholder:text-slate-400 focus-visible:border-brand-red/70 focus-visible:ring-brand-red/20"
               onChange={(event) => updateFormValue("customerConcern", event.target.value)}
             />
             <FieldError errors={state.fieldErrors} name="customerConcern" />
@@ -279,8 +279,7 @@ export function QuoteRequestForm({
 
       <div
         className={cn(
-          websiteCardVariants({ variant: "formSection" }),
-          "border-transparent bg-[linear-gradient(135deg,#0d245f_0%,#173c99_100%)] text-white shadow-[0_22px_44px_rgba(7,18,57,0.2)]",
+          "rounded-[1.75rem] border border-white/10 bg-[linear-gradient(135deg,#07172d_0%,#0b2144_52%,#12305f_100%)] p-5 text-white shadow-[0_24px_56px_rgba(2,11,24,0.28)] sm:p-6 md:p-7",
         )}
       >
         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
@@ -298,7 +297,7 @@ export function QuoteRequestForm({
             pendingLabel="Sending request..."
             variant="yellowPrimary"
             size="pill"
-            className="h-12 min-w-[200px] text-sm"
+            className="h-12 w-full min-w-[200px] text-sm md:w-auto"
           >
             Send request
           </SubmitButton>
@@ -315,7 +314,16 @@ function FormSectionCard({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <section className={cn(websiteCardVariants({ variant: "formSection" }), className)}>{children}</section>;
+  return (
+    <section
+      className={cn(
+        "rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-[0_20px_48px_rgba(2,11,24,0.10)] sm:p-6 md:p-7",
+        className,
+      )}
+    >
+      {children}
+    </section>
+  );
 }
 
 function SectionHeading({
@@ -329,12 +337,12 @@ function SectionHeading({
 }) {
   return (
     <div className="flex items-start gap-3">
-      <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#eef3ff] text-[#173c99]">
+      <div className="mt-0.5 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-red/10 text-brand-red">
         <Icon className="h-4 w-4" />
       </div>
       <div className="space-y-1">
-        <h2 className="text-lg font-semibold text-[#10224d]">{title}</h2>
-        <p className="text-sm leading-6 text-[#4d5f7f]">{description}</p>
+        <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+        <p className="text-sm leading-6 text-slate-600">{description}</p>
       </div>
     </div>
   );
@@ -355,7 +363,7 @@ function Field({
 }) {
   return (
     <div className="space-y-2">
-      <Label htmlFor={name} className="text-sm font-medium text-[#1c2b49]">
+      <Label htmlFor={name} className="text-sm font-medium text-slate-800">
         {label}
       </Label>
       <Input

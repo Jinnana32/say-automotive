@@ -43,6 +43,7 @@ describe("PublicSiteShell", () => {
     fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
 
     expect(screen.getByRole("button", { name: "Close menu" })).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "Services" }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: "Catalog" }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: "Service Quote" }).length).toBeGreaterThan(0);
 
@@ -73,9 +74,9 @@ describe("PublicSiteShell", () => {
       </PublicSiteShell>,
     );
 
-    const logo = screen.getByAltText("SAY Auto Care Center");
+    const logos = screen.getAllByAltText("SAY Auto Care Center");
 
-    expect(logo).toHaveAttribute("src", expect.stringContaining("/say-auto-care-logo-tight.png"));
+    expect(logos[0]).toHaveAttribute("src", expect.stringContaining("/brand/website-official-logo-transparent.png"));
     expect(screen.queryByAltText("SAY Auto Care Center shield")).not.toBeInTheDocument();
   });
 });

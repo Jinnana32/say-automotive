@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
+import { ArrowRight, Mail, MapPin, Menu, PhoneCall, X } from 'lucide-react';
 
-import { DEFAULT_BRAND_LOGO_TIGHT_SRC } from '@/components/shared/brand-assets';
 import { BrandLogo } from '@/components/shared/brand-logo';
 import { Button } from '@/components/ui/button';
 import type { WebsiteShellData } from '@/features/website/types';
 import { cn } from '@/lib/utils';
+
+const OFFICIAL_WEBSITE_LOGO_SRC = '/brand/website-official-logo-transparent.png';
 
 const publicNavLinks = [
   {
@@ -18,20 +19,36 @@ const publicNavLinks = [
     exact: true,
   },
   {
+    href: '/#services',
+    label: 'Services',
+  },
+  {
     href: '/catalog',
     label: 'Catalog',
   },
   {
-    href: '/garage-journal',
-    label: 'Shop Updates',
+    href: '/#about-us',
+    label: 'About Us',
+  },
+  {
+    href: '/#why-choose-us',
+    label: 'Why Choose Us',
+  },
+  {
+    href: '/#reviews',
+    label: 'Reviews',
   },
   {
     href: '/contact',
-    label: 'Contact Us',
+    label: 'Contact',
   },
-];
+] as const;
 
 function isActivePath(pathname: string, href: string, exact?: boolean) {
+  if (href.startsWith('/#')) {
+    return false;
+  }
+
   if (exact) {
     return pathname === href;
   }
@@ -59,9 +76,26 @@ function PublicNavLink({
       onClick={onSelect}
       aria-current={isActive ? 'page' : undefined}
       className={cn(
-        'rounded-full px-3 py-2 transition hover:text-[#173c99]',
-        isActive ? 'bg-[#eef3ff] text-[#173c99] shadow-sm' : 'text-[#223255]',
+        'group inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] transition',
+        isActive ? 'text-white' : 'text-white/78 hover:text-white',
       )}
+    >
+      <span>{label}</span>
+      <span
+        className={cn(
+          'h-px w-0 bg-brand-red transition-all duration-200',
+          isActive ? 'w-10' : 'group-hover:w-6',
+        )}
+      />
+    </Link>
+  );
+}
+
+function FooterLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="text-sm text-white/70 transition hover:text-white"
     >
       {label}
     </Link>
@@ -76,46 +110,46 @@ export function PublicSiteShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [mobileMenuPathname, setMobileMenuPathname] = useState<string | null>(null);
-  const isQuoteActive = isActivePath(pathname, '/get-quote');
-  const websiteLogoSrc = shellData.businessLogoUrl ?? DEFAULT_BRAND_LOGO_TIGHT_SRC;
-  const mobileMenuOpen = mobileMenuPathname === pathname;
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isQuoteActive = pathname === '/get-quote';
+  const websiteLogoSrc = OFFICIAL_WEBSITE_LOGO_SRC;
 
   return (
-    <div className="min-h-screen overflow-x-clip bg-[#f3f5fa] text-[#10224d]">
-      <header className="sticky top-0 z-20 border-b border-[#d6deef] bg-white/96 shadow-[0_12px_30px_rgba(9,26,79,0.08)] backdrop-blur">
-        <div className="h-1 w-full bg-[linear-gradient(90deg,#ffd24a_0%,#0f2d83_38%,#173c99_100%)]" />
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
-          <Link href="/" className="flex min-w-0 flex-1 items-center md:flex-none">
+    <div className="min-h-screen overflow-x-hidden bg-[#030B18] text-white">
+      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#030B18]/84 backdrop-blur-xl">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+          <Link href="/" className="flex min-w-0 items-center">
             <BrandLogo
               src={websiteLogoSrc}
               alt={shellData.businessName}
-              width={240}
-              height={192}
-              className="h-10 w-auto max-w-[150px] shrink-0 sm:h-11 sm:max-w-[170px] md:h-12 md:max-w-[220px]"
+              width={320}
+              height={120}
+              className="h-10 w-auto max-w-[164px] shrink-0 object-contain sm:h-11 sm:max-w-[190px] lg:h-12 lg:max-w-[220px]"
               priority
-              sizes="(max-width: 639px) 150px, (max-width: 767px) 170px, 220px"
+              sizes="(max-width: 639px) 164px, (max-width: 1023px) 190px, 220px"
+              surface="dark"
             />
           </Link>
 
-          <nav className="hidden items-center gap-x-2 gap-y-2 text-[15px] font-medium md:flex">
+          <nav className="hidden items-center gap-7 lg:flex">
             {publicNavLinks.map((link) => (
               <PublicNavLink
                 key={link.href}
                 href={link.href}
                 label={link.label}
-                exact={link.exact}
+                exact={'exact' in link ? link.exact : undefined}
               />
             ))}
+          </nav>
 
+          <div className="flex items-center gap-3">
             <Button
               asChild
               variant="yellowPrimary"
               size="pill"
               className={cn(
-                'h-10 px-5',
-                isQuoteActive &&
-                  'ring-2 ring-[#173c99] ring-offset-2 ring-offset-white',
+                'hidden h-11 rounded-xl px-5 text-sm font-semibold uppercase tracking-[0.16em] shadow-[0_18px_36px_rgba(214,40,40,0.24)] sm:inline-flex',
+                isQuoteActive && 'ring-2 ring-white/40 ring-offset-2 ring-offset-[#030B18]',
               )}
             >
               <Link
@@ -123,37 +157,34 @@ export function PublicSiteShell({
                 aria-current={isQuoteActive ? 'page' : undefined}
               >
                 Service Quote
+                <ArrowRight className="size-4" />
               </Link>
             </Button>
-          </nav>
 
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="shrink-0 rounded-2xl border border-[#d6deef] bg-white text-[#173c99] shadow-sm md:hidden"
-            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={mobileMenuOpen}
-            onClick={() =>
-              setMobileMenuPathname((currentPathname) =>
-                currentPathname === pathname ? null : pathname,
-              )
-            }
-          >
-            {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-          </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="rounded-2xl border border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-white lg:hidden"
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileMenuOpen}
+              onClick={() => setMobileMenuOpen((current) => !current)}
+            >
+              {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+            </Button>
+          </div>
         </div>
 
         {mobileMenuOpen ? (
-          <div className="border-t border-[#d6deef] bg-white px-4 py-3 shadow-[0_18px_32px_rgba(9,26,79,0.08)] md:hidden">
-            <nav className="mx-auto flex w-full max-w-7xl flex-col gap-2">
+          <div className="border-t border-white/10 bg-[#061326]/96 px-4 py-4 shadow-[0_24px_48px_rgba(0,0,0,0.28)] lg:hidden">
+            <nav className="mx-auto flex w-full max-w-7xl flex-col gap-3">
               {publicNavLinks.map((link) => (
                 <PublicNavLink
                   key={link.href}
                   href={link.href}
                   label={link.label}
-                  exact={link.exact}
-                  onSelect={() => setMobileMenuPathname(null)}
+                  exact={'exact' in link ? link.exact : undefined}
+                  onSelect={() => setMobileMenuOpen(false)}
                 />
               ))}
 
@@ -162,17 +193,17 @@ export function PublicSiteShell({
                 variant="yellowPrimary"
                 size="pill"
                 className={cn(
-                  'mt-2 h-11 w-full justify-center',
-                  isQuoteActive &&
-                    'ring-2 ring-[#173c99] ring-offset-2 ring-offset-white',
+                  'mt-2 h-11 w-full justify-center rounded-xl text-sm font-semibold uppercase tracking-[0.16em]',
+                  isQuoteActive && 'ring-2 ring-white/40 ring-offset-2 ring-offset-[#061326]',
                 )}
               >
                 <Link
                   href="/get-quote"
                   aria-current={isQuoteActive ? 'page' : undefined}
-                  onClick={() => setMobileMenuPathname(null)}
+                  onClick={() => setMobileMenuOpen(false)}
                 >
                   Service Quote
+                  <ArrowRight className="size-4" />
                 </Link>
               </Button>
             </nav>
@@ -180,9 +211,73 @@ export function PublicSiteShell({
         ) : null}
       </header>
 
-      <main>{children}</main>
+      <main className="flex-1 bg-[#030B18]">{children}</main>
 
-      {/* keep your existing footer unchanged */}
+      <footer className="border-t border-white/10 bg-[#020817]">
+        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+          <div className="grid gap-x-8 gap-y-10 border-b border-white/10 pb-10 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:grid-cols-[minmax(0,1.3fr)_0.8fr_1fr]">
+            <div className="space-y-5 md:col-span-2 lg:col-span-1">
+              <BrandLogo
+                src={websiteLogoSrc}
+                alt={shellData.businessName}
+                width={320}
+                height={120}
+                className="h-12 w-auto max-w-[210px] object-contain"
+                surface="dark"
+              />
+              <p className="max-w-md text-sm leading-7 text-white/68">
+                Professional auto care and repair services you can trust. Quality work. Honest service.
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/44">
+                Quick Links
+              </p>
+              <div className="mt-5 flex flex-col gap-3">
+                {publicNavLinks.map((link) => (
+                  <FooterLink key={link.href} href={link.href} label={link.label} />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/44">
+                Contact Us
+              </p>
+              <div className="mt-5 space-y-4 text-sm text-white/70">
+                {shellData.contactNumber ? (
+                  <div className="flex items-start gap-3">
+                    <PhoneCall className="mt-0.5 size-4 shrink-0 text-brand-red" />
+                    <span>{shellData.contactNumber}</span>
+                  </div>
+                ) : null}
+                {shellData.email ? (
+                  <div className="flex items-start gap-3">
+                    <Mail className="mt-0.5 size-4 shrink-0 text-brand-red" />
+                    <span>{shellData.email}</span>
+                  </div>
+                ) : null}
+                {shellData.address ? (
+                  <div className="flex items-start gap-3">
+                    <MapPin className="mt-0.5 size-4 shrink-0 text-brand-red" />
+                    <span>{shellData.address}</span>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4 pt-6 text-sm text-white/46 sm:flex-row sm:items-center sm:justify-between">
+            <p>© 2024 SAY Auto Care. All rights reserved.</p>
+            <div className="flex flex-wrap items-center gap-4">
+              <span>Privacy Policy</span>
+              <span>Terms of Service</span>
+              <span>Contact Support</span>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
