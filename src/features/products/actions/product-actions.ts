@@ -25,6 +25,7 @@ import {
   parseProductFormData,
   productFormSchema,
 } from "@/features/products/schemas/product-form-schema";
+import { excludeCurrentProductId } from "@/features/products/utils";
 import {
   type InlineProductActionState,
   INITIAL_INLINE_PRODUCT_ACTION_STATE,
@@ -196,30 +197,33 @@ async function upsertProduct(
       .eq("id", values.unitId)
       .maybeSingle(),
     normalizedSku
-      ? supabase
-          .from("products")
-          .select("id")
-          .eq("sku", normalizedSku)
-          .eq("branch_id", resolvedBranchId)
-          .neq("id", values.productId ?? "")
-          .maybeSingle()
+      ? excludeCurrentProductId(
+          supabase
+            .from("products")
+            .select("id")
+            .eq("sku", normalizedSku)
+            .eq("branch_id", resolvedBranchId),
+          values.productId,
+        ).maybeSingle()
       : Promise.resolve({ data: null, error: null }),
     normalizedBarcode
-      ? supabase
-          .from("products")
-          .select("id")
-          .eq("barcode", normalizedBarcode)
-          .eq("branch_id", resolvedBranchId)
-          .neq("id", values.productId ?? "")
-          .maybeSingle()
+      ? excludeCurrentProductId(
+          supabase
+            .from("products")
+            .select("id")
+            .eq("barcode", normalizedBarcode)
+            .eq("branch_id", resolvedBranchId),
+          values.productId,
+        ).maybeSingle()
       : Promise.resolve({ data: null, error: null }),
     normalizedWebsiteSlug
-      ? supabase
-          .from("products")
-          .select("id")
-          .eq("website_slug", normalizedWebsiteSlug)
-          .neq("id", values.productId ?? "")
-          .maybeSingle()
+      ? excludeCurrentProductId(
+          supabase
+            .from("products")
+            .select("id")
+            .eq("website_slug", normalizedWebsiteSlug),
+          values.productId,
+        ).maybeSingle()
       : Promise.resolve({ data: null, error: null }),
   ]);
 
