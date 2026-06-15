@@ -33,9 +33,30 @@ describe("settings form schemas", () => {
       requireAdditionalItemPreApproval: true,
       enableBarcodeSupport: true,
       enableShelfLocation: false,
+      payrollStandardDailyHours: "8",
+      payrollHolidayPremiumRate: "30",
     });
 
     expect(parsed.success).toBe(true);
+  });
+
+  it("rejects invalid payroll rule settings", () => {
+    const parsed = operationalRulesSettingsSchema.safeParse({
+      allowGlobalProductCatalog: false,
+      allowGlobalServiceCatalog: true,
+      allowPartialPayments: true,
+      requireInvoiceBeforeJobCompletion: false,
+      requireInvoiceBeforeVehicleRelease: false,
+      allowReleaseWithBalance: false,
+      requireFullPaymentBeforeRelease: true,
+      requireAdditionalItemPreApproval: true,
+      enableBarcodeSupport: true,
+      enableShelfLocation: false,
+      payrollStandardDailyHours: "0",
+      payrollHolidayPremiumRate: "-5",
+    });
+
+    expect(parsed.success).toBe(false);
   });
 
   it("rejects invalid document sequence padding", () => {

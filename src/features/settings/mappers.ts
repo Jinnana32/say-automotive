@@ -39,6 +39,8 @@ export function mapBusinessSettingsRowToValues(
     requireAdditionalItemPreApproval: row.require_additional_item_preapproval,
     enableBarcodeSupport: row.enable_barcode_support,
     enableShelfLocation: row.enable_shelf_location,
+    payrollStandardDailyHours: String(row.payroll_standard_daily_hours ?? 8),
+    payrollHolidayPremiumRate: String((row.payroll_holiday_premium_rate ?? 0.3) * 100),
   };
 }
 

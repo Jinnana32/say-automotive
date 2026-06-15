@@ -31,6 +31,8 @@ export type BusinessSettingsValues = {
   requireAdditionalItemPreApproval: boolean;
   enableBarcodeSupport: boolean;
   enableShelfLocation: boolean;
+  payrollStandardDailyHours: string;
+  payrollHolidayPremiumRate: string;
 };
 
 export type BusinessBranding = {

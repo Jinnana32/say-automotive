@@ -25,6 +25,7 @@ export function mapStaffRowToFormValues(row: StaffRow): StaffFormValues {
     lastName: row.last_name,
     documentTitle: row.document_title ?? "",
     role: row.role,
+    isPayrollEligible: row.is_payroll_eligible,
     contactNumber: row.contact_number ?? "",
     address: row.address ?? "",
     sssNumber: row.sss_number ?? "",

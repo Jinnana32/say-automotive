@@ -21,6 +21,7 @@ export default async function NewStaffPage() {
           lastName: "",
           documentTitle: "",
           role: "mechanic",
+          isPayrollEligible: true,
           contactNumber: "",
           address: "",
           sssNumber: "",

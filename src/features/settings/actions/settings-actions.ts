@@ -155,6 +155,8 @@ export async function updateOperationalRulesSettingsAction(
     require_additional_item_preapproval: parsed.data.requireAdditionalItemPreApproval,
     enable_barcode_support: parsed.data.enableBarcodeSupport,
     enable_shelf_location: parsed.data.enableShelfLocation,
+    payroll_standard_daily_hours: Number(parsed.data.payrollStandardDailyHours),
+    payroll_holiday_premium_rate: Number(parsed.data.payrollHolidayPremiumRate) / 100,
   };
 
   const { error } = await supabase
@@ -186,6 +188,8 @@ export async function updateOperationalRulesSettingsAction(
         currentSettings.require_additional_item_preapproval,
       enable_barcode_support: currentSettings.enable_barcode_support,
       enable_shelf_location: currentSettings.enable_shelf_location,
+      payroll_standard_daily_hours: currentSettings.payroll_standard_daily_hours,
+      payroll_holiday_premium_rate: currentSettings.payroll_holiday_premium_rate,
     },
     afterData: payload,
   });

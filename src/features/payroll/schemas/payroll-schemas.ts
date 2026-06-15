@@ -2,6 +2,7 @@ import { DateTime } from "luxon";
 import { z } from "zod";
 
 import type {
+  PayrollAdjustmentFormValues,
   CompensationProfileFormValues,
   PayrollPeriodFormValues,
   PayrollPeriodStatusFormValues,
@@ -78,6 +79,15 @@ export const payrollPeriodStatusSchema = z.object({
   status: z.enum(["draft", "processing", "finalized"]),
 });
 
+export const payrollAdjustmentSchema = z.object({
+  payrollPeriodId: z.string().uuid("Select a payroll period."),
+  payrollPeriodItemId: z.string().uuid("Select a payroll staff row."),
+  adjustmentType: z.enum(["addition", "deduction"]),
+  label: z.string().trim().min(1, "Adjustment label is required.").max(120, "Adjustment label is too long."),
+  amount: moneyField,
+  notes: z.string().trim().max(500, "Notes must be 500 characters or fewer."),
+});
+
 export function parseCompensationProfileFormData(formData: FormData): CompensationProfileFormValues {
   return {
     staffId: readString(formData, "staffId"),
@@ -104,6 +114,17 @@ export function parsePayrollPeriodStatusFormData(formData: FormData): PayrollPer
   return {
     periodId: readString(formData, "periodId"),
     status: readString(formData, "status") as PayrollPeriodStatusFormValues["status"],
+  };
+}
+
+export function parsePayrollAdjustmentFormData(formData: FormData): PayrollAdjustmentFormValues {
+  return {
+    payrollPeriodId: readString(formData, "payrollPeriodId"),
+    payrollPeriodItemId: readString(formData, "payrollPeriodItemId"),
+    adjustmentType: readString(formData, "adjustmentType") as PayrollAdjustmentFormValues["adjustmentType"],
+    label: readString(formData, "label"),
+    amount: readString(formData, "amount"),
+    notes: readString(formData, "notes"),
   };
 }
 

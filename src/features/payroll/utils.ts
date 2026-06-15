@@ -15,6 +15,7 @@ import type {
   PayrollPeriodStaffSummary,
   PayrollPeriodStatus,
   PayrollStaffReadinessStatus,
+  PayrollWarningCode,
 } from "@/features/payroll/types";
 
 export const PAY_BASIS_OPTIONS: Array<{
@@ -131,6 +132,25 @@ export function getPayrollReadinessTone(status: PayrollStaffReadinessStatus) {
       return "warning";
     case "not_configured":
       return "neutral";
+  }
+}
+
+export function formatPayrollWarningLabel(code: PayrollWarningCode) {
+  switch (code) {
+    case "missing_schedule":
+      return "Missing schedule";
+    case "missing_compensation":
+      return "Missing compensation";
+    case "missing_attendance":
+      return "Missing attendance";
+    case "needs_dtr_completion":
+      return "Needs time out";
+    case "not_configured":
+      return "Not configured";
+    case "pending_approval":
+      return "Pending approval";
+    case "custom_holiday_rule":
+      return "Custom holiday rule";
   }
 }
 

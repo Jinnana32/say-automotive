@@ -351,6 +351,8 @@ export type Database = {
           allow_attendance_admin_override: boolean;
           enable_barcode_support: boolean;
           enable_shelf_location: boolean;
+          payroll_standard_daily_hours: number;
+          payroll_holiday_premium_rate: number;
           default_tax_rate: number;
           business_name: string;
           business_logo_path: string | null;
@@ -378,6 +380,8 @@ export type Database = {
           allow_attendance_admin_override?: boolean;
           enable_barcode_support?: boolean;
           enable_shelf_location?: boolean;
+          payroll_standard_daily_hours?: number;
+          payroll_holiday_premium_rate?: number;
           default_tax_rate?: number;
           business_name: string;
           business_logo_path?: string | null;
@@ -1094,6 +1098,8 @@ export type Database = {
           status: Database["public"]["Enums"]["payroll_period_status"];
           notes: string | null;
           created_by_staff_id: string | null;
+          generated_by_staff_id: string | null;
+          generated_at: string | null;
           finalized_by_staff_id: string | null;
           finalized_at: string | null;
           created_at: string;
@@ -1109,6 +1115,8 @@ export type Database = {
           status?: Database["public"]["Enums"]["payroll_period_status"];
           notes?: string | null;
           created_by_staff_id?: string | null;
+          generated_by_staff_id?: string | null;
+          generated_at?: string | null;
           finalized_by_staff_id?: string | null;
           finalized_at?: string | null;
           created_at?: string;
@@ -1131,8 +1139,167 @@ export type Database = {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "payroll_periods_generated_by_staff_id_fkey";
+            columns: ["generated_by_staff_id"];
+            isOneToOne: false;
+            referencedRelation: "staff";
+            referencedColumns: ["id"];
+          },
+          {
             foreignKeyName: "payroll_periods_finalized_by_staff_id_fkey";
             columns: ["finalized_by_staff_id"];
+            isOneToOne: false;
+            referencedRelation: "staff";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      payroll_period_item_adjustments: {
+        Row: {
+          id: string;
+          payroll_period_item_id: string;
+          adjustment_type: string;
+          label: string;
+          amount: number;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          payroll_period_item_id: string;
+          adjustment_type: string;
+          label: string;
+          amount: number;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["payroll_period_item_adjustments"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "payroll_period_item_adjustments_payroll_period_item_id_fkey";
+            columns: ["payroll_period_item_id"];
+            isOneToOne: false;
+            referencedRelation: "payroll_period_items";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      payroll_period_items: {
+        Row: {
+          id: string;
+          payroll_period_id: string;
+          branch_id: string;
+          staff_id: string;
+          staff_name: string;
+          staff_role: Database["public"]["Enums"]["staff_role"];
+          pay_basis: Database["public"]["Enums"]["pay_basis"] | null;
+          base_rate: number | null;
+          overtime_rate: number | null;
+          allowance_per_period: number;
+          daily_rate_used: number;
+          hourly_rate_used: number;
+          standard_daily_hours: number;
+          holiday_premium_rate: number;
+          scheduled_workday_count: number;
+          holiday_day_count: number;
+          approved_leave_day_count: number;
+          expected_workday_count: number;
+          missing_attendance_day_count: number;
+          recorded_day_count: number;
+          present_count: number;
+          late_count: number;
+          half_day_count: number;
+          absent_count: number;
+          missing_timeout_count: number;
+          pending_approval_count: number;
+          worked_minutes: number;
+          paid_day_units: number;
+          holiday_worked_day_units: number;
+          late_deduction_minutes: number;
+          overtime_minutes: number;
+          base_pay: number;
+          late_deduction_amount: number;
+          holiday_premium_pay: number;
+          overtime_pay: number;
+          allowance_pay: number;
+          computed_pay: number;
+          manual_additions_total: number;
+          manual_deductions_total: number;
+          gross_pay: number;
+          net_pay: number;
+          readiness_status: string;
+          warning_codes: string[];
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          payroll_period_id: string;
+          branch_id: string;
+          staff_id: string;
+          staff_name: string;
+          staff_role: Database["public"]["Enums"]["staff_role"];
+          pay_basis?: Database["public"]["Enums"]["pay_basis"] | null;
+          base_rate?: number | null;
+          overtime_rate?: number | null;
+          allowance_per_period?: number;
+          daily_rate_used?: number;
+          hourly_rate_used?: number;
+          standard_daily_hours?: number;
+          holiday_premium_rate?: number;
+          scheduled_workday_count?: number;
+          holiday_day_count?: number;
+          approved_leave_day_count?: number;
+          expected_workday_count?: number;
+          missing_attendance_day_count?: number;
+          recorded_day_count?: number;
+          present_count?: number;
+          late_count?: number;
+          half_day_count?: number;
+          absent_count?: number;
+          missing_timeout_count?: number;
+          pending_approval_count?: number;
+          worked_minutes?: number;
+          paid_day_units?: number;
+          holiday_worked_day_units?: number;
+          late_deduction_minutes?: number;
+          overtime_minutes?: number;
+          base_pay?: number;
+          late_deduction_amount?: number;
+          holiday_premium_pay?: number;
+          overtime_pay?: number;
+          allowance_pay?: number;
+          computed_pay?: number;
+          manual_additions_total?: number;
+          manual_deductions_total?: number;
+          gross_pay?: number;
+          net_pay?: number;
+          readiness_status?: string;
+          warning_codes?: string[];
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["payroll_period_items"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "payroll_period_items_branch_id_fkey";
+            columns: ["branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "payroll_period_items_payroll_period_id_fkey";
+            columns: ["payroll_period_id"];
+            isOneToOne: false;
+            referencedRelation: "payroll_periods";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "payroll_period_items_staff_id_fkey";
+            columns: ["staff_id"];
             isOneToOne: false;
             referencedRelation: "staff";
             referencedColumns: ["id"];
@@ -1579,6 +1746,7 @@ export type Database = {
           tin_number: string | null;
           emergency_contact_name: string | null;
           emergency_contact_number: string | null;
+          is_payroll_eligible: boolean;
           status: Database["public"]["Enums"]["record_status"];
           created_at: string;
           updated_at: string;
@@ -1599,6 +1767,7 @@ export type Database = {
           tin_number?: string | null;
           emergency_contact_name?: string | null;
           emergency_contact_number?: string | null;
+          is_payroll_eligible?: boolean;
           status?: Database["public"]["Enums"]["record_status"];
           created_at?: string;
           updated_at?: string;

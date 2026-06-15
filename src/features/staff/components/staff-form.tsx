@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 import { useFormValues } from "@/lib/use-form-values";
 import { createStaffAction, updateStaffAction } from "@/features/staff/actions/staff-actions";
-import type { StaffFormValues } from "@/features/staff/types";
+import { getDefaultPayrollEligibilityForRole, type StaffFormValues } from "@/features/staff/types";
 
 export function StaffForm({
   mode,
@@ -27,6 +27,15 @@ export function StaffForm({
     INITIAL_FORM_ACTION_STATE,
   );
   const { values, updateFormValue } = useFormValues(initialValues);
+  const [payrollEligibilityTouched, setPayrollEligibilityTouched] = useState(false);
+
+  function handleRoleChange(nextRole: StaffFormValues["role"]) {
+    updateFormValue("role", nextRole);
+
+    if (!payrollEligibilityTouched) {
+      updateFormValue("isPayrollEligible", getDefaultPayrollEligibilityForRole(nextRole));
+    }
+  }
 
   return (
     <form action={formAction} className="space-y-6">
@@ -80,7 +89,7 @@ export function StaffForm({
                 name="role"
                 value={values.role}
                 className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                onChange={(event) => updateFormValue("role", event.target.value as StaffFormValues["role"])}
+                onChange={(event) => handleRoleChange(event.target.value as StaffFormValues["role"])}
               >
                 <option value="owner">Owner</option>
                 <option value="admin">Admin</option>
@@ -121,6 +130,33 @@ export function StaffForm({
               </select>
               <FieldError errors={state.fieldErrors} name="status" />
             </div>
+          </div>
+
+          <div className="rounded-2xl border border-border/70 bg-muted/15 px-4 py-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <p className="font-medium text-foreground">Include in payroll</p>
+                <p className="text-sm text-muted-foreground">
+                  Payroll pages and cut summaries only include staff marked as payroll-eligible. Owner and admin default to excluded, but you can still opt them in here.
+                </p>
+              </div>
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  name="isPayrollEligible"
+                  checked={values.isPayrollEligible}
+                  onChange={(event) => {
+                    setPayrollEligibilityTouched(true);
+                    updateFormValue("isPayrollEligible", event.target.checked);
+                  }}
+                  className="mt-0.5 size-4 rounded border-border text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/25"
+                />
+                <span className="text-sm font-medium text-foreground">
+                  {values.isPayrollEligible ? "Included" : "Excluded"}
+                </span>
+              </label>
+            </div>
+            <FieldError errors={state.fieldErrors} name="isPayrollEligible" />
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">

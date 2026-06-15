@@ -7,6 +7,7 @@ describe("staffFormSchema", () => {
     const result = staffFormSchema.safeParse({
       staffCode: "",
       role: "mechanic",
+      isPayrollEligible: true,
       firstName: "",
       lastName: "",
       documentTitle: "",
@@ -27,6 +28,7 @@ describe("staffFormSchema", () => {
     const result = staffFormSchema.safeParse({
       staffCode: "EMP-MAIN-0007",
       role: "admin",
+      isPayrollEligible: false,
       firstName: "Nia Grace",
       lastName: "Ariete",
       documentTitle: "Shop Manager",
@@ -41,5 +43,25 @@ describe("staffFormSchema", () => {
     });
 
     expect(result.success).toBe(true);
+  });
+
+  it("requires an explicit payroll eligibility flag", () => {
+    const result = staffFormSchema.safeParse({
+      staffCode: "EMP-MAIN-0008",
+      role: "owner",
+      firstName: "Henrick",
+      lastName: "Say",
+      documentTitle: "",
+      contactNumber: "",
+      address: "",
+      sssNumber: "",
+      philhealthNumber: "",
+      tinNumber: "",
+      emergencyContactName: "",
+      emergencyContactNumber: "",
+      status: "active",
+    });
+
+    expect(result.success).toBe(false);
   });
 });

@@ -25,6 +25,7 @@ export type StaffFormValues = {
   lastName: string;
   documentTitle: string;
   role: StaffRole;
+  isPayrollEligible: boolean;
   contactNumber: string;
   address: string;
   sssNumber: string;
@@ -34,3 +35,7 @@ export type StaffFormValues = {
   emergencyContactNumber: string;
   status: StaffStatus;
 };
+
+export function getDefaultPayrollEligibilityForRole(role: StaffRole) {
+  return role !== "owner" && role !== "admin";
+}

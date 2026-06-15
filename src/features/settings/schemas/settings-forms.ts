@@ -33,6 +33,20 @@ export const operationalRulesSettingsSchema = z.object({
   requireAdditionalItemPreApproval: z.boolean(),
   enableBarcodeSupport: z.boolean(),
   enableShelfLocation: z.boolean(),
+  payrollStandardDailyHours: z
+    .string()
+    .trim()
+    .refine(
+      (value) => Number.isFinite(Number(value)) && Number(value) > 0 && Number(value) <= 24,
+      "Standard daily hours must be between 0 and 24.",
+    ),
+  payrollHolidayPremiumRate: z
+    .string()
+    .trim()
+    .refine(
+      (value) => Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= 1000,
+      "Holiday premium rate must be between 0 and 1000 percent.",
+    ),
 });
 
 export const documentSequenceSettingsSchema = z.object({
@@ -81,6 +95,8 @@ export function parseOperationalRulesSettingsFormData(formData: FormData) {
     requireAdditionalItemPreApproval: readCheckbox(formData, "requireAdditionalItemPreApproval"),
     enableBarcodeSupport: readCheckbox(formData, "enableBarcodeSupport"),
     enableShelfLocation: readCheckbox(formData, "enableShelfLocation"),
+    payrollStandardDailyHours: readString(formData, "payrollStandardDailyHours"),
+    payrollHolidayPremiumRate: readString(formData, "payrollHolidayPremiumRate"),
   };
 }
 

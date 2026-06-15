@@ -1,4 +1,5 @@
 import type { StaffRole } from "@/lib/auth/permissions";
+import type { PrintDocumentBusinessProfile } from "@/components/reports/print-document-page";
 import type { StaffScheduleSummary } from "@/features/attendance/types";
 import type { Database } from "@/types/database";
 
@@ -27,12 +28,13 @@ export type PayrollCompensationRosterItem = {
   fullName: string;
   role: StaffRole;
   contactNumber: string | null;
+  isPayrollEligible: boolean;
   schedule: StaffScheduleSummary | null;
   profile: CompensationProfileSummary | null;
 };
 
 export type PayrollDashboardSummary = {
-  activeStaffCount: number;
+  eligibleStaffCount: number;
   compensatedStaffCount: number;
   missingCompensationCount: number;
   scheduledStaffCount: number;
@@ -53,6 +55,8 @@ export type PayrollPeriodSummary = {
   status: PayrollPeriodStatus;
   notes: string | null;
   createdByStaffId: string | null;
+  generatedByStaffId: string | null;
+  generatedAt: string | null;
   finalizedByStaffId: string | null;
   finalizedAt: string | null;
   createdAt: string;
@@ -134,23 +138,106 @@ export type PayrollPeriodStaffSummary = {
 
 export type PayrollPeriodDetailSummary = {
   totalStaffCount: number;
-  staffWithActivityCount: number;
-  configuredStaffCount: number;
-  scheduledStaffCount: number;
-  readyStaffCount: number;
-  blockedStaffCount: number;
+  warningStaffCount: number;
   missingScheduleCount: number;
   missingCompensationCount: number;
   missingAttendanceCount: number;
   openShiftCount: number;
   pendingApprovalCount: number;
   totalWorkedMinutes: number;
+  totalBasePay: number;
+  totalLateDeductions: number;
+  totalHolidayPremiumPay: number;
+  totalOvertimePay: number;
+  totalAllowancePay: number;
+  totalGrossPay: number;
+  totalNetPay: number;
+};
+
+export type PayrollPeriodAdjustmentType = "addition" | "deduction";
+
+export type PayrollWarningCode =
+  | "missing_schedule"
+  | "missing_compensation"
+  | "missing_attendance"
+  | "needs_dtr_completion"
+  | "not_configured"
+  | "pending_approval"
+  | "custom_holiday_rule";
+
+export type PayrollPeriodItemAdjustmentSummary = {
+  id: string;
+  payrollPeriodItemId: string;
+  adjustmentType: PayrollPeriodAdjustmentType;
+  label: string;
+  amount: number;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PayrollPeriodItemSummary = {
+  id: string;
+  payrollPeriodId: string;
+  branchId: string;
+  staffId: string;
+  fullName: string;
+  role: StaffRole;
+  payBasis: PayBasis | null;
+  baseRate: number | null;
+  overtimeRate: number | null;
+  allowancePerPeriod: number;
+  dailyRateUsed: number;
+  hourlyRateUsed: number;
+  standardDailyHours: number;
+  holidayPremiumRate: number;
+  scheduledWorkdayCount: number;
+  holidayDayCount: number;
+  approvedLeaveDayCount: number;
+  expectedWorkdayCount: number;
+  missingAttendanceDayCount: number;
+  recordedDayCount: number;
+  presentCount: number;
+  lateCount: number;
+  halfDayCount: number;
+  absentCount: number;
+  missingTimeoutCount: number;
+  pendingApprovalCount: number;
+  workedMinutes: number;
+  paidDayUnits: number;
+  holidayWorkedDayUnits: number;
+  lateDeductionMinutes: number;
+  overtimeMinutes: number;
+  basePay: number;
+  lateDeductionAmount: number;
+  holidayPremiumPay: number;
+  overtimePay: number;
+  allowancePay: number;
+  computedPay: number;
+  manualAdditionsTotal: number;
+  manualDeductionsTotal: number;
+  grossPay: number;
+  netPay: number;
+  readinessStatus: PayrollStaffReadinessStatus;
+  warningCodes: PayrollWarningCode[];
+  adjustments: PayrollPeriodItemAdjustmentSummary[];
+};
+
+export type PayrollSettingsSummary = {
+  standardDailyHours: number;
+  holidayPremiumRate: number;
 };
 
 export type PayrollPeriodDetailData = {
   period: PayrollPeriodSummary;
+  settings: PayrollSettingsSummary;
   summary: PayrollPeriodDetailSummary;
-  staffSummaries: PayrollPeriodStaffSummary[];
+  items: PayrollPeriodItemSummary[];
+};
+
+export type PayrollPrintDocument = PayrollPeriodDetailData & {
+  businessProfile: PrintDocumentBusinessProfile;
+  generatedAt: string;
 };
 
 export type PayrollAttendanceSourceRecord = {
@@ -159,4 +246,13 @@ export type PayrollAttendanceSourceRecord = {
   timeIn: string | null;
   timeOut: string | null;
   approvedAt: string | null;
+};
+
+export type PayrollAdjustmentFormValues = {
+  payrollPeriodId: string;
+  payrollPeriodItemId: string;
+  adjustmentType: PayrollPeriodAdjustmentType;
+  label: string;
+  amount: string;
+  notes: string;
 };

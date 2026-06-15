@@ -9,6 +9,7 @@ export const staffFormSchema = z.object({
   lastName: z.string().trim().min(1, "Last name is required."),
   documentTitle: z.string().trim(),
   role: z.enum(["owner", "admin", "mechanic", "cashier", "inventory_staff", "service_advisor"]),
+  isPayrollEligible: z.boolean(),
   contactNumber: z.string().trim(),
   address: z.string().trim(),
   sssNumber: z.string().trim(),
@@ -27,6 +28,7 @@ export function parseStaffFormData(formData: FormData): StaffFormValues {
     lastName: readString(formData, "lastName"),
     documentTitle: readString(formData, "documentTitle"),
     role: readString(formData, "role") as StaffFormValues["role"],
+    isPayrollEligible: readCheckbox(formData, "isPayrollEligible"),
     contactNumber: readString(formData, "contactNumber"),
     address: readString(formData, "address"),
     sssNumber: readString(formData, "sssNumber"),
@@ -41,4 +43,8 @@ export function parseStaffFormData(formData: FormData): StaffFormValues {
 function readString(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value : "";
+}
+
+function readCheckbox(formData: FormData, key: string) {
+  return formData.get(key) === "on";
 }

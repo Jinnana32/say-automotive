@@ -13,11 +13,11 @@ import { INITIAL_PAYROLL_FORM_ACTION_STATE } from "@/features/payroll/utils";
 export function PayrollPeriodStatusForm({
   periodId,
   currentStatus,
-  canFinalize,
+  hasGeneratedCut,
 }: {
   periodId: string;
   currentStatus: PayrollPeriodStatus;
-  canFinalize: boolean;
+  hasGeneratedCut: boolean;
 }) {
   const router = useRouter();
   const [state, formAction] = useActionState(
@@ -43,9 +43,10 @@ export function PayrollPeriodStatusForm({
             name="status"
             value="processing"
             variant="outline"
+            disabled={!hasGeneratedCut}
             pendingLabel="Updating..."
           >
-            Mark processing
+            Lock for review
           </SubmitButton>
         ) : null}
 
@@ -59,7 +60,7 @@ export function PayrollPeriodStatusForm({
           <SubmitButton
             name="status"
             value="finalized"
-            disabled={!canFinalize}
+            disabled={!hasGeneratedCut}
             pendingLabel="Finalizing..."
           >
             Finalize period
@@ -67,9 +68,9 @@ export function PayrollPeriodStatusForm({
         ) : null}
       </div>
 
-      {!canFinalize && currentStatus !== "finalized" ? (
+      {!hasGeneratedCut && currentStatus !== "finalized" ? (
         <p className="text-xs text-muted-foreground">
-          Finalization unlocks only when no staff with attendance activity are missing compensation or a time out.
+          Generate the payroll cut before locking this period for payout review or finalizing it.
         </p>
       ) : null}
 

@@ -49,33 +49,33 @@ export function PayrollPageContent({
     <div className="space-y-6">
       <PageHeader
         title="Payroll"
-        description="Compensation setup and payroll period readiness built on top of attendance, without turning payroll into hardcoded assumptions too early."
+        description="Build payroll cuts from branch attendance and compensation, then review and print payout summaries."
       />
 
       <MetricGrid>
         <StatCard
-          title="Active staff"
-          value={String(summary.activeStaffCount)}
-          description="Current staff roster eligible for compensation setup"
+          title="Payroll team"
+          value={String(summary.eligibleStaffCount)}
+          description="Active staff currently included in payroll"
         />
         <StatCard
           title="Compensation ready"
           value={String(summary.compensatedStaffCount)}
-          description="Staff with a compensation profile already configured"
+          description="Payroll staff with a compensation profile already configured"
           badge={`${summary.missingCompensationCount} missing`}
           tone={summary.missingCompensationCount > 0 ? "warning" : "success"}
         />
         <StatCard
           title="Schedules ready"
           value={String(summary.scheduledStaffCount)}
-          description="Staff with a weekly work schedule configured"
+          description="Payroll staff with a weekly work schedule configured"
           badge={`${summary.missingScheduleCount} missing`}
           tone={summary.missingScheduleCount > 0 ? "warning" : "success"}
         />
         <StatCard
           title="Payroll periods"
           value={String(summary.payrollPeriodCount)}
-          description="Coverage windows created so far"
+          description="Coverage windows prepared for payroll cuts"
           badge={`${summary.processingPeriodCount} processing`}
           tone={summary.processingPeriodCount > 0 ? "info" : "neutral"}
         />
@@ -135,7 +135,7 @@ export function PayrollPageContent({
         {periodPagination.totalItems === 0 ? (
           <EmptyState
             title="No payroll periods yet"
-            description="Create the first payroll period so attendance and compensation can be reviewed against a real coverage window."
+            description="Create the first payroll period so you can generate a payroll cut summary for a real coverage window."
             action={<PayrollPeriodDialog />}
           />
         ) : (
@@ -196,7 +196,7 @@ export function PayrollPageContent({
 
       <DataTableCard
         title="Compensation setup"
-        description={`Showing ${compensationPagination.totalItems} of ${totalCompensationRosterCount} active staff records.`}
+        description={`Showing ${compensationPagination.totalItems} of ${totalCompensationRosterCount} payroll-eligible staff records.`}
         toolbar={
           <DataTableFilters
             key={filters.staffSearch}

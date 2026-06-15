@@ -16,6 +16,7 @@ type StaffSavePayload = Pick<
   | "last_name"
   | "document_title"
   | "role"
+  | "is_payroll_eligible"
   | "contact_number"
   | "address"
   | "sss_number"
@@ -61,6 +62,7 @@ async function saveStaff(formData: FormData): Promise<FormActionState> {
     last_name: values.lastName,
     document_title: normalizeNullable(values.documentTitle),
     role: values.role,
+    is_payroll_eligible: values.isPayrollEligible,
     contact_number: normalizeNullable(values.contactNumber),
     address: normalizeNullable(values.address),
     sss_number: normalizeNullable(values.sssNumber),

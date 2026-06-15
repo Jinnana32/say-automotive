@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 
 import type { StaffScheduleSummary } from "@/features/attendance/types";
-import { computeExpectedWorkdaySummary } from "@/features/attendance/utils";
 import { applyBranchFilter, getBranchScopedServerClient } from "@/lib/branches";
 import type {
   CompensationProfileSummary,
@@ -10,29 +9,29 @@ import type {
   PayrollPageFilters,
   PayrollPeriodDetailData,
   PayrollPeriodDetailSummary,
-  PayrollPeriodStaffSummary,
+  PayrollPeriodItemAdjustmentSummary,
+  PayrollPeriodItemSummary,
   PayrollPeriodSummary,
+  PayrollWarningCode,
 } from "@/features/payroll/types";
-import {
-  isBlockedPayrollStaffSummary,
-  resolvePayrollReadinessStatus,
-  summarizePayrollAttendance,
-} from "@/features/payroll/utils";
 import type { TableRow } from "@/types/database";
 
 type StaffRow = Pick<
   TableRow<"staff">,
-  "id" | "first_name" | "last_name" | "role" | "contact_number" | "status"
+  | "id"
+  | "first_name"
+  | "last_name"
+  | "role"
+  | "contact_number"
+  | "status"
+  | "is_payroll_eligible"
 >;
 type CompensationRow = TableRow<"staff_compensation_profiles">;
 type PayrollPeriodRow = TableRow<"payroll_periods">;
+type PayrollPeriodItemRow = TableRow<"payroll_period_items">;
+type PayrollPeriodItemAdjustmentRow = TableRow<"payroll_period_item_adjustments">;
 type StaffScheduleRow = TableRow<"staff_schedules">;
-type BranchHolidayRow = TableRow<"branch_holidays">;
-type StaffLeaveEntryRow = TableRow<"staff_leave_entries">;
-type AttendanceRow = Pick<
-  TableRow<"attendance">,
-  "staff_id" | "status" | "time_in" | "time_out" | "approved_at" | "attendance_date"
->;
+type BusinessSettingsRow = TableRow<"business_settings">;
 
 export async function getPayrollPageData(filters: PayrollPageFilters): Promise<PayrollPageData> {
   const { branchScope, supabase } = await getBranchScopedServerClient("payroll:read");
@@ -41,8 +40,11 @@ export async function getPayrollPageData(filters: PayrollPageFilters): Promise<P
       applyBranchFilter(
         supabase
           .from("staff")
-          .select("id, first_name, last_name, role, contact_number, status")
+          .select(
+            "id, first_name, last_name, role, contact_number, status, is_payroll_eligible",
+          )
           .eq("status", "active")
+          .eq("is_payroll_eligible", true)
           .order("last_name", { ascending: true })
           .order("first_name", { ascending: true }),
         branchScope.selectedBranchId,
@@ -71,11 +73,13 @@ export async function getPayrollPageData(filters: PayrollPageFilters): Promise<P
   let scheduleRows: StaffScheduleRow[] = [];
 
   if (staffIds.length > 0) {
-    const [{ data: compensationData, error: compensationError }, { data: scheduleData, error: scheduleError }] =
-      await Promise.all([
-        supabase.from("staff_compensation_profiles").select("*").in("staff_id", staffIds),
-        supabase.from("staff_schedules").select("*").in("staff_id", staffIds),
-      ]);
+    const [
+      { data: compensationData, error: compensationError },
+      { data: scheduleData, error: scheduleError },
+    ] = await Promise.all([
+      supabase.from("staff_compensation_profiles").select("*").in("staff_id", staffIds),
+      supabase.from("staff_schedules").select("*").in("staff_id", staffIds),
+    ]);
 
     if (compensationError) {
       throw new Error(compensationError.message);
@@ -106,7 +110,13 @@ export async function getPayrollPageData(filters: PayrollPageFilters): Promise<P
       return true;
     }
 
-    return [period.label, period.notes ?? "", period.periodStartDate, period.periodEndDate, period.payoutDate]
+    return [
+      period.label,
+      period.notes ?? "",
+      period.periodStartDate,
+      period.periodEndDate,
+      period.payoutDate,
+    ]
       .join(" ")
       .toLowerCase()
       .includes(periodSearch);
@@ -116,6 +126,7 @@ export async function getPayrollPageData(filters: PayrollPageFilters): Promise<P
     fullName: `${staffMember.first_name} ${staffMember.last_name}`.trim(),
     role: staffMember.role,
     contactNumber: staffMember.contact_number,
+    isPayrollEligible: staffMember.is_payroll_eligible,
     schedule: scheduleByStaffId.get(staffMember.id) ?? null,
     profile: compensationByStaffId.get(staffMember.id) ?? null,
   }));
@@ -130,7 +141,7 @@ export async function getPayrollPageData(filters: PayrollPageFilters): Promise<P
   return {
     filters,
     summary: {
-      activeStaffCount: staffRows.length,
+      eligibleStaffCount: staffRows.length,
       compensatedStaffCount: compensationRows.length,
       missingCompensationCount: Math.max(staffRows.length - compensationRows.length, 0),
       scheduledStaffCount: scheduleRows.length,
@@ -165,255 +176,132 @@ export async function getPayrollPeriodDetailData(periodId: string): Promise<Payr
   }
 
   const period = mapPayrollPeriod(periodData as PayrollPeriodRow);
-  const { data: staffData, error: staffError } = await supabase
-    .from("staff")
-    .select("id, first_name, last_name, role, contact_number, status")
-    .eq("branch_id", period.branchId)
-    .eq("status", "active")
-    .order("last_name", { ascending: true })
-    .order("first_name", { ascending: true });
+  const [{ data: itemData, error: itemError }, { data: settingsData, error: settingsError }] =
+    await Promise.all([
+    supabase
+      .from("payroll_period_items")
+      .select("*")
+      .eq("payroll_period_id", period.id)
+      .order("net_pay", { ascending: false })
+      .order("staff_name", { ascending: true }),
+    supabase
+      .from("business_settings")
+      .select("payroll_standard_daily_hours, payroll_holiday_premium_rate")
+      .eq("branch_id", period.branchId)
+      .single(),
+    ]);
 
-  if (staffError) {
-    throw new Error(staffError.message);
+  if (itemError) {
+    throw new Error(itemError.message);
   }
 
-  const staffRows = (staffData ?? []) as StaffRow[];
-  const staffIds = staffRows.map((staffMember) => staffMember.id);
-  let compensationRows: CompensationRow[] = [];
-  let scheduleRows: StaffScheduleRow[] = [];
-  let attendanceRows: AttendanceRow[] = [];
-  let holidayRows: BranchHolidayRow[] = [];
-  let leaveEntryRows: StaffLeaveEntryRow[] = [];
-
-  if (staffIds.length > 0) {
-    const [
-      { data: compensationData, error: compensationError },
-      { data: scheduleData, error: scheduleError },
-      { data: attendanceData, error: attendanceError },
-      { data: holidayData, error: holidayError },
-      { data: leaveEntryData, error: leaveEntryError },
-    ] =
-      await Promise.all([
-        supabase.from("staff_compensation_profiles").select("*").in("staff_id", staffIds),
-        supabase.from("staff_schedules").select("*").in("staff_id", staffIds),
-        supabase
-          .from("attendance")
-          .select("staff_id, status, time_in, time_out, approved_at, attendance_date")
-          .gte("attendance_date", period.periodStartDate)
-          .lte("attendance_date", period.periodEndDate)
-          .in("staff_id", staffIds),
-        supabase
-          .from("branch_holidays")
-          .select("*")
-          .eq("branch_id", period.branchId)
-          .gte("holiday_date", period.periodStartDate)
-          .lte("holiday_date", period.periodEndDate),
-        supabase
-          .from("staff_leave_entries")
-          .select("*")
-          .eq("branch_id", period.branchId)
-          .lte("start_date", period.periodEndDate)
-          .gte("end_date", period.periodStartDate)
-          .in("staff_id", staffIds),
-      ]);
-
-      if (compensationError) {
-        throw new Error(compensationError.message);
-      }
-
-      if (scheduleError) {
-        throw new Error(scheduleError.message);
-      }
-
-      if (attendanceError) {
-        throw new Error(attendanceError.message);
-      }
-
-      if (holidayError) {
-        throw new Error(holidayError.message);
-      }
-
-      if (leaveEntryError) {
-        throw new Error(leaveEntryError.message);
-      }
-
-      compensationRows = (compensationData ?? []) as CompensationRow[];
-      scheduleRows = (scheduleData ?? []) as StaffScheduleRow[];
-      attendanceRows = (attendanceData ?? []) as AttendanceRow[];
-      holidayRows = (holidayData ?? []) as BranchHolidayRow[];
-      leaveEntryRows = (leaveEntryData ?? []) as StaffLeaveEntryRow[];
+  if (settingsError) {
+    throw new Error(settingsError.message);
   }
 
-  const compensationByStaffId = new Map(
-    compensationRows.map((row) => [row.staff_id, mapCompensationProfile(row)]),
-  );
-  const scheduleByStaffId = new Map(
-    scheduleRows.map((row) => [row.staff_id, mapStaffSchedule(row)]),
-  );
-  const attendanceByStaffId = new Map<string, AttendanceRow[]>();
-  const leaveEntriesByStaffId = new Map<string, StaffLeaveEntryRow[]>();
-  const holidayDates = new Set(holidayRows.map((row) => row.holiday_date));
+  const itemIds = ((itemData ?? []) as PayrollPeriodItemRow[]).map((row) => row.id);
+  let adjustmentRows: PayrollPeriodItemAdjustmentRow[] = [];
 
-  for (const row of attendanceRows) {
-    const existing = attendanceByStaffId.get(row.staff_id) ?? [];
-    existing.push(row);
-    attendanceByStaffId.set(row.staff_id, existing);
+  if (itemIds.length > 0) {
+    const { data: adjustmentData, error: adjustmentError } = await supabase
+      .from("payroll_period_item_adjustments")
+      .select("*")
+      .in("payroll_period_item_id", itemIds);
+
+    if (adjustmentError) {
+      throw new Error(adjustmentError.message);
+    }
+
+    adjustmentRows = (adjustmentData ?? []) as PayrollPeriodItemAdjustmentRow[];
   }
 
-  for (const row of leaveEntryRows) {
-    const existing = leaveEntriesByStaffId.get(row.staff_id) ?? [];
-    existing.push(row);
-    leaveEntriesByStaffId.set(row.staff_id, existing);
+  const adjustmentsByItemId = new Map<string, PayrollPeriodItemAdjustmentSummary[]>();
+
+  for (const row of adjustmentRows) {
+    const existing = adjustmentsByItemId.get(row.payroll_period_item_id) ?? [];
+    existing.push(mapPayrollAdjustment(row));
+    adjustmentsByItemId.set(row.payroll_period_item_id, existing);
   }
 
-  const staffSummaries = staffRows
-    .map<PayrollPeriodStaffSummary>((staffMember) => {
-      const schedule = scheduleByStaffId.get(staffMember.id) ?? null;
-      const attendanceSummary = summarizePayrollAttendance(
-        (attendanceByStaffId.get(staffMember.id) ?? []).map((record) => ({
-          attendanceDate: record.attendance_date,
-          status: record.status,
-          timeIn: record.time_in,
-          timeOut: record.time_out,
-          approvedAt: record.approved_at,
-        })),
-        {
-          ignoredMissingTimeoutDates: holidayDates,
-        },
-      );
-      const compensationProfile = compensationByStaffId.get(staffMember.id) ?? null;
-      const hadAttendanceActivity = attendanceSummary.recordedDays > 0;
-      const expectationSummary = computeExpectedWorkdaySummary({
-        schedule,
-        startDate: period.periodStartDate,
-        endDate: period.periodEndDate,
-        holidayDates,
-        leaveEntries: (leaveEntriesByStaffId.get(staffMember.id) ?? []).map((leaveEntry) => ({
-          startDate: leaveEntry.start_date,
-          endDate: leaveEntry.end_date,
-        })),
-      });
-      const missingAttendanceDayCount = Math.max(
-        expectationSummary.expectedWorkdayCount - attendanceSummary.recordedDays,
-        0,
-      );
-      const readinessStatus = resolvePayrollReadinessStatus({
-        hasCompensationProfile: compensationProfile !== null,
-        hasSchedule: schedule !== null,
-        expectedWorkdayCount: expectationSummary.expectedWorkdayCount,
-        hadAttendanceActivity,
-        missingAttendanceDayCount,
-        missingTimeoutCount: attendanceSummary.missingTimeoutCount,
-      });
-      const summary: PayrollPeriodStaffSummary = {
-        staffId: staffMember.id,
-        fullName: `${staffMember.first_name} ${staffMember.last_name}`.trim(),
-        role: staffMember.role,
-        contactNumber: staffMember.contact_number,
-        schedule,
-        compensationProfile,
-        hadAttendanceActivity,
-        isBlocked: false,
-        readinessStatus,
-        scheduledWorkdayCount: expectationSummary.scheduledWorkdayCount,
-        holidayDayCount: expectationSummary.holidayDayCount,
-        approvedLeaveDayCount: expectationSummary.approvedLeaveDayCount,
-        expectedWorkdayCount: expectationSummary.expectedWorkdayCount,
-        missingAttendanceDayCount,
-        recordedDays: attendanceSummary.recordedDays,
-        presentCount: attendanceSummary.presentCount,
-        lateCount: attendanceSummary.lateCount,
-        halfDayCount: attendanceSummary.halfDayCount,
-        absentCount: attendanceSummary.absentCount,
-        missingTimeoutCount: attendanceSummary.missingTimeoutCount,
-        approvedCount: attendanceSummary.approvedCount,
-        pendingApprovalCount: attendanceSummary.pendingApprovalCount,
-        workedMinutes: attendanceSummary.workedMinutes,
-      };
-
-      return {
-        ...summary,
-        isBlocked: isBlockedPayrollStaffSummary(summary),
-      };
-    })
+  const items = ((itemData ?? []) as PayrollPeriodItemRow[])
+    .map((row) => mapPayrollPeriodItem(row, adjustmentsByItemId.get(row.id) ?? []))
     .sort((leftItem, rightItem) => {
-      if (leftItem.isBlocked !== rightItem.isBlocked) {
-        return leftItem.isBlocked ? -1 : 1;
-      }
+      const leftWarnings = leftItem.warningCodes.length;
+      const rightWarnings = rightItem.warningCodes.length;
 
-      if (leftItem.hadAttendanceActivity !== rightItem.hadAttendanceActivity) {
-        return leftItem.hadAttendanceActivity ? -1 : 1;
+      if (leftWarnings !== rightWarnings) {
+        return rightWarnings - leftWarnings;
       }
 
       return leftItem.fullName.localeCompare(rightItem.fullName);
     });
 
-  const summary = staffSummaries.reduce<PayrollPeriodDetailSummary>(
-    (currentSummary, staffSummary) => {
+  const summary = items.reduce<PayrollPeriodDetailSummary>(
+    (currentSummary, item) => {
       currentSummary.totalStaffCount += 1;
+      currentSummary.totalWorkedMinutes += item.workedMinutes;
+      currentSummary.totalBasePay += item.basePay;
+      currentSummary.totalLateDeductions += item.lateDeductionAmount;
+      currentSummary.totalHolidayPremiumPay += item.holidayPremiumPay;
+      currentSummary.totalOvertimePay += item.overtimePay;
+      currentSummary.totalAllowancePay += item.allowancePay;
+      currentSummary.totalGrossPay += item.grossPay;
+      currentSummary.totalNetPay += item.netPay;
 
-      if (staffSummary.compensationProfile) {
-        currentSummary.configuredStaffCount += 1;
+      if (item.warningCodes.length > 0) {
+        currentSummary.warningStaffCount += 1;
       }
 
-      if (staffSummary.schedule) {
-        currentSummary.scheduledStaffCount += 1;
-      }
-
-      if (staffSummary.hadAttendanceActivity) {
-        currentSummary.staffWithActivityCount += 1;
-      }
-
-      if (staffSummary.readinessStatus === "ready") {
-        currentSummary.readyStaffCount += 1;
-      }
-
-      if (staffSummary.readinessStatus === "missing_compensation") {
-        currentSummary.missingCompensationCount += 1;
-      }
-
-      if (staffSummary.readinessStatus === "missing_schedule") {
+      if (item.warningCodes.includes("missing_schedule")) {
         currentSummary.missingScheduleCount += 1;
       }
 
-      if (staffSummary.readinessStatus === "missing_attendance") {
+      if (
+        item.warningCodes.includes("missing_compensation") ||
+        item.warningCodes.includes("not_configured")
+      ) {
+        currentSummary.missingCompensationCount += 1;
+      }
+
+      if (item.warningCodes.includes("missing_attendance")) {
         currentSummary.missingAttendanceCount += 1;
       }
 
-      if (staffSummary.missingTimeoutCount > 0) {
+      if (item.missingTimeoutCount > 0) {
         currentSummary.openShiftCount += 1;
       }
 
-      currentSummary.pendingApprovalCount += staffSummary.pendingApprovalCount;
-
-      if (staffSummary.isBlocked) {
-        currentSummary.blockedStaffCount += 1;
-      }
-
-      currentSummary.totalWorkedMinutes += staffSummary.workedMinutes;
+      currentSummary.pendingApprovalCount += item.pendingApprovalCount;
 
       return currentSummary;
     },
     {
       totalStaffCount: 0,
-      staffWithActivityCount: 0,
-      configuredStaffCount: 0,
-      scheduledStaffCount: 0,
-      readyStaffCount: 0,
-      blockedStaffCount: 0,
+      warningStaffCount: 0,
       missingScheduleCount: 0,
       missingCompensationCount: 0,
       missingAttendanceCount: 0,
       openShiftCount: 0,
       pendingApprovalCount: 0,
       totalWorkedMinutes: 0,
+      totalBasePay: 0,
+      totalLateDeductions: 0,
+      totalHolidayPremiumPay: 0,
+      totalOvertimePay: 0,
+      totalAllowancePay: 0,
+      totalGrossPay: 0,
+      totalNetPay: 0,
     },
   );
 
   return {
     period,
+    settings: {
+      standardDailyHours: (settingsData as BusinessSettingsRow).payroll_standard_daily_hours ?? 8,
+      holidayPremiumRate: (settingsData as BusinessSettingsRow).payroll_holiday_premium_rate ?? 0.3,
+    },
     summary,
-    staffSummaries,
+    items,
   };
 }
 
@@ -441,6 +329,8 @@ function mapPayrollPeriod(row: PayrollPeriodRow): PayrollPeriodSummary {
     status: row.status,
     notes: row.notes,
     createdByStaffId: row.created_by_staff_id,
+    generatedByStaffId: row.generated_by_staff_id,
+    generatedAt: row.generated_at,
     finalizedByStaffId: row.finalized_by_staff_id,
     finalizedAt: row.finalized_at,
     createdAt: row.created_at,
@@ -463,5 +353,70 @@ function mapStaffSchedule(row: StaffScheduleRow): StaffScheduleSummary {
     saturdayIsWorkday: row.saturday_is_workday,
     sundayIsWorkday: row.sunday_is_workday,
     notes: row.notes,
+  };
+}
+
+function mapPayrollAdjustment(row: PayrollPeriodItemAdjustmentRow): PayrollPeriodItemAdjustmentSummary {
+  return {
+    id: row.id,
+    payrollPeriodItemId: row.payroll_period_item_id,
+    adjustmentType: row.adjustment_type as PayrollPeriodItemAdjustmentSummary["adjustmentType"],
+    label: row.label,
+    amount: row.amount,
+    notes: row.notes,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function mapPayrollPeriodItem(
+  row: PayrollPeriodItemRow,
+  adjustments: PayrollPeriodItemAdjustmentSummary[],
+): PayrollPeriodItemSummary {
+  return {
+    id: row.id,
+    payrollPeriodId: row.payroll_period_id,
+    branchId: row.branch_id,
+    staffId: row.staff_id,
+    fullName: row.staff_name,
+    role: row.staff_role,
+    payBasis: row.pay_basis,
+    baseRate: row.base_rate,
+    overtimeRate: row.overtime_rate,
+    allowancePerPeriod: row.allowance_per_period,
+    dailyRateUsed: row.daily_rate_used,
+    hourlyRateUsed: row.hourly_rate_used,
+    standardDailyHours: row.standard_daily_hours,
+    holidayPremiumRate: row.holiday_premium_rate,
+    scheduledWorkdayCount: row.scheduled_workday_count,
+    holidayDayCount: row.holiday_day_count,
+    approvedLeaveDayCount: row.approved_leave_day_count,
+    expectedWorkdayCount: row.expected_workday_count,
+    missingAttendanceDayCount: row.missing_attendance_day_count,
+    recordedDayCount: row.recorded_day_count,
+    presentCount: row.present_count,
+    lateCount: row.late_count,
+    halfDayCount: row.half_day_count,
+    absentCount: row.absent_count,
+    missingTimeoutCount: row.missing_timeout_count,
+    pendingApprovalCount: row.pending_approval_count,
+    workedMinutes: row.worked_minutes,
+    paidDayUnits: row.paid_day_units,
+    holidayWorkedDayUnits: row.holiday_worked_day_units,
+    lateDeductionMinutes: row.late_deduction_minutes,
+    overtimeMinutes: row.overtime_minutes,
+    basePay: row.base_pay,
+    lateDeductionAmount: row.late_deduction_amount,
+    holidayPremiumPay: row.holiday_premium_pay,
+    overtimePay: row.overtime_pay,
+    allowancePay: row.allowance_pay,
+    computedPay: row.computed_pay,
+    manualAdditionsTotal: row.manual_additions_total,
+    manualDeductionsTotal: row.manual_deductions_total,
+    grossPay: row.gross_pay,
+    netPay: row.net_pay,
+    readinessStatus: row.readiness_status as PayrollPeriodItemSummary["readinessStatus"],
+    warningCodes: (row.warning_codes ?? []) as PayrollWarningCode[],
+    adjustments,
   };
 }

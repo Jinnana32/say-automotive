@@ -3,9 +3,11 @@
 import { useActionState } from "react";
 
 import { FormSection } from "@/components/shared/form-section";
-import { FormStatusMessage } from "@/components/shared/form-status";
+import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { SubmitButton } from "@/components/shared/submit-button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { updateOperationalRulesSettingsAction } from "@/features/settings/actions/settings-actions";
 import type { BusinessSettingsValues } from "@/features/settings/types";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
@@ -33,6 +35,8 @@ export function OperationalRulesForm({
     requireAdditionalItemPreApproval: initialValues.requireAdditionalItemPreApproval,
     enableBarcodeSupport: initialValues.enableBarcodeSupport,
     enableShelfLocation: initialValues.enableShelfLocation,
+    payrollStandardDailyHours: initialValues.payrollStandardDailyHours,
+    payrollHolidayPremiumRate: initialValues.payrollHolidayPremiumRate,
   });
 
   return (
@@ -120,6 +124,38 @@ export function OperationalRulesForm({
             checked={values.enableShelfLocation}
             onCheckedChange={(checked) => updateFormValue("enableShelfLocation", checked)}
           />
+        </div>
+
+        <div className="grid gap-4 rounded-2xl border border-border/70 bg-muted/15 px-4 py-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="payrollStandardDailyHours">Standard daily hours</Label>
+            <Input
+              id="payrollStandardDailyHours"
+              name="payrollStandardDailyHours"
+              inputMode="decimal"
+              value={values.payrollStandardDailyHours}
+              onChange={(event) => updateFormValue("payrollStandardDailyHours", event.target.value)}
+            />
+            <p className="text-sm text-muted-foreground">
+              Used to convert daily salary into an hourly rate for overtime and late deductions.
+            </p>
+            <FieldError errors={state.fieldErrors} name="payrollStandardDailyHours" />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="payrollHolidayPremiumRate">Holiday premium (%)</Label>
+            <Input
+              id="payrollHolidayPremiumRate"
+              name="payrollHolidayPremiumRate"
+              inputMode="decimal"
+              value={values.payrollHolidayPremiumRate}
+              onChange={(event) => updateFormValue("payrollHolidayPremiumRate", event.target.value)}
+            />
+            <p className="text-sm text-muted-foreground">
+              Extra percentage paid only when a staff member actually works on a holiday date.
+            </p>
+            <FieldError errors={state.fieldErrors} name="payrollHolidayPremiumRate" />
+          </div>
         </div>
 
         <SubmitButton pendingLabel="Saving...">Save operational rules</SubmitButton>
