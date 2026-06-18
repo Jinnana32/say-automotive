@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { ArrowRight, ClipboardCheck, Mail, MapPin, PhoneCall } from "lucide-react";
+import { ArrowRight, ClipboardCheck, Clock3, Mail, MapPin, PhoneCall } from "lucide-react";
 
 import { BrandLogo } from "@/components/shared/brand-logo";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,10 @@ export const dynamic = "force-dynamic";
 const OFFICIAL_WEBSITE_LOGO_SRC = "/brand/website-official-logo-transparent.png";
 const WEBSITE_HERO_BACKGROUND_SRC = "/brand/website-hero-background.png";
 const WEBSITE_FEATURE_BACKGROUND_SRC = "/brand/website-feature-background.png";
+const STORE_HOURS = {
+  weekdays: "Monday–Saturday: 7:00 AM–5:00 PM",
+  sunday: "Sunday: Closed",
+} as const;
 
 export default async function ContactPage() {
   const shellData = await getWebsiteShellData();
@@ -97,7 +101,13 @@ export default async function ContactPage() {
                 icon={<MapPin className="size-5" />}
                 label="Visit the branch"
                 value={shellData.address ?? "Please contact the shop for the latest address details."}
-                className="sm:col-span-2"
+                className="sm:col-span-2 lg:col-span-1"
+              />
+              <ContactSummaryCard
+                icon={<Clock3 className="size-5" />}
+                label="Store Hours"
+                value={`${STORE_HOURS.weekdays}\n${STORE_HOURS.sunday}`}
+                className="sm:col-span-2 lg:col-span-1"
               />
             </div>
           </div>
@@ -127,6 +137,13 @@ export default async function ContactPage() {
                   <span className="font-semibold text-white">Phone:</span>{" "}
                   {shellData.contactNumber ?? "Please contact the shop for the latest number."}
                 </p>
+                <div>
+                  <p>
+                    <span className="font-semibold text-white">Store Hours:</span>
+                  </p>
+                  <p>{STORE_HOURS.weekdays}</p>
+                  <p>{STORE_HOURS.sunday}</p>
+                </div>
                 {shellData.email ? (
                   <p>
                     <span className="font-semibold text-white">Email:</span> {shellData.email}
@@ -307,7 +324,7 @@ function ContactSummaryCard({
       <p className="mt-4 text-sm font-semibold uppercase tracking-[0.16em] text-white/52">
         {label}
       </p>
-      <p className="mt-2 text-base leading-7 text-white/84">{value}</p>
+      <p className="mt-2 whitespace-pre-line text-base leading-7 text-white/84">{value}</p>
     </div>
   );
 }

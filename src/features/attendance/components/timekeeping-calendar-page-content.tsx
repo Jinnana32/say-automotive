@@ -23,6 +23,7 @@ import { AttendanceAllowedIpForm } from "@/features/attendance/components/attend
 import { AttendanceAllowedIpRowActions } from "@/features/attendance/components/attendance-allowed-ip-row-actions";
 import { AttendanceDevicesPageContent } from "@/features/attendance/components/attendance-devices-page-content";
 import { BranchHolidayDialog } from "@/features/attendance/components/branch-holiday-dialog";
+import { PhilippineHolidayImportDialog } from "@/features/attendance/components/philippine-holiday-import-dialog";
 import { BranchHolidayRowActions } from "@/features/attendance/components/branch-holiday-row-actions";
 import type { BranchHolidaySummary, TimekeepingCalendarPageData } from "@/features/attendance/types";
 import {
@@ -104,9 +105,9 @@ export function TimekeepingCalendarPageContent({
         defaultValue="access"
         value={activeTab}
         onValueChange={updateTab}
-        className="space-y-6"
+        className="min-w-0 space-y-6"
       >
-        <TabsList className="w-fit">
+        <TabsList className="w-full max-w-full flex-wrap xl:w-fit">
           <TabsTrigger value="access">Access & IP</TabsTrigger>
           <TabsTrigger value="devices">
             Review devices
@@ -251,13 +252,23 @@ export function TimekeepingCalendarPageContent({
           <DataTableCard
             title="Branch calendar dates"
             description="These dates remove expected attendance for the whole branch and record how payroll should treat the day."
-            action={<BranchHolidayDialog triggerLabel="Add calendar date" />}
+            action={
+              <div className="flex flex-wrap items-center gap-2">
+                <PhilippineHolidayImportDialog existingHolidays={data.holidays} />
+                <BranchHolidayDialog triggerLabel="Add calendar date" />
+              </div>
+            }
           >
             {data.holidays.length === 0 ? (
               <EmptyState
                 title="No branch calendar dates yet"
                 description="Add branch closures or holidays so attendance is not expected and payroll treatment is explicit."
-                action={<BranchHolidayDialog triggerLabel="Add calendar date" />}
+                action={
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    <PhilippineHolidayImportDialog existingHolidays={data.holidays} />
+                    <BranchHolidayDialog triggerLabel="Add calendar date" />
+                  </div>
+                }
               />
             ) : (
               <div className="overflow-x-auto">

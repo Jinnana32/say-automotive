@@ -11,15 +11,18 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { GeneratePayrollCutButton } from "@/features/payroll/components/generate-payroll-cut-button";
 import { PayrollPeriodItemAdjustmentsDialog } from "@/features/payroll/components/payroll-period-item-adjustments-dialog";
+import { PayrollPeriodItemBreakdownDrawer } from "@/features/payroll/components/payroll-period-item-breakdown-drawer";
 import { PayrollPeriodStatusBadge } from "@/features/payroll/components/payroll-period-status-badge";
 import { PayrollPeriodStatusForm } from "@/features/payroll/components/payroll-period-status-form";
 import type { PayrollPeriodDetailData } from "@/features/payroll/types";
 import {
   formatPayBasisLabel,
   formatPayrollCoverage,
+  formatPayrollDayUnits,
   formatPayrollReadinessLabel,
   formatPayrollWarningLabel,
   formatWorkedDuration,
+  getPayrollAttendedDayCount,
   getPayrollReadinessTone,
 } from "@/features/payroll/utils";
 import { formatCurrency } from "@/lib/currency";
@@ -86,7 +89,7 @@ export function PayrollPeriodDetail({ data }: { data: PayrollPeriodDetailData })
         <StatCard
           title="Warnings"
           value={String(summary.warningStaffCount)}
-          description={`${summary.pendingApprovalCount} pending approval · ${summary.openShiftCount} open shift`}
+          description={`${summary.openShiftCount} open shift · ${summary.missingAttendanceCount} missing attendance`}
           tone={summary.warningStaffCount > 0 ? "warning" : "success"}
         />
         <StatCard
@@ -158,7 +161,7 @@ export function PayrollPeriodDetail({ data }: { data: PayrollPeriodDetailData })
                   <TableRow key={item.id}>
                     <TableCell>
                       <div className="space-y-1">
-                        <p className="font-semibold text-foreground">{item.fullName}</p>
+                        <PayrollPeriodItemBreakdownDrawer periodId={period.id} item={item} />
                         <p className="text-sm text-muted-foreground capitalize">
                           {item.role.replaceAll("_", " ")}
                         </p>
@@ -180,11 +183,11 @@ export function PayrollPeriodDetail({ data }: { data: PayrollPeriodDetailData })
                     <TableCell className="text-sm text-muted-foreground">
                       <div className="space-y-1">
                         <p>
-                          {item.recordedDayCount} recorded · {item.paidDayUnits} paid day
+                          {formatPayrollDayUnits(item.paidDayUnits)} paid day
                           {item.paidDayUnits === 1 ? "" : "s"}
                         </p>
                         <p>
-                          P {item.presentCount} · L {item.lateCount} · H {item.halfDayCount} · A {item.absentCount}
+                          Attended {getPayrollAttendedDayCount(item)} · Late {item.lateCount} · Half {item.halfDayCount} · Absent {item.absentCount}
                         </p>
                         <p>
                           {formatWorkedDuration(item.workedMinutes)}

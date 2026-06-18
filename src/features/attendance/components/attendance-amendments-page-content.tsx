@@ -72,7 +72,7 @@ export function AttendanceAmendmentsPageContent({
   const pagination = paginateItems(filteredAmendments, searchParams.get(pageParamName) ?? undefined);
 
   return (
-    <div className="space-y-6">
+    <div className="w-full min-w-0 max-w-full space-y-6">
       {reviewTarget ? (
         <DtrAmendmentReviewDialog
           amendment={reviewTarget}
@@ -121,11 +121,12 @@ export function AttendanceAmendmentsPageContent({
         description={`${pagination.totalItems} amendment request${
           pagination.totalItems === 1 ? "" : "s"
         } in the current view.`}
+        className="min-w-0"
         contentClassName="p-0"
         toolbar={
           <DataTableFilters
             key={`${search}:${status}`}
-            className="lg:grid lg:grid-cols-[minmax(0,1fr)_220px]"
+            className="xl:grid xl:grid-cols-[minmax(0,1fr)_220px]"
             search={{
               name: searchParamName,
               value: searchParams.get(searchParamName) ?? "",

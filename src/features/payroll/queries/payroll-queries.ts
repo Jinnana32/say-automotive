@@ -1,19 +1,27 @@
 import { notFound } from "next/navigation";
 
-import type { StaffScheduleSummary } from "@/features/attendance/types";
+import type { StaffLeaveEntrySummary, StaffScheduleSummary } from "@/features/attendance/types";
 import { applyBranchFilter, getBranchScopedServerClient } from "@/lib/branches";
+import { computePayrollItemBreakdown, type PayrollHolidayRule } from "@/features/payroll/calculations";
 import type {
   CompensationProfileSummary,
+  PayrollAttendanceSourceRecord,
   PayrollCompensationRosterItem,
   PayrollPageData,
   PayrollPageFilters,
   PayrollPeriodDetailData,
   PayrollPeriodDetailSummary,
   PayrollPeriodItemAdjustmentSummary,
+  PayrollPeriodItemBreakdownData,
   PayrollPeriodItemSummary,
   PayrollPeriodSummary,
   PayrollWarningCode,
 } from "@/features/payroll/types";
+import {
+  buildPayrollDifferenceDetails,
+  buildPayrollRecordedVsPaidExplanation,
+  buildPayrollWarningDetails,
+} from "@/features/payroll/utils";
 import type { TableRow } from "@/types/database";
 
 type StaffRow = Pick<
@@ -32,6 +40,12 @@ type PayrollPeriodItemRow = TableRow<"payroll_period_items">;
 type PayrollPeriodItemAdjustmentRow = TableRow<"payroll_period_item_adjustments">;
 type StaffScheduleRow = TableRow<"staff_schedules">;
 type BusinessSettingsRow = TableRow<"business_settings">;
+type BranchHolidayRow = TableRow<"branch_holidays">;
+type StaffLeaveEntryRow = TableRow<"staff_leave_entries">;
+type AttendanceRow = Pick<
+  TableRow<"attendance">,
+  "staff_id" | "status" | "time_in" | "time_out" | "approved_at" | "attendance_date"
+>;
 
 export async function getPayrollPageData(filters: PayrollPageFilters): Promise<PayrollPageData> {
   const { branchScope, supabase } = await getBranchScopedServerClient("payroll:read");
@@ -271,8 +285,6 @@ export async function getPayrollPeriodDetailData(periodId: string): Promise<Payr
         currentSummary.openShiftCount += 1;
       }
 
-      currentSummary.pendingApprovalCount += item.pendingApprovalCount;
-
       return currentSummary;
     },
     {
@@ -302,6 +314,169 @@ export async function getPayrollPeriodDetailData(periodId: string): Promise<Payr
     },
     summary,
     items,
+  };
+}
+
+export async function getPayrollPeriodItemBreakdownData(
+  periodId: string,
+  itemId: string,
+): Promise<PayrollPeriodItemBreakdownData | null> {
+  const { branchScope, supabase } = await getBranchScopedServerClient("payroll:read");
+  const { data: periodData, error: periodError } = await applyBranchFilter(
+    supabase.from("payroll_periods").select("*"),
+    branchScope.selectedBranchId,
+  )
+    .eq("id", periodId)
+    .maybeSingle();
+
+  if (periodError) {
+    throw new Error(periodError.message);
+  }
+
+  if (!periodData) {
+    return null;
+  }
+
+  const period = mapPayrollPeriod(periodData as PayrollPeriodRow);
+  const [{ data: itemData, error: itemError }, { data: adjustmentData, error: adjustmentError }] =
+    await Promise.all([
+      supabase
+        .from("payroll_period_items")
+        .select("*")
+        .eq("payroll_period_id", period.id)
+        .eq("id", itemId)
+        .maybeSingle(),
+      supabase
+        .from("payroll_period_item_adjustments")
+        .select("*")
+        .eq("payroll_period_item_id", itemId)
+        .order("created_at", { ascending: true }),
+    ]);
+
+  if (itemError) {
+    throw new Error(itemError.message);
+  }
+
+  if (adjustmentError) {
+    throw new Error(adjustmentError.message);
+  }
+
+  if (!itemData) {
+    return null;
+  }
+
+  const adjustments = ((adjustmentData ?? []) as PayrollPeriodItemAdjustmentRow[]).map(
+    mapPayrollAdjustment,
+  );
+  const item = mapPayrollPeriodItem(itemData as PayrollPeriodItemRow, adjustments);
+
+  const [
+    { data: scheduleData, error: scheduleError },
+    { data: attendanceData, error: attendanceError },
+    { data: leaveEntryData, error: leaveEntryError },
+    { data: holidayData, error: holidayError },
+  ] = await Promise.all([
+    supabase.from("staff_schedules").select("*").eq("staff_id", item.staffId).maybeSingle(),
+    supabase
+      .from("attendance")
+      .select("staff_id, status, time_in, time_out, approved_at, attendance_date")
+      .eq("staff_id", item.staffId)
+      .gte("attendance_date", period.periodStartDate)
+      .lte("attendance_date", period.periodEndDate)
+      .order("attendance_date", { ascending: true }),
+    supabase
+      .from("staff_leave_entries")
+      .select("staff_id, start_date, end_date")
+      .eq("branch_id", period.branchId)
+      .eq("staff_id", item.staffId)
+      .lte("start_date", period.periodEndDate)
+      .gte("end_date", period.periodStartDate),
+    supabase
+      .from("branch_holidays")
+      .select("holiday_date, label, holiday_kind, pay_treatment, notes")
+      .eq("branch_id", period.branchId)
+      .gte("holiday_date", period.periodStartDate)
+      .lte("holiday_date", period.periodEndDate)
+      .order("holiday_date", { ascending: true }),
+  ]);
+
+  if (scheduleError) {
+    throw new Error(scheduleError.message);
+  }
+
+  if (attendanceError) {
+    throw new Error(attendanceError.message);
+  }
+
+  if (leaveEntryError) {
+    throw new Error(leaveEntryError.message);
+  }
+
+  if (holidayError) {
+    throw new Error(holidayError.message);
+  }
+
+  const attendanceRecords = ((attendanceData ?? []) as AttendanceRow[]).map<PayrollAttendanceSourceRecord>(
+    (row) => ({
+      attendanceDate: row.attendance_date,
+      status: row.status,
+      timeIn: row.time_in,
+      timeOut: row.time_out,
+      approvedAt: row.approved_at,
+    }),
+  );
+  const holidays = ((holidayData ?? []) as BranchHolidayRow[]).map<PayrollHolidayRule>((row) => ({
+    holidayDate: row.holiday_date,
+    label: row.label,
+    holidayKind: row.holiday_kind as PayrollHolidayRule["holidayKind"],
+    payTreatment: row.pay_treatment as PayrollHolidayRule["payTreatment"],
+    notes: row.notes,
+  }));
+  const leaveEntries = ((leaveEntryData ?? []) as StaffLeaveEntryRow[]).map<
+    Pick<StaffLeaveEntrySummary, "startDate" | "endDate">
+  >((row) => ({
+    startDate: row.start_date,
+    endDate: row.end_date,
+  }));
+  const schedule = scheduleData ? mapStaffSchedule(scheduleData as StaffScheduleRow) : null;
+  const compensationProfile = buildCompensationProfileFromPayrollItem(item);
+  const breakdown = computePayrollItemBreakdown({
+    staffId: item.staffId,
+    fullName: item.fullName,
+    role: item.role,
+    schedule,
+    compensationProfile,
+    attendanceRecords,
+    holidays,
+    leaveEntries,
+    periodStartDate: period.periodStartDate,
+    periodEndDate: period.periodEndDate,
+    settings: {
+      standardDailyHours: item.standardDailyHours,
+      holidayPremiumRate: item.holidayPremiumRate,
+    },
+    manualAdditionsTotal: item.manualAdditionsTotal,
+    manualDeductionsTotal: item.manualDeductionsTotal,
+  });
+  const differenceDetails = buildPayrollDifferenceDetails(breakdown.days);
+
+  return {
+    period,
+    settings: {
+      standardDailyHours: item.standardDailyHours,
+      holidayPremiumRate: item.holidayPremiumRate,
+    },
+    item,
+    days: breakdown.days,
+    recordedVsPaidExplanation: buildPayrollRecordedVsPaidExplanation({
+      item,
+      days: breakdown.days,
+    }),
+    differenceDetails,
+    warningDetails: buildPayrollWarningDetails({
+      item,
+      days: breakdown.days,
+    }),
   };
 }
 
@@ -399,7 +574,7 @@ function mapPayrollPeriodItem(
     halfDayCount: row.half_day_count,
     absentCount: row.absent_count,
     missingTimeoutCount: row.missing_timeout_count,
-    pendingApprovalCount: row.pending_approval_count,
+    pendingApprovalCount: 0,
     workedMinutes: row.worked_minutes,
     paidDayUnits: row.paid_day_units,
     holidayWorkedDayUnits: row.holiday_worked_day_units,
@@ -416,7 +591,28 @@ function mapPayrollPeriodItem(
     grossPay: row.gross_pay,
     netPay: row.net_pay,
     readinessStatus: row.readiness_status as PayrollPeriodItemSummary["readinessStatus"],
-    warningCodes: (row.warning_codes ?? []) as PayrollWarningCode[],
+    warningCodes: ((row.warning_codes ?? []) as PayrollWarningCode[]).filter(
+      (warningCode) => warningCode !== "pending_approval",
+    ),
     adjustments,
+  };
+}
+
+function buildCompensationProfileFromPayrollItem(
+  item: PayrollPeriodItemSummary,
+): CompensationProfileSummary | null {
+  if (item.payBasis === null || item.baseRate === null) {
+    return null;
+  }
+
+  return {
+    id: `payroll-item-${item.id}`,
+    staffId: item.staffId,
+    payBasis: item.payBasis,
+    baseRate: item.baseRate,
+    overtimeRate: item.overtimeRate,
+    allowancePerPeriod: item.allowancePerPeriod,
+    effectiveStartDate: "1970-01-01",
+    notes: null,
   };
 }

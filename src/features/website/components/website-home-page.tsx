@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import {
+  Award,
   ArrowRight,
   CircleDot,
   ClipboardCheck,
@@ -21,6 +22,7 @@ import {
 import { BrandLogo } from '@/components/shared/brand-logo';
 import { Button } from '@/components/ui/button';
 import type { WebsiteShellData } from '@/features/website/types';
+import { cn } from '@/lib/utils';
 
 const OFFICIAL_WEBSITE_LOGO_SRC = '/brand/website-official-logo-transparent.png';
 const WEBSITE_HERO_BACKGROUND_SRC = '/brand/website-hero-background.png';
@@ -31,6 +33,29 @@ const HERO_FEATURES = [
   { label: 'Premium Equipment', icon: Gauge },
   { label: 'Quality Service', icon: ShieldCheck },
   { label: 'Customer Focused', icon: Users },
+] as const;
+
+const EXPERTISE_HIGHLIGHTS = [
+  {
+    title: 'FCA-Certified Mechanic',
+    description: 'Hands-on service expertise with FCA training and automotive repair experience.',
+    icon: ShieldCheck,
+  },
+  {
+    title: 'USA Certified Mechanic',
+    description: 'Certified mechanic experience from the USA with professional service standards.',
+    icon: Award,
+  },
+  {
+    title: 'Hybrid Vehicle Experience',
+    description: 'Hybrid car certified mechanic experience for modern vehicle service needs.',
+    icon: Zap,
+  },
+  {
+    title: 'Open Monday–Saturday',
+    description: 'Store hours: 7:00 AM–5:00 PM. Sunday: Closed.',
+    icon: Clock3,
+  },
 ] as const;
 
 const SERVICE_CARDS = [
@@ -76,26 +101,98 @@ const SERVICE_CARDS = [
   },
 ] as const;
 
+const BRAND_LOGOS = [
+  {
+    name: 'Varta',
+    src: '/brand/brands/varta.jpeg',
+    frameClassName: 'h-28 max-w-[160px] sm:h-32 sm:max-w-[205px] lg:h-36 lg:max-w-[225px]',
+  },
+  {
+    name: 'D1Y Life Race Wheels',
+    src: '/brand/brands/d1y-life.jpeg',
+    frameClassName: 'h-28 max-w-[160px] sm:h-32 sm:max-w-[205px] lg:h-36 lg:max-w-[225px]',
+  },
+  {
+    name: 'Falken',
+    src: '/brand/brands/falken.jpeg',
+    frameClassName: 'h-28 max-w-[160px] sm:h-32 sm:max-w-[205px] lg:h-36 lg:max-w-[225px]',
+  },
+  {
+    name: 'Journey Xtreme 4x4 Tires',
+    src: '/brand/brands/journey-xtreme-4x4.jpeg',
+    frameClassName: 'h-28 max-w-[160px] sm:h-32 sm:max-w-[205px] lg:h-36 lg:max-w-[225px]',
+  },
+  { name: 'Nankang', src: '/brand/brands/nankang.jpeg' },
+  { name: 'YSS Auto Suspension', src: '/brand/brands/yss-auto.jpeg' },
+  { name: 'Option 4WD', src: '/brand/brands/option-4wd.jpeg' },
+  {
+    name: 'Emtrac',
+    src: '/brand/brands/emtrac.jpeg',
+    frameClassName: 'h-26 max-w-[165px] sm:h-30 sm:max-w-[210px] lg:h-34 lg:max-w-[228px]',
+  },
+  {
+    name: 'Sumaxx',
+    src: '/brand/brands/sumaxx.jpeg',
+    frameClassName: 'h-26 max-w-[165px] sm:h-30 sm:max-w-[210px] lg:h-34 lg:max-w-[228px]',
+  },
+  { name: 'ARB 4x4 Accessories', src: '/brand/brands/arb-4x4-accessories.jpeg' },
+  {
+    name: 'Black Mamba',
+    src: '/brand/brands/black-mamba.jpeg',
+    frameClassName: 'h-24 max-w-[165px] sm:h-28 sm:max-w-[210px] lg:h-32 lg:max-w-[228px]',
+  },
+  { name: 'Bradley', src: '/brand/brands/bradley.jpeg' },
+  { name: '4x Engineering', src: '/brand/brands/4x-engineering.jpeg' },
+  {
+    name: 'Explorer Extreme Performance',
+    src: '/brand/brands/explorer-extreme-performance.jpeg',
+    frameClassName: 'h-24 max-w-[165px] sm:h-28 sm:max-w-[210px] lg:h-32 lg:max-w-[228px]',
+  },
+  { name: 'Lenso Tires', src: '/brand/brands/lenso-tires.jpeg' },
+  {
+    name: 'Warn',
+    src: '/brand/brands/warn.jpeg',
+    frameClassName: 'h-28 max-w-[160px] sm:h-32 sm:max-w-[205px] lg:h-36 lg:max-w-[225px]',
+  },
+  { name: 'Cali Off-Road', src: '/brand/brands/cali-off-road.jpeg' },
+  {
+    name: 'Continental',
+    src: '/brand/brands/continental.jpeg',
+    frameClassName: 'h-26 max-w-[165px] sm:h-30 sm:max-w-[210px] lg:h-34 lg:max-w-[228px]',
+  },
+  {
+    name: 'MaxTrek Tyres',
+    src: '/brand/brands/maxtrek-tyres.jpeg',
+    frameClassName: 'h-26 max-w-[165px] sm:h-30 sm:max-w-[210px] lg:h-34 lg:max-w-[228px]',
+  },
+  { name: 'AMP Tires', src: '/brand/brands/amp-tires.jpeg' },
+  {
+    name: 'Venom Wheels',
+    src: '/brand/brands/venom-wheels.jpeg',
+    frameClassName: 'h-28 max-w-[160px] sm:h-32 sm:max-w-[205px] lg:h-36 lg:max-w-[225px]',
+  },
+] as const;
+
 const TRUST_POINTS = [
   {
-    title: 'Certified Experts',
-    description: 'Skilled and certified technicians focused on dependable workmanship.',
+    title: 'FCA-Certified Mechanic',
+    description: 'Hands-on service expertise with FCA training and automotive repair experience.',
     icon: ShieldCheck,
   },
   {
-    title: 'Honest Pricing',
-    description: 'Clear recommendations and transparent service guidance from start to finish.',
+    title: 'USA Certified Mechanic',
+    description: 'Certified mechanic experience from the USA with professional service standards.',
+    icon: Award,
+  },
+  {
+    title: 'Hybrid Vehicle Experience',
+    description: 'Hybrid car certified mechanic experience for modern vehicle service needs.',
+    icon: Zap,
+  },
+  {
+    title: 'Brand Service Background',
+    description: 'Experience involving FCA, Jeep, Dodge, RAM, and Firestone/Bridgestone Complete Auto Care.',
     icon: ClipboardCheck,
-  },
-  {
-    title: 'Fast Turnaround',
-    description: 'Efficient service planning that helps get you back on the road sooner.',
-    icon: Clock3,
-  },
-  {
-    title: 'Satisfaction Guaranteed',
-    description: 'Service quality and customer care remain at the center of every job.',
-    icon: Users,
   },
 ] as const;
 
@@ -184,7 +281,7 @@ export function WebsiteHomePage({
 
       <section id="about-us" className="border-b border-white/10 bg-[#061224]">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[minmax(0,1.1fr)_auto] lg:items-center lg:px-8">
-          <div className="space-y-4">
+          <div className="space-y-6">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand-red">
               About Us
             </p>
@@ -194,6 +291,19 @@ export function WebsiteHomePage({
             <p className="max-w-3xl text-base leading-8 text-white/72">
               SAY Auto Care delivers workshop support built around clear service communication, modern equipment, and a commitment to doing the job right. From diagnostics to preventive maintenance, the team is focused on safe, reliable results.
             </p>
+            <div className="rounded-[1.75rem] border border-white/10 bg-[linear-gradient(180deg,rgba(9,24,53,0.94),rgba(4,12,28,0.98))] px-5 py-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)] sm:px-6">
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-brand-red">
+                USA-Certified Automotive Expertise
+              </p>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-white/72 sm:text-base">
+                SAY Auto Care is backed by hands-on automotive service expertise from an FCA-Certified Mechanic and USA Certified Mechanic, with experience involving FCA, Jeep, Dodge, RAM, Firestone/Bridgestone Complete Auto Care, and hybrid vehicle systems.
+              </p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {EXPERTISE_HIGHLIGHTS.map((highlight) => (
+                <ExpertiseHighlightCard key={highlight.title} highlight={highlight} />
+              ))}
+            </div>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
@@ -257,6 +367,33 @@ export function WebsiteHomePage({
         </div>
       </section>
 
+      <section className="bg-[#F8FAFC] text-[#061B3D]">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="inline-flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.24em] text-brand-red">
+              <span className="h-px w-8 bg-brand-red" />
+              Trusted Brands
+              <span className="h-px w-8 bg-brand-red" />
+            </p>
+            <h2 className="mt-4 text-3xl font-semibold uppercase tracking-[0.03em] text-[#061B3D] sm:text-4xl">
+              Brands We Work With
+            </h2>
+            <p className="mt-4 text-base leading-8 text-slate-600">
+              We carry and work with trusted automotive brands for tires, batteries, suspension, 4x4 accessories, and maintenance products.
+            </p>
+            <p className="mt-1.5 text-sm leading-7 text-slate-500">
+              Availability may vary. Contact the shop for fitment, pricing, and current stock.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-8 flex max-w-7xl flex-wrap justify-center gap-4 sm:gap-5 lg:gap-6">
+            {BRAND_LOGOS.map((brand) => (
+              <BrandLogoTile key={brand.name} brand={brand} />
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section id="why-choose-us" className="border-y border-white/10 bg-[#061224]">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-center lg:px-8 lg:py-20">
           <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#07172d] shadow-[0_26px_60px_rgba(0,0,0,0.28)]">
@@ -276,7 +413,7 @@ export function WebsiteHomePage({
             <SectionHeading
               eyebrow="Why Choose Us"
               title="Quality Care You Can Trust"
-              description="At SAY Auto Care, we combine expert craftsmanship with honest service to keep your vehicle running at its best. Your safety and satisfaction are our top priorities."
+              description="Backed by an FCA-Certified Mechanic and USA Certified Mechanic with hybrid vehicle service experience, SAY Auto Care combines hands-on expertise with honest service to keep your vehicle running at its best."
               align="left"
             />
 
@@ -426,6 +563,61 @@ function HeroFeature({
       <p className="mt-4 text-sm font-semibold uppercase tracking-[0.14em] text-white/90">
         {label}
       </p>
+    </div>
+  );
+}
+
+function ExpertiseHighlightCard({
+  highlight,
+}: {
+  highlight: {
+    title: string;
+    description: string;
+    icon: LucideIcon;
+  };
+}) {
+  const Icon = highlight.icon;
+
+  return (
+    <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-4 py-4 shadow-[0_14px_34px_rgba(0,0,0,0.16)]">
+      <div className="flex size-10 items-center justify-center rounded-2xl bg-brand-red/10 text-brand-red">
+        <Icon className="size-5" />
+      </div>
+      <p className="mt-3 text-sm font-semibold uppercase tracking-[0.12em] text-white">
+        {highlight.title}
+      </p>
+      <p className="mt-2 text-sm leading-6 text-white/66">
+        {highlight.description}
+      </p>
+    </div>
+  );
+}
+
+function BrandLogoTile({
+  brand,
+}: {
+  brand: {
+    name: string;
+    src: string;
+    frameClassName?: string;
+  };
+}) {
+  return (
+    <div className="flex w-[170px] min-h-[108px] items-center justify-center rounded-2xl border border-slate-200 bg-white p-2.5 shadow-sm transition hover:-translate-y-0.5 hover:border-red-200 hover:shadow-md sm:w-[210px] sm:min-h-[126px] sm:p-3.5 lg:w-[240px] lg:min-h-[138px]">
+      <div
+        className={cn(
+          'relative h-24 w-full max-w-[150px] sm:h-28 sm:max-w-[190px] lg:h-32 lg:max-w-[215px]',
+          brand.frameClassName,
+        )}
+      >
+        <Image
+          src={brand.src}
+          alt={`${brand.name} logo`}
+          fill
+          sizes="(max-width: 639px) 170px, (max-width: 1023px) 210px, 240px"
+          className="object-contain"
+        />
+      </div>
     </div>
   );
 }

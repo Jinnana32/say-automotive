@@ -14,13 +14,19 @@ import {
 } from "@/features/attendance/schemas/attendance-settings-schema";
 import {
   branchHolidaySchema,
+  parsePhilippineHolidayImportFormData,
   parseBranchHolidayFormData,
+  philippineHolidayImportSchema,
 } from "@/features/attendance/schemas/branch-holiday-schema";
 import {
   parseStaffLeaveFormData,
   staffLeaveSchema,
 } from "@/features/attendance/schemas/staff-leave-schema";
 import type { TimekeepingActionState } from "@/features/attendance/types";
+import {
+  getPhilippineHolidaySuggestionsForYear,
+  isPhilippineHolidaySuggestionImportable,
+} from "@/features/attendance/philippine-holidays";
 import { INITIAL_TIMEKEEPING_ACTION_STATE } from "@/features/attendance/utils";
 
 export async function upsertBranchHolidayAction(
@@ -186,6 +192,137 @@ export async function deleteBranchHolidayAction(formData: FormData) {
 
     revalidateTimekeepingPaths();
   }
+}
+
+export async function importPhilippineHolidaySuggestionsAction(
+  _prevState: TimekeepingActionState = INITIAL_TIMEKEEPING_ACTION_STATE,
+  formData: FormData,
+): Promise<TimekeepingActionState> {
+  const parsed = philippineHolidayImportSchema.safeParse(
+    parsePhilippineHolidayImportFormData(formData),
+  );
+
+  if (!parsed.success) {
+    return {
+      ...toFormActionState(parsed.error),
+      status: "error",
+    };
+  }
+
+  const { year, selections } = parsed.data;
+  const suggestions = getPhilippineHolidaySuggestionsForYear(year);
+
+  if (suggestions.length === 0) {
+    return {
+      status: "error",
+      message: `No official Philippine holiday suggestions are stored for ${year} yet.`,
+    };
+  }
+
+  const suggestionById = new Map(suggestions.map((suggestion) => [suggestion.id, suggestion]));
+  const normalizedSelections = Array.from(
+    new Map(selections.map((selection) => [selection.suggestionId, selection])).values(),
+  );
+  const selectedSuggestions: Array<{
+    suggestionId: string;
+    payTreatment: "unpaid" | "paid_regular_day" | "custom";
+    suggestion: ReturnType<typeof getPhilippineHolidaySuggestionsForYear>[number] & {
+      importable: true;
+      holidayKind: NonNullable<ReturnType<typeof getPhilippineHolidaySuggestionsForYear>[number]["holidayKind"]>;
+      defaultPayTreatment: NonNullable<ReturnType<typeof getPhilippineHolidaySuggestionsForYear>[number]["defaultPayTreatment"]>;
+    };
+  }> = [];
+
+  for (const selection of normalizedSelections) {
+    const suggestion = suggestionById.get(selection.suggestionId);
+
+    if (!suggestion || !isPhilippineHolidaySuggestionImportable(suggestion)) {
+      continue;
+    }
+
+    selectedSuggestions.push({
+      ...selection,
+      suggestion,
+    });
+  }
+
+  if (selectedSuggestions.length === 0) {
+    return {
+      status: "error",
+      message: "Select at least one importable holiday to continue.",
+    };
+  }
+
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("settings:write");
+  const branchId = branchScope.writeBranchId;
+  const selectedDates = Array.from(
+    new Set(selectedSuggestions.map(({ suggestion }) => suggestion.holidayDate)),
+  );
+  const { data: existingHolidayData, error: existingHolidayError } = await supabase
+    .from("branch_holidays")
+    .select("*")
+    .eq("branch_id", branchId)
+    .in("holiday_date", selectedDates);
+
+  if (existingHolidayError) {
+    return {
+      status: "error",
+      message: existingHolidayError.message,
+    };
+  }
+
+  const existingDates = new Set((existingHolidayData ?? []).map((holiday) => holiday.holiday_date));
+  const payloads = selectedSuggestions
+    .filter(({ suggestion }) => !existingDates.has(suggestion.holidayDate))
+    .map(({ suggestion, payTreatment }) => ({
+      branch_id: branchId,
+      holiday_date: suggestion.holidayDate,
+      label: suggestion.label,
+      holiday_kind: suggestion.holidayKind,
+      pay_treatment: payTreatment,
+      notes: normalizeNullable(suggestion.notes ?? ""),
+    }));
+
+  if (payloads.length === 0) {
+    return {
+      status: "success",
+      message: "No new holidays were imported. The selected dates already exist in this branch calendar.",
+    };
+  }
+
+  const { data: insertedHolidays, error: insertError } = await supabase
+    .from("branch_holidays")
+    .insert(payloads)
+    .select("*");
+
+  if (insertError) {
+    return {
+      status: "error",
+      message: insertError.message,
+    };
+  }
+
+  for (const insertedHoliday of insertedHolidays ?? []) {
+    await writeAuditLog(supabase, {
+      action: `Imported Philippine holiday ${insertedHoliday.label}`,
+      entityType: "branch_holiday",
+      entityId: insertedHoliday.id,
+      userId: context.userId,
+      afterData: insertedHoliday,
+    });
+  }
+
+  revalidateTimekeepingPaths();
+
+  const skippedCount = selectedSuggestions.length - payloads.length;
+
+  return {
+    status: "success",
+    message:
+      skippedCount > 0
+        ? `Imported ${payloads.length} holiday${payloads.length === 1 ? "" : "s"} and skipped ${skippedCount} already-added date${skippedCount === 1 ? "" : "s"}.`
+        : `Imported ${payloads.length} holiday${payloads.length === 1 ? "" : "s"}.`,
+  };
 }
 
 export async function upsertStaffLeaveEntryAction(

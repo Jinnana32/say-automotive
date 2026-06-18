@@ -266,6 +266,39 @@ export type BranchHolidayFormValues = {
   notes: string;
 };
 
+export type PhilippineHolidaySuggestionType =
+  | "regular_holiday"
+  | "special_non_working_holiday"
+  | "special_working_day";
+
+export type PhilippineHolidaySuggestion = {
+  id: string;
+  year: number;
+  holidayDate: string;
+  label: string;
+  officialType: PhilippineHolidaySuggestionType;
+  holidayKind: BranchHolidayKind | null;
+  defaultPayTreatment: BranchHolidayPayTreatment | null;
+  importable: boolean;
+  notes: string | null;
+};
+
+export type PhilippineHolidaySuggestionRow = PhilippineHolidaySuggestion & {
+  alreadyAdded: boolean;
+  selectable: boolean;
+  selectedByDefault: boolean;
+};
+
+export type PhilippineHolidayImportSelection = {
+  suggestionId: string;
+  payTreatment: BranchHolidayPayTreatment;
+};
+
+export type PhilippineHolidayImportFormValues = {
+  year: string;
+  selections: PhilippineHolidayImportSelection[];
+};
+
 export type StaffLeaveFormValues = {
   leaveEntryId: string;
   staffId: string;

@@ -86,8 +86,8 @@ export async function upsertAttendanceRecordAction(
     time_out: values.timeOut ? toUtcIso(values.timeOut) : null,
     status: values.status,
     notes: normalizeNullable(values.notes),
-    approved_by_staff_id: null,
-    approved_at: null,
+    approved_by_staff_id: context.staffId,
+    approved_at: new Date().toISOString(),
   };
   const operation = existingAttendance
     ? supabase.from("attendance").update(payload).eq("id", existingAttendance.id).select("*").single()
@@ -119,100 +119,6 @@ export async function upsertAttendanceRecordAction(
   return {
     status: "success",
     message: "Attendance saved.",
-  };
-}
-
-export async function setAttendanceApprovalAction(
-  _prevState: AttendanceEntryActionState = INITIAL_ATTENDANCE_ENTRY_ACTION_STATE,
-  formData: FormData,
-): Promise<AttendanceEntryActionState> {
-  const attendanceId = readString(formData, "attendanceId");
-  const approvalAction = readString(formData, "approvalAction");
-
-  if (!attendanceId) {
-    return {
-      status: "error",
-      message: "Attendance record is required.",
-    };
-  }
-
-  if (approvalAction !== "approve" && approvalAction !== "unapprove") {
-    return {
-      status: "error",
-      message: "Invalid attendance approval action.",
-    };
-  }
-
-  const { context, supabase } = await getBranchScopedServerClient("attendance:write");
-  const { data: existingAttendance, error: existingAttendanceError } = await supabase
-    .from("attendance")
-    .select("*")
-    .eq("id", attendanceId)
-    .maybeSingle();
-
-  if (existingAttendanceError) {
-    return {
-      status: "error",
-      message: existingAttendanceError.message,
-    };
-  }
-
-  if (!existingAttendance) {
-    return {
-      status: "error",
-      message: "Attendance record no longer exists.",
-    };
-  }
-
-  const payrollLock = await getPayrollPeriodLockForDate(
-    supabase,
-    existingAttendance.branch_id,
-    existingAttendance.attendance_date,
-  );
-
-  if (payrollLock?.status === "finalized") {
-    return {
-      status: "error",
-      message: `Attendance approval is locked because payroll period ${payrollLock.label} is finalized.`,
-    };
-  }
-
-  const nextApprovalState = approvalAction === "approve";
-  const { data: savedAttendance, error } = await supabase
-    .from("attendance")
-    .update({
-      approved_by_staff_id: nextApprovalState ? context.staffId : null,
-      approved_at: nextApprovalState ? new Date().toISOString() : null,
-    })
-    .eq("id", attendanceId)
-    .select("*")
-    .single();
-
-  if (error) {
-    return {
-      status: "error",
-      message: error.message,
-    };
-  }
-
-  await logAttendanceAdjustment({
-    branchId: savedAttendance.branch_id,
-    supabase,
-    changedByStaffId: context.staffId,
-    action: nextApprovalState ? "approved" : "unapproved",
-    attendanceId: savedAttendance.id,
-    staffId: savedAttendance.staff_id,
-    attendanceDate: savedAttendance.attendance_date,
-    previousData: serializeAttendanceSnapshot(existingAttendance),
-    nextData: serializeAttendanceSnapshot(savedAttendance),
-  });
-
-  revalidatePath("/attendance");
-  revalidatePath("/payroll");
-
-  return {
-    status: "success",
-    message: nextApprovalState ? "Attendance approved." : "Attendance approval removed.",
   };
 }
 

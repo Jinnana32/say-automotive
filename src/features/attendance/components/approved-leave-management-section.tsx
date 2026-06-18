@@ -71,7 +71,7 @@ export function ApprovedLeaveManagementSection({
   ).length;
 
   return (
-    <div className="space-y-4">
+    <div className="w-full min-w-0 max-w-full space-y-4">
       <MetricGrid className="xl:grid-cols-3">
         <StatCard
           title="Approved leave entries"
@@ -97,11 +97,12 @@ export function ApprovedLeaveManagementSection({
         description={`${leavePagination.totalItems} approved leave entr${
           leavePagination.totalItems === 1 ? "y" : "ies"
         } in the current view.`}
+        className="min-w-0"
         action={<StaffLeaveDialog activeStaff={data.activeStaff} />}
         toolbar={
           <DataTableFilters
             key={`${leaveSearch}:${leaveType}`}
-            className="lg:grid lg:grid-cols-[minmax(0,1fr)_220px]"
+            className="xl:grid xl:grid-cols-[minmax(0,1fr)_220px]"
             pageParamName="leavePage"
             search={{
               name: "leaveSearch",

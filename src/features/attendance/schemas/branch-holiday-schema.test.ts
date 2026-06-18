@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { branchHolidaySchema } from "@/features/attendance/schemas/branch-holiday-schema";
+import {
+  branchHolidaySchema,
+  philippineHolidayImportSchema,
+} from "@/features/attendance/schemas/branch-holiday-schema";
 
 describe("branchHolidaySchema", () => {
   it("rejects incomplete holiday entries", () => {
@@ -11,6 +14,17 @@ describe("branchHolidaySchema", () => {
       holidayKind: "invalid",
       payTreatment: "invalid",
       notes: "",
+    });
+
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("philippineHolidayImportSchema", () => {
+  it("requires at least one selected importable holiday", () => {
+    const result = philippineHolidayImportSchema.safeParse({
+      year: 2026,
+      selections: [],
     });
 
     expect(result.success).toBe(false);

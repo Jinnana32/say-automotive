@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { computePayrollItem, summarizeAdjustmentTotals } from "@/features/payroll/calculations";
+import {
+  computePayrollItem,
+  computePayrollItemBreakdown,
+  summarizeAdjustmentTotals,
+} from "@/features/payroll/calculations";
 import type {
   CompensationProfileSummary,
   PayrollPeriodItemAdjustmentSummary,
@@ -130,7 +134,7 @@ describe("computePayrollItem", () => {
     expect(item.warningCodes).toEqual([]);
   });
 
-  it("treats half days as literal 0.5 paid day and flags pending approvals as warnings", () => {
+  it("treats half days as literal 0.5 paid day without requiring a separate approval step", () => {
     const item = computePayrollItem({
       staffId: "staff-1",
       fullName: "Nenita Say",
@@ -158,7 +162,57 @@ describe("computePayrollItem", () => {
 
     expect(item.paidDayUnits).toBe(0.5);
     expect(item.basePay).toBe(400);
-    expect(item.pendingApprovalCount).toBe(1);
-    expect(item.warningCodes).toContain("pending_approval");
+    expect(item.pendingApprovalCount).toBe(0);
+    expect(item.warningCodes).not.toContain("pending_approval");
+  });
+
+  it("returns a daily breakdown with holiday labels and unpaid absence reasons", () => {
+    const breakdown = computePayrollItemBreakdown({
+      staffId: "staff-1",
+      fullName: "Cyril Atizon",
+      role: "mechanic",
+      schedule: baseSchedule,
+      compensationProfile: dailyProfile,
+      attendanceRecords: [
+        {
+          attendanceDate: "2026-05-05",
+          status: "absent",
+          timeIn: null,
+          timeOut: null,
+          approvedAt: "2026-05-05T10:00:00.000Z",
+        },
+      ],
+      holidays: [
+        {
+          holidayDate: "2026-05-04",
+          label: "Shop maintenance",
+          holidayKind: "branch_closure",
+          payTreatment: "unpaid",
+        },
+      ],
+      leaveEntries: [],
+      periodStartDate: "2026-05-04",
+      periodEndDate: "2026-05-05",
+      settings: {
+        standardDailyHours: 8,
+        holidayPremiumRate: 0.3,
+      },
+    });
+
+    expect(breakdown.days).toEqual([
+      expect.objectContaining({
+        date: "2026-05-04",
+        statusLabel: "Branch Closed",
+        holidayLabel: "Shop maintenance",
+        isPaid: false,
+        payReason: "Unpaid branch closure",
+      }),
+      expect.objectContaining({
+        date: "2026-05-05",
+        statusLabel: "Absent",
+        isPaid: false,
+        payReason: "Recorded absent day · not paid",
+      }),
+    ]);
   });
 });

@@ -10,7 +10,7 @@ export function FilterBar({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-2xl border border-border/80 bg-muted/20 p-3 lg:flex-row lg:items-center",
+        "flex w-full min-w-0 max-w-full flex-col gap-3 rounded-2xl border border-border/80 bg-muted/20 p-3 lg:flex-row lg:items-center",
         className,
       )}
     >

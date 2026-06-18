@@ -27,7 +27,6 @@ import type {
 import {
   ATTENDANCE_FILTER_OPTIONS,
   ATTENDANCE_ROLE_OPTIONS,
-  canApproveAttendanceForLockedPeriod,
   canEditAttendanceForLockedPeriod,
   formatAttendanceLockMessage,
   formatAttendanceStatusLabel,
@@ -104,9 +103,9 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
         : `${attendanceData.summary.unrecordedCount} still unrecorded`,
     },
     {
-      label: "Approved",
-      value: attendanceData.summary.approvedCount,
-      helper: `${attendanceData.summary.recordedCount - attendanceData.summary.approvedCount} pending review`,
+      label: "Schedules configured",
+      value: attendanceData.summary.scheduleConfiguredCount,
+      helper: `${attendanceData.summary.totalStaff - attendanceData.summary.scheduleConfiguredCount} staff still missing schedule setup`,
     },
     {
       label: "Missing timeout",
@@ -176,7 +175,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
   }
 
   return (
-    <div className="min-w-0 space-y-6">
+    <div className="w-full min-w-0 max-w-full space-y-6 overflow-x-hidden">
       <PageHeader
         title="Attendance"
         description={`Daily time records and roster controls for ${selectedDateLabel}.`}
@@ -227,9 +226,9 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
         defaultValue="attendance"
         value={activeTab}
         onValueChange={updateTab}
-        className="min-w-0 space-y-6"
+        className="w-full min-w-0 max-w-full space-y-6 overflow-x-hidden"
       >
-        <TabsList className="w-fit flex-wrap">
+        <TabsList className="w-full max-w-full flex-wrap xl:w-fit">
           <TabsTrigger value="attendance">Attendance</TabsTrigger>
           <TabsTrigger value="roster">Roster</TabsTrigger>
           <TabsTrigger value="amendments">
@@ -239,7 +238,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
           <TabsTrigger value="leave">Approved leave</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="attendance" className="min-w-0 space-y-6">
+        <TabsContent value="attendance" className="w-full min-w-0 max-w-full space-y-6 overflow-x-hidden">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {attendanceCards.map((card) => (
               <SummaryCard
@@ -251,7 +250,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
             ))}
           </div>
 
-          <div className="grid min-w-0 gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
+          <div className="grid min-w-0 max-w-full gap-6 xl:grid-cols-[320px_minmax(0,1fr)] 2xl:grid-cols-[360px_minmax(0,1fr)]">
             <Card className="min-w-0 border-border/70 shadow-sm">
               <CardHeader className="space-y-1 pb-4">
                 <CardTitle className="text-base font-semibold text-foreground">
@@ -393,7 +392,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
               <CardContent className="min-w-0 space-y-4 p-6">
                 <DataTableFilters
                   key={`${attendanceData.filters.search}:${attendanceData.filters.status}:${attendanceData.filters.date}`}
-                  className="lg:grid lg:grid-cols-[minmax(0,1fr)_220px]"
+                  className="2xl:grid 2xl:grid-cols-[minmax(0,1fr)_220px]"
                   pageParamName="attendancePage"
                   search={{
                     name: "attendanceSearch",
@@ -451,38 +450,36 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                     description="Try a different date or clear the current filters. Active staff will still appear here once they are expected on the selected day."
                   />
                 ) : (
-                  <div className="overflow-hidden rounded-[1.25rem] border border-border/70">
-                    <div className="overflow-x-auto">
-                      <Table className="min-w-[1060px] table-auto [&_th]:px-5 [&_th]:tracking-[0.12em] [&_td]:px-5 [&_td]:py-5 lg:min-w-[1200px] lg:[&_th]:tracking-[0.16em]">
+                  <div className="min-w-0 overflow-hidden rounded-[1.25rem] border border-border/70">
+                    <div className="min-w-0 max-w-full overflow-x-auto">
+                      <Table className="min-w-[640px] table-auto [&_th]:px-4 [&_th]:tracking-[0.12em] [&_td]:px-4 [&_td]:py-5 2xl:min-w-[920px] 2xl:[&_th]:px-5 2xl:[&_th]:tracking-[0.16em] 2xl:[&_td]:px-5">
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="min-w-[260px] lg:min-w-[280px]">Staff member</TableHead>
-                            <TableHead className="min-w-[148px] lg:min-w-[156px]">Role</TableHead>
-                            <TableHead className="min-w-[200px] lg:min-w-[220px]">Status</TableHead>
-                            <TableHead className="min-w-[180px] lg:hidden">Time</TableHead>
-                            <TableHead className="hidden min-w-[160px] whitespace-nowrap lg:table-cell">Time in</TableHead>
-                            <TableHead className="hidden min-w-[160px] whitespace-nowrap lg:table-cell">Time out</TableHead>
-                            <TableHead className="min-w-[180px] lg:min-w-[200px]">Notes</TableHead>
-                            <TableHead className="min-w-[88px] px-5 text-right">Actions</TableHead>
+                            <TableHead className="min-w-[220px] 2xl:min-w-[280px]">Staff</TableHead>
+                            <TableHead className="min-w-[180px] 2xl:min-w-[220px]">Status</TableHead>
+                            <TableHead className="min-w-[170px] 2xl:hidden">Time</TableHead>
+                            <TableHead className="hidden min-w-[148px] whitespace-nowrap 2xl:table-cell">Time in</TableHead>
+                            <TableHead className="hidden min-w-[148px] whitespace-nowrap 2xl:table-cell">Time out</TableHead>
+                            <TableHead className="w-[72px] min-w-[72px] px-4 text-right 2xl:px-5">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {attendancePagination.items.map((item) => (
                             <TableRow key={item.staffId}>
-                              <TableCell className="min-w-[260px] align-top lg:min-w-[280px]">
+                              <TableCell className="min-w-[220px] align-top 2xl:min-w-[280px]">
                                 <div className="space-y-1">
                                   <p className="break-words font-semibold leading-snug text-foreground">
                                     {item.fullName}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {formatStaffRoleLabel(item.role)}
                                   </p>
                                   <p className="text-sm text-muted-foreground">
                                     {item.contactNumber ?? "No contact number"}
                                   </p>
                                 </div>
                               </TableCell>
-                              <TableCell className="min-w-[148px] align-top text-sm text-muted-foreground lg:min-w-[156px]">
-                                {formatStaffRoleLabel(item.role)}
-                              </TableCell>
-                              <TableCell className="min-w-[200px] align-top lg:min-w-[220px]">
+                              <TableCell className="min-w-[180px] align-top 2xl:min-w-[220px]">
                                 <div className="space-y-1.5">
                                   {attendanceData.branchHoliday && !item.attendance ? (
                                     <StatusBadge
@@ -516,7 +513,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                                   ) : null}
                                 </div>
                               </TableCell>
-                              <TableCell className="min-w-[180px] align-top text-sm text-muted-foreground lg:hidden">
+                              <TableCell className="min-w-[170px] align-top text-sm text-muted-foreground 2xl:hidden">
                                 <div className="space-y-1">
                                   <p className="leading-none">
                                     <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
@@ -532,24 +529,17 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                                   </p>
                                 </div>
                               </TableCell>
-                              <TableCell className="hidden min-w-[160px] whitespace-nowrap align-top text-sm text-muted-foreground lg:table-cell">
+                              <TableCell className="hidden min-w-[148px] whitespace-nowrap align-top text-sm text-muted-foreground 2xl:table-cell">
                                 {formatAttendanceTableTime(item.attendance?.timeIn)}
                               </TableCell>
-                              <TableCell className="hidden min-w-[160px] whitespace-nowrap align-top text-sm text-muted-foreground lg:table-cell">
+                              <TableCell className="hidden min-w-[148px] whitespace-nowrap align-top text-sm text-muted-foreground 2xl:table-cell">
                                 {formatAttendanceTableTime(item.attendance?.timeOut)}
                               </TableCell>
-                              <TableCell className="min-w-[180px] align-top text-sm text-muted-foreground lg:min-w-[200px]">
-                                <span className="block break-words leading-snug">
-                                  {formatAttendanceTableNote(item.attendance?.notes, attendanceData.branchHoliday?.notes)}
-                                </span>
-                              </TableCell>
-                              <TableCell className="min-w-[88px] px-5 align-top text-right">
+                              <TableCell className="w-[72px] min-w-[72px] px-4 align-top text-right 2xl:px-5">
                                 <AttendanceDayRowActions
                                   attendance={item.attendance}
                                   attendanceDate={attendanceData.filters.date}
-                                  canApprove={canApproveAttendanceForLockedPeriod(attendanceData.lockedPeriod)}
                                   canEdit={canEditAttendanceForLockedPeriod(attendanceData.lockedPeriod)}
-                                  isApproved={item.isApproved}
                                   staffId={item.staffId}
                                   staffName={item.fullName}
                                 />
@@ -576,7 +566,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
           </div>
         </TabsContent>
 
-        <TabsContent value="roster" className="space-y-6">
+        <TabsContent value="roster" className="w-full min-w-0 max-w-full space-y-6 overflow-x-hidden">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {rosterCards.map((card) => (
               <SummaryCard
@@ -588,14 +578,14 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
             ))}
           </div>
 
-          <Card className="border-border/70 shadow-sm">
-            <CardContent className="space-y-4 p-6">
-              <DataTableFilters
-                key={`${rosterData.filters.search}:${rosterData.filters.role}:${rosterData.filters.date}`}
-                className="xl:grid xl:grid-cols-[minmax(0,1fr)_220px_180px]"
-                pageParamName="rosterPage"
-                search={{
-                  name: "rosterSearch",
+          <Card className="min-w-0 border-border/70 shadow-sm">
+            <CardContent className="min-w-0 space-y-4 p-6">
+                <DataTableFilters
+                  key={`${rosterData.filters.search}:${rosterData.filters.role}:${rosterData.filters.date}`}
+                  className="2xl:grid 2xl:grid-cols-[minmax(0,1fr)_220px_180px]"
+                  pageParamName="rosterPage"
+                  search={{
+                    name: "rosterSearch",
                   value: rosterData.filters.search,
                   placeholder: "Search by staff name or contact number",
                 }}
@@ -653,83 +643,85 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                   description="Try a different date or clear the current filters. Active staff will appear here even before attendance is recorded."
                 />
               ) : (
-                <div className="overflow-hidden rounded-[1.25rem] border border-border/70">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Staff member</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead>Schedule</TableHead>
-                        <TableHead>Leave / exception</TableHead>
-                        <TableHead>Notes</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {rosterPagination.items.map((item) => (
-                        <TableRow key={item.staffId}>
-                          <TableCell>
-                            <div className="space-y-1">
-                              <p className="font-semibold text-foreground">{item.fullName}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {item.contactNumber ?? "No contact number"}
-                              </p>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {formatStaffRoleLabel(item.role)}
-                          </TableCell>
-                          <TableCell className="max-w-[240px] text-sm text-muted-foreground">
-                            <div className="space-y-1">
-                              <p>{formatScheduleSummary(item.schedule)}</p>
-                              {item.schedule?.notes?.trim() ? (
-                                <p className="line-clamp-2 text-xs">{item.schedule.notes}</p>
-                              ) : null}
-                            </div>
-                          </TableCell>
-                          <TableCell className="max-w-[240px] text-sm text-muted-foreground">
-                            {rosterData.branchHoliday ? (
-                              <div className="space-y-1">
-                                <p className={cn("font-medium", getBranchHolidayTextClass(rosterData.branchHoliday))}>
-                                  {item.attendance
-                                    ? `${formatBranchHolidayStatusLabel(rosterData.branchHoliday)} · attendance recorded`
-                                    : formatBranchHolidayStatusLabel(rosterData.branchHoliday)}
-                                </p>
-                                <p>
-                                  {formatHolidayBannerLabel(rosterData.branchHoliday)} · Pay treatment:{" "}
-                                  {formatBranchHolidayPayTreatmentLabel(rosterData.branchHoliday.payTreatment)}
-                                </p>
-                              </div>
-                            ) : item.leaveEntry ? (
-                              <div className="space-y-1">
-                                <p className="font-medium text-sky-700">
-                                  {formatStaffLeaveTypeLabel(item.leaveEntry.leaveType)}
-                                </p>
-                                <p>{formatLeaveDateRange(item.leaveEntry)}</p>
-                              </div>
-                            ) : (
-                              "No approved leave"
-                            )}
-                          </TableCell>
-                          <TableCell className="max-w-[240px] text-sm text-muted-foreground">
-                            <span className="line-clamp-2">
-                              {item.schedule?.notes?.trim()
-                                || item.leaveEntry?.notes?.trim()
-                                || rosterData.branchHoliday?.notes?.trim()
-                                || "No notes"}
-                            </span>
-                          </TableCell>
-                          <TableCell className="w-14 px-2 text-right">
-                            <AttendanceRosterRowActions
-                              staffId={item.staffId}
-                              staffName={item.fullName}
-                              schedule={item.schedule}
-                            />
-                          </TableCell>
+                <div className="min-w-0 overflow-hidden rounded-[1.25rem] border border-border/70">
+                  <div className="min-w-0 max-w-full overflow-x-auto">
+                    <Table className="min-w-[860px] xl:min-w-0">
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Staff member</TableHead>
+                          <TableHead>Role</TableHead>
+                          <TableHead>Schedule</TableHead>
+                          <TableHead>Leave / exception</TableHead>
+                          <TableHead>Notes</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {rosterPagination.items.map((item) => (
+                          <TableRow key={item.staffId}>
+                            <TableCell>
+                              <div className="space-y-1">
+                                <p className="font-semibold text-foreground">{item.fullName}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {item.contactNumber ?? "No contact number"}
+                                </p>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {formatStaffRoleLabel(item.role)}
+                            </TableCell>
+                            <TableCell className="max-w-[240px] text-sm text-muted-foreground">
+                              <div className="space-y-1">
+                                <p>{formatScheduleSummary(item.schedule)}</p>
+                                {item.schedule?.notes?.trim() ? (
+                                  <p className="line-clamp-2 text-xs">{item.schedule.notes}</p>
+                                ) : null}
+                              </div>
+                            </TableCell>
+                            <TableCell className="max-w-[240px] text-sm text-muted-foreground">
+                              {rosterData.branchHoliday ? (
+                                <div className="space-y-1">
+                                  <p className={cn("font-medium", getBranchHolidayTextClass(rosterData.branchHoliday))}>
+                                    {item.attendance
+                                      ? `${formatBranchHolidayStatusLabel(rosterData.branchHoliday)} · attendance recorded`
+                                      : formatBranchHolidayStatusLabel(rosterData.branchHoliday)}
+                                  </p>
+                                  <p>
+                                    {formatHolidayBannerLabel(rosterData.branchHoliday)} · Pay treatment:{" "}
+                                    {formatBranchHolidayPayTreatmentLabel(rosterData.branchHoliday.payTreatment)}
+                                  </p>
+                                </div>
+                              ) : item.leaveEntry ? (
+                                <div className="space-y-1">
+                                  <p className="font-medium text-sky-700">
+                                    {formatStaffLeaveTypeLabel(item.leaveEntry.leaveType)}
+                                  </p>
+                                  <p>{formatLeaveDateRange(item.leaveEntry)}</p>
+                                </div>
+                              ) : (
+                                "No approved leave"
+                              )}
+                            </TableCell>
+                            <TableCell className="max-w-[240px] text-sm text-muted-foreground">
+                              <span className="line-clamp-2">
+                                {item.schedule?.notes?.trim()
+                                  || item.leaveEntry?.notes?.trim()
+                                  || rosterData.branchHoliday?.notes?.trim()
+                                  || "No notes"}
+                              </span>
+                            </TableCell>
+                            <TableCell className="w-14 px-2 text-right">
+                              <AttendanceRosterRowActions
+                                staffId={item.staffId}
+                                staffName={item.fullName}
+                                schedule={item.schedule}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               )}
 
@@ -746,7 +738,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
           </Card>
         </TabsContent>
 
-        <TabsContent value="amendments" className="space-y-6">
+        <TabsContent value="amendments" className="w-full min-w-0 max-w-full space-y-6 overflow-x-hidden">
           <AttendanceAmendmentsPageContent
             data={amendmentsReview}
             embedded
@@ -754,7 +746,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
           />
         </TabsContent>
 
-        <TabsContent value="leave" className="space-y-6">
+        <TabsContent value="leave" className="w-full min-w-0 max-w-full space-y-6 overflow-x-hidden">
           <ApprovedLeaveManagementSection data={leaveManagement} />
         </TabsContent>
       </Tabs>

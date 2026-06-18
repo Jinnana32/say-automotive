@@ -7,5 +7,5 @@ export function PageContainer({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <div className={cn("mx-auto max-w-[1440px] space-y-6", className)}>{children}</div>;
+  return <div className={cn("mx-auto w-full min-w-0 max-w-[1440px] space-y-6", className)}>{children}</div>;
 }

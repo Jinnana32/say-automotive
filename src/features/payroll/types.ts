@@ -1,6 +1,10 @@
 import type { StaffRole } from "@/lib/auth/permissions";
 import type { PrintDocumentBusinessProfile } from "@/components/reports/print-document-page";
-import type { StaffScheduleSummary } from "@/features/attendance/types";
+import type {
+  BranchHolidayKind,
+  BranchHolidayPayTreatment,
+  StaffScheduleSummary,
+} from "@/features/attendance/types";
 import type { Database } from "@/types/database";
 
 export type PayBasis = Database["public"]["Enums"]["pay_basis"];
@@ -223,6 +227,44 @@ export type PayrollPeriodItemSummary = {
   adjustments: PayrollPeriodItemAdjustmentSummary[];
 };
 
+export type PayrollPeriodItemBreakdownDay = {
+  date: string;
+  weekdayLabel: string;
+  attendanceStatus: Database["public"]["Enums"]["attendance_status"] | null;
+  statusLabel: string;
+  timeIn: string | null;
+  timeOut: string | null;
+  workedMinutes: number;
+  regularMinutes: number;
+  overtimeMinutes: number;
+  lateDeductionMinutes: number;
+  paidDayUnits: number;
+  isPaid: boolean;
+  payReason: string;
+  warningCodes: PayrollWarningCode[];
+  holidayLabel: string | null;
+  holidayKind: BranchHolidayKind | null;
+  holidayPayTreatment: BranchHolidayPayTreatment | null;
+  hasAttendanceRecord: boolean;
+  hasPendingApproval: boolean;
+  isScheduledWorkday: boolean;
+  isLeaveCovered: boolean;
+  isRestDay: boolean;
+};
+
+export type PayrollPeriodItemDifferenceDetail = {
+  date: string;
+  statusLabel: string;
+  reason: string;
+  paidDayUnits: number;
+};
+
+export type PayrollPeriodItemWarningDetail = {
+  date: string | null;
+  label: string;
+  reason: string;
+};
+
 export type PayrollSettingsSummary = {
   standardDailyHours: number;
   holidayPremiumRate: number;
@@ -233,6 +275,16 @@ export type PayrollPeriodDetailData = {
   settings: PayrollSettingsSummary;
   summary: PayrollPeriodDetailSummary;
   items: PayrollPeriodItemSummary[];
+};
+
+export type PayrollPeriodItemBreakdownData = {
+  period: PayrollPeriodSummary;
+  settings: PayrollSettingsSummary;
+  item: PayrollPeriodItemSummary;
+  days: PayrollPeriodItemBreakdownDay[];
+  recordedVsPaidExplanation: string;
+  differenceDetails: PayrollPeriodItemDifferenceDetail[];
+  warningDetails: PayrollPeriodItemWarningDetail[];
 };
 
 export type PayrollPrintDocument = PayrollPeriodDetailData & {

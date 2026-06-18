@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import { resolvePayrollReadinessStatus, summarizePayrollAttendance } from "@/features/payroll/utils";
+import type {
+  PayrollPeriodItemBreakdownDay,
+  PayrollPeriodItemSummary,
+} from "@/features/payroll/types";
+import {
+  buildPayrollRecordedVsPaidExplanation,
+  buildPayrollWarningDetails,
+  getPayrollAttendedDayCount,
+  resolvePayrollReadinessStatus,
+  summarizePayrollAttendance,
+} from "@/features/payroll/utils";
 
 describe("summarizePayrollAttendance", () => {
   it("counts attendance states, worked minutes, and missing time-outs", () => {
@@ -33,8 +43,8 @@ describe("summarizePayrollAttendance", () => {
     expect(result.lateCount).toBe(1);
     expect(result.absentCount).toBe(1);
     expect(result.missingTimeoutCount).toBe(1);
-    expect(result.approvedCount).toBe(1);
-    expect(result.pendingApprovalCount).toBe(2);
+    expect(result.approvedCount).toBe(3);
+    expect(result.pendingApprovalCount).toBe(0);
     expect(result.workedMinutes).toBe(540);
   });
 
@@ -56,7 +66,8 @@ describe("summarizePayrollAttendance", () => {
 
     expect(result.recordedDays).toBe(1);
     expect(result.missingTimeoutCount).toBe(0);
-    expect(result.pendingApprovalCount).toBe(1);
+    expect(result.approvedCount).toBe(1);
+    expect(result.pendingApprovalCount).toBe(0);
   });
 });
 
@@ -98,5 +109,122 @@ describe("resolvePayrollReadinessStatus", () => {
     });
 
     expect(result).toBe("configured_no_activity");
+  });
+});
+
+describe("getPayrollAttendedDayCount", () => {
+  it("counts late and half-day entries as attended days", () => {
+    expect(
+      getPayrollAttendedDayCount({
+        presentCount: 6,
+        lateCount: 2,
+        halfDayCount: 1,
+      }),
+    ).toBe(9);
+  });
+});
+
+const baseBreakdownDay: PayrollPeriodItemBreakdownDay = {
+  date: "2026-05-01",
+  weekdayLabel: "Fri",
+  attendanceStatus: "present",
+  statusLabel: "Present",
+  timeIn: "2026-05-01T00:00:00.000Z",
+  timeOut: "2026-05-01T08:00:00.000Z",
+  workedMinutes: 480,
+  regularMinutes: 480,
+  overtimeMinutes: 0,
+  lateDeductionMinutes: 0,
+  paidDayUnits: 1,
+  isPaid: true,
+  payReason: "Complete attendance",
+  warningCodes: [],
+  holidayLabel: null,
+  holidayKind: null,
+  holidayPayTreatment: null,
+  hasAttendanceRecord: true,
+  hasPendingApproval: false,
+  isScheduledWorkday: true,
+  isLeaveCovered: false,
+  isRestDay: false,
+};
+
+const baseItem: Pick<
+  PayrollPeriodItemSummary,
+  "fullName" | "recordedDayCount" | "paidDayUnits" | "warningCodes"
+> = {
+  fullName: "Joselito Saclote",
+  recordedDayCount: 2,
+  paidDayUnits: 1,
+  warningCodes: ["missing_attendance"],
+};
+
+describe("buildPayrollRecordedVsPaidExplanation", () => {
+  it("explains when a recorded date is not counted as paid", () => {
+    const explanation = buildPayrollRecordedVsPaidExplanation({
+      item: baseItem,
+      days: [
+        baseBreakdownDay,
+        {
+          ...baseBreakdownDay,
+          date: "2026-05-02",
+          weekdayLabel: "Sat",
+          attendanceStatus: "absent",
+          statusLabel: "Absent",
+          timeIn: null,
+          timeOut: null,
+          workedMinutes: 0,
+          regularMinutes: 0,
+          isPaid: false,
+          paidDayUnits: 0,
+          payReason: "Recorded absent day · not paid",
+        },
+      ],
+    });
+
+    expect(explanation).toContain("1 paid day");
+    expect(explanation).toContain("Some dates were not paid");
+  });
+});
+
+describe("buildPayrollWarningDetails", () => {
+  it("returns specific warning dates and general configuration issues", () => {
+    const warnings = buildPayrollWarningDetails({
+      item: {
+        ...baseItem,
+        warningCodes: ["missing_attendance", "missing_compensation"],
+      },
+      days: [
+        {
+          ...baseBreakdownDay,
+          date: "2026-05-03",
+          weekdayLabel: "Sun",
+          attendanceStatus: null,
+          statusLabel: "No Record",
+          timeIn: null,
+          timeOut: null,
+          workedMinutes: 0,
+          regularMinutes: 0,
+          isPaid: false,
+          paidDayUnits: 0,
+          payReason: "No attendance record",
+          warningCodes: ["missing_attendance"],
+          hasAttendanceRecord: false,
+        },
+      ],
+    });
+
+    expect(warnings).toEqual([
+      {
+        date: "2026-05-03",
+        label: "Missing attendance",
+        reason: "Scheduled workday has no attendance record.",
+      },
+      {
+        date: null,
+        label: "Missing compensation",
+        reason: "No compensation profile is configured for this staff member.",
+      },
+    ]);
   });
 });

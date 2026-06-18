@@ -80,7 +80,7 @@ export function AppShell({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen overflow-x-hidden bg-slate-50">
       <AppSidebar
         navigationItems={navigationItems}
         businessName={businessName}
@@ -114,7 +114,7 @@ export function AppShell({
         />
       ) : null}
       <div
-        className={`min-h-screen ${isDesktopSidebarCollapsed ? DESKTOP_CONTENT_COLLAPSED_CLASS : DESKTOP_CONTENT_EXPANDED_CLASS}`}
+        className={`min-h-screen min-w-0 overflow-x-hidden ${isDesktopSidebarCollapsed ? DESKTOP_CONTENT_COLLAPSED_CLASS : DESKTOP_CONTENT_EXPANDED_CLASS}`}
       >
         <div className="no-print">
           <AppTopbar
@@ -125,7 +125,7 @@ export function AppShell({
             onOpenNavigation={() => setIsMobileSidebarOpen(true)}
           />
         </div>
-        <main className="px-4 py-6 sm:px-6 lg:px-8">
+        <main className="min-w-0 overflow-x-hidden px-4 py-6 sm:px-6 lg:px-8">
           <PageContainer>{children}</PageContainer>
         </main>
       </div>

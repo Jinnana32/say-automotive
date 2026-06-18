@@ -10,7 +10,13 @@ import { Button } from '@/components/ui/button';
 import type { WebsiteShellData } from '@/features/website/types';
 import { cn } from '@/lib/utils';
 
-const OFFICIAL_WEBSITE_LOGO_SRC = '/brand/website-official-logo-transparent.png';
+const OFFICIAL_WEBSITE_LOGO_SRC =
+  '/brand/website-official-logo-transparent.png';
+const FACEBOOK_PAGE_URL = 'https://www.facebook.com/SayAutomotive1';
+const STORE_HOURS = {
+  weekdays: 'Monday–Saturday: 7:00 AM–5:00 PM',
+  sunday: 'Sunday: Closed',
+} as const;
 
 const publicNavLinks = [
   {
@@ -149,7 +155,8 @@ export function PublicSiteShell({
               size="pill"
               className={cn(
                 'hidden h-11 rounded-xl px-5 text-sm font-semibold uppercase tracking-[0.16em] shadow-[0_18px_36px_rgba(214,40,40,0.24)] sm:inline-flex',
-                isQuoteActive && 'ring-2 ring-white/40 ring-offset-2 ring-offset-[#030B18]',
+                isQuoteActive &&
+                  'ring-2 ring-white/40 ring-offset-2 ring-offset-[#030B18]',
               )}
             >
               <Link
@@ -170,7 +177,11 @@ export function PublicSiteShell({
               aria-expanded={mobileMenuOpen}
               onClick={() => setMobileMenuOpen((current) => !current)}
             >
-              {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+              {mobileMenuOpen ? (
+                <X className="size-5" />
+              ) : (
+                <Menu className="size-5" />
+              )}
             </Button>
           </div>
         </div>
@@ -194,7 +205,8 @@ export function PublicSiteShell({
                 size="pill"
                 className={cn(
                   'mt-2 h-11 w-full justify-center rounded-xl text-sm font-semibold uppercase tracking-[0.16em]',
-                  isQuoteActive && 'ring-2 ring-white/40 ring-offset-2 ring-offset-[#061326]',
+                  isQuoteActive &&
+                    'ring-2 ring-white/40 ring-offset-2 ring-offset-[#061326]',
                 )}
               >
                 <Link
@@ -215,7 +227,7 @@ export function PublicSiteShell({
 
       <footer className="border-t border-white/10 bg-[#020817]">
         <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-          <div className="grid gap-x-8 gap-y-10 border-b border-white/10 pb-10 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:grid-cols-[minmax(0,1.3fr)_0.8fr_1fr]">
+          <div className="grid gap-x-8 gap-y-10 border-b border-white/10 pb-10 md:grid-cols-2 lg:grid-cols-[minmax(0,1.2fr)_0.8fr_1fr_0.9fr]">
             <div className="space-y-5 md:col-span-2 lg:col-span-1">
               <BrandLogo
                 src={websiteLogoSrc}
@@ -226,7 +238,8 @@ export function PublicSiteShell({
                 surface="dark"
               />
               <p className="max-w-md text-sm leading-7 text-white/68">
-                Professional auto care and repair services you can trust. Quality work. Honest service.
+                Professional auto care and repair services you can trust.
+                Quality work. Honest service.
               </p>
             </div>
 
@@ -236,7 +249,11 @@ export function PublicSiteShell({
               </p>
               <div className="mt-5 flex flex-col gap-3">
                 {publicNavLinks.map((link) => (
-                  <FooterLink key={link.href} href={link.href} label={link.label} />
+                  <FooterLink
+                    key={link.href}
+                    href={link.href}
+                    label={link.label}
+                  />
                 ))}
               </div>
             </div>
@@ -264,6 +281,30 @@ export function PublicSiteShell({
                     <span>{shellData.address}</span>
                   </div>
                 ) : null}
+                <a
+                  href={FACEBOOK_PAGE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Visit SAY Auto Care Center / Mags & Tires on Facebook"
+                  className="inline-flex items-center gap-3 text-slate-300 transition hover:text-white"
+                >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1877F2] text-sm font-bold text-white">
+                    f
+                  </span>
+                  <span className="text-sm">
+                    SAY Auto Care Center / Mags & Tires
+                  </span>
+                </a>
+              </div>
+            </div>
+
+            <div className="md:col-span-2 lg:col-span-1">
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/44">
+                Store Hours
+              </p>
+              <div className="mt-5 space-y-2 text-sm leading-7 text-white/70">
+                <p>{STORE_HOURS.weekdays}</p>
+                <p>{STORE_HOURS.sunday}</p>
               </div>
             </div>
           </div>

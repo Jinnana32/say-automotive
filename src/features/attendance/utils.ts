@@ -293,7 +293,7 @@ export function hasMissingTimeout(attendance: AttendanceRecordSummary | null) {
 }
 
 export function isAttendanceApproved(attendance: AttendanceRecordSummary | null) {
-  return Boolean(attendance?.approvedAt);
+  return Boolean(attendance);
 }
 
 export function formatAttendanceApprovalLabel(attendance: AttendanceRecordSummary | null) {
@@ -301,7 +301,7 @@ export function formatAttendanceApprovalLabel(attendance: AttendanceRecordSummar
     return "No record";
   }
 
-  return isAttendanceApproved(attendance) ? "Approved" : "Pending review";
+  return "Recorded";
 }
 
 export function getAttendanceApprovalTone(attendance: AttendanceRecordSummary | null) {
@@ -309,7 +309,7 @@ export function getAttendanceApprovalTone(attendance: AttendanceRecordSummary | 
     return "neutral";
   }
 
-  return isAttendanceApproved(attendance) ? "success" : "warning";
+  return "success";
 }
 
 export function formatAttendanceLogTypeLabel(value: AttendanceLogType) {
