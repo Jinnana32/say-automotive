@@ -173,6 +173,8 @@ export function formatPayrollWarningLabel(code: PayrollWarningCode) {
       return "Pending approval";
     case "custom_holiday_rule":
       return "Custom holiday rule";
+    case "worked_during_approved_leave":
+      return "Worked during approved leave";
   }
 }
 
@@ -189,11 +191,15 @@ export function buildPayrollDifferenceDetails(
         day.warningCodes.includes("custom_holiday_rule") ||
         day.holidayKind !== null ||
         day.isLeaveCovered);
+    const shouldExplainWorkedDuringApprovedLeave = day.warningCodes.includes(
+      "worked_during_approved_leave",
+    );
 
     if (
       !shouldExplainRecordedDifference &&
       !shouldExplainAutoPaidDay &&
-      !shouldExplainScheduledUnpaidDay
+      !shouldExplainScheduledUnpaidDay &&
+      !shouldExplainWorkedDuringApprovedLeave
     ) {
       return [];
     }
@@ -214,6 +220,15 @@ export function buildPayrollRecordedVsPaidExplanation(params: {
   days: PayrollPeriodItemBreakdownDay[];
 }) {
   const paidLabel = formatPayrollDayUnits(params.item.paidDayUnits);
+  const workedDuringLeaveDays = params.days.filter(
+    (day) => day.isWorkedDuringApprovedLeave,
+  ).length;
+  const workedDuringLeaveNote =
+    workedDuringLeaveDays > 0
+      ? ` ${workedDuringLeaveDays} date${
+          workedDuringLeaveDays === 1 ? " was" : "s were"
+        } worked during approved leave, so the company leave premium was added on top of the normal worked-day pay.`
+      : "";
   const fullyPaidRecordedDays = params.days.filter(
     (day) => day.hasAttendanceRecord && day.paidDayUnits === 1,
   ).length;
@@ -223,33 +238,63 @@ export function buildPayrollRecordedVsPaidExplanation(params: {
   const unpaidRecordedDays = params.days.filter(
     (day) => day.hasAttendanceRecord && day.paidDayUnits === 0,
   ).length;
-  const autoPaidDays = params.days.filter(
-    (day) => !day.hasAttendanceRecord && day.paidDayUnits > 0,
+  const autoPaidLeaveDays = params.days.filter(
+    (day) => !day.hasAttendanceRecord && day.isApprovedLeavePaidDay,
+  ).length;
+  const autoPaidHolidayOrClosureDays = params.days.filter(
+    (day) =>
+      !day.hasAttendanceRecord && day.paidDayUnits > 0 && !day.isApprovedLeavePaidDay,
   ).length;
 
   if (params.item.recordedDayCount === params.item.paidDayUnits) {
-    return `${params.item.fullName} has ${paidLabel} paid day${params.item.paidDayUnits === 1 ? "" : "s"} in this payroll period. This payroll uses paid attendance days, overtime, and manual adjustments for the selected coverage window.`;
+    return `${params.item.fullName} has ${paidLabel} paid day${
+      params.item.paidDayUnits === 1 ? "" : "s"
+    } in this payroll period. This payroll uses paid attendance days, overtime, and manual adjustments for the selected coverage window.${workedDuringLeaveNote}`;
   }
 
   if (params.item.recordedDayCount > params.item.paidDayUnits) {
     if (unpaidRecordedDays > 0 && partiallyPaidRecordedDays > 0) {
-      return `${params.item.fullName} has ${paidLabel} paid day${params.item.paidDayUnits === 1 ? "" : "s"} in this payroll period. Some dates were not fully paid: ${unpaidRecordedDays} date${unpaidRecordedDays === 1 ? " was" : "s were"} not paid, and ${partiallyPaidRecordedDays} date${partiallyPaidRecordedDays === 1 ? " was" : "s were"} only partially paid.`;
+      return `${params.item.fullName} has ${paidLabel} paid day${
+        params.item.paidDayUnits === 1 ? "" : "s"
+      } in this payroll period. Some dates were not fully paid: ${unpaidRecordedDays} date${
+        unpaidRecordedDays === 1 ? " was" : "s were"
+      } not paid, and ${partiallyPaidRecordedDays} date${
+        partiallyPaidRecordedDays === 1 ? " was" : "s were"
+      } only partially paid.${workedDuringLeaveNote}`;
     }
 
     if (unpaidRecordedDays > 0) {
-      return `${params.item.fullName} has ${paidLabel} paid day${params.item.paidDayUnits === 1 ? "" : "s"} in this payroll period. Some dates were not paid because they were absent, missing required attendance, unpaid closure days, or otherwise not payable.`;
+      return `${params.item.fullName} has ${paidLabel} paid day${
+        params.item.paidDayUnits === 1 ? "" : "s"
+      } in this payroll period. Some dates were not paid because they were absent, missing required attendance, unpaid closure days, or otherwise not payable.${workedDuringLeaveNote}`;
     }
 
     if (partiallyPaidRecordedDays > 0) {
-      return `${params.item.fullName} has ${paidLabel} paid day${params.item.paidDayUnits === 1 ? "" : "s"} in this payroll period. Some dates were only partially paid, such as half days or days with reduced payable time.`;
+      return `${params.item.fullName} has ${paidLabel} paid day${
+        params.item.paidDayUnits === 1 ? "" : "s"
+      } in this payroll period. Some dates were only partially paid, such as half days or days with reduced payable time.${workedDuringLeaveNote}`;
     }
   }
 
-  if (autoPaidDays > 0) {
-    return `${params.item.fullName} has ${paidLabel} paid day${params.item.paidDayUnits === 1 ? "" : "s"} in this payroll period. ${autoPaidDays} date${autoPaidDays === 1 ? " was" : "s were"} counted as paid without a punch record because of the configured holiday or closure treatment.`;
+  if (autoPaidLeaveDays > 0) {
+    return `${params.item.fullName} has ${paidLabel} paid day${
+      params.item.paidDayUnits === 1 ? "" : "s"
+    } in this payroll period. ${autoPaidLeaveDays} approved leave date${
+      autoPaidLeaveDays === 1 ? " was" : "s were"
+    } paid as scheduled working day${autoPaidLeaveDays === 1 ? "" : "s"} without attendance logs.${workedDuringLeaveNote}`;
   }
 
-  return `${params.item.fullName} has ${paidLabel} paid day${params.item.paidDayUnits === 1 ? "" : "s"} in this payroll period. Use the daily breakdown and warnings below to review unpaid, partial, or exception dates.`;
+  if (autoPaidHolidayOrClosureDays > 0) {
+    return `${params.item.fullName} has ${paidLabel} paid day${
+      params.item.paidDayUnits === 1 ? "" : "s"
+    } in this payroll period. ${autoPaidHolidayOrClosureDays} date${
+      autoPaidHolidayOrClosureDays === 1 ? " was" : "s were"
+    } counted as paid without a punch record because of the configured holiday or closure treatment.${workedDuringLeaveNote}`;
+  }
+
+  return `${params.item.fullName} has ${paidLabel} paid day${
+    params.item.paidDayUnits === 1 ? "" : "s"
+  } in this payroll period. Use the daily breakdown and warnings below to review unpaid, partial, or exception dates.${workedDuringLeaveNote}`;
 }
 
 export function buildPayrollWarningDetails(params: {
@@ -480,5 +525,7 @@ function resolvePayrollWarningReason(
       return day?.holidayLabel
         ? `${day.holidayLabel} uses a custom pay treatment and should be reviewed manually.`
         : "Holiday pay treatment is custom and should be reviewed manually.";
+    case "worked_during_approved_leave":
+      return "Approved leave exists on this date, but the staff member also worked so the leave premium was applied.";
   }
 }

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { writeAuditLog } from "@/lib/audit";
 import { getBranchScopedServerClient, requireBranchAccess } from "@/lib/branches";
 import { toFormActionState } from "@/lib/forms";
+import type { StaffLeaveEntrySummary } from "@/features/attendance/types";
 import {
   computePayrollItem,
   summarizeAdjustmentTotals,
@@ -251,7 +252,7 @@ export async function generatePayrollCutAction(
       .in("staff_id", staffIds),
     supabase
       .from("staff_leave_entries")
-      .select("staff_id, start_date, end_date")
+      .select("staff_id, start_date, end_date, leave_type")
       .eq("branch_id", periodData.branch_id)
       .lte("start_date", periodData.period_end_date)
       .gte("end_date", periodData.period_start_date)
@@ -314,6 +315,7 @@ export async function generatePayrollCutAction(
   const leaveEntriesByStaffId = new Map<string, Array<{
     startDate: string;
     endDate: string;
+    leaveType: StaffLeaveEntrySummary["leaveType"];
   }>>();
 
   for (const row of (attendanceData ?? []) as AttendanceRow[]) {
@@ -333,6 +335,7 @@ export async function generatePayrollCutAction(
     existing.push({
       startDate: row.start_date,
       endDate: row.end_date,
+      leaveType: row.leave_type as StaffLeaveEntrySummary["leaveType"],
     });
     leaveEntriesByStaffId.set(row.staff_id, existing);
   }

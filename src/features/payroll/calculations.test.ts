@@ -215,4 +215,154 @@ describe("computePayrollItem", () => {
       }),
     ]);
   });
+
+  it("adds a leave premium when staff worked during approved leave", () => {
+    const breakdown = computePayrollItemBreakdown({
+      staffId: "staff-1",
+      fullName: "Cyril Atizon",
+      role: "mechanic",
+      schedule: baseSchedule,
+      compensationProfile: dailyProfile,
+      attendanceRecords: [
+        {
+          attendanceDate: "2026-05-04",
+          status: "present",
+          timeIn: "2026-05-04T00:00:00.000Z",
+          timeOut: "2026-05-04T08:00:00.000Z",
+          approvedAt: "2026-05-04T09:00:00.000Z",
+        },
+      ],
+      holidays: [],
+      leaveEntries: [
+        {
+          startDate: "2026-05-04",
+          endDate: "2026-05-04",
+          leaveType: "vacation",
+        },
+      ],
+      periodStartDate: "2026-05-04",
+      periodEndDate: "2026-05-04",
+      settings: {
+        standardDailyHours: 8,
+        holidayPremiumRate: 0.3,
+      },
+    });
+
+    expect(breakdown.item.paidDayUnits).toBe(1);
+    expect(breakdown.item.basePay).toBe(800);
+    expect(breakdown.item.workedDuringLeaveDayCount).toBe(1);
+    expect(breakdown.item.workedDuringLeavePremiumPay).toBe(800);
+    expect(breakdown.item.computedPay).toBe(1600);
+    expect(breakdown.item.grossPay).toBe(1600);
+    expect(breakdown.item.netPay).toBe(1600);
+    expect(breakdown.item.warningCodes).toContain("worked_during_approved_leave");
+    expect(breakdown.days).toEqual([
+      expect.objectContaining({
+        date: "2026-05-04",
+        statusLabel: "Worked During Approved Leave",
+        isWorkedDuringApprovedLeave: true,
+        workedDuringApprovedLeavePremiumPay: 800,
+        payReason:
+          "Approved leave exists, but staff also worked. Company policy applied leave premium.",
+        warningCodes: ["worked_during_approved_leave"],
+      }),
+    ]);
+  });
+
+  it("pays approved leave on a scheduled workday even without attendance logs", () => {
+    const breakdown = computePayrollItemBreakdown({
+      staffId: "staff-1",
+      fullName: "Tamayo",
+      role: "mechanic",
+      schedule: baseSchedule,
+      compensationProfile: {
+        ...dailyProfile,
+        baseRate: 495,
+      },
+      attendanceRecords: [],
+      holidays: [],
+      leaveEntries: [
+        {
+          startDate: "2026-05-04",
+          endDate: "2026-05-04",
+          leaveType: "vacation",
+        },
+      ],
+      periodStartDate: "2026-05-04",
+      periodEndDate: "2026-05-04",
+      settings: {
+        standardDailyHours: 8,
+        holidayPremiumRate: 0.3,
+      },
+    });
+
+    expect(breakdown.item.paidDayUnits).toBe(1);
+    expect(breakdown.item.basePay).toBe(495);
+    expect(breakdown.item.approvedLeavePay).toBe(495);
+    expect(breakdown.item.computedPay).toBe(495);
+    expect(breakdown.item.netPay).toBe(495);
+    expect(breakdown.days).toEqual([
+      expect.objectContaining({
+        date: "2026-05-04",
+        statusLabel: "Approved Leave",
+        isApprovedLeavePaidDay: true,
+        approvedLeavePay: 495,
+        isPaid: true,
+        payReason: "Approved paid leave on a scheduled working day.",
+      }),
+    ]);
+  });
+
+  it("does not pay approved leave on rest days or unpaid leave types", () => {
+    const breakdown = computePayrollItemBreakdown({
+      staffId: "staff-1",
+      fullName: "Tamayo",
+      role: "mechanic",
+      schedule: baseSchedule,
+      compensationProfile: dailyProfile,
+      attendanceRecords: [],
+      holidays: [],
+      leaveEntries: [
+        {
+          startDate: "2026-05-03",
+          endDate: "2026-05-03",
+          leaveType: "vacation",
+        },
+        {
+          startDate: "2026-05-05",
+          endDate: "2026-05-05",
+          leaveType: "unpaid",
+        },
+      ],
+      periodStartDate: "2026-05-03",
+      periodEndDate: "2026-05-05",
+      settings: {
+        standardDailyHours: 8,
+        holidayPremiumRate: 0.3,
+      },
+    });
+
+    expect(breakdown.item.paidDayUnits).toBe(0);
+    expect(breakdown.item.approvedLeavePay).toBe(0);
+    expect(breakdown.days).toEqual([
+      expect.objectContaining({
+        date: "2026-05-03",
+        statusLabel: "Approved Leave",
+        isApprovedLeavePaidDay: false,
+        isPaid: false,
+        payReason: "Approved leave on a rest day / not counted as paid day",
+      }),
+      expect.objectContaining({
+        date: "2026-05-04",
+        statusLabel: "Absent",
+      }),
+      expect.objectContaining({
+        date: "2026-05-05",
+        statusLabel: "Approved Leave",
+        isApprovedLeavePaidDay: false,
+        isPaid: false,
+        payReason: "Approved unpaid leave / not counted as paid day",
+      }),
+    ]);
+  });
 });

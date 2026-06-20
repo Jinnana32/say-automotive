@@ -386,7 +386,7 @@ export async function getPayrollPeriodItemBreakdownData(
       .order("attendance_date", { ascending: true }),
     supabase
       .from("staff_leave_entries")
-      .select("staff_id, start_date, end_date")
+      .select("staff_id, start_date, end_date, leave_type")
       .eq("branch_id", period.branchId)
       .eq("staff_id", item.staffId)
       .lte("start_date", period.periodEndDate)
@@ -433,10 +433,11 @@ export async function getPayrollPeriodItemBreakdownData(
     notes: row.notes,
   }));
   const leaveEntries = ((leaveEntryData ?? []) as StaffLeaveEntryRow[]).map<
-    Pick<StaffLeaveEntrySummary, "startDate" | "endDate">
+    Pick<StaffLeaveEntrySummary, "startDate" | "endDate" | "leaveType">
   >((row) => ({
     startDate: row.start_date,
     endDate: row.end_date,
+    leaveType: row.leave_type as StaffLeaveEntrySummary["leaveType"],
   }));
   const schedule = scheduleData ? mapStaffSchedule(scheduleData as StaffScheduleRow) : null;
   const compensationProfile = buildCompensationProfileFromPayrollItem(item);
@@ -458,6 +459,45 @@ export async function getPayrollPeriodItemBreakdownData(
     manualAdditionsTotal: item.manualAdditionsTotal,
     manualDeductionsTotal: item.manualDeductionsTotal,
   });
+  const computedItemForBreakdown: PayrollPeriodItemSummary = {
+    ...item,
+    payBasis: breakdown.item.payBasis,
+    baseRate: breakdown.item.baseRate,
+    overtimeRate: breakdown.item.overtimeRate,
+    allowancePerPeriod: breakdown.item.allowancePerPeriod,
+    dailyRateUsed: breakdown.item.dailyRateUsed,
+    hourlyRateUsed: breakdown.item.hourlyRateUsed,
+    standardDailyHours: breakdown.item.standardDailyHours,
+    holidayPremiumRate: breakdown.item.holidayPremiumRate,
+    scheduledWorkdayCount: breakdown.item.scheduledWorkdayCount,
+    holidayDayCount: breakdown.item.holidayDayCount,
+    approvedLeaveDayCount: breakdown.item.approvedLeaveDayCount,
+    expectedWorkdayCount: breakdown.item.expectedWorkdayCount,
+    missingAttendanceDayCount: breakdown.item.missingAttendanceDayCount,
+    recordedDayCount: breakdown.item.recordedDayCount,
+    presentCount: breakdown.item.presentCount,
+    lateCount: breakdown.item.lateCount,
+    halfDayCount: breakdown.item.halfDayCount,
+    absentCount: breakdown.item.absentCount,
+    missingTimeoutCount: breakdown.item.missingTimeoutCount,
+    pendingApprovalCount: breakdown.item.pendingApprovalCount,
+    workedMinutes: breakdown.item.workedMinutes,
+    paidDayUnits: breakdown.item.paidDayUnits,
+    holidayWorkedDayUnits: breakdown.item.holidayWorkedDayUnits,
+    lateDeductionMinutes: breakdown.item.lateDeductionMinutes,
+    overtimeMinutes: breakdown.item.overtimeMinutes,
+    basePay: breakdown.item.basePay,
+    lateDeductionAmount: breakdown.item.lateDeductionAmount,
+    holidayPremiumPay: breakdown.item.holidayPremiumPay,
+    overtimePay: breakdown.item.overtimePay,
+    computedPay: breakdown.item.computedPay,
+    manualAdditionsTotal: breakdown.item.manualAdditionsTotal,
+    manualDeductionsTotal: breakdown.item.manualDeductionsTotal,
+    grossPay: breakdown.item.grossPay,
+    netPay: breakdown.item.netPay,
+    readinessStatus: breakdown.item.readinessStatus,
+    warningCodes: breakdown.item.warningCodes,
+  };
   const differenceDetails = buildPayrollDifferenceDetails(breakdown.days);
 
   return {
@@ -466,15 +506,15 @@ export async function getPayrollPeriodItemBreakdownData(
       standardDailyHours: item.standardDailyHours,
       holidayPremiumRate: item.holidayPremiumRate,
     },
-    item,
+    item: computedItemForBreakdown,
     days: breakdown.days,
     recordedVsPaidExplanation: buildPayrollRecordedVsPaidExplanation({
-      item,
+      item: computedItemForBreakdown,
       days: breakdown.days,
     }),
     differenceDetails,
     warningDetails: buildPayrollWarningDetails({
-      item,
+      item: computedItemForBreakdown,
       days: breakdown.days,
     }),
   };

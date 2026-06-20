@@ -3,6 +3,7 @@ import type { PrintDocumentBusinessProfile } from "@/components/reports/print-do
 import type {
   BranchHolidayKind,
   BranchHolidayPayTreatment,
+  StaffLeaveType,
   StaffScheduleSummary,
 } from "@/features/attendance/types";
 import type { Database } from "@/types/database";
@@ -167,7 +168,8 @@ export type PayrollWarningCode =
   | "needs_dtr_completion"
   | "not_configured"
   | "pending_approval"
-  | "custom_holiday_rule";
+  | "custom_holiday_rule"
+  | "worked_during_approved_leave";
 
 export type PayrollPeriodItemAdjustmentSummary = {
   id: string;
@@ -249,6 +251,11 @@ export type PayrollPeriodItemBreakdownDay = {
   hasPendingApproval: boolean;
   isScheduledWorkday: boolean;
   isLeaveCovered: boolean;
+  leaveType: StaffLeaveType | null;
+  isApprovedLeavePaidDay: boolean;
+  approvedLeavePay: number;
+  isWorkedDuringApprovedLeave: boolean;
+  workedDuringApprovedLeavePremiumPay: number;
   isRestDay: boolean;
 };
 

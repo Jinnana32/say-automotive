@@ -45,6 +45,7 @@ describe("PublicSiteShell", () => {
     expect(screen.getByRole("button", { name: "Close menu" })).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "Services" }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: "Catalog" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: "Brands" }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: "Service Quote" }).length).toBeGreaterThan(0);
 
     fireEvent.click(screen.getByRole("button", { name: "Close menu" }));

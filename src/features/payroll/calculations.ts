@@ -5,6 +5,7 @@ import type {
   BranchHolidayKind,
   BranchHolidayPayTreatment,
   StaffLeaveEntrySummary,
+  StaffLeaveType,
   StaffScheduleSummary,
 } from "@/features/attendance/types";
 import {
@@ -69,11 +70,15 @@ export type PayrollComputedItem = {
   workedMinutes: number;
   paidDayUnits: number;
   holidayWorkedDayUnits: number;
+  approvedLeavePaidDayCount: number;
+  workedDuringLeaveDayCount: number;
   lateDeductionMinutes: number;
   overtimeMinutes: number;
   basePay: number;
+  approvedLeavePay: number;
   lateDeductionAmount: number;
   holidayPremiumPay: number;
+  workedDuringLeavePremiumPay: number;
   overtimePay: number;
   allowancePay: number;
   computedPay: number;
@@ -118,7 +123,7 @@ export function computePayrollItem(params: {
   compensationProfile: CompensationProfileSummary | null;
   attendanceRecords: PayrollAttendanceSourceRecord[];
   holidays: PayrollHolidayRule[];
-  leaveEntries: Array<Pick<StaffLeaveEntrySummary, "startDate" | "endDate">>;
+  leaveEntries: Array<Pick<StaffLeaveEntrySummary, "startDate" | "endDate" | "leaveType">>;
   periodStartDate: string;
   periodEndDate: string;
   settings: PayrollRuleSettings;
@@ -136,7 +141,7 @@ export function computePayrollItemBreakdown(params: {
   compensationProfile: CompensationProfileSummary | null;
   attendanceRecords: PayrollAttendanceSourceRecord[];
   holidays: PayrollHolidayRule[];
-  leaveEntries: Array<Pick<StaffLeaveEntrySummary, "startDate" | "endDate">>;
+  leaveEntries: Array<Pick<StaffLeaveEntrySummary, "startDate" | "endDate" | "leaveType">>;
   periodStartDate: string;
   periodEndDate: string;
   settings: PayrollRuleSettings;
@@ -189,16 +194,22 @@ export function computePayrollItemBreakdown(params: {
 
   let paidDayUnits = 0;
   let holidayWorkedDayUnits = 0;
+  let approvedLeavePaidDayCount = 0;
+  let workedDuringLeaveDayCount = 0;
   let lateDeductionMinutes = 0;
   let overtimeMinutes = 0;
+  let approvedLeavePay = 0;
+  let workedDuringLeavePremiumPay = 0;
   const days: PayrollPeriodItemBreakdownDay[] = [];
 
   for (const date of buildDateRange(params.periodStartDate, params.periodEndDate)) {
     const attendance = attendanceByDate.get(date);
     const holiday = holidayByDate.get(date);
-    const leaveCovered = params.leaveEntries.some((leaveEntry) =>
-      doesLeaveCoverDate(leaveEntry, date),
-    );
+    const leaveEntry =
+      params.leaveEntries.find((candidate) => doesLeaveCoverDate(candidate, date)) ?? null;
+    const leaveCovered = leaveEntry !== null;
+    const leaveType = leaveEntry?.leaveType ?? null;
+    const isPaidLeave = leaveType !== null && leaveType !== "unpaid";
     const scheduledWorkday = isScheduledWorkdayForDate(params.schedule, date);
     const workedMinutes = computeWorkedMinutes(attendance?.timeIn ?? null, attendance?.timeOut ?? null);
     const overtimeMinutesForDay = attendance
@@ -210,6 +221,13 @@ export function computePayrollItemBreakdown(params: {
         })
       : 0;
     const regularMinutes = Math.max(workedMinutes - overtimeMinutesForDay, 0);
+    const workedDuringApprovedLeave =
+      Boolean(attendance) &&
+      leaveCovered &&
+      attendance?.status !== "absent" &&
+      workedMinutes > 0;
+    const approvedLeavePaidDay =
+      leaveCovered && isPaidLeave && scheduledWorkday && !holiday && !workedDuringApprovedLeave;
     const lateDeductionMinutesForDay =
       attendance?.status === "late"
         ? computeLateDeductionMinutes({
@@ -219,9 +237,21 @@ export function computePayrollItemBreakdown(params: {
           })
         : 0;
     let paidDayUnitsForDay = 0;
+    let approvedLeavePayForDay = 0;
+    let workedDuringLeavePremiumPayForDay = 0;
     const dayWarningCodes = new Set<PayrollWarningCode>();
 
-    if (attendance) {
+    if (approvedLeavePaidDay) {
+      paidDayUnits += 1;
+      paidDayUnitsForDay = 1;
+      approvedLeavePaidDayCount += 1;
+      approvedLeavePayForDay = roundMoney(rateSummary.dailyRateUsed);
+      approvedLeavePay += approvedLeavePayForDay;
+
+      if (attendance?.timeIn && !attendance?.timeOut && !holidayDates.has(date)) {
+        dayWarningCodes.add("needs_dtr_completion");
+      }
+    } else if (attendance) {
       const dayUnits = getAttendanceDayUnits(attendance.status);
       paidDayUnits += dayUnits;
       paidDayUnitsForDay = dayUnits;
@@ -235,6 +265,14 @@ export function computePayrollItemBreakdown(params: {
       }
 
       overtimeMinutes += overtimeMinutesForDay;
+
+      if (workedDuringApprovedLeave && dayUnits > 0) {
+        workedDuringLeaveDayCount += 1;
+        workedDuringLeavePremiumPayForDay = roundMoney(rateSummary.dailyRateUsed * dayUnits);
+        workedDuringLeavePremiumPay += workedDuringLeavePremiumPayForDay;
+        warningCodes.add("worked_during_approved_leave");
+        dayWarningCodes.add("worked_during_approved_leave");
+      }
 
       if (attendance.timeIn && !attendance.timeOut && !holidayDates.has(date)) {
         dayWarningCodes.add("needs_dtr_completion");
@@ -263,6 +301,7 @@ export function computePayrollItemBreakdown(params: {
         attendanceStatus: attendance?.status ?? null,
         holidayKind: holiday?.holidayKind ?? null,
         isLeaveCovered: leaveCovered,
+        isWorkedDuringApprovedLeave: workedDuringApprovedLeave,
         isScheduledWorkday: scheduledWorkday,
       }),
       timeIn: attendance?.timeIn ?? null,
@@ -277,6 +316,9 @@ export function computePayrollItemBreakdown(params: {
         attendanceStatus: attendance?.status ?? null,
         holiday,
         isLeaveCovered: leaveCovered,
+        leaveType,
+        isApprovedLeavePaidDay: approvedLeavePaidDay,
+        isWorkedDuringApprovedLeave: workedDuringApprovedLeave,
         isScheduledWorkday: scheduledWorkday,
         paidDayUnits: paidDayUnitsForDay,
       }),
@@ -288,23 +330,35 @@ export function computePayrollItemBreakdown(params: {
       hasPendingApproval: false,
       isScheduledWorkday: scheduledWorkday,
       isLeaveCovered: leaveCovered,
+      leaveType,
+      isApprovedLeavePaidDay: approvedLeavePaidDay,
+      approvedLeavePay: approvedLeavePayForDay,
+      isWorkedDuringApprovedLeave: workedDuringApprovedLeave,
+      workedDuringApprovedLeavePremiumPay: workedDuringLeavePremiumPayForDay,
       isRestDay: !scheduledWorkday && !attendance && !holiday && !leaveCovered,
     });
   }
 
   const basePay = roundMoney(rateSummary.dailyRateUsed * paidDayUnits);
+  approvedLeavePay = roundMoney(approvedLeavePay);
   const lateDeductionAmount = roundMoney(
     (rateSummary.dailyRateUsed / (standardDailyHours * 60)) * lateDeductionMinutes,
   );
   const holidayPremiumPay = roundMoney(
     rateSummary.dailyRateUsed * holidayWorkedDayUnits * holidayPremiumRate,
   );
+  workedDuringLeavePremiumPay = roundMoney(workedDuringLeavePremiumPay);
   const overtimePay = roundMoney(
     (overtimeMinutes / 60) * rateSummary.hourlyRateUsed,
   );
   const allowancePay = roundMoney(params.compensationProfile?.allowancePerPeriod ?? 0);
   const computedPay = roundMoney(
-    basePay - lateDeductionAmount + holidayPremiumPay + overtimePay + allowancePay,
+    basePay -
+      lateDeductionAmount +
+      holidayPremiumPay +
+      workedDuringLeavePremiumPay +
+      overtimePay +
+      allowancePay,
   );
   const manualAdditionsTotal = roundMoney(params.manualAdditionsTotal ?? 0);
   const manualDeductionsTotal = roundMoney(params.manualDeductionsTotal ?? 0);
@@ -339,11 +393,15 @@ export function computePayrollItemBreakdown(params: {
       workedMinutes: attendanceSummary.workedMinutes,
       paidDayUnits: roundMoney(paidDayUnits),
       holidayWorkedDayUnits: roundMoney(holidayWorkedDayUnits),
+      approvedLeavePaidDayCount,
+      workedDuringLeaveDayCount,
       lateDeductionMinutes,
       overtimeMinutes,
       basePay,
+      approvedLeavePay,
       lateDeductionAmount,
       holidayPremiumPay,
+      workedDuringLeavePremiumPay,
       overtimePay,
       allowancePay,
       computedPay,
@@ -561,8 +619,30 @@ function resolveDailyStatusLabel(params: {
   attendanceStatus: PayrollAttendanceSourceRecord["status"] | null;
   holidayKind: BranchHolidayKind | null;
   isLeaveCovered: boolean;
+  isWorkedDuringApprovedLeave: boolean;
   isScheduledWorkday: boolean;
 }) {
+  if (params.isWorkedDuringApprovedLeave) {
+    return "Worked During Approved Leave";
+  }
+
+  if (params.holidayKind && !params.attendanceStatus) {
+    switch (params.holidayKind) {
+      case "branch_closure":
+        return "Branch Closed";
+      case "public_holiday":
+        return "Public Holiday";
+      case "company_holiday":
+        return "Company Holiday";
+      case "special_non_working_day":
+        return "Special Non-working Day";
+    }
+  }
+
+  if (params.isLeaveCovered) {
+    return "Approved Leave";
+  }
+
   if (params.attendanceStatus) {
     switch (params.attendanceStatus) {
       case "present":
@@ -589,12 +669,8 @@ function resolveDailyStatusLabel(params: {
     }
   }
 
-  if (params.isLeaveCovered) {
-    return "Approved Leave";
-  }
-
   if (params.isScheduledWorkday) {
-    return "No Record";
+    return "Absent";
   }
 
   return "Rest Day";
@@ -604,9 +680,30 @@ function buildDayPayReason(params: {
   attendanceStatus: PayrollAttendanceSourceRecord["status"] | null;
   holiday: PayrollHolidayRule | undefined;
   isLeaveCovered: boolean;
+  leaveType: StaffLeaveType | null;
+  isApprovedLeavePaidDay: boolean;
+  isWorkedDuringApprovedLeave: boolean;
   isScheduledWorkday: boolean;
   paidDayUnits: number;
 }) {
+  if (params.isWorkedDuringApprovedLeave) {
+    const baseReason =
+      "Approved leave exists, but staff also worked. Company policy applied leave premium.";
+
+    switch (params.attendanceStatus) {
+      case "late":
+        return `${baseReason} Late but paid.`;
+      case "half_day":
+        return `${baseReason} Half day counted as 0.5 paid day.`;
+      default:
+        return baseReason;
+    }
+  }
+
+  if (params.isApprovedLeavePaidDay) {
+    return "Approved paid leave on a scheduled working day.";
+  }
+
   if (params.attendanceStatus) {
     if (params.holiday && params.paidDayUnits > 0) {
       const premiumText =
@@ -653,11 +750,19 @@ function buildDayPayReason(params: {
   }
 
   if (params.isLeaveCovered) {
+    if (params.leaveType === "unpaid") {
+      return "Approved unpaid leave / not counted as paid day";
+    }
+
+    if (!params.isScheduledWorkday) {
+      return "Approved leave on a rest day / not counted as paid day";
+    }
+
     return "Approved leave / not counted as worked day";
   }
 
   if (params.isScheduledWorkday) {
-    return "No attendance record";
+    return "Recorded absent / no approved paid leave.";
   }
 
   return "Rest day / not scheduled";

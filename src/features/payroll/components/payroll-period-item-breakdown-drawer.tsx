@@ -202,9 +202,21 @@ function PayrollBreakdownContent({
   adjustmentsNet: number;
 }) {
   const attendedDayCount = getPayrollAttendedDayCount(data.item);
+  const approvedLeaveDayCount = data.days.filter((day) => day.isApprovedLeavePaidDay).length;
+  const approvedLeavePay = data.days.reduce((total, day) => total + day.approvedLeavePay, 0);
+  const workedDuringLeaveDayCount = data.days.filter(
+    (day) => day.isWorkedDuringApprovedLeave,
+  ).length;
+  const workedDuringLeavePremiumPay = data.days.reduce(
+    (total, day) => total + day.workedDuringApprovedLeavePremiumPay,
+    0,
+  );
+  const regularPay = data.item.basePay - approvedLeavePay;
   const summaryCards = useMemo(
     () => [
       { label: "Paid days", value: formatPayrollDayUnits(data.item.paidDayUnits) },
+      { label: "Approved leave", value: String(approvedLeaveDayCount) },
+      { label: "Worked during leave", value: String(workedDuringLeaveDayCount) },
       { label: "Attended days", value: String(attendedDayCount) },
       { label: "Late", value: String(data.item.lateCount) },
       { label: "Half days", value: String(data.item.halfDayCount) },
@@ -216,7 +228,13 @@ function PayrollBreakdownContent({
       { label: "Gross pay", value: formatCurrency(data.item.grossPay) },
       { label: "Net pay", value: formatCurrency(data.item.netPay) },
     ],
-    [attendedDayCount, data.item, regularMinutes],
+    [
+      approvedLeaveDayCount,
+      attendedDayCount,
+      data.item,
+      regularMinutes,
+      workedDuringLeaveDayCount,
+    ],
   );
 
   return (
@@ -280,13 +298,18 @@ function PayrollBreakdownContent({
             <CardTitle className="text-base">Earnings breakdown</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
-            <BreakdownRow label="Base earnings" value={formatCurrency(data.item.basePay)} />
+            <BreakdownRow label="Regular Pay" value={formatCurrency(regularPay)} />
+            <BreakdownRow label="Approved Leave Pay" value={formatCurrency(approvedLeavePay)} />
             <BreakdownRow
               label="Late deductions"
               value={`-${formatCurrency(data.item.lateDeductionAmount)}`}
               valueClassName={data.item.lateDeductionAmount > 0 ? "text-amber-600" : undefined}
             />
             <BreakdownRow label="Holiday premium" value={formatCurrency(data.item.holidayPremiumPay)} />
+            <BreakdownRow
+              label="Worked During Leave Premium"
+              value={formatCurrency(workedDuringLeavePremiumPay)}
+            />
             <BreakdownRow label="Overtime earnings" value={formatCurrency(data.item.overtimePay)} />
             <BreakdownRow label="Allowance" value={formatCurrency(data.item.allowancePay)} />
             <BreakdownRow label="Computed pay" value={formatCurrency(data.item.computedPay)} />
@@ -521,6 +544,10 @@ function resolveDayStatusTone(statusLabel: string) {
   switch (statusLabel) {
     case "Present":
       return "success";
+    case "Approved Leave":
+      return "info";
+    case "Worked During Approved Leave":
+      return "warning";
     case "Late":
     case "Half day":
       return "warning";

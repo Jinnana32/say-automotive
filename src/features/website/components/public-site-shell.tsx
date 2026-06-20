@@ -33,6 +33,10 @@ const publicNavLinks = [
     label: 'Catalog',
   },
   {
+    href: '/#brands',
+    label: 'Brands',
+  },
+  {
     href: '/#about-us',
     label: 'About Us',
   },
@@ -285,7 +289,7 @@ export function PublicSiteShell({
                   href={FACEBOOK_PAGE_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Visit SAY Auto Care Center / Mags & Tires on Facebook"
+                  aria-label="Visit SAY Auto Care on Facebook"
                   className="inline-flex items-center gap-3 text-slate-300 transition hover:text-white"
                 >
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1877F2] text-sm font-bold text-white">

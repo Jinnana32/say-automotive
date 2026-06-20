@@ -146,6 +146,11 @@ const baseBreakdownDay: PayrollPeriodItemBreakdownDay = {
   hasPendingApproval: false,
   isScheduledWorkday: true,
   isLeaveCovered: false,
+  leaveType: null,
+  isApprovedLeavePaidDay: false,
+  approvedLeavePay: 0,
+  isWorkedDuringApprovedLeave: false,
+  workedDuringApprovedLeavePremiumPay: 0,
   isRestDay: false,
 };
 
@@ -185,6 +190,61 @@ describe("buildPayrollRecordedVsPaidExplanation", () => {
     expect(explanation).toContain("1 paid day");
     expect(explanation).toContain("Some dates were not paid");
   });
+
+  it("mentions leave premium when a worked date overlaps approved leave", () => {
+    const explanation = buildPayrollRecordedVsPaidExplanation({
+      item: {
+        ...baseItem,
+        recordedDayCount: 1,
+        paidDayUnits: 1,
+      },
+      days: [
+        {
+          ...baseBreakdownDay,
+          statusLabel: "Worked During Approved Leave",
+          payReason:
+            "Approved leave exists, but staff also worked. Company policy applied leave premium.",
+          isLeaveCovered: true,
+          isWorkedDuringApprovedLeave: true,
+          workedDuringApprovedLeavePremiumPay: 500,
+          warningCodes: ["worked_during_approved_leave"],
+        },
+      ],
+    });
+
+    expect(explanation).toContain("company leave premium was added");
+  });
+
+  it("describes approved leave days paid without attendance logs", () => {
+    const explanation = buildPayrollRecordedVsPaidExplanation({
+      item: {
+        ...baseItem,
+        recordedDayCount: 0,
+        paidDayUnits: 1,
+      },
+      days: [
+        {
+          ...baseBreakdownDay,
+          hasAttendanceRecord: false,
+          attendanceStatus: null,
+          statusLabel: "Approved Leave",
+          timeIn: null,
+          timeOut: null,
+          workedMinutes: 0,
+          regularMinutes: 0,
+          isPaid: true,
+          payReason: "Approved paid leave on a scheduled working day.",
+          isLeaveCovered: true,
+          leaveType: "vacation",
+          isApprovedLeavePaidDay: true,
+          approvedLeavePay: 500,
+          paidDayUnits: 1,
+        },
+      ],
+    });
+
+    expect(explanation).toContain("approved leave date was paid as scheduled working day");
+  });
 });
 
 describe("buildPayrollWarningDetails", () => {
@@ -201,6 +261,9 @@ describe("buildPayrollWarningDetails", () => {
           weekdayLabel: "Sun",
           attendanceStatus: null,
           statusLabel: "No Record",
+          leaveType: null,
+          isApprovedLeavePaidDay: false,
+          approvedLeavePay: 0,
           timeIn: null,
           timeOut: null,
           workedMinutes: 0,
@@ -224,6 +287,37 @@ describe("buildPayrollWarningDetails", () => {
         date: null,
         label: "Missing compensation",
         reason: "No compensation profile is configured for this staff member.",
+      },
+    ]);
+  });
+
+  it("returns worked-during-leave warnings with the specific date", () => {
+    const warnings = buildPayrollWarningDetails({
+      item: {
+        ...baseItem,
+        warningCodes: ["worked_during_approved_leave"],
+      },
+      days: [
+        {
+          ...baseBreakdownDay,
+          date: "2026-05-04",
+          statusLabel: "Worked During Approved Leave",
+          payReason:
+            "Approved leave exists, but staff also worked. Company policy applied leave premium.",
+          isLeaveCovered: true,
+          isWorkedDuringApprovedLeave: true,
+          workedDuringApprovedLeavePremiumPay: 500,
+          warningCodes: ["worked_during_approved_leave"],
+        },
+      ],
+    });
+
+    expect(warnings).toEqual([
+      {
+        date: "2026-05-04",
+        label: "Worked during approved leave",
+        reason:
+          "Approved leave exists on this date, but the staff member also worked so the leave premium was applied.",
       },
     ]);
   });
