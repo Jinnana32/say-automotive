@@ -24,7 +24,8 @@ import { Button } from '@/components/ui/button';
 import type { WebsiteShellData } from '@/features/website/types';
 import { cn } from '@/lib/utils';
 
-const OFFICIAL_WEBSITE_LOGO_SRC = '/brand/website-official-logo-transparent.png';
+const OFFICIAL_WEBSITE_LOGO_SRC =
+  '/brand/website-official-logo-transparent.png';
 const WEBSITE_HERO_BACKGROUND_SRC = '/brand/website-hero-background.png';
 const WEBSITE_FEATURE_BACKGROUND_SRC = '/brand/website-feature-background.png';
 const GOOGLE_REVIEWS_URL =
@@ -40,17 +41,20 @@ const HERO_FEATURES = [
 const EXPERTISE_HIGHLIGHTS = [
   {
     title: 'FCA-Certified Mechanic',
-    description: 'Hands-on service expertise with FCA training and automotive repair experience.',
+    description:
+      'Hands-on service expertise with FCA training and automotive repair experience.',
     icon: ShieldCheck,
   },
   {
     title: 'USA Certified Mechanic',
-    description: 'Certified mechanic experience from the USA with professional service standards.',
+    description:
+      'Certified mechanic experience from the USA with professional service standards.',
     icon: Award,
   },
   {
     title: 'Hybrid Vehicle Experience',
-    description: 'Hybrid car certified mechanic experience for modern vehicle service needs.',
+    description:
+      'Hybrid car certified mechanic experience for modern vehicle service needs.',
     icon: Zap,
   },
   {
@@ -63,12 +67,14 @@ const EXPERTISE_HIGHLIGHTS = [
 const SERVICE_CARDS = [
   {
     title: 'Engine Repair',
-    description: 'Diagnostics, repairs, and performance support for engine issues.',
+    description:
+      'Diagnostics, repairs, and performance support for engine issues.',
     icon: Wrench,
   },
   {
     title: 'Electrical',
-    description: 'Electrical diagnosis, wiring checks, battery-related issues, and component repair.',
+    description:
+      'Electrical diagnosis, wiring checks, battery-related issues, and component repair.',
     icon: Zap,
   },
   {
@@ -83,7 +89,8 @@ const SERVICE_CARDS = [
   },
   {
     title: 'A/C',
-    description: 'Air-conditioning inspection, cooling performance checks, and A/C service.',
+    description:
+      'Air-conditioning inspection, cooling performance checks, and A/C service.',
     icon: Snowflake,
   },
   {
@@ -93,12 +100,14 @@ const SERVICE_CARDS = [
   },
   {
     title: 'Transmission Service',
-    description: 'Transmission inspection, fluid service, and drivetrain-related support.',
+    description:
+      'Transmission inspection, fluid service, and drivetrain-related support.',
     icon: Cog,
   },
   {
     title: 'Tune-Up / Tires',
-    description: 'Tune-up service, tire checks, balancing, rotation, and related maintenance.',
+    description:
+      'Tune-up service, tire checks, balancing, rotation, and related maintenance.',
     icon: CircleDot,
   },
 ] as const;
@@ -111,7 +120,7 @@ const BRAND_LOGOS = [
   },
   {
     name: 'Shell Helix',
-    src: '/brand-logos/e2d6ce87-ad70-4b77-9b9f-00219a884f27.png',
+    src: '/brand-logos/new shell logo.png',
     frameClassName: 'h-12 max-w-[240px]',
   },
   {
@@ -234,22 +243,26 @@ const BRAND_LOGOS = [
 const TRUST_POINTS = [
   {
     title: 'FCA-Certified Mechanic',
-    description: 'Hands-on service expertise with FCA training and automotive repair experience.',
+    description:
+      'Hands-on service expertise with FCA training and automotive repair experience.',
     icon: ShieldCheck,
   },
   {
     title: 'USA Certified Mechanic',
-    description: 'Certified mechanic experience from the USA with professional service standards.',
+    description:
+      'Certified mechanic experience from the USA with professional service standards.',
     icon: Award,
   },
   {
     title: 'Hybrid Vehicle Experience',
-    description: 'Hybrid car certified mechanic experience for modern vehicle service needs.',
+    description:
+      'Hybrid car certified mechanic experience for modern vehicle service needs.',
     icon: Zap,
   },
   {
     title: 'Brand Service Background',
-    description: 'Experience involving FCA, Jeep, Dodge, RAM, and Firestone/Bridgestone Complete Auto Care.',
+    description:
+      'Experience involving FCA, Jeep, Dodge, RAM, and Firestone/Bridgestone Complete Auto Care.',
     icon: ClipboardCheck,
   },
 ] as const;
@@ -315,7 +328,8 @@ export function WebsiteHomePage({
                 Built On <span className="text-brand-red">Trust.</span>
               </h1>
               <p className="mt-5 max-w-[560px] text-base leading-8 text-white/76 sm:text-lg">
-                Professional auto care services you can count on. Quality. Reliability. Performance.
+                Professional auto care services you can count on. Quality.
+                Reliability. Performance.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -362,22 +376,33 @@ export function WebsiteHomePage({
               About Us
             </p>
             <h2 className="text-3xl font-semibold uppercase tracking-[0.03em] text-white sm:text-4xl">
-              Your trusted SAY Auto Care destination for dependable maintenance and repair.
+              Your trusted SAY Auto Care destination for dependable maintenance
+              and repair.
             </h2>
             <p className="max-w-3xl text-base leading-8 text-white/72">
-              SAY Auto Care delivers workshop support built around clear service communication, modern equipment, and a commitment to doing the job right. From diagnostics to preventive maintenance, the team is focused on safe, reliable results.
+              SAY Auto Care delivers workshop support built around clear service
+              communication, modern equipment, and a commitment to doing the job
+              right. From diagnostics to preventive maintenance, the team is
+              focused on safe, reliable results.
             </p>
             <div className="rounded-[1.75rem] border border-white/10 bg-[linear-gradient(180deg,rgba(9,24,53,0.94),rgba(4,12,28,0.98))] px-5 py-5 shadow-[0_18px_48px_rgba(0,0,0,0.2)] sm:px-6">
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-brand-red">
                 USA-Certified Automotive Expertise
               </p>
               <p className="mt-3 max-w-3xl text-sm leading-7 text-white/72 sm:text-base">
-                SAY Auto Care is backed by hands-on automotive service expertise from an FCA-Certified Mechanic and USA Certified Mechanic, with experience involving FCA, Jeep, Dodge, RAM, Firestone/Bridgestone Complete Auto Care, and hybrid vehicle systems.
+                SAY Auto Care is backed by hands-on automotive service expertise
+                from an FCA-Certified Mechanic and USA Certified Mechanic, with
+                experience involving FCA, Jeep, Dodge, RAM,
+                Firestone/Bridgestone Complete Auto Care, and hybrid vehicle
+                systems.
               </p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {EXPERTISE_HIGHLIGHTS.map((highlight) => (
-                <ExpertiseHighlightCard key={highlight.title} highlight={highlight} />
+                <ExpertiseHighlightCard
+                  key={highlight.title}
+                  highlight={highlight}
+                />
               ))}
             </div>
           </div>
@@ -424,7 +449,9 @@ export function WebsiteHomePage({
                   Need parts too?
                 </p>
                 <p className="max-w-2xl text-base leading-7 text-white/76">
-                  Browse tires, batteries, fluids, and other catalog items online before you contact the shop for availability and fitment.
+                  Browse tires, batteries, fluids, and other catalog items
+                  online before you contact the shop for availability and
+                  fitment.
                 </p>
               </div>
               <Button
@@ -458,22 +485,30 @@ export function WebsiteHomePage({
               Brands We Work With
             </h2>
             <p className="mt-4 text-base leading-8 text-slate-600">
-              We carry and work with trusted automotive brands for tires, batteries, suspension, 4x4 accessories, lubricants, and maintenance products.
+              We carry and work with trusted automotive brands for tires,
+              batteries, suspension, 4x4 accessories, lubricants, and
+              maintenance products.
             </p>
             <p className="mt-1.5 text-sm leading-7 text-slate-500">
-              Availability may vary. Contact the shop for fitment, pricing, and current stock.
+              Availability may vary. Contact the shop for fitment, pricing, and
+              current stock.
             </p>
           </div>
 
           <div className="mx-auto mt-7 flex max-w-6xl flex-wrap justify-center gap-x-10 gap-y-5 sm:mt-8 sm:gap-x-12 sm:gap-y-6 lg:gap-x-14 lg:gap-y-7">
-            {BRAND_LOGOS.filter((brand) => brand.src.trim().length > 0).map((brand) => (
-              <BrandLogoTile key={brand.name} brand={brand} />
-            ))}
+            {BRAND_LOGOS.filter((brand) => brand.src.trim().length > 0).map(
+              (brand) => (
+                <BrandLogoTile key={brand.name} brand={brand} />
+              ),
+            )}
           </div>
         </div>
       </section>
 
-      <section id="why-choose-us" className="border-y border-white/10 bg-[#061224]">
+      <section
+        id="why-choose-us"
+        className="border-y border-white/10 bg-[#061224]"
+      >
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-center lg:px-8 lg:py-20">
           <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#07172d] shadow-[0_26px_60px_rgba(0,0,0,0.28)]">
             <div className="relative aspect-[16/11]">
@@ -518,7 +553,10 @@ export function WebsiteHomePage({
 
           <div className="mt-10 grid gap-5 lg:grid-cols-3">
             {GOOGLE_REVIEW_PREVIEWS.map((review) => (
-              <ReviewPreviewCard key={`${review.name}-${review.date}`} review={review} />
+              <ReviewPreviewCard
+                key={`${review.name}-${review.date}`}
+                review={review}
+              />
             ))}
           </div>
 
@@ -551,10 +589,12 @@ export function WebsiteHomePage({
                   Ready to get started?
                 </p>
                 <h2 className="text-3xl font-semibold uppercase tracking-[0.03em] text-white sm:text-4xl">
-                  Request a service quote and experience the SAY Auto Care difference.
+                  Request a service quote and experience the SAY Auto Care
+                  difference.
                 </h2>
                 <p className="max-w-2xl text-base leading-7 text-white/72">
-                  Reach the shop through the service quote form and let the team guide you to the right next step for your vehicle.
+                  Reach the shop through the service quote form and let the team
+                  guide you to the right next step for your vehicle.
                 </p>
               </div>
 
@@ -588,7 +628,8 @@ export function WebsiteHomePage({
               />
               <div className="hidden h-10 w-px bg-white/10 sm:block" />
               <p className="max-w-xl text-sm leading-7 text-white/66">
-                Need workshop support right away? Use the service quote form or contact the shop directly for assistance.
+                Need workshop support right away? Use the service quote form or
+                contact the shop directly for assistance.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
@@ -630,10 +671,12 @@ function SectionHeading({
   const centered = align === 'center';
 
   return (
-    <div className={centered ? 'mx-auto max-w-3xl text-center' : 'max-w-2xl text-left'}>
-      <div
-        className={centered ? 'justify-center' : 'justify-start'}
-      >
+    <div
+      className={
+        centered ? 'mx-auto max-w-3xl text-center' : 'max-w-2xl text-left'
+      }
+    >
+      <div className={centered ? 'justify-center' : 'justify-start'}>
         <p className="inline-flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.24em] text-brand-red">
           <span className="h-px w-8 bg-brand-red" />
           {eyebrow}
@@ -776,7 +819,9 @@ function TrustPoint({
         <Icon className="size-5" />
       </div>
       <p className="mt-4 text-lg font-semibold text-white">{point.title}</p>
-      <p className="mt-2 text-sm leading-7 text-white/68">{point.description}</p>
+      <p className="mt-2 text-sm leading-7 text-white/68">
+        {point.description}
+      </p>
     </div>
   );
 }
