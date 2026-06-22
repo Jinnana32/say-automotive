@@ -110,7 +110,7 @@ const SERVICE_CARDS = [
       'Tune-up service, tire checks, balancing, rotation, and related maintenance.',
     icon: CircleDot,
   },
-] as cons;
+] as const;
 const BRAND_LOGOS = [
   {
     name: 'Valvoline',
