@@ -110,12 +110,11 @@ const SERVICE_CARDS = [
       'Tune-up service, tire checks, balancing, rotation, and related maintenance.',
     icon: CircleDot,
   },
-] as const;
-
+] as cons;
 const BRAND_LOGOS = [
   {
     name: 'Valvoline',
-    src: '/brand-logos/62570fb4-1da9-47a7-a8de-d1d8e67bfd12.jpg',
+    src: '/brand-logos/valvoline.png',
     frameClassName: 'h-12 max-w-[240px]',
   },
   {
@@ -170,7 +169,7 @@ const BRAND_LOGOS = [
   },
   {
     name: 'Emtrac',
-    src: '/brand-logos/Emtrac.png',
+    src: '/brand-logos/Emtrac-removebg-preview.png',
     frameClassName: 'h-12 max-w-[240px]',
   },
   {
@@ -190,7 +189,7 @@ const BRAND_LOGOS = [
   },
   {
     name: 'Bradley',
-    src: '/brand-logos/Bradley.png',
+    src: '/brand-logos/Bradley-removebg-preview.png',
     frameClassName: 'h-12 max-w-[170px]',
   },
   {
@@ -235,7 +234,7 @@ const BRAND_LOGOS = [
   },
   {
     name: 'Venom Wheels',
-    src: '/brand-logos/Venom.png',
+    src: '/brand-logos/Venom-removebg-preview.png',
     frameClassName: 'h-14 max-w-[220px]',
   },
 ] as const;
