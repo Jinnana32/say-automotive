@@ -27,6 +27,8 @@ import { cn } from '@/lib/utils';
 const OFFICIAL_WEBSITE_LOGO_SRC = '/brand/website-official-logo-transparent.png';
 const WEBSITE_HERO_BACKGROUND_SRC = '/brand/website-hero-background.png';
 const WEBSITE_FEATURE_BACKGROUND_SRC = '/brand/website-feature-background.png';
+const GOOGLE_REVIEWS_URL =
+  'https://www.google.com/maps/place/SAY+Auto+Care+Center+%2F+Mags+%26+Tires/@10.7204706,122.5314177,17z/data=!4m8!3m7!1s0x33aefb11f1e70e4f:0x551d5bca1b30e393!8m2!3d10.7204653!4d122.5339926!9m1!1b1!16s%2Fg%2F11y2dx8r3_';
 
 const HERO_FEATURES = [
   { label: 'Expert Technicians', icon: Wrench },
@@ -102,6 +104,26 @@ const SERVICE_CARDS = [
 ] as const;
 
 const BRAND_LOGOS = [
+  {
+    name: 'Valvoline',
+    src: '/brand-logos/62570fb4-1da9-47a7-a8de-d1d8e67bfd12.jpg',
+    frameClassName: 'h-12 max-w-[240px]',
+  },
+  {
+    name: 'Shell Helix',
+    src: '/brand-logos/e2d6ce87-ad70-4b77-9b9f-00219a884f27.png',
+    frameClassName: 'h-12 max-w-[240px]',
+  },
+  {
+    name: 'Mobil 1',
+    src: '/brand-logos/Mobil1_logo.png',
+    frameClassName: 'h-12 max-w-[240px]',
+  },
+  {
+    name: 'Totachi',
+    src: '/brand-logos/totachi-seeklogo.com_.svg',
+    frameClassName: 'h-12 max-w-[220px]',
+  },
   {
     name: 'Varta',
     src: '/brand-logos/Varta.png',
@@ -232,10 +254,28 @@ const TRUST_POINTS = [
   },
 ] as const;
 
-const TESTIMONIAL_PREVIEWS = [
-  'Excellent service, clear communication, and a smooth visit from drop-off to release.',
-  'Fair pricing, professional workmanship, and a team that explains the next step clearly.',
-  'Reliable support, fast turnaround, and confidence that the job was done the right way.',
+const GOOGLE_REVIEW_PREVIEWS = [
+  {
+    name: 'Joab Cano',
+    meta: 'Local Guide · 25 reviews · 4 photos',
+    date: 'a year ago',
+    quote:
+      'I was in Iloilo visiting from Kalibo. This family owned and operated business was great! Everyone was very helpful and friendly. Knowledgeable. Friendly. Good price.',
+  },
+  {
+    name: 'Achilles Tan',
+    meta: 'Local Guide · 125 reviews · 82 photos',
+    date: '7 months ago',
+    quote:
+      'My new and favorite go to repair shop. Seldom can you find a shop where the owner is the one handling and overseeing the repair. You can really feel and sense his expertise and years of experience.\n\nHe charges fairly too, commensurate to the repairs that was done. So far all of my recent maintenance work and repairs have been done by Say auto care.\n\nIt also helps that their shop is so close to home.',
+  },
+  {
+    name: 'James',
+    meta: 'Local Guide · 13 reviews · 7 photos',
+    date: 'a year ago',
+    quote:
+      'This is a great man who was very courteous and did everything I needed for my car.',
+  },
 ] as const;
 
 export function WebsiteHomePage({
@@ -418,7 +458,7 @@ export function WebsiteHomePage({
               Brands We Work With
             </h2>
             <p className="mt-4 text-base leading-8 text-slate-600">
-              We carry and work with trusted automotive brands for tires, batteries, suspension, 4x4 accessories, and maintenance products.
+              We carry and work with trusted automotive brands for tires, batteries, suspension, 4x4 accessories, lubricants, and maintenance products.
             </p>
             <p className="mt-1.5 text-sm leading-7 text-slate-500">
               Availability may vary. Contact the shop for fitment, pricing, and current stock.
@@ -470,13 +510,34 @@ export function WebsiteHomePage({
           <SectionHeading
             eyebrow="Customer Reviews"
             title="What Our Customers Say"
-            description="Customer feedback preview for the public website presentation. Verified testimonials can be added here once approved by the shop."
+            description="Real feedback from customers who visited SAY Auto Care Center / Mags & Tires."
           />
+          <p className="mt-3 text-center text-sm leading-7 text-white/52">
+            Reviews from Google.
+          </p>
 
           <div className="mt-10 grid gap-5 lg:grid-cols-3">
-            {TESTIMONIAL_PREVIEWS.map((quote) => (
-              <ReviewPreviewCard key={quote} quote={quote} />
+            {GOOGLE_REVIEW_PREVIEWS.map((review) => (
+              <ReviewPreviewCard key={`${review.name}-${review.date}`} review={review} />
             ))}
+          </div>
+
+          <div className="mt-8 flex justify-center">
+            <Button
+              asChild
+              variant="outlineLight"
+              size="pill"
+              className="h-12 rounded-xl border-white/16 bg-white/5 px-6 text-sm font-semibold uppercase tracking-[0.16em]"
+            >
+              <Link
+                href={GOOGLE_REVIEWS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View more reviews on Google
+                <ArrowRight className="size-4" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -654,6 +715,7 @@ function BrandLogoTile({
           alt={`${brand.name} logo`}
           fill
           sizes="(max-width: 639px) 160px, (max-width: 1023px) 190px, 240px"
+          unoptimized={brand.src.endsWith('.svg')}
           className="object-contain"
         />
       </div>
@@ -719,20 +781,47 @@ function TrustPoint({
   );
 }
 
-function ReviewPreviewCard({ quote }: { quote: string }) {
+function ReviewPreviewCard({
+  review,
+}: {
+  review: {
+    name: string;
+    meta: string;
+    date: string;
+    quote: string;
+  };
+}) {
+  const initials = review.name
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
     <div className="rounded-[1.75rem] border border-white/10 bg-[linear-gradient(180deg,rgba(9,24,53,0.92),rgba(5,15,32,0.98))] p-6 shadow-[0_18px_46px_rgba(0,0,0,0.22)]">
-      <div className="flex items-center gap-1 text-brand-red">
+      <div className="flex items-center gap-1 text-amber-400">
         {Array.from({ length: 5 }, (_, index) => (
           <Star key={index} className="size-4 fill-current" />
         ))}
       </div>
-      <p className="mt-5 text-base leading-8 text-white/76">
-        {quote}
+      <p className="mt-5 whitespace-pre-line text-base leading-8 text-white/76">
+        {review.quote}
       </p>
-      <div className="mt-6 border-t border-white/10 pt-5">
-        <p className="text-sm font-semibold text-white">Customer feedback preview</p>
-        <p className="mt-1 text-sm text-white/48">Illustrative review layout</p>
+      <div className="mt-6 flex items-start gap-4 border-t border-white/10 pt-5">
+        <div className="flex size-12 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/6 text-sm font-semibold uppercase tracking-[0.14em] text-white">
+          {initials}
+        </div>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <p className="text-sm font-semibold text-white">{review.name}</p>
+            <span className="text-xs uppercase tracking-[0.16em] text-white/38">
+              Google Review
+            </span>
+          </div>
+          <p className="mt-1 text-sm text-white/56">{review.meta}</p>
+          <p className="mt-1 text-sm text-white/48">{review.date}</p>
+        </div>
       </div>
     </div>
   );
