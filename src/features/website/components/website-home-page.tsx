@@ -159,7 +159,7 @@ const BRAND_LOGOS = [
   },
   {
     name: 'YSS Auto Suspension',
-    src: '/brand-logos/yssauto.jpg',
+    src: '/brand-logos/yssauto-removebg-preview.png',
     frameClassName: 'h-12 max-w-[240px]',
   },
   {
@@ -209,7 +209,7 @@ const BRAND_LOGOS = [
   },
   {
     name: 'Warn',
-    src: '/brand-logos/Warn.png',
+    src: '/brand-logos/Warn-removebg-preview.png',
     frameClassName: 'h-16 max-w-[130px]',
   },
   {
