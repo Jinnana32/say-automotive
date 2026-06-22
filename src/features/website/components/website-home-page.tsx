@@ -169,7 +169,7 @@ const BRAND_LOGOS = [
   },
   {
     name: 'Emtrac',
-    src: '/brand-logos/Emtrac.png',
+    src: '/brand-logos/Emtrac-removebg-preview.png',
     frameClassName: 'h-12 max-w-[240px]',
   },
   {
