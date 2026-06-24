@@ -28,6 +28,7 @@ import type {
 } from "@/features/attendance/types";
 import {
   buildDtrAmendmentFormValues,
+  formatAttendanceStatusLabel,
   formatAttendanceTime,
   formatDtrAmendmentStatusLabel,
   formatDtrAmendmentTypeLabel,
@@ -490,6 +491,10 @@ function getDetailStatusLabel(day: MechanicPortalHistoryDay) {
     return "Half day";
   }
 
+  if (day.attendance?.status === "unpaid_day_off") {
+    return formatAttendanceStatusLabel("unpaid_day_off");
+  }
+
   if (day.attendance?.status === "absent" || day.calendarStatus === "absent") {
     return "Absent";
   }
@@ -520,6 +525,10 @@ function getDetailStatusTone(day: MechanicPortalHistoryDay) {
 
   if (day.amendments.some((item) => item.status === "pending") || day.calendarStatus === "incomplete") {
     return "warning" as const;
+  }
+
+  if (day.attendance?.status === "unpaid_day_off") {
+    return "info" as const;
   }
 
   if (day.attendance?.status === "absent" || day.calendarStatus === "absent") {

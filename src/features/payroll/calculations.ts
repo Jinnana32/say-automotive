@@ -12,6 +12,7 @@ import {
   computeExpectedWorkdaySummary,
   doesLeaveCoverDate,
   isScheduledWorkdayForDate,
+  UNPAID_DAY_OFF_STATUS_LABEL,
 } from "@/features/attendance/utils";
 import type {
   CompensationProfileSummary,
@@ -225,6 +226,7 @@ export function computePayrollItemBreakdown(params: {
       Boolean(attendance) &&
       leaveCovered &&
       attendance?.status !== "absent" &&
+      attendance?.status !== "unpaid_day_off" &&
       workedMinutes > 0;
     const approvedLeavePaidDay =
       leaveCovered && isPaidLeave && scheduledWorkday && !holiday && !workedDuringApprovedLeave;
@@ -486,6 +488,7 @@ function getAttendanceDayUnits(
     case "half_day":
       return 0.5;
     case "absent":
+    case "unpaid_day_off":
       return 0;
   }
 }
@@ -653,6 +656,8 @@ function resolveDailyStatusLabel(params: {
         return "Half day";
       case "absent":
         return "Absent";
+      case "unpaid_day_off":
+        return UNPAID_DAY_OFF_STATUS_LABEL;
     }
   }
 
@@ -717,6 +722,7 @@ function buildDayPayReason(params: {
         case "half_day":
           return `${premiumText} · half day counted as 0.5 paid day`;
         case "absent":
+        case "unpaid_day_off":
           return `${premiumText} · absent and not paid`;
         default:
           return premiumText;
@@ -732,6 +738,8 @@ function buildDayPayReason(params: {
         return "Half day counted as 0.5 paid day";
       case "absent":
         return "Recorded absent day · not paid";
+      case "unpaid_day_off":
+        return "Recorded day off (unpaid) · not paid";
     }
   }
 

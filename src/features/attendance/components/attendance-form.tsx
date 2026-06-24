@@ -3,7 +3,13 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +18,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { upsertAttendanceRecordAction } from "@/features/attendance/actions/attendance-actions";
 import type { AttendanceFormValues } from "@/features/attendance/types";
-import { ATTENDANCE_STATUS_OPTIONS, INITIAL_ATTENDANCE_ENTRY_ACTION_STATE } from "@/features/attendance/utils";
+import { ATTENDANCE_STATUS_OPTIONS, INITIAL_ATTENDANCE_ENTRY_ACTION_STATE, isNonTimedAttendanceStatus } from "@/features/attendance/utils";
 import { formatDate } from "@/lib/dates";
 import { useFormValues } from "@/lib/use-form-values";
 
@@ -31,7 +37,7 @@ export function AttendanceForm({
     INITIAL_ATTENDANCE_ENTRY_ACTION_STATE,
   );
   const { values, updateFormValue } = useFormValues(initialValues);
-  const timeFieldsDisabled = values.status === "absent";
+  const timeFieldsDisabled = isNonTimedAttendanceStatus(values.status);
 
   useEffect(() => {
     if (state.status !== "success") {
@@ -56,16 +62,25 @@ export function AttendanceForm({
 
       <div className="grid gap-5 md:grid-cols-[220px_minmax(0,1fr)]">
         <div className="space-y-2">
-          <Label htmlFor="attendanceStatus">Status</Label>
+          <Label htmlFor="attendanceStatus" required>
+            Status
+          </Label>
           <NativeSelect
             id="attendanceStatus"
             name="status"
             value={values.status}
+            className={fieldControlClassName(state.fieldErrors, "status")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "status",
+              required: true,
+              errorId: fieldErrorId("status"),
+            })}
             onChange={(event) => {
               const nextStatus = event.target.value as AttendanceFormValues["status"];
               updateFormValue("status", nextStatus);
 
-              if (nextStatus === "absent") {
+              if (isNonTimedAttendanceStatus(nextStatus)) {
                 updateFormValue("timeIn", "");
                 updateFormValue("timeOut", "");
               }
@@ -77,34 +92,48 @@ export function AttendanceForm({
               </option>
             ))}
           </NativeSelect>
-          <FieldError errors={state.fieldErrors} name="status" />
+          <FieldError errors={state.fieldErrors} name="status" id={fieldErrorId("status")} />
         </div>
 
         <div className="grid gap-5 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="attendanceTimeIn">Time in</Label>
+            <Label htmlFor="timeIn">Time in</Label>
             <Input
-              id="attendanceTimeIn"
+              id="timeIn"
               name="timeIn"
               type="datetime-local"
               disabled={timeFieldsDisabled}
               value={values.timeIn}
+              className={fieldControlClassName(state.fieldErrors, "timeIn")}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "timeIn",
+                required: false,
+                errorId: fieldErrorId("timeIn"),
+              })}
               onChange={(event) => updateFormValue("timeIn", event.target.value)}
             />
-            <FieldError errors={state.fieldErrors} name="timeIn" />
+            <FieldError errors={state.fieldErrors} name="timeIn" id={fieldErrorId("timeIn")} />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="attendanceTimeOut">Time out</Label>
+            <Label htmlFor="timeOut">Time out</Label>
             <Input
-              id="attendanceTimeOut"
+              id="timeOut"
               name="timeOut"
               type="datetime-local"
               disabled={timeFieldsDisabled}
               value={values.timeOut}
+              className={fieldControlClassName(state.fieldErrors, "timeOut")}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "timeOut",
+                required: false,
+                errorId: fieldErrorId("timeOut"),
+              })}
               onChange={(event) => updateFormValue("timeOut", event.target.value)}
             />
-            <FieldError errors={state.fieldErrors} name="timeOut" />
+            <FieldError errors={state.fieldErrors} name="timeOut" id={fieldErrorId("timeOut")} />
           </div>
         </div>
       </div>
@@ -115,10 +144,17 @@ export function AttendanceForm({
           id="attendanceNotes"
           name="notes"
           value={values.notes}
+          className={fieldControlClassName(state.fieldErrors, "notes")}
+          {...fieldAriaProps({
+            errors: state.fieldErrors,
+            name: "notes",
+            required: false,
+            errorId: fieldErrorId("notes"),
+          })}
           onChange={(event) => updateFormValue("notes", event.target.value)}
           placeholder="Optional shift note, late reason, or follow-up detail."
         />
-        <FieldError errors={state.fieldErrors} name="notes" />
+        <FieldError errors={state.fieldErrors} name="notes" id={fieldErrorId("notes")} />
       </div>
 
       <div className="flex flex-wrap justify-end gap-3">

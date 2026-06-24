@@ -3,7 +3,14 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormRequiredFieldsNote,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,15 +57,25 @@ export function CompensationProfileForm({
         <p>Set the payroll basis and baseline rate used for payroll readiness and later calculations.</p>
       </div>
 
+      <FormRequiredFieldsNote />
       <FormStatusMessage message={state.status === "error" ? state.message : undefined} />
 
       <div className="grid gap-5 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="compensationPayBasis">Pay basis</Label>
+          <Label htmlFor="compensationPayBasis" required>
+            Pay basis
+          </Label>
           <NativeSelect
             id="compensationPayBasis"
             name="payBasis"
             value={values.payBasis}
+            className={fieldControlClassName(state.fieldErrors, "payBasis")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "payBasis",
+              required: true,
+              errorId: fieldErrorId("payBasis"),
+            })}
             onChange={(event) =>
               updateFormValue("payBasis", event.target.value as CompensationProfileFormValues["payBasis"])
             }
@@ -69,25 +86,36 @@ export function CompensationProfileForm({
               </option>
             ))}
           </NativeSelect>
-          <FieldError errors={state.fieldErrors} name="payBasis" />
+          <FieldError errors={state.fieldErrors} name="payBasis" id={fieldErrorId("payBasis")} />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="compensationEffectiveStartDate">Effective start date</Label>
+          <Label htmlFor="compensationEffectiveStartDate" required>
+            Effective start date
+          </Label>
           <Input
             id="compensationEffectiveStartDate"
             name="effectiveStartDate"
             type="date"
             value={values.effectiveStartDate}
             onChange={(event) => updateFormValue("effectiveStartDate", event.target.value)}
+            className={fieldControlClassName(state.fieldErrors, "effectiveStartDate")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "effectiveStartDate",
+              required: true,
+              errorId: fieldErrorId("effectiveStartDate"),
+            })}
           />
-          <FieldError errors={state.fieldErrors} name="effectiveStartDate" />
+          <FieldError errors={state.fieldErrors} name="effectiveStartDate" id={fieldErrorId("effectiveStartDate")} />
         </div>
       </div>
 
       <div className="grid gap-5 md:grid-cols-3">
         <div className="space-y-2">
-          <Label htmlFor="compensationBaseRate">Base rate</Label>
+          <Label htmlFor="compensationBaseRate" required>
+            Base rate
+          </Label>
           <Input
             id="compensationBaseRate"
             name="baseRate"
@@ -96,8 +124,15 @@ export function CompensationProfileForm({
             step={MONEY_INPUT_STEP}
             value={values.baseRate}
             onChange={(event) => updateFormValue("baseRate", event.target.value)}
+            className={fieldControlClassName(state.fieldErrors, "baseRate")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "baseRate",
+              required: true,
+              errorId: fieldErrorId("baseRate"),
+            })}
           />
-          <FieldError errors={state.fieldErrors} name="baseRate" />
+          <FieldError errors={state.fieldErrors} name="baseRate" id={fieldErrorId("baseRate")} />
         </div>
 
         <div className="space-y-2">
@@ -109,14 +144,23 @@ export function CompensationProfileForm({
             type="number"
             step={MONEY_INPUT_STEP}
             value={values.overtimeRate}
+            className={fieldControlClassName(state.fieldErrors, "overtimeRate")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "overtimeRate",
+              required: false,
+              errorId: fieldErrorId("overtimeRate"),
+            })}
             onChange={(event) => updateFormValue("overtimeRate", event.target.value)}
             placeholder="Optional"
           />
-          <FieldError errors={state.fieldErrors} name="overtimeRate" />
+          <FieldError errors={state.fieldErrors} name="overtimeRate" id={fieldErrorId("overtimeRate")} />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="compensationAllowancePerPeriod">Allowance per period</Label>
+          <Label htmlFor="compensationAllowancePerPeriod" required>
+            Allowance per period
+          </Label>
           <Input
             id="compensationAllowancePerPeriod"
             name="allowancePerPeriod"
@@ -125,8 +169,15 @@ export function CompensationProfileForm({
             step={MONEY_INPUT_STEP}
             value={values.allowancePerPeriod}
             onChange={(event) => updateFormValue("allowancePerPeriod", event.target.value)}
+            className={fieldControlClassName(state.fieldErrors, "allowancePerPeriod")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "allowancePerPeriod",
+              required: true,
+              errorId: fieldErrorId("allowancePerPeriod"),
+            })}
           />
-          <FieldError errors={state.fieldErrors} name="allowancePerPeriod" />
+          <FieldError errors={state.fieldErrors} name="allowancePerPeriod" id={fieldErrorId("allowancePerPeriod")} />
         </div>
       </div>
 
@@ -136,10 +187,17 @@ export function CompensationProfileForm({
           id="compensationNotes"
           name="notes"
           value={values.notes}
+          className={fieldControlClassName(state.fieldErrors, "notes")}
+          {...fieldAriaProps({
+            errors: state.fieldErrors,
+            name: "notes",
+            required: false,
+            errorId: fieldErrorId("notes"),
+          })}
           onChange={(event) => updateFormValue("notes", event.target.value)}
           placeholder="Optional payroll setup note, role context, or special basis reminder."
         />
-        <FieldError errors={state.fieldErrors} name="notes" />
+        <FieldError errors={state.fieldErrors} name="notes" id={fieldErrorId("notes")} />
       </div>
 
       <div className="flex flex-wrap justify-end gap-3">

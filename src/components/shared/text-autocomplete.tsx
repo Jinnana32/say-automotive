@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeferredValue, useEffect, useId, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useId, useRef, useState, type ComponentProps } from "react";
 import { Check, ChevronDown, Search } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,8 @@ export function TextAutocomplete({
   helperText,
   disabled,
   className,
+  inputClassName,
+  inputProps,
 }: {
   id: string;
   name: string;
@@ -34,6 +36,11 @@ export function TextAutocomplete({
   helperText?: string;
   disabled?: boolean;
   className?: string;
+  inputClassName?: string;
+  inputProps?: Omit<
+    ComponentProps<typeof Input>,
+    "id" | "name" | "value" | "disabled" | "placeholder" | "autoComplete" | "className" | "onChange" | "onFocus" | "onKeyDown"
+  >;
 }) {
   const listboxId = useId();
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -84,7 +91,8 @@ export function TextAutocomplete({
           aria-controls={listboxId}
           aria-expanded={isOpen}
           aria-activedescendant={activeOption ? `${listboxId}-${activeIndex}` : undefined}
-          className="pr-10 pl-9"
+          className={cn("pr-10 pl-9", inputClassName)}
+          {...inputProps}
           onFocus={() => {
             setIsOpen(true);
             setActiveIndex(visibleOptions.length > 0 ? 0 : -1);

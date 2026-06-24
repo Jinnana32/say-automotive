@@ -3,7 +3,15 @@
 import Link from "next/link";
 import { useActionState, useEffect, useMemo, useState } from "react";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormRequiredFieldsNote,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+  formSelectClassName,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -76,7 +84,7 @@ export function ProductForm({
   ]);
 
   return (
-    <form action={formAction} className="space-y-6" encType="multipart/form-data">
+    <form action={formAction} className="space-y-6">
       {initialValues.productId ? <input type="hidden" name="productId" value={initialValues.productId} /> : null}
       {!permissions.canSelectOwningBranch ? (
         <input type="hidden" name="owningBranchId" value={values.owningBranchId} />
@@ -91,6 +99,7 @@ export function ProductForm({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          <FormRequiredFieldsNote />
           <FormStatusMessage message={state.message} />
 
           <div className="rounded-2xl border border-border/70 bg-muted/20 p-5">
@@ -155,18 +164,26 @@ export function ProductForm({
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="name">Product name</Label>
-              <Input id="name" name="name" value={values.name} onChange={(event) => updateFormValue("name", event.target.value)} />
-              <FieldError errors={state.fieldErrors} name="name" />
+              <Label htmlFor="name" required>Product name</Label>
+              <Input
+                id="name"
+                name="name"
+                value={values.name}
+                className={fieldControlClassName(state.fieldErrors, "name")}
+                {...fieldAriaProps({ errors: state.fieldErrors, name: "name", required: true, errorId: fieldErrorId("name") })}
+                onChange={(event) => updateFormValue("name", event.target.value)}
+              />
+              <FieldError errors={state.fieldErrors} name="name" id={fieldErrorId("name")} />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="productType">Product type</Label>
+              <Label htmlFor="productType" required>Product type</Label>
               <select
                 id="productType"
                 name="productType"
                 value={values.productType}
-                className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className={formSelectClassName(state.fieldErrors, "productType")}
+                {...fieldAriaProps({ errors: state.fieldErrors, name: "productType", required: true, errorId: fieldErrorId("productType") })}
                 onChange={(event) => updateFormValue("productType", event.target.value as ProductFormValues["productType"])}
               >
                 <option value="part">Part</option>
@@ -175,7 +192,7 @@ export function ProductForm({
                 <option value="accessory">Accessory</option>
                 <option value="tool">Tool</option>
               </select>
-              <FieldError errors={state.fieldErrors} name="productType" />
+              <FieldError errors={state.fieldErrors} name="productType" id={fieldErrorId("productType")} />
             </div>
           </div>
 
@@ -193,12 +210,13 @@ export function ProductForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="unitId">Base unit</Label>
+              <Label htmlFor="unitId" required>Base unit</Label>
               <select
                 id="unitId"
                 name="unitId"
                 value={values.unitId}
-                className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className={formSelectClassName(state.fieldErrors, "unitId")}
+                {...fieldAriaProps({ errors: state.fieldErrors, name: "unitId", required: true, errorId: fieldErrorId("unitId") })}
                 onChange={(event) => updateFormValue("unitId", event.target.value)}
               >
                 <option value="">Select unit</option>
@@ -208,14 +226,35 @@ export function ProductForm({
                   </option>
                 ))}
               </select>
-              <FieldError errors={state.fieldErrors} name="unitId" />
+              <FieldError errors={state.fieldErrors} name="unitId" id={fieldErrorId("unitId")} />
             </div>
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
-            <SelectField name="categoryId" label="Category" value={values.categoryId} options={categories} onChange={(value) => updateFormValue("categoryId", value)} />
-            <SelectField name="brandId" label="Brand" value={values.brandId} options={brands} onChange={(value) => updateFormValue("brandId", value)} />
-            <SelectField name="supplierId" label="Supplier" value={values.supplierId} options={suppliers} onChange={(value) => updateFormValue("supplierId", value)} />
+            <SelectField
+              name="categoryId"
+              label="Category"
+              value={values.categoryId}
+              options={categories}
+              errors={state.fieldErrors}
+              onChange={(value) => updateFormValue("categoryId", value)}
+            />
+            <SelectField
+              name="brandId"
+              label="Brand"
+              value={values.brandId}
+              options={brands}
+              errors={state.fieldErrors}
+              onChange={(value) => updateFormValue("brandId", value)}
+            />
+            <SelectField
+              name="supplierId"
+              label="Supplier"
+              value={values.supplierId}
+              options={suppliers}
+              errors={state.fieldErrors}
+              onChange={(value) => updateFormValue("supplierId", value)}
+            />
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
@@ -233,9 +272,9 @@ export function ProductForm({
           </div>
 
           <div className="grid gap-6 md:grid-cols-4">
-            <NumberField name="costPrice" label="Cost price" value={values.costPrice} errors={state.fieldErrors} onChange={(value) => updateFormValue("costPrice", value)} step={MONEY_INPUT_STEP} />
-            <NumberField name="sellingPrice" label="Selling price" value={values.sellingPrice} errors={state.fieldErrors} onChange={(value) => updateFormValue("sellingPrice", value)} step={MONEY_INPUT_STEP} />
-            <NumberField name="reorderLevel" label="Reorder level" value={values.reorderLevel} errors={state.fieldErrors} onChange={(value) => updateFormValue("reorderLevel", value)} step={MONEY_INPUT_STEP} />
+            <NumberField name="costPrice" label="Cost price" value={values.costPrice} errors={state.fieldErrors} onChange={(value) => updateFormValue("costPrice", value)} step={MONEY_INPUT_STEP} required />
+            <NumberField name="sellingPrice" label="Selling price" value={values.sellingPrice} errors={state.fieldErrors} onChange={(value) => updateFormValue("sellingPrice", value)} step={MONEY_INPUT_STEP} required />
+            <NumberField name="reorderLevel" label="Reorder level" value={values.reorderLevel} errors={state.fieldErrors} onChange={(value) => updateFormValue("reorderLevel", value)} step={MONEY_INPUT_STEP} required />
             <NumberField name="warrantyDurationDays" label="Warranty days" value={values.warrantyDurationDays} errors={state.fieldErrors} onChange={(value) => updateFormValue("warrantyDurationDays", value)} />
           </div>
 
@@ -247,18 +286,19 @@ export function ProductForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status" required>Status</Label>
               <select
                 id="status"
                 name="status"
                 value={values.status}
-                className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className={formSelectClassName(state.fieldErrors, "status")}
+                {...fieldAriaProps({ errors: state.fieldErrors, name: "status", required: true, errorId: fieldErrorId("status") })}
                 onChange={(event) => updateFormValue("status", event.target.value as ProductFormValues["status"])}
               >
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
-              <FieldError errors={state.fieldErrors} name="status" />
+              <FieldError errors={state.fieldErrors} name="status" id={fieldErrorId("status")} />
             </div>
           </div>
 
@@ -378,6 +418,7 @@ export function ProductForm({
                 value={values.websiteSortOrder}
                 errors={state.fieldErrors}
                 onChange={(value) => updateFormValue("websiteSortOrder", value)}
+                required
               />
             </div>
 
@@ -408,15 +449,24 @@ export function ProductForm({
             </div>
 
             <div className="mt-5 space-y-2">
-              <Label htmlFor="websiteShortDescription">Public short description</Label>
+              <Label htmlFor="websiteShortDescription" required={values.websiteVisible}>
+                Public short description
+              </Label>
               <Textarea
                 id="websiteShortDescription"
                 name="websiteShortDescription"
                 value={values.websiteShortDescription}
                 placeholder="Short website copy focused on fitment, quality, or value."
+                className={fieldControlClassName(state.fieldErrors, "websiteShortDescription")}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "websiteShortDescription",
+                  required: values.websiteVisible,
+                  errorId: fieldErrorId("websiteShortDescription"),
+                })}
                 onChange={(event) => updateFormValue("websiteShortDescription", event.target.value)}
               />
-              <FieldError errors={state.fieldErrors} name="websiteShortDescription" />
+              <FieldError errors={state.fieldErrors} name="websiteShortDescription" id={fieldErrorId("websiteShortDescription")} />
             </div>
           </div>
 
@@ -445,12 +495,14 @@ function SelectField({
   label,
   value,
   options,
+  errors,
   onChange,
 }: {
   name: string;
   label: string;
   value: string;
   options: ReferenceOption[];
+  errors?: Record<string, string[] | undefined>;
   onChange: (value: string) => void;
 }) {
   return (
@@ -460,7 +512,13 @@ function SelectField({
         id={name}
         name={name}
         value={value}
-        className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className={formSelectClassName(errors, name)}
+        {...fieldAriaProps({
+          errors,
+          name,
+          required: false,
+          errorId: fieldErrorId(name),
+        })}
         onChange={(event) => onChange(event.target.value)}
       >
         <option value="">None</option>
@@ -470,6 +528,7 @@ function SelectField({
           </option>
         ))}
       </select>
+      <FieldError errors={errors} name={name} id={fieldErrorId(name)} />
     </div>
   );
 }
@@ -481,6 +540,7 @@ function NumberField({
   errors,
   onChange,
   step,
+  required,
 }: {
   name: string;
   label: string;
@@ -488,12 +548,28 @@ function NumberField({
   errors?: Record<string, string[] | undefined>;
   onChange: (value: string) => void;
   step?: string;
+  required?: boolean;
 }) {
   return (
     <div className="space-y-2">
-      <Label htmlFor={name}>{label}</Label>
-      <Input id={name} name={name} type="number" step={step} inputMode="decimal" value={value} onChange={(event) => onChange(event.target.value)} />
-      <FieldError errors={errors} name={name} />
+      <Label htmlFor={name} required={required}>{label}</Label>
+      <Input
+        id={name}
+        name={name}
+        type="number"
+        step={step}
+        inputMode="decimal"
+        value={value}
+        className={fieldControlClassName(errors, name)}
+        {...fieldAriaProps({
+          errors,
+          name,
+          required: required ?? false,
+          errorId: fieldErrorId(name),
+        })}
+        onChange={(event) => onChange(event.target.value)}
+      />
+      <FieldError errors={errors} name={name} id={fieldErrorId(name)} />
     </div>
   );
 }

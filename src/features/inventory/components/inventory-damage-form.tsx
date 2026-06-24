@@ -2,7 +2,14 @@
 
 import { useActionState, useState } from "react";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+  formSelectClassName,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -39,13 +46,21 @@ export function InventoryDamageForm({ products }: { products: InventoryProductOp
           <FormStatusMessage message={state.message} />
 
           <div className="space-y-2">
-            <Label htmlFor="damageProductId">Product</Label>
+            <Label htmlFor="damageProductId" required>
+              Product
+            </Label>
             <select
               id="damageProductId"
               name="productId"
               value={productId}
               onChange={(event) => setProductId(event.target.value)}
-              className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className={formSelectClassName(state.fieldErrors, "productId")}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "productId",
+                required: true,
+                errorId: fieldErrorId("productId"),
+              })}
             >
               <option value="">Select product</option>
               {products.map((product) => (
@@ -55,7 +70,7 @@ export function InventoryDamageForm({ products }: { products: InventoryProductOp
                 </option>
               ))}
             </select>
-            <FieldError errors={state.fieldErrors} name="productId" />
+            <FieldError errors={state.fieldErrors} name="productId" id={fieldErrorId("productId")} />
           </div>
 
           {selectedProduct ? (
@@ -66,15 +81,44 @@ export function InventoryDamageForm({ products }: { products: InventoryProductOp
           ) : null}
 
           <div className="space-y-2">
-            <Label htmlFor="damageQuantity">Damaged quantity</Label>
-            <Input id="damageQuantity" name="quantity" inputMode="decimal" value={values.quantity} onChange={(event) => updateFormValue("quantity", event.target.value)} />
-            <FieldError errors={state.fieldErrors} name="quantity" />
+            <Label htmlFor="damageQuantity" required>
+              Damaged quantity
+            </Label>
+            <Input
+              id="damageQuantity"
+              name="quantity"
+              inputMode="decimal"
+              value={values.quantity}
+              onChange={(event) => updateFormValue("quantity", event.target.value)}
+              className={fieldControlClassName(state.fieldErrors, "quantity")}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "quantity",
+                required: true,
+                errorId: fieldErrorId("quantity"),
+              })}
+            />
+            <FieldError errors={state.fieldErrors} name="quantity" id={fieldErrorId("quantity")} />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="damageNotes">Notes (required)</Label>
-            <Textarea id="damageNotes" name="notes" value={values.notes} onChange={(event) => updateFormValue("notes", event.target.value)} />
-            <FieldError errors={state.fieldErrors} name="notes" />
+            <Label htmlFor="damageNotes" required>
+              Notes
+            </Label>
+            <Textarea
+              id="damageNotes"
+              name="notes"
+              value={values.notes}
+              onChange={(event) => updateFormValue("notes", event.target.value)}
+              className={fieldControlClassName(state.fieldErrors, "notes")}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "notes",
+                required: true,
+                errorId: fieldErrorId("notes"),
+              })}
+            />
+            <FieldError errors={state.fieldErrors} name="notes" id={fieldErrorId("notes")} />
           </div>
 
           <SubmitButton pendingLabel="Saving..." disabled={!productId}>

@@ -2,7 +2,13 @@
 
 import { useActionState, useMemo } from "react";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,31 +84,51 @@ export function JobOrderItemEditForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description" required>
+          Description
+        </Label>
         <Input
           id="description"
           name="description"
           value={values.description}
           onChange={(event) => updateFormValue("description", event.target.value)}
+          className={fieldControlClassName(state.fieldErrors, "description")}
+          {...fieldAriaProps({
+            errors: state.fieldErrors,
+            name: "description",
+            required: true,
+            errorId: fieldErrorId("description"),
+          })}
         />
-        <FieldError errors={state.fieldErrors} name="description" />
+        <FieldError errors={state.fieldErrors} name="description" id={fieldErrorId("description")} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="quantity">Quantity</Label>
+          <Label htmlFor="quantity" required>
+            Quantity
+          </Label>
           <Input
             id="quantity"
             name="quantity"
             inputMode="decimal"
             value={values.quantity}
             onChange={(event) => updateFormValue("quantity", event.target.value)}
+            className={fieldControlClassName(state.fieldErrors, "quantity")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "quantity",
+              required: true,
+              errorId: fieldErrorId("quantity"),
+            })}
           />
-          <FieldError errors={state.fieldErrors} name="quantity" />
+          <FieldError errors={state.fieldErrors} name="quantity" id={fieldErrorId("quantity")} />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="unitPrice">Unit price</Label>
+          <Label htmlFor="unitPrice" required>
+            Unit price
+          </Label>
           <Input
             id="unitPrice"
             name="unitPrice"
@@ -112,8 +138,15 @@ export function JobOrderItemEditForm({
             value={values.unitPrice}
             onChange={(event) => updateFormValue("unitPrice", event.target.value)}
             placeholder="0.00"
+            className={fieldControlClassName(state.fieldErrors, "unitPrice")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "unitPrice",
+              required: true,
+              errorId: fieldErrorId("unitPrice"),
+            })}
           />
-          <FieldError errors={state.fieldErrors} name="unitPrice" />
+          <FieldError errors={state.fieldErrors} name="unitPrice" id={fieldErrorId("unitPrice")} />
         </div>
       </div>
 

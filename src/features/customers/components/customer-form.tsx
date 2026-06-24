@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import { FieldError, FormRequiredFieldsNote, FormStatusMessage, fieldAriaProps, fieldControlClassName, fieldErrorId, formSelectClassName } from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,16 +46,25 @@ export function CustomerForm({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          <FormRequiredFieldsNote />
           <FormStatusMessage message={state.message} />
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="customerType">Customer type</Label>
+              <Label htmlFor="customerType" required>
+                Customer type
+              </Label>
               <select
                 id="customerType"
                 name="customerType"
                 value={values.customerType}
-                className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className={formSelectClassName(state.fieldErrors, "customerType")}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "customerType",
+                  required: true,
+                  errorId: fieldErrorId("customerType"),
+                })}
                 onChange={(event) =>
                   updateFormValue("customerType", event.target.value as CustomerFormValues["customerType"])
                 }
@@ -64,43 +73,93 @@ export function CustomerForm({
                 <option value="company">Company</option>
                 <option value="fleet">Fleet</option>
               </select>
-              <FieldError errors={state.fieldErrors} name="customerType" />
+              <FieldError errors={state.fieldErrors} name="customerType" id={fieldErrorId("customerType")} />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status" required>
+                Status
+              </Label>
               <select
                 id="status"
                 name="status"
                 value={values.status}
-                className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className={formSelectClassName(state.fieldErrors, "status")}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "status",
+                  required: true,
+                  errorId: fieldErrorId("status"),
+                })}
                 onChange={(event) => updateFormValue("status", event.target.value as CustomerFormValues["status"])}
               >
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
-              <FieldError errors={state.fieldErrors} name="status" />
+              <FieldError errors={state.fieldErrors} name="status" id={fieldErrorId("status")} />
             </div>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="firstName">First name</Label>
-              <Input id="firstName" name="firstName" value={values.firstName} onChange={(event) => updateFormValue("firstName", event.target.value)} />
-              <FieldError errors={state.fieldErrors} name="firstName" />
+              <Label htmlFor="firstName" required={values.customerType === "individual"}>
+                First name
+              </Label>
+              <Input
+                id="firstName"
+                name="firstName"
+                value={values.firstName}
+                className={fieldControlClassName(state.fieldErrors, "firstName")}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "firstName",
+                  required: values.customerType === "individual",
+                  errorId: fieldErrorId("firstName"),
+                })}
+                onChange={(event) => updateFormValue("firstName", event.target.value)}
+              />
+              <FieldError errors={state.fieldErrors} name="firstName" id={fieldErrorId("firstName")} />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="lastName">Last name</Label>
-              <Input id="lastName" name="lastName" value={values.lastName} onChange={(event) => updateFormValue("lastName", event.target.value)} />
-              <FieldError errors={state.fieldErrors} name="lastName" />
+              <Label htmlFor="lastName" required={values.customerType === "individual"}>
+                Last name
+              </Label>
+              <Input
+                id="lastName"
+                name="lastName"
+                value={values.lastName}
+                className={fieldControlClassName(state.fieldErrors, "lastName")}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "lastName",
+                  required: values.customerType === "individual",
+                  errorId: fieldErrorId("lastName"),
+                })}
+                onChange={(event) => updateFormValue("lastName", event.target.value)}
+              />
+              <FieldError errors={state.fieldErrors} name="lastName" id={fieldErrorId("lastName")} />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="companyName">Company or fleet name</Label>
-            <Input id="companyName" name="companyName" value={values.companyName} onChange={(event) => updateFormValue("companyName", event.target.value)} />
-            <FieldError errors={state.fieldErrors} name="companyName" />
+            <Label htmlFor="companyName" required={values.customerType !== "individual"}>
+              Company or fleet name
+            </Label>
+            <Input
+              id="companyName"
+              name="companyName"
+              value={values.companyName}
+              className={fieldControlClassName(state.fieldErrors, "companyName")}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "companyName",
+                required: values.customerType !== "individual",
+                errorId: fieldErrorId("companyName"),
+              })}
+              onChange={(event) => updateFormValue("companyName", event.target.value)}
+            />
+            <FieldError errors={state.fieldErrors} name="companyName" id={fieldErrorId("companyName")} />
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">

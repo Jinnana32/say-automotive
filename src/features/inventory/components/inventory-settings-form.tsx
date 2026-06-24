@@ -2,7 +2,13 @@
 
 import { useActionState, useState } from "react";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,11 +31,20 @@ export function InventorySettingsForm({ products }: { products: InventoryProduct
       <FormStatusMessage message={state.message} />
 
       <div className="space-y-2">
-        <Label htmlFor="settingsProductId">Product</Label>
+        <Label htmlFor="settingsProductId" required>
+          Product
+        </Label>
         <NativeSelect
           id="settingsProductId"
           name="productId"
           value={productId}
+          className={fieldControlClassName(state.fieldErrors, "productId")}
+          {...fieldAriaProps({
+            errors: state.fieldErrors,
+            name: "productId",
+            required: true,
+            errorId: fieldErrorId("productId"),
+          })}
           onChange={(event) => {
             const nextProduct = products.find((product) => product.id === event.target.value) ?? null;
             setProductId(event.target.value);
@@ -49,7 +64,7 @@ export function InventorySettingsForm({ products }: { products: InventoryProduct
             </option>
           ))}
         </NativeSelect>
-        <FieldError errors={state.fieldErrors} name="productId" />
+        <FieldError errors={state.fieldErrors} name="productId" id={fieldErrorId("productId")} />
       </div>
 
       <div className="grid gap-5 md:grid-cols-2">
@@ -60,9 +75,16 @@ export function InventorySettingsForm({ products }: { products: InventoryProduct
             name="reorderLevel"
             inputMode="decimal"
             value={reorderLevel}
+            className={fieldControlClassName(state.fieldErrors, "reorderLevel")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "reorderLevel",
+              required: false,
+              errorId: fieldErrorId("reorderLevel"),
+            })}
             onChange={(event) => setReorderLevel(event.target.value)}
           />
-          <FieldError errors={state.fieldErrors} name="reorderLevel" />
+          <FieldError errors={state.fieldErrors} name="reorderLevel" id={fieldErrorId("reorderLevel")} />
         </div>
 
         <div className="space-y-2">
@@ -71,9 +93,16 @@ export function InventorySettingsForm({ products }: { products: InventoryProduct
             id="shelfLocation"
             name="shelfLocation"
             value={shelfLocation}
+            className={fieldControlClassName(state.fieldErrors, "shelfLocation")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "shelfLocation",
+              required: false,
+              errorId: fieldErrorId("shelfLocation"),
+            })}
             onChange={(event) => setShelfLocation(event.target.value)}
           />
-          <FieldError errors={state.fieldErrors} name="shelfLocation" />
+          <FieldError errors={state.fieldErrors} name="shelfLocation" id={fieldErrorId("shelfLocation")} />
         </div>
       </div>
 

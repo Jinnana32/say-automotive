@@ -2,7 +2,14 @@
 
 import { useActionState } from "react";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+  formSelectClassName,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -48,12 +55,20 @@ export function AssignMechanicForm({
             <FormStatusMessage message={state.message} />
 
             <div className="space-y-2">
-              <Label htmlFor="staffId">Mechanic</Label>
+              <Label htmlFor="staffId" required>
+                Mechanic
+              </Label>
               <select
                 id="staffId"
                 name="staffId"
                 value={values.staffId}
-                className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className={formSelectClassName(state.fieldErrors, "staffId")}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "staffId",
+                  required: true,
+                  errorId: fieldErrorId("staffId"),
+                })}
                 onChange={(event) => updateFormValue("staffId", event.target.value)}
               >
                 {mechanics.map((mechanic) => (
@@ -62,7 +77,7 @@ export function AssignMechanicForm({
                   </option>
                 ))}
               </select>
-              <FieldError errors={state.fieldErrors} name="staffId" />
+              <FieldError errors={state.fieldErrors} name="staffId" id={fieldErrorId("staffId")} />
             </div>
 
             <div className="space-y-2">
@@ -72,9 +87,16 @@ export function AssignMechanicForm({
                 name="taskDescription"
                 placeholder="Optional focus area for this mechanic"
                 value={values.taskDescription}
+                className={fieldControlClassName(state.fieldErrors, "taskDescription")}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "taskDescription",
+                  required: false,
+                  errorId: fieldErrorId("taskDescription"),
+                })}
                 onChange={(event) => updateFormValue("taskDescription", event.target.value)}
               />
-              <FieldError errors={state.fieldErrors} name="taskDescription" />
+              <FieldError errors={state.fieldErrors} name="taskDescription" id={fieldErrorId("taskDescription")} />
             </div>
 
             <div className="flex justify-end">

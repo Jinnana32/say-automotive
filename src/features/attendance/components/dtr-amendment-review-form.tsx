@@ -3,7 +3,13 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,7 +74,12 @@ export function DtrAmendmentReviewForm({
       <FormStatusMessage message={state.status === "error" ? state.message : undefined} />
 
       <div className="space-y-2">
-        <Label htmlFor={`reviewFinalTime-${amendment.id}`}>Approved final time</Label>
+        <Label
+          htmlFor={`reviewFinalTime-${amendment.id}`}
+          required={values.decision === "approved"}
+        >
+          Approved final time
+        </Label>
         <Input
           id={`reviewFinalTime-${amendment.id}`}
           type="time"
@@ -76,8 +87,15 @@ export function DtrAmendmentReviewForm({
           value={values.finalTime}
           onChange={(event) => updateFormValue("finalTime", event.target.value)}
           disabled={values.decision === "rejected"}
+          className={fieldControlClassName(state.fieldErrors, "finalTime")}
+          {...fieldAriaProps({
+            errors: state.fieldErrors,
+            name: "finalTime",
+            required: values.decision === "approved",
+            errorId: fieldErrorId("finalTime"),
+          })}
         />
-        <FieldError errors={state.fieldErrors} name="finalTime" />
+        <FieldError errors={state.fieldErrors} name="finalTime" id={fieldErrorId("finalTime")} />
       </div>
 
       <div className="space-y-2">
@@ -86,10 +104,17 @@ export function DtrAmendmentReviewForm({
           id={`reviewAdminNote-${amendment.id}`}
           name="adminNote"
           value={values.adminNote}
+          className={fieldControlClassName(state.fieldErrors, "adminNote")}
+          {...fieldAriaProps({
+            errors: state.fieldErrors,
+            name: "adminNote",
+            required: false,
+            errorId: fieldErrorId("adminNote"),
+          })}
           onChange={(event) => updateFormValue("adminNote", event.target.value)}
           placeholder="Optional note for the mechanic or payroll reviewer."
         />
-        <FieldError errors={state.fieldErrors} name="adminNote" />
+        <FieldError errors={state.fieldErrors} name="adminNote" id={fieldErrorId("adminNote")} />
       </div>
 
       <div className="flex flex-wrap justify-end gap-3">

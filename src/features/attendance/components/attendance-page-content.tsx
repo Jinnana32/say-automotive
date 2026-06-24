@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DataTableFilters } from "@/components/shared/data-table-filters";
 import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FormStatusMessage } from "@/components/shared/form-status";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
@@ -57,6 +58,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
   const selectedDate = attendanceCalendar.selectedDate;
   const selectedDateLabel = formatDate(selectedDate);
   const activeTab = resolveAttendanceTab(searchParams.get("tab"));
+  const feedbackError = searchParams.get("error");
   const selectedMonth = DateTime.fromISO(attendanceCalendar.monthStartDate);
   const isBranchHolidayDate = attendanceData.branchHoliday !== null;
   const yearOptions = buildYearOptions(selectedMonth.year, DateTime.fromISO(today).year);
@@ -187,6 +189,8 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
           ) : undefined
         }
       />
+
+      <FormStatusMessage message={feedbackError ?? undefined} />
 
       {attendanceData.lockedPeriod ? (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">

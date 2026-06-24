@@ -2,7 +2,14 @@
 
 import { useActionState } from "react";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+  formSelectClassName,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,7 +53,9 @@ export function RecordPaymentForm({
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="amount">Amount</Label>
+          <Label htmlFor="amount" required>
+            Amount
+          </Label>
           <Input
             id="amount"
             name="amount"
@@ -55,17 +64,32 @@ export function RecordPaymentForm({
             step={MONEY_INPUT_STEP}
             value={values.amount}
             onChange={(event) => updateFormValue("amount", event.target.value)}
+            className={fieldControlClassName(state.fieldErrors, "amount")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "amount",
+              required: true,
+              errorId: fieldErrorId("amount"),
+            })}
           />
-          <FieldError errors={state.fieldErrors} name="amount" />
+          <FieldError errors={state.fieldErrors} name="amount" id={fieldErrorId("amount")} />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="paymentMethod">Payment method</Label>
+          <Label htmlFor="paymentMethod" required>
+            Payment method
+          </Label>
           <select
             id="paymentMethod"
             name="paymentMethod"
             value={values.paymentMethod}
-            className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className={formSelectClassName(state.fieldErrors, "paymentMethod")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "paymentMethod",
+              required: true,
+              errorId: fieldErrorId("paymentMethod"),
+            })}
             onChange={(event) => updateFormValue("paymentMethod", event.target.value)}
           >
             {PAYMENT_METHOD_OPTIONS.map((option) => (
@@ -74,21 +98,45 @@ export function RecordPaymentForm({
               </option>
             ))}
           </select>
-          <FieldError errors={state.fieldErrors} name="paymentMethod" />
+          <FieldError errors={state.fieldErrors} name="paymentMethod" id={fieldErrorId("paymentMethod")} />
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="referenceNumber">Reference number</Label>
-          <Input id="referenceNumber" name="referenceNumber" value={values.referenceNumber} onChange={(event) => updateFormValue("referenceNumber", event.target.value)} />
-          <FieldError errors={state.fieldErrors} name="referenceNumber" />
+          <Input
+            id="referenceNumber"
+            name="referenceNumber"
+            value={values.referenceNumber}
+            className={fieldControlClassName(state.fieldErrors, "referenceNumber")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "referenceNumber",
+              required: false,
+              errorId: fieldErrorId("referenceNumber"),
+            })}
+            onChange={(event) => updateFormValue("referenceNumber", event.target.value)}
+          />
+          <FieldError errors={state.fieldErrors} name="referenceNumber" id={fieldErrorId("referenceNumber")} />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="notes">Notes</Label>
-          <Input id="notes" name="notes" value={values.notes} onChange={(event) => updateFormValue("notes", event.target.value)} />
-          <FieldError errors={state.fieldErrors} name="notes" />
+          <Input
+            id="notes"
+            name="notes"
+            value={values.notes}
+            className={fieldControlClassName(state.fieldErrors, "notes")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "notes",
+              required: false,
+              errorId: fieldErrorId("notes"),
+            })}
+            onChange={(event) => updateFormValue("notes", event.target.value)}
+          />
+          <FieldError errors={state.fieldErrors} name="notes" id={fieldErrorId("notes")} />
         </div>
       </div>
 

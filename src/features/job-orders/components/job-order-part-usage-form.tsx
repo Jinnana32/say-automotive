@@ -2,7 +2,13 @@
 
 import { useActionState } from "react";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,7 +64,9 @@ export function JobOrderPartUsageForm({
 
       <div className="grid gap-3 md:grid-cols-[160px_1fr_auto]">
         <div className="space-y-2">
-          <Label htmlFor={`${mode}-quantity-${jobOrderItemId}`}>Quantity</Label>
+          <Label htmlFor={`${mode}-quantity-${jobOrderItemId}`} required>
+            Quantity
+          </Label>
           <Input
             id={`${mode}-quantity-${jobOrderItemId}`}
             name="quantity"
@@ -66,8 +74,15 @@ export function JobOrderPartUsageForm({
             value={values.quantity}
             onChange={(event) => updateFormValue("quantity", event.target.value)}
             disabled={isDisabled}
+            className={fieldControlClassName(state.fieldErrors, "quantity")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "quantity",
+              required: true,
+              errorId: fieldErrorId("quantity"),
+            })}
           />
-          <FieldError errors={state.fieldErrors} name="quantity" />
+          <FieldError errors={state.fieldErrors} name="quantity" id={fieldErrorId("quantity")} />
         </div>
 
         <div className="space-y-2">
@@ -77,10 +92,17 @@ export function JobOrderPartUsageForm({
             name="notes"
             placeholder={mode === "use" ? "Optional usage note" : "Optional return note"}
             value={values.notes}
-            onChange={(event) => updateFormValue("notes", event.target.value)}
             disabled={isDisabled}
+            className={fieldControlClassName(state.fieldErrors, "notes")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "notes",
+              required: false,
+              errorId: fieldErrorId("notes"),
+            })}
+            onChange={(event) => updateFormValue("notes", event.target.value)}
           />
-          <FieldError errors={state.fieldErrors} name="notes" />
+          <FieldError errors={state.fieldErrors} name="notes" id={fieldErrorId("notes")} />
         </div>
 
         <div className="flex items-end">

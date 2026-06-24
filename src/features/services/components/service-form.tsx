@@ -3,7 +3,15 @@
 import Link from "next/link";
 import { useActionState } from "react";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormRequiredFieldsNote,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+  formSelectClassName,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,6 +62,7 @@ export function ServiceForm({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          <FormRequiredFieldsNote />
           <FormStatusMessage message={state.message} />
 
           <div className="rounded-2xl border border-border/70 bg-muted/20 p-5">
@@ -118,21 +127,40 @@ export function ServiceForm({
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="name">Service name</Label>
-              <Input id="name" name="name" value={values.name} onChange={(event) => updateFormValue("name", event.target.value)} />
-              <FieldError errors={state.fieldErrors} name="name" />
+              <Label htmlFor="name" required>Service name</Label>
+              <Input
+                id="name"
+                name="name"
+                value={values.name}
+                className={fieldControlClassName(state.fieldErrors, "name")}
+                {...fieldAriaProps({ errors: state.fieldErrors, name: "name", required: true, errorId: fieldErrorId("name") })}
+                onChange={(event) => updateFormValue("name", event.target.value)}
+              />
+              <FieldError errors={state.fieldErrors} name="name" id={fieldErrorId("name")} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
-              <Input id="category" name="category" value={values.category} onChange={(event) => updateFormValue("category", event.target.value)} />
-              <FieldError errors={state.fieldErrors} name="category" />
+              <Input
+                id="category"
+                name="category"
+                value={values.category}
+                className={fieldControlClassName(state.fieldErrors, "category")}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "category",
+                  required: false,
+                  errorId: fieldErrorId("category"),
+                })}
+                onChange={(event) => updateFormValue("category", event.target.value)}
+              />
+              <FieldError errors={state.fieldErrors} name="category" id={fieldErrorId("category")} />
             </div>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="laborPrice">Labor price</Label>
+              <Label htmlFor="laborPrice" required>Labor price</Label>
               <Input
                 id="laborPrice"
                 name="laborPrice"
@@ -140,9 +168,11 @@ export function ServiceForm({
                 type="number"
                 step={MONEY_INPUT_STEP}
                 value={values.laborPrice}
+                className={fieldControlClassName(state.fieldErrors, "laborPrice")}
+                {...fieldAriaProps({ errors: state.fieldErrors, name: "laborPrice", required: true, errorId: fieldErrorId("laborPrice") })}
                 onChange={(event) => updateFormValue("laborPrice", event.target.value)}
               />
-              <FieldError errors={state.fieldErrors} name="laborPrice" />
+              <FieldError errors={state.fieldErrors} name="laborPrice" id={fieldErrorId("laborPrice")} />
             </div>
 
             <div className="space-y-2">
@@ -152,31 +182,51 @@ export function ServiceForm({
                 name="estimatedDurationMinutes"
                 inputMode="numeric"
                 value={values.estimatedDurationMinutes}
+                className={fieldControlClassName(state.fieldErrors, "estimatedDurationMinutes")}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "estimatedDurationMinutes",
+                  required: false,
+                  errorId: fieldErrorId("estimatedDurationMinutes"),
+                })}
                 onChange={(event) => updateFormValue("estimatedDurationMinutes", event.target.value)}
               />
-              <FieldError errors={state.fieldErrors} name="estimatedDurationMinutes" />
+              <FieldError errors={state.fieldErrors} name="estimatedDurationMinutes" id={fieldErrorId("estimatedDurationMinutes")} />
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea id="description" name="description" value={values.description} onChange={(event) => updateFormValue("description", event.target.value)} />
-            <FieldError errors={state.fieldErrors} name="description" />
+            <Textarea
+              id="description"
+              name="description"
+              value={values.description}
+              className={fieldControlClassName(state.fieldErrors, "description")}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "description",
+                required: false,
+                errorId: fieldErrorId("description"),
+              })}
+              onChange={(event) => updateFormValue("description", event.target.value)}
+            />
+            <FieldError errors={state.fieldErrors} name="description" id={fieldErrorId("description")} />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
+            <Label htmlFor="status" required>Status</Label>
             <select
               id="status"
               name="status"
               value={values.status}
-              className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className={formSelectClassName(state.fieldErrors, "status")}
+              {...fieldAriaProps({ errors: state.fieldErrors, name: "status", required: true, errorId: fieldErrorId("status") })}
               onChange={(event) => updateFormValue("status", event.target.value as ServiceFormValues["status"])}
             >
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
-            <FieldError errors={state.fieldErrors} name="status" />
+            <FieldError errors={state.fieldErrors} name="status" id={fieldErrorId("status")} />
           </div>
 
           <div className="flex flex-wrap gap-3">

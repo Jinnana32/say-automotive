@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { z } from "zod";
 
-import { ATTENDANCE_STATUS_VALUES } from "@/features/attendance/utils";
+import { ATTENDANCE_STATUS_VALUES, isNonTimedAttendanceStatus } from "@/features/attendance/utils";
 import type { AttendanceFormValues } from "@/features/attendance/types";
 
 const BUSINESS_TIMEZONE = "Asia/Manila";
@@ -51,11 +51,11 @@ export const attendanceEntrySchema = z
       });
     }
 
-    if (values.status === "absent" && (hasTimeIn || hasTimeOut)) {
+    if (isNonTimedAttendanceStatus(values.status) && (hasTimeIn || hasTimeOut)) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["status"],
-        message: "Absent records should not include time in or time out.",
+        message: "Absent and unpaid day off records should not include time in or time out.",
       });
     }
 

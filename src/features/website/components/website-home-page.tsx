@@ -112,131 +112,31 @@ const SERVICE_CARDS = [
   },
 ] as const;
 const BRAND_LOGOS = [
-  {
-    name: 'Valvoline',
-    src: '/brand-logos/valvoline.png',
-    frameClassName: 'h-12 max-w-[240px]',
-  },
-  {
-    name: 'Shell Helix',
-    src: '/brand-logos/new shell logo.png',
-    frameClassName: 'h-12 max-w-[240px]',
-  },
-  {
-    name: 'Mobil 1',
-    src: '/brand-logos/Mobil1_logo.png',
-    frameClassName: 'h-12 max-w-[240px]',
-  },
-  {
-    name: 'Totachi',
-    src: '/brand-logos/totachi-seeklogo.com_.svg',
-    frameClassName: 'h-12 max-w-[220px]',
-  },
-  {
-    name: 'Varta',
-    src: '/brand-logos/Varta.png',
-    frameClassName: 'h-14 max-w-[190px]',
-  },
-  {
-    name: 'Dirty Life Race Wheels',
-    src: '/brand-logos/Dirty Wheels.png',
-    frameClassName: 'h-12 max-w-[220px]',
-  },
-  {
-    name: 'Falken',
-    src: '/brand-logos/Ralken.png',
-    frameClassName: 'h-12 max-w-[240px]',
-  },
-  {
-    name: 'Journey Xtreme 4x4 Tires',
-    src: '/brand-logos/Journey.png',
-    frameClassName: 'h-14 max-w-[220px]',
-  },
-  {
-    name: 'Nankang',
-    src: '/brand-logos/Nankang.png',
-    frameClassName: 'h-12 max-w-[220px]',
-  },
-  {
-    name: 'YSS Auto Suspension',
-    src: '/brand-logos/yssauto-removebg-preview.png',
-    frameClassName: 'h-12 max-w-[240px]',
-  },
-  {
-    name: 'Option 4WD',
-    src: '/brand-logos/Option.png',
-    frameClassName: 'h-14 max-w-[220px]',
-  },
-  {
-    name: 'Emtrac',
-    src: '/brand-logos/Emtrac.png',
-    frameClassName: 'h-12 max-w-[240px]',
-  },
-  {
-    name: 'Sumaxx',
-    src: '/brand-logos/Sumaxx.png',
-    frameClassName: 'h-14 max-w-[220px]',
-  },
-  {
-    name: 'ARB 4x4 Accessories',
-    src: '/brand-logos/Arb.png',
-    frameClassName: 'h-14 max-w-[150px]',
-  },
-  {
-    name: 'Black Mamba',
-    src: '/brand-logos/Black Mamba.png',
-    frameClassName: 'h-12 max-w-[180px]',
-  },
-  {
-    name: 'Bradley',
-    src: '/brand-logos/Bradley-removebg-preview.png',
-    frameClassName: 'h-12 max-w-[170px]',
-  },
-  {
-    name: '4x Engineering',
-    src: '/brand-logos/4x4 Engineering.png',
-    frameClassName: 'h-12 max-w-[240px]',
-  },
-  {
-    name: 'Explorer Extreme Performance',
-    src: '/brand-logos/Explorer.png',
-    frameClassName: 'h-12 max-w-[240px]',
-  },
-  {
-    name: 'Lenso Tires',
-    src: '/brand-logos/Lenso.png',
-    frameClassName: 'h-14 max-w-[170px]',
-  },
-  {
-    name: 'Warn',
-    src: '/brand-logos/Warn-removebg-preview.png',
-    frameClassName: 'h-16 max-w-[130px]',
-  },
-  {
-    name: 'Cali Off-Road',
-    src: '/brand-logos/Cali.png',
-    frameClassName: 'h-16 max-w-[130px]',
-  },
-  {
-    name: 'Continental',
-    src: '/brand-logos/Continental.png',
-    frameClassName: 'h-14 max-w-[180px]',
-  },
-  {
-    name: 'MaxTrek Tyres',
-    src: '/brand-logos/Maxtrek.png',
-    frameClassName: 'h-14 max-w-[220px]',
-  },
-  {
-    name: 'AMP Tires',
-    src: '/brand-logos/Amp.png',
-    frameClassName: 'h-12 max-w-[240px]',
-  },
-  {
-    name: 'Venom Wheels',
-    src: '/brand-logos/Venom-removebg-preview.png',
-    frameClassName: 'h-14 max-w-[220px]',
-  },
+  { name: 'Valvoline', src: '/brand-logos/valvoline.png' },
+  { name: 'Shell Helix', src: '/brand-logos/new shell logo.png' },
+  { name: 'Mobil 1', src: '/brand-logos/Mobil1_logo.png' },
+  { name: 'Totachi', src: '/brand-logos/totachi-seeklogo.com_.svg' },
+  { name: 'Varta', src: '/brand-logos/Varta.png' },
+  { name: 'Dirty Life Race Wheels', src: '/brand-logos/Dirty Wheels.png' },
+  { name: 'Falken', src: '/brand-logos/Ralken.png' },
+  { name: 'Journey Xtreme 4x4 Tires', src: '/brand-logos/Journey.png' },
+  { name: 'Nankang', src: '/brand-logos/Nankang.png' },
+  { name: 'YSS Auto Suspension', src: '/brand-logos/yssauto-removebg-preview.png' },
+  { name: 'Option 4WD', src: '/brand-logos/Option.png' },
+  { name: 'Emtrac', src: '/brand-logos/Emtrac.png' },
+  { name: 'Sumaxx', src: '/brand-logos/Sumaxx.png', imageClassName: 'max-h-14' },
+  { name: 'ARB 4x4 Accessories', src: '/brand-logos/Arb.png', imageClassName: 'max-h-14' },
+  { name: 'Black Mamba', src: '/brand-logos/Black Mamba.png', imageClassName: 'max-h-14' },
+  { name: 'Bradley', src: '/brand-logos/Bradley-removebg-preview.png' },
+  { name: '4x Engineering', src: '/brand-logos/4x4 Engineering.png', imageClassName: 'max-h-14' },
+  { name: 'Explorer Extreme Performance', src: '/brand-logos/Explorer.png' },
+  { name: 'Lenso Tires', src: '/brand-logos/Lenso.png' },
+  { name: 'Warn', src: '/brand-logos/Warn-removebg-preview.png' },
+  { name: 'Cali Off-Road', src: '/brand-logos/Cali.png' },
+  { name: 'Continental', src: '/brand-logos/Continental.png' },
+  { name: 'MaxTrek Tyres', src: '/brand-logos/Maxtrek.png' },
+  { name: 'AMP Tires', src: '/brand-logos/Amp.png' },
+  { name: 'Venom Wheels', src: '/brand-logos/Venom-removebg-preview.png' },
 ] as const;
 
 const TRUST_POINTS = [
@@ -473,11 +373,11 @@ export function WebsiteHomePage({
         id="brands"
         className="scroll-mt-28 bg-[#030B18] px-4 py-16 sm:px-6 lg:px-8 lg:py-20"
       >
-        <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/10 bg-slate-50 px-4 py-10 shadow-[0_30px_70px_rgba(0,0,0,0.28)] sm:px-8 sm:py-12 lg:px-14 lg:py-14">
+        <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/10 bg-slate-50 px-4 py-8 shadow-[0_30px_70px_rgba(0,0,0,0.28)] sm:px-8 sm:py-10 lg:px-14 lg:py-12">
           <div className="mx-auto max-w-3xl text-center">
             <p className="inline-flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.24em] text-brand-red">
               <span className="h-px w-8 bg-brand-red" />
-              Trusted Brands
+              Trusted Automotive Brands
               <span className="h-px w-8 bg-brand-red" />
             </p>
             <h2 className="mt-4 text-3xl font-semibold uppercase tracking-[0.03em] text-[#061B3D] sm:text-4xl">
@@ -494,7 +394,7 @@ export function WebsiteHomePage({
             </p>
           </div>
 
-          <div className="mx-auto mt-7 flex max-w-6xl flex-wrap justify-center gap-x-10 gap-y-5 sm:mt-8 sm:gap-x-12 sm:gap-y-6 lg:gap-x-14 lg:gap-y-7">
+          <div className="mx-auto mt-8 grid max-w-6xl grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {BRAND_LOGOS.filter((brand) => brand.src.trim().length > 0).map(
               (brand) => (
                 <BrandLogoTile key={brand.name} brand={brand} />
@@ -741,26 +641,22 @@ function BrandLogoTile({
   brand: {
     name: string;
     src: string;
-    frameClassName?: string;
+    imageClassName?: string;
   };
 }) {
   return (
-    <div className="flex h-16 w-[160px] items-center justify-center px-4 sm:h-[4.5rem] sm:w-[195px] sm:px-5 lg:h-20 lg:w-[220px] lg:px-6">
-      <div
+    <div className="flex h-16 items-center justify-center">
+      <Image
+        src={brand.src}
+        alt={`${brand.name} logo`}
+        width={220}
+        height={48}
+        unoptimized={brand.src.endsWith('.svg')}
         className={cn(
-          'relative h-14 w-full max-w-[210px]',
-          brand.frameClassName,
+          'max-h-12 max-w-[220px] object-contain',
+          brand.imageClassName,
         )}
-      >
-        <Image
-          src={brand.src}
-          alt={`${brand.name} logo`}
-          fill
-          sizes="(max-width: 639px) 160px, (max-width: 1023px) 190px, 240px"
-          unoptimized={brand.src.endsWith('.svg')}
-          className="object-contain"
-        />
-      </div>
+      />
     </div>
   );
 }

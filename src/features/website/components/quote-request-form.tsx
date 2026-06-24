@@ -3,7 +3,14 @@
 import { useActionState } from "react";
 import { CarFront, type LucideIcon, MapPin, UserRound, Wrench } from "lucide-react";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormRequiredFieldsNote,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,6 +50,7 @@ export function QuoteRequestForm({
 
   return (
     <form action={formAction} className="space-y-5 sm:space-y-6">
+      <FormRequiredFieldsNote />
       <FormStatusMessage message={state.message} />
 
       <FormSectionCard>
@@ -57,6 +65,7 @@ export function QuoteRequestForm({
             label="First name"
             value={values.firstName}
             errors={state.fieldErrors}
+            required
             onChange={(value) => updateFormValue("firstName", value)}
           />
           <Field
@@ -64,6 +73,7 @@ export function QuoteRequestForm({
             label="Last name"
             value={values.lastName}
             errors={state.fieldErrors}
+            required
             onChange={(value) => updateFormValue("lastName", value)}
           />
           <Field
@@ -78,6 +88,7 @@ export function QuoteRequestForm({
             label="Email"
             value={values.email}
             errors={state.fieldErrors}
+            required
             onChange={(value) => updateFormValue("email", value)}
           />
         </div>
@@ -95,6 +106,7 @@ export function QuoteRequestForm({
             label="Province"
             value={values.province}
             errors={state.fieldErrors}
+            required
             onChange={(value) => updateFormValue("province", value)}
           />
           <Field
@@ -102,6 +114,7 @@ export function QuoteRequestForm({
             label="City"
             value={values.city}
             errors={state.fieldErrors}
+            required
             onChange={(value) => updateFormValue("city", value)}
           />
           <Field
@@ -109,6 +122,7 @@ export function QuoteRequestForm({
             label="Barangay"
             value={values.barangay}
             errors={state.fieldErrors}
+            required
             onChange={(value) => updateFormValue("barangay", value)}
           />
         </div>
@@ -123,14 +137,20 @@ export function QuoteRequestForm({
         <div className="mt-5 space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="vehicleMake" className="text-sm font-medium text-slate-800">
+              <Label htmlFor="vehicleMake" required className="text-sm font-medium text-slate-800">
                 Vehicle make
               </Label>
               <select
                 id="vehicleMake"
                 name="vehicleMake"
                 value={values.vehicleMake}
-                className={SELECT_CLASS_NAME}
+                className={fieldControlClassName(state.fieldErrors, "vehicleMake", SELECT_CLASS_NAME)}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "vehicleMake",
+                  required: true,
+                  errorId: fieldErrorId("vehicleMake"),
+                })}
                 onChange={(event) => {
                   const nextMake = event.target.value;
                   updateFormValue("vehicleMake", nextMake);
@@ -151,18 +171,24 @@ export function QuoteRequestForm({
                   </option>
                 ))}
               </select>
-              <FieldError errors={state.fieldErrors} name="vehicleMake" />
+              <FieldError errors={state.fieldErrors} name="vehicleMake" id={fieldErrorId("vehicleMake")} />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="vehicleModel" className="text-sm font-medium text-slate-800">
+              <Label htmlFor="vehicleModel" required className="text-sm font-medium text-slate-800">
                 Vehicle model
               </Label>
               <select
                 id="vehicleModel"
                 name="vehicleModel"
                 value={values.vehicleModel}
-                className={SELECT_CLASS_NAME}
+                className={fieldControlClassName(state.fieldErrors, "vehicleModel", SELECT_CLASS_NAME)}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "vehicleModel",
+                  required: true,
+                  errorId: fieldErrorId("vehicleModel"),
+                })}
                 onChange={(event) => updateFormValue("vehicleModel", event.target.value)}
               >
                 <option value="">Select model</option>
@@ -172,7 +198,7 @@ export function QuoteRequestForm({
                   </option>
                 ))}
               </select>
-              <FieldError errors={state.fieldErrors} name="vehicleModel" />
+              <FieldError errors={state.fieldErrors} name="vehicleModel" id={fieldErrorId("vehicleModel")} />
             </div>
           </div>
 
@@ -185,14 +211,20 @@ export function QuoteRequestForm({
               onChange={(value) => updateFormValue("vehicleYear", value)}
             />
             <div className="space-y-2">
-              <Label htmlFor="transmission" className="text-sm font-medium text-slate-800">
+              <Label htmlFor="transmission" required className="text-sm font-medium text-slate-800">
                 Transmission
               </Label>
               <select
                 id="transmission"
                 name="transmission"
                 value={values.transmission}
-                className={SELECT_CLASS_NAME}
+                className={fieldControlClassName(state.fieldErrors, "transmission", SELECT_CLASS_NAME)}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "transmission",
+                  required: true,
+                  errorId: fieldErrorId("transmission"),
+                })}
                 onChange={(event) => updateFormValue("transmission", event.target.value)}
               >
                 <option value="">Select transmission</option>
@@ -202,13 +234,14 @@ export function QuoteRequestForm({
                   </option>
                 ))}
               </select>
-              <FieldError errors={state.fieldErrors} name="transmission" />
+              <FieldError errors={state.fieldErrors} name="transmission" id={fieldErrorId("transmission")} />
             </div>
             <Field
               name="mileage"
               label="Mileage"
               value={values.mileage}
               errors={state.fieldErrors}
+              required
               onChange={(value) => updateFormValue("mileage", value)}
             />
           </div>
@@ -240,14 +273,20 @@ export function QuoteRequestForm({
         />
         <div className="mt-5 space-y-4">
           <div className="space-y-2 xl:max-w-[55%]">
-            <Label htmlFor="serviceNeeded" className="text-sm font-medium text-slate-800">
+            <Label htmlFor="serviceNeeded" required className="text-sm font-medium text-slate-800">
               Service needed
             </Label>
             <select
               id="serviceNeeded"
               name="serviceNeeded"
               value={values.serviceNeeded}
-              className={SELECT_CLASS_NAME}
+              className={fieldControlClassName(state.fieldErrors, "serviceNeeded", SELECT_CLASS_NAME)}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "serviceNeeded",
+                required: true,
+                errorId: fieldErrorId("serviceNeeded"),
+              })}
               onChange={(event) => updateFormValue("serviceNeeded", event.target.value)}
             >
               <option value="">Select service</option>
@@ -257,11 +296,11 @@ export function QuoteRequestForm({
                 </option>
               ))}
             </select>
-            <FieldError errors={state.fieldErrors} name="serviceNeeded" />
+            <FieldError errors={state.fieldErrors} name="serviceNeeded" id={fieldErrorId("serviceNeeded")} />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="customerConcern" className="text-sm font-medium text-slate-800">
+            <Label htmlFor="customerConcern" required className="text-sm font-medium text-slate-800">
               Let us know your car concern
             </Label>
             <Textarea
@@ -269,10 +308,20 @@ export function QuoteRequestForm({
               name="customerConcern"
               value={values.customerConcern}
               rows={6}
-              className="min-h-[152px] rounded-2xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 shadow-[inset_0_1px_2px_rgba(15,23,42,0.03)] placeholder:text-slate-400 focus-visible:border-brand-red/70 focus-visible:ring-brand-red/20"
+              className={fieldControlClassName(
+                state.fieldErrors,
+                "customerConcern",
+                "min-h-[152px] rounded-2xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 shadow-[inset_0_1px_2px_rgba(15,23,42,0.03)] placeholder:text-slate-400 focus-visible:border-brand-red/70 focus-visible:ring-brand-red/20",
+              )}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "customerConcern",
+                required: true,
+                errorId: fieldErrorId("customerConcern"),
+              })}
               onChange={(event) => updateFormValue("customerConcern", event.target.value)}
             />
-            <FieldError errors={state.fieldErrors} name="customerConcern" />
+            <FieldError errors={state.fieldErrors} name="customerConcern" id={fieldErrorId("customerConcern")} />
           </div>
         </div>
       </FormSectionCard>
@@ -353,27 +402,35 @@ function Field({
   label,
   value,
   errors,
+  required = false,
   onChange,
 }: {
   name: string;
   label: string;
   value: string;
   errors?: Record<string, string[] | undefined>;
+  required?: boolean;
   onChange: (value: string) => void;
 }) {
   return (
     <div className="space-y-2">
-      <Label htmlFor={name} className="text-sm font-medium text-slate-800">
+      <Label htmlFor={name} required={required} className="text-sm font-medium text-slate-800">
         {label}
       </Label>
       <Input
         id={name}
         name={name}
         value={value}
-        className={FIELD_CLASS_NAME}
+        className={fieldControlClassName(errors, name, FIELD_CLASS_NAME)}
+        {...fieldAriaProps({
+          errors,
+          name,
+          required,
+          errorId: fieldErrorId(name),
+        })}
         onChange={(event) => onChange(event.target.value)}
       />
-      <FieldError errors={errors} name={name} />
+      <FieldError errors={errors} name={name} id={fieldErrorId(name)} />
     </div>
   );
 }

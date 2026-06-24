@@ -41,4 +41,30 @@ describe("attendanceEntrySchema", () => {
 
     expect(result.success).toBe(false);
   });
+
+  it("accepts unpaid day off without logged times", () => {
+    const result = attendanceEntrySchema.safeParse({
+      staffId: "6f85967c-31db-43ae-8d70-cdb34abd57b2",
+      attendanceDate: "2026-05-07",
+      status: "unpaid_day_off",
+      timeIn: "",
+      timeOut: "",
+      notes: "Approved unpaid day off.",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects unpaid day off records with logged times", () => {
+    const result = attendanceEntrySchema.safeParse({
+      staffId: "6f85967c-31db-43ae-8d70-cdb34abd57b2",
+      attendanceDate: "2026-05-07",
+      status: "unpaid_day_off",
+      timeIn: "2026-05-07T08:00",
+      timeOut: "",
+      notes: "",
+    });
+
+    expect(result.success).toBe(false);
+  });
 });

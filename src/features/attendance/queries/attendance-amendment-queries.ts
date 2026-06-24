@@ -741,6 +741,10 @@ function deriveMechanicPortalCalendarStatus({
   }
 
   if (attendance) {
+    if (attendance.status === "unpaid_day_off" && !attendance.timeIn && !attendance.timeOut) {
+      return "none";
+    }
+
     if (attendance.status === "absent" && !attendance.timeIn && !attendance.timeOut) {
       return "absent";
     }

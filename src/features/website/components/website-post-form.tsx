@@ -3,7 +3,15 @@
 import Link from "next/link";
 import { useActionState } from "react";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormRequiredFieldsNote,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+  formSelectClassName,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,9 +25,6 @@ import {
   updateWebsitePostAction,
 } from "@/features/website/actions/website-actions";
 import type { WebsitePostFormValues } from "@/features/website/types";
-
-const SELECT_CLASS_NAME =
-  "flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 export function WebsitePostForm({
   mode,
@@ -47,6 +52,7 @@ export function WebsitePostForm({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          <FormRequiredFieldsNote />
           <FormStatusMessage message={state.message} />
 
           <div className="grid gap-6 md:grid-cols-2">
@@ -55,6 +61,7 @@ export function WebsitePostForm({
               label="Title"
               value={values.title}
               errors={state.fieldErrors}
+              required
               onChange={(value) => updateFormValue("title", value)}
             />
             <TextField
@@ -69,34 +76,50 @@ export function WebsitePostForm({
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category" required>
+                Category
+              </Label>
               <select
                 id="category"
                 name="category"
                 value={values.category}
-                className={SELECT_CLASS_NAME}
+                className={formSelectClassName(state.fieldErrors, "category")}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "category",
+                  required: true,
+                  errorId: fieldErrorId("category"),
+                })}
                 onChange={(event) => updateFormValue("category", event.target.value as WebsitePostFormValues["category"])}
               >
                 <option value="shop_update">Shop update</option>
                 <option value="maintenance_tip">Maintenance tip</option>
                 <option value="promo">Promo</option>
               </select>
-              <FieldError errors={state.fieldErrors} name="category" />
+              <FieldError errors={state.fieldErrors} name="category" id={fieldErrorId("category")} />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status" required>
+                Status
+              </Label>
               <select
                 id="status"
                 name="status"
                 value={values.status}
-                className={SELECT_CLASS_NAME}
+                className={formSelectClassName(state.fieldErrors, "status")}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "status",
+                  required: true,
+                  errorId: fieldErrorId("status"),
+                })}
                 onChange={(event) => updateFormValue("status", event.target.value as WebsitePostFormValues["status"])}
               >
                 <option value="active">Published</option>
                 <option value="inactive">Draft</option>
               </select>
-              <FieldError errors={state.fieldErrors} name="status" />
+              <FieldError errors={state.fieldErrors} name="status" id={fieldErrorId("status")} />
             </div>
           </div>
 
@@ -110,27 +133,45 @@ export function WebsitePostForm({
           />
 
           <div className="space-y-2">
-            <Label htmlFor="excerpt">Excerpt</Label>
+            <Label htmlFor="excerpt" required>
+              Excerpt
+            </Label>
             <Textarea
               id="excerpt"
               name="excerpt"
               value={values.excerpt}
               rows={3}
               onChange={(event) => updateFormValue("excerpt", event.target.value)}
+              className={fieldControlClassName(state.fieldErrors, "excerpt")}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "excerpt",
+                required: true,
+                errorId: fieldErrorId("excerpt"),
+              })}
             />
-            <FieldError errors={state.fieldErrors} name="excerpt" />
+            <FieldError errors={state.fieldErrors} name="excerpt" id={fieldErrorId("excerpt")} />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="content">Content</Label>
+            <Label htmlFor="content" required>
+              Content
+            </Label>
             <Textarea
               id="content"
               name="content"
               value={values.content}
               rows={12}
               onChange={(event) => updateFormValue("content", event.target.value)}
+              className={fieldControlClassName(state.fieldErrors, "content")}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "content",
+                required: true,
+                errorId: fieldErrorId("content"),
+              })}
             />
-            <FieldError errors={state.fieldErrors} name="content" />
+            <FieldError errors={state.fieldErrors} name="content" id={fieldErrorId("content")} />
           </div>
 
           <label className="flex items-start gap-3 rounded-2xl border border-border/70 bg-muted/20 px-4 py-3">
@@ -169,6 +210,7 @@ function TextField({
   value,
   errors,
   placeholder,
+  required = false,
   onChange,
 }: {
   name: string;
@@ -176,19 +218,29 @@ function TextField({
   value: string;
   errors?: Record<string, string[] | undefined>;
   placeholder?: string;
+  required?: boolean;
   onChange: (value: string) => void;
 }) {
   return (
     <div className="space-y-2">
-      <Label htmlFor={name}>{label}</Label>
+      <Label htmlFor={name} required={required}>
+        {label}
+      </Label>
       <Input
         id={name}
         name={name}
         value={value}
         placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
+        className={fieldControlClassName(errors, name)}
+        {...fieldAriaProps({
+          errors,
+          name,
+          required,
+          errorId: fieldErrorId(name),
+        })}
       />
-      <FieldError errors={errors} name={name} />
+      <FieldError errors={errors} name={name} id={fieldErrorId(name)} />
     </div>
   );
 }

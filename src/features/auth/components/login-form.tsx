@@ -3,7 +3,13 @@
 import { useActionState, useState } from "react";
 import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +32,7 @@ export function LoginForm() {
       <div className="grid gap-2.5">
         <Label
           htmlFor="email"
+          required
           className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500"
         >
           Email
@@ -41,15 +48,26 @@ export function LoginForm() {
             placeholder="Enter your email"
             value={values.email}
             onChange={(event) => updateFormValue("email", event.target.value)}
-            className="h-12 rounded-xl border-slate-300 bg-white pl-11 pr-4 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus-visible:border-brand-red focus-visible:ring-brand-red/20"
+            className={fieldControlClassName(
+              state.fieldErrors,
+              "email",
+              "h-12 rounded-xl border-slate-300 bg-white pl-11 pr-4 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus-visible:border-brand-red focus-visible:ring-brand-red/20",
+            )}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "email",
+              required: true,
+              errorId: fieldErrorId("email"),
+            })}
           />
         </div>
-        <FieldError errors={state.fieldErrors} name="email" />
+        <FieldError errors={state.fieldErrors} name="email" id={fieldErrorId("email")} />
       </div>
 
       <div className="grid gap-2.5">
         <Label
           htmlFor="password"
+          required
           className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500"
         >
           Password
@@ -64,7 +82,17 @@ export function LoginForm() {
             placeholder="Enter your password"
             value={values.password}
             onChange={(event) => updateFormValue("password", event.target.value)}
-            className="h-12 rounded-xl border-slate-300 bg-white pl-11 pr-12 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus-visible:border-brand-red focus-visible:ring-brand-red/20"
+            className={fieldControlClassName(
+              state.fieldErrors,
+              "password",
+              "h-12 rounded-xl border-slate-300 bg-white pl-11 pr-12 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus-visible:border-brand-red focus-visible:ring-brand-red/20",
+            )}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "password",
+              required: true,
+              errorId: fieldErrorId("password"),
+            })}
           />
           <button
             type="button"
@@ -76,7 +104,7 @@ export function LoginForm() {
             {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
           </button>
         </div>
-        <FieldError errors={state.fieldErrors} name="password" />
+        <FieldError errors={state.fieldErrors} name="password" id={fieldErrorId("password")} />
       </div>
 
       <SubmitButton

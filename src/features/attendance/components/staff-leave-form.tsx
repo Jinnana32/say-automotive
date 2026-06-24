@@ -3,7 +3,14 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormRequiredFieldsNote,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,14 +58,24 @@ export function StaffLeaveForm({
     <form action={formAction} className="space-y-5">
       <input type="hidden" name="leaveEntryId" value={values.leaveEntryId} />
 
+      <FormRequiredFieldsNote />
       <FormStatusMessage message={state.status === "error" ? state.message : undefined} />
 
       <div className="space-y-2">
-        <Label htmlFor="leaveStaffId">Staff member</Label>
+        <Label htmlFor="leaveStaffId" required>
+          Staff member
+        </Label>
         <NativeSelect
           id="leaveStaffId"
           name="staffId"
           value={values.staffId}
+          className={fieldControlClassName(state.fieldErrors, "staffId")}
+          {...fieldAriaProps({
+            errors: state.fieldErrors,
+            name: "staffId",
+            required: true,
+            errorId: fieldErrorId("staffId"),
+          })}
           onChange={(event) => updateFormValue("staffId", event.target.value)}
         >
           <option value="">Select a staff member</option>
@@ -68,40 +85,67 @@ export function StaffLeaveForm({
             </option>
           ))}
         </NativeSelect>
-        <FieldError errors={state.fieldErrors} name="staffId" />
+        <FieldError errors={state.fieldErrors} name="staffId" id={fieldErrorId("staffId")} />
       </div>
 
       <div className="grid gap-5 md:grid-cols-3">
         <div className="space-y-2">
-          <Label htmlFor="leaveStartDate">Start date</Label>
+          <Label htmlFor="leaveStartDate" required>
+            Start date
+          </Label>
           <Input
             id="leaveStartDate"
             name="startDate"
             type="date"
             value={values.startDate}
             onChange={(event) => updateFormValue("startDate", event.target.value)}
+            className={fieldControlClassName(state.fieldErrors, "startDate")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "startDate",
+              required: true,
+              errorId: fieldErrorId("startDate"),
+            })}
           />
-          <FieldError errors={state.fieldErrors} name="startDate" />
+          <FieldError errors={state.fieldErrors} name="startDate" id={fieldErrorId("startDate")} />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="leaveEndDate">End date</Label>
+          <Label htmlFor="leaveEndDate" required>
+            End date
+          </Label>
           <Input
             id="leaveEndDate"
             name="endDate"
             type="date"
             value={values.endDate}
             onChange={(event) => updateFormValue("endDate", event.target.value)}
+            className={fieldControlClassName(state.fieldErrors, "endDate")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "endDate",
+              required: true,
+              errorId: fieldErrorId("endDate"),
+            })}
           />
-          <FieldError errors={state.fieldErrors} name="endDate" />
+          <FieldError errors={state.fieldErrors} name="endDate" id={fieldErrorId("endDate")} />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="leaveType">Leave type</Label>
+          <Label htmlFor="leaveType" required>
+            Leave type
+          </Label>
           <NativeSelect
             id="leaveType"
             name="leaveType"
             value={values.leaveType}
+            className={fieldControlClassName(state.fieldErrors, "leaveType")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "leaveType",
+              required: true,
+              errorId: fieldErrorId("leaveType"),
+            })}
             onChange={(event) =>
               updateFormValue(
                 "leaveType",
@@ -115,7 +159,7 @@ export function StaffLeaveForm({
               </option>
             ))}
           </NativeSelect>
-          <FieldError errors={state.fieldErrors} name="leaveType" />
+          <FieldError errors={state.fieldErrors} name="leaveType" id={fieldErrorId("leaveType")} />
         </div>
       </div>
 

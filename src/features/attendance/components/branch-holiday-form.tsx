@@ -3,7 +3,14 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormRequiredFieldsNote,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,27 +62,46 @@ export function BranchHolidayForm({
     <form action={formAction} className="space-y-5">
       <input type="hidden" name="holidayId" value={values.holidayId} />
 
+      <FormRequiredFieldsNote />
       <FormStatusMessage message={state.status === "error" ? state.message : undefined} />
 
       <div className="grid gap-5 md:grid-cols-3">
         <div className="space-y-2">
-          <Label htmlFor="holidayDate">Calendar date</Label>
+          <Label htmlFor="holidayDate" required>
+            Calendar date
+          </Label>
           <Input
             id="holidayDate"
             name="holidayDate"
             type="date"
             value={values.holidayDate}
             onChange={(event) => updateFormValue("holidayDate", event.target.value)}
+            className={fieldControlClassName(state.fieldErrors, "holidayDate")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "holidayDate",
+              required: true,
+              errorId: fieldErrorId("holidayDate"),
+            })}
           />
-          <FieldError errors={state.fieldErrors} name="holidayDate" />
+          <FieldError errors={state.fieldErrors} name="holidayDate" id={fieldErrorId("holidayDate")} />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="holidayKind">Event type</Label>
+          <Label htmlFor="holidayKind" required>
+            Event type
+          </Label>
           <NativeSelect
             id="holidayKind"
             name="holidayKind"
             value={values.holidayKind}
+            className={fieldControlClassName(state.fieldErrors, "holidayKind")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "holidayKind",
+              required: true,
+              errorId: fieldErrorId("holidayKind"),
+            })}
             onChange={(event) =>
               setValues((currentValues) => {
                 const nextHolidayKind = event.target.value as BranchHolidayFormValues["holidayKind"];
@@ -97,15 +123,24 @@ export function BranchHolidayForm({
               </option>
             ))}
           </NativeSelect>
-          <FieldError errors={state.fieldErrors} name="holidayKind" />
+          <FieldError errors={state.fieldErrors} name="holidayKind" id={fieldErrorId("holidayKind")} />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="payTreatment">Pay treatment</Label>
+          <Label htmlFor="payTreatment" required>
+            Pay treatment
+          </Label>
           <NativeSelect
             id="payTreatment"
             name="payTreatment"
             value={values.payTreatment}
+            className={fieldControlClassName(state.fieldErrors, "payTreatment")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "payTreatment",
+              required: true,
+              errorId: fieldErrorId("payTreatment"),
+            })}
             onChange={(event) =>
               updateFormValue(
                 "payTreatment",
@@ -120,20 +155,29 @@ export function BranchHolidayForm({
             ))}
           </NativeSelect>
           <p className="text-xs text-muted-foreground">{payTreatmentHelperText}</p>
-          <FieldError errors={state.fieldErrors} name="payTreatment" />
+          <FieldError errors={state.fieldErrors} name="payTreatment" id={fieldErrorId("payTreatment")} />
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="holidayLabel">Label or reason</Label>
+        <Label htmlFor="holidayLabel" required>
+          Label or reason
+        </Label>
         <Input
           id="holidayLabel"
           name="label"
           value={values.label}
           onChange={(event) => updateFormValue("label", event.target.value)}
           placeholder="Shop maintenance, Araw ng Kagitingan, company outing..."
+          className={fieldControlClassName(state.fieldErrors, "label")}
+          {...fieldAriaProps({
+            errors: state.fieldErrors,
+            name: "label",
+            required: true,
+            errorId: fieldErrorId("label"),
+          })}
         />
-        <FieldError errors={state.fieldErrors} name="label" />
+        <FieldError errors={state.fieldErrors} name="label" id={fieldErrorId("label")} />
       </div>
 
       <div className="space-y-2">

@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 
+import { ConfirmActionDialog } from "@/components/shared/confirm-action-dialog";
 import {
   TableRowActionsMenu,
   TableRowActionsMenuButton,
-  TableRowActionsMenuConfirm,
 } from "@/components/shared/table-row-actions-menu";
 import { deleteBranchHolidayAction } from "@/features/attendance/actions/timekeeping-actions";
 import { BranchHolidayDialog } from "@/features/attendance/components/branch-holiday-dialog";
@@ -18,6 +18,7 @@ export function BranchHolidayRowActions({
   holiday: BranchHolidaySummary;
 }) {
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   return (
     <>
@@ -27,15 +28,11 @@ export function BranchHolidayRowActions({
           icon={Pencil}
           onSelect={() => setIsEditOpen(true)}
         />
-        <TableRowActionsMenuConfirm
+        <TableRowActionsMenuButton
           label="Delete calendar date"
-          title={`Delete ${holiday.label}?`}
-          description="This calendar date will stop excluding attendance from payroll readiness once removed."
-          confirmLabel="Delete calendar date"
-          cancelLabel="Keep calendar date"
-          action={deleteBranchHolidayAction}
-          fields={[{ name: "holidayId", value: holiday.id }]}
           icon={Trash2}
+          tone="destructive"
+          onSelect={() => setIsDeleteOpen(true)}
         />
       </TableRowActionsMenu>
       <BranchHolidayDialog
@@ -43,6 +40,17 @@ export function BranchHolidayRowActions({
         open={isEditOpen}
         onOpenChange={setIsEditOpen}
         showTrigger={false}
+      />
+      <ConfirmActionDialog
+        title={`Delete ${holiday.label}?`}
+        description="This calendar date will stop excluding attendance from payroll readiness once removed."
+        confirmLabel="Delete calendar date"
+        cancelLabel="Keep calendar date"
+        action={deleteBranchHolidayAction}
+        fields={[{ name: "holidayId", value: holiday.id }]}
+        closeOnSubmit={false}
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
       />
     </>
   );

@@ -1,5 +1,6 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { writeAuditLog } from "@/lib/audit";
@@ -159,7 +160,7 @@ export async function deleteBranchHolidayAction(formData: FormData) {
   const holidayId = readString(formData, "holidayId");
 
   if (!holidayId) {
-    return;
+    redirectTimekeepingFeedback({ tab: "holidays", error: "Invalid calendar date request." });
   }
 
   const { branchScope, context, supabase } = await getBranchScopedServerClient("settings:write");
@@ -171,27 +172,43 @@ export async function deleteBranchHolidayAction(formData: FormData) {
     .eq("branch_id", branchId)
     .maybeSingle();
 
-  if (currentHolidayError || !currentHoliday) {
-    return;
+  if (currentHolidayError) {
+    redirectTimekeepingFeedback({ tab: "holidays", error: currentHolidayError.message });
   }
 
-  const { error } = await supabase
+  if (!currentHoliday) {
+    redirectTimekeepingFeedback({ tab: "holidays", error: "Branch calendar date not found." });
+  }
+
+  const { data: deletedHoliday, error } = await supabase
     .from("branch_holidays")
     .delete()
     .eq("id", holidayId)
-    .eq("branch_id", branchId);
+    .eq("branch_id", branchId)
+    .select("id")
+    .maybeSingle();
 
-  if (!error) {
-    await writeAuditLog(supabase, {
-      action: `Deleted branch holiday ${currentHoliday.label}`,
-      entityType: "branch_holiday",
-      entityId: currentHoliday.id,
-      userId: context.userId,
-      beforeData: currentHoliday,
-    });
-
-    revalidateTimekeepingPaths();
+  if (error) {
+    redirectTimekeepingFeedback({ tab: "holidays", error: error.message });
   }
+
+  if (!deletedHoliday) {
+    redirectTimekeepingFeedback({
+      tab: "holidays",
+      error: "Branch calendar date could not be deleted.",
+    });
+  }
+
+  await writeAuditLog(supabase, {
+    action: `Deleted branch holiday ${currentHoliday.label}`,
+    entityType: "branch_holiday",
+    entityId: currentHoliday.id,
+    userId: context.userId,
+    beforeData: currentHoliday,
+  });
+
+  revalidateTimekeepingPaths();
+  redirectTimekeepingFeedback({ tab: "holidays" });
 }
 
 export async function importPhilippineHolidaySuggestionsAction(
@@ -457,7 +474,7 @@ export async function deleteStaffLeaveEntryAction(formData: FormData) {
   const leaveEntryId = readString(formData, "leaveEntryId");
 
   if (!leaveEntryId) {
-    return;
+    redirectAttendanceFeedback({ tab: "leave", error: "Invalid leave entry request." });
   }
 
   const { branchScope, context, supabase } = await getBranchScopedServerClient("settings:write");
@@ -469,27 +486,43 @@ export async function deleteStaffLeaveEntryAction(formData: FormData) {
     .eq("branch_id", branchId)
     .maybeSingle();
 
-  if (currentLeaveError || !currentLeaveEntry) {
-    return;
+  if (currentLeaveError) {
+    redirectAttendanceFeedback({ tab: "leave", error: currentLeaveError.message });
   }
 
-  const { error } = await supabase
+  if (!currentLeaveEntry) {
+    redirectAttendanceFeedback({ tab: "leave", error: "Approved leave entry not found." });
+  }
+
+  const { data: deletedLeaveEntry, error } = await supabase
     .from("staff_leave_entries")
     .delete()
     .eq("id", leaveEntryId)
-    .eq("branch_id", branchId);
+    .eq("branch_id", branchId)
+    .select("id")
+    .maybeSingle();
 
-  if (!error) {
-    await writeAuditLog(supabase, {
-      action: "Deleted approved leave entry",
-      entityType: "staff_leave_entry",
-      entityId: currentLeaveEntry.id,
-      userId: context.userId,
-      beforeData: currentLeaveEntry,
-    });
-
-    revalidateTimekeepingPaths();
+  if (error) {
+    redirectAttendanceFeedback({ tab: "leave", error: error.message });
   }
+
+  if (!deletedLeaveEntry) {
+    redirectAttendanceFeedback({
+      tab: "leave",
+      error: "Approved leave entry could not be deleted.",
+    });
+  }
+
+  await writeAuditLog(supabase, {
+    action: "Deleted approved leave entry",
+    entityType: "staff_leave_entry",
+    entityId: currentLeaveEntry.id,
+    userId: context.userId,
+    beforeData: currentLeaveEntry,
+  });
+
+  revalidateTimekeepingPaths();
+  redirectAttendanceFeedback({ tab: "leave" });
 }
 
 export async function updateAttendanceAccessSettingsAction(
@@ -639,7 +672,7 @@ export async function deleteAttendanceAllowedIpAction(formData: FormData) {
   const allowedIpId = readString(formData, "allowedIpId");
 
   if (!allowedIpId) {
-    return;
+    redirectTimekeepingFeedback({ error: "Invalid allowed IP request." });
   }
 
   const { branchScope, context, supabase } = await getBranchScopedServerClient("settings:write");
@@ -651,27 +684,40 @@ export async function deleteAttendanceAllowedIpAction(formData: FormData) {
     .eq("branch_id", branchId)
     .maybeSingle();
 
-  if (currentAllowedIpError || !currentAllowedIp) {
-    return;
+  if (currentAllowedIpError) {
+    redirectTimekeepingFeedback({ error: currentAllowedIpError.message });
   }
 
-  const { error } = await supabase
+  if (!currentAllowedIp) {
+    redirectTimekeepingFeedback({ error: "Allowed shop IP not found." });
+  }
+
+  const { data: deletedAllowedIp, error } = await supabase
     .from("attendance_allowed_ips")
     .delete()
     .eq("id", allowedIpId)
-    .eq("branch_id", branchId);
+    .eq("branch_id", branchId)
+    .select("id")
+    .maybeSingle();
 
-  if (!error) {
-    await writeAuditLog(supabase, {
-      action: `Deleted allowed attendance IP ${currentAllowedIp.ip_address}`,
-      entityType: "attendance_allowed_ip",
-      entityId: currentAllowedIp.id,
-      userId: context.userId,
-      beforeData: currentAllowedIp,
-    });
-
-    revalidateTimekeepingPaths();
+  if (error) {
+    redirectTimekeepingFeedback({ error: error.message });
   }
+
+  if (!deletedAllowedIp) {
+    redirectTimekeepingFeedback({ error: "Allowed shop IP could not be removed." });
+  }
+
+  await writeAuditLog(supabase, {
+    action: `Deleted allowed attendance IP ${currentAllowedIp.ip_address}`,
+    entityType: "attendance_allowed_ip",
+    entityId: currentAllowedIp.id,
+    userId: context.userId,
+    beforeData: currentAllowedIp,
+  });
+
+  revalidateTimekeepingPaths();
+  redirectTimekeepingFeedback({});
 }
 
 function revalidateTimekeepingPaths() {
@@ -692,4 +738,34 @@ function normalizeNullable(value: string) {
 function readString(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value : "";
+}
+
+function redirectTimekeepingFeedback(params: { tab?: string; error?: string }) {
+  const search = new URLSearchParams();
+
+  if (params.tab && params.tab !== "access") {
+    search.set("tab", params.tab);
+  }
+
+  if (params.error) {
+    search.set("error", params.error);
+  }
+
+  const query = search.toString();
+  redirect(`/settings/timekeeping${query ? `?${query}` : ""}`);
+}
+
+function redirectAttendanceFeedback(params: { tab?: string; error?: string }) {
+  const search = new URLSearchParams();
+
+  if (params.tab) {
+    search.set("tab", params.tab);
+  }
+
+  if (params.error) {
+    search.set("error", params.error);
+  }
+
+  const query = search.toString();
+  redirect(`/attendance${query ? `?${query}` : ""}`);
 }

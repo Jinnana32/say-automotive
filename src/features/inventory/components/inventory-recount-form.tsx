@@ -2,7 +2,14 @@
 
 import { useActionState, useState } from "react";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+  formSelectClassName,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -39,13 +46,21 @@ export function InventoryRecountForm({ products }: { products: InventoryProductO
           <FormStatusMessage message={state.message} />
 
           <div className="space-y-2">
-            <Label htmlFor="recountProductId">Product</Label>
+            <Label htmlFor="recountProductId" required>
+              Product
+            </Label>
             <select
               id="recountProductId"
               name="productId"
               value={productId}
               onChange={(event) => setProductId(event.target.value)}
-              className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className={formSelectClassName(state.fieldErrors, "productId")}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "productId",
+                required: true,
+                errorId: fieldErrorId("productId"),
+              })}
             >
               <option value="">Select product</option>
               {products.map((product) => (
@@ -55,7 +70,7 @@ export function InventoryRecountForm({ products }: { products: InventoryProductO
                 </option>
               ))}
             </select>
-            <FieldError errors={state.fieldErrors} name="productId" />
+            <FieldError errors={state.fieldErrors} name="productId" id={fieldErrorId("productId")} />
           </div>
 
           {selectedProduct ? (
@@ -68,15 +83,44 @@ export function InventoryRecountForm({ products }: { products: InventoryProductO
           ) : null}
 
           <div className="space-y-2">
-            <Label htmlFor="countedQuantity">Counted quantity</Label>
-            <Input id="countedQuantity" name="countedQuantity" inputMode="decimal" value={values.countedQuantity} onChange={(event) => updateFormValue("countedQuantity", event.target.value)} />
-            <FieldError errors={state.fieldErrors} name="countedQuantity" />
+            <Label htmlFor="countedQuantity" required>
+              Counted quantity
+            </Label>
+            <Input
+              id="countedQuantity"
+              name="countedQuantity"
+              inputMode="decimal"
+              value={values.countedQuantity}
+              onChange={(event) => updateFormValue("countedQuantity", event.target.value)}
+              className={fieldControlClassName(state.fieldErrors, "countedQuantity")}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "countedQuantity",
+                required: true,
+                errorId: fieldErrorId("countedQuantity"),
+              })}
+            />
+            <FieldError errors={state.fieldErrors} name="countedQuantity" id={fieldErrorId("countedQuantity")} />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="recountNotes">Notes (required)</Label>
-            <Textarea id="recountNotes" name="notes" value={values.notes} onChange={(event) => updateFormValue("notes", event.target.value)} />
-            <FieldError errors={state.fieldErrors} name="notes" />
+            <Label htmlFor="recountNotes" required>
+              Notes
+            </Label>
+            <Textarea
+              id="recountNotes"
+              name="notes"
+              value={values.notes}
+              onChange={(event) => updateFormValue("notes", event.target.value)}
+              className={fieldControlClassName(state.fieldErrors, "notes")}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "notes",
+                required: true,
+                errorId: fieldErrorId("notes"),
+              })}
+            />
+            <FieldError errors={state.fieldErrors} name="notes" id={fieldErrorId("notes")} />
           </div>
 
           <SubmitButton pendingLabel="Adjusting..." disabled={!productId}>

@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { EmptyState } from "@/components/shared/empty-state";
 import { DataTableCard } from "@/components/shared/data-table-card";
+import { FormStatusMessage } from "@/components/shared/form-status";
 import { MetricGrid } from "@/components/shared/metric-grid";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
@@ -53,6 +54,7 @@ export function TimekeepingCalendarPageContent({
 
     return "access";
   })();
+  const feedbackError = searchParams.get("error");
 
   function updateTab(nextTab: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -62,6 +64,8 @@ export function TimekeepingCalendarPageContent({
     } else {
       params.set("tab", nextTab);
     }
+
+    params.delete("error");
 
     const query = params.toString();
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
@@ -73,6 +77,8 @@ export function TimekeepingCalendarPageContent({
         title="Timekeeping"
         description="Manage branch attendance rules, device approvals, and branch closure or holiday calendars from one place."
       />
+
+      <FormStatusMessage message={feedbackError ?? undefined} />
 
       <MetricGrid className="xl:grid-cols-4">
         <StatCard

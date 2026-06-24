@@ -3,7 +3,14 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormRequiredFieldsNote,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,6 +71,7 @@ export function StaffScheduleForm({
   return (
     <form action={formAction} className="space-y-5">
       <input type="hidden" name="staffId" value={values.staffId} />
+      <FormRequiredFieldsNote />
 
       <div className="rounded-2xl border border-border/70 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
         <p className="font-medium text-foreground">{staffName}</p>
@@ -74,45 +82,74 @@ export function StaffScheduleForm({
 
       <div className="grid gap-5 md:grid-cols-3">
         <div className="space-y-2">
-          <Label htmlFor="scheduleShiftStartTime">Shift start</Label>
+          <Label htmlFor="scheduleShiftStartTime" required>
+            Shift start
+          </Label>
           <Input
             id="scheduleShiftStartTime"
             name="shiftStartTime"
             type="time"
             value={values.shiftStartTime}
             onChange={(event) => updateFormValue("shiftStartTime", event.target.value)}
+            className={fieldControlClassName(state.fieldErrors, "shiftStartTime")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "shiftStartTime",
+              required: true,
+              errorId: fieldErrorId("shiftStartTime"),
+            })}
           />
-          <FieldError errors={state.fieldErrors} name="shiftStartTime" />
+          <FieldError errors={state.fieldErrors} name="shiftStartTime" id={fieldErrorId("shiftStartTime")} />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="scheduleShiftEndTime">Shift end</Label>
+          <Label htmlFor="scheduleShiftEndTime" required>
+            Shift end
+          </Label>
           <Input
             id="scheduleShiftEndTime"
             name="shiftEndTime"
             type="time"
             value={values.shiftEndTime}
             onChange={(event) => updateFormValue("shiftEndTime", event.target.value)}
+            className={fieldControlClassName(state.fieldErrors, "shiftEndTime")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "shiftEndTime",
+              required: true,
+              errorId: fieldErrorId("shiftEndTime"),
+            })}
           />
-          <FieldError errors={state.fieldErrors} name="shiftEndTime" />
+          <FieldError errors={state.fieldErrors} name="shiftEndTime" id={fieldErrorId("shiftEndTime")} />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="scheduleGraceMinutes">Grace minutes</Label>
+          <Label htmlFor="scheduleGraceMinutes" required>
+            Grace minutes
+          </Label>
           <Input
             id="scheduleGraceMinutes"
             name="graceMinutes"
             inputMode="numeric"
             value={values.graceMinutes}
             onChange={(event) => updateFormValue("graceMinutes", event.target.value)}
+            className={fieldControlClassName(state.fieldErrors, "graceMinutes")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "graceMinutes",
+              required: true,
+              errorId: fieldErrorId("graceMinutes"),
+            })}
           />
-          <FieldError errors={state.fieldErrors} name="graceMinutes" />
+          <FieldError errors={state.fieldErrors} name="graceMinutes" id={fieldErrorId("graceMinutes")} />
         </div>
       </div>
 
       <div className="space-y-3">
         <div>
-          <p className="text-sm font-medium text-foreground">Working days</p>
+          <Label required className="text-sm font-medium text-foreground">
+            Working days
+          </Label>
           <p className="text-sm text-muted-foreground">Select the days this staff member is expected to work.</p>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
@@ -132,7 +169,7 @@ export function StaffScheduleForm({
             </label>
           ))}
         </div>
-        <FieldError errors={state.fieldErrors} name="mondayIsWorkday" />
+        <FieldError errors={state.fieldErrors} name="mondayIsWorkday" id={fieldErrorId("mondayIsWorkday")} />
       </div>
 
       <div className="space-y-2">

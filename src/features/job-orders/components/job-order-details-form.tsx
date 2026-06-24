@@ -2,7 +2,13 @@
 
 import { useActionState } from "react";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -48,8 +54,20 @@ export function JobOrderDetailsForm({
           <div className="grid gap-5 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="mileageIn">Mileage in</Label>
-              <Input id="mileageIn" name="mileageIn" value={values.mileageIn} onChange={(event) => updateFormValue("mileageIn", event.target.value)} inputMode="decimal" />
-              <FieldError errors={state.fieldErrors} name="mileageIn" />
+              <Input
+                id="mileageIn"
+                name="mileageIn"
+                value={values.mileageIn}
+                onChange={(event) => updateFormValue("mileageIn", event.target.value)}
+                inputMode="decimal"
+                className={fieldControlClassName(state.fieldErrors, "mileageIn")}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "mileageIn",
+                  errorId: fieldErrorId("mileageIn"),
+                })}
+              />
+              <FieldError errors={state.fieldErrors} name="mileageIn" id={fieldErrorId("mileageIn")} />
             </div>
 
             <div className="space-y-2">
@@ -60,8 +78,14 @@ export function JobOrderDetailsForm({
                 value={values.mileageOut}
                 onChange={(event) => updateFormValue("mileageOut", event.target.value)}
                 inputMode="decimal"
+                className={fieldControlClassName(state.fieldErrors, "mileageOut")}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "mileageOut",
+                  errorId: fieldErrorId("mileageOut"),
+                })}
               />
-              <FieldError errors={state.fieldErrors} name="mileageOut" />
+              <FieldError errors={state.fieldErrors} name="mileageOut" id={fieldErrorId("mileageOut")} />
             </div>
           </div>
 
@@ -72,8 +96,14 @@ export function JobOrderDetailsForm({
               name="customerConcern"
               value={values.customerConcern}
               onChange={(event) => updateFormValue("customerConcern", event.target.value)}
+              className={fieldControlClassName(state.fieldErrors, "customerConcern")}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "customerConcern",
+                errorId: fieldErrorId("customerConcern"),
+              })}
             />
-            <FieldError errors={state.fieldErrors} name="customerConcern" />
+            <FieldError errors={state.fieldErrors} name="customerConcern" id={fieldErrorId("customerConcern")} />
           </div>
 
           <div className="space-y-2">
@@ -83,14 +113,31 @@ export function JobOrderDetailsForm({
               name="inspectionNotes"
               value={values.inspectionNotes}
               onChange={(event) => updateFormValue("inspectionNotes", event.target.value)}
+              className={fieldControlClassName(state.fieldErrors, "inspectionNotes")}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "inspectionNotes",
+                errorId: fieldErrorId("inspectionNotes"),
+              })}
             />
-            <FieldError errors={state.fieldErrors} name="inspectionNotes" />
+            <FieldError errors={state.fieldErrors} name="inspectionNotes" id={fieldErrorId("inspectionNotes")} />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="diagnosis">Diagnosis</Label>
-            <Textarea id="diagnosis" name="diagnosis" value={values.diagnosis} onChange={(event) => updateFormValue("diagnosis", event.target.value)} />
-            <FieldError errors={state.fieldErrors} name="diagnosis" />
+            <Textarea
+              id="diagnosis"
+              name="diagnosis"
+              value={values.diagnosis}
+              onChange={(event) => updateFormValue("diagnosis", event.target.value)}
+              className={fieldControlClassName(state.fieldErrors, "diagnosis")}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "diagnosis",
+                errorId: fieldErrorId("diagnosis"),
+              })}
+            />
+            <FieldError errors={state.fieldErrors} name="diagnosis" id={fieldErrorId("diagnosis")} />
           </div>
 
           <div className="space-y-2">
@@ -100,8 +147,14 @@ export function JobOrderDetailsForm({
               name="workPerformed"
               value={values.workPerformed}
               onChange={(event) => updateFormValue("workPerformed", event.target.value)}
+              className={fieldControlClassName(state.fieldErrors, "workPerformed")}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "workPerformed",
+                errorId: fieldErrorId("workPerformed"),
+              })}
             />
-            <FieldError errors={state.fieldErrors} name="workPerformed" />
+            <FieldError errors={state.fieldErrors} name="workPerformed" id={fieldErrorId("workPerformed")} />
           </div>
 
           <div className="flex justify-end">

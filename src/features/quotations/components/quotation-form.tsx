@@ -4,7 +4,15 @@ import Link from "next/link";
 import { useState } from "react";
 import { useActionState } from "react";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormRequiredFieldsNote,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+  formSelectClassName,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -89,11 +97,14 @@ export function QuotationForm({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              <FormRequiredFieldsNote />
               <FormStatusMessage message={state.message} />
 
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="customerId">Customer</Label>
+                  <Label htmlFor="customerId" required>
+                    Customer
+                  </Label>
                   <select
                     id="customerId"
                     name="customerId"
@@ -110,7 +121,13 @@ export function QuotationForm({
                         setVehicleId("");
                       }
                     }}
-                    className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className={formSelectClassName(state.fieldErrors, "customerId")}
+                    {...fieldAriaProps({
+                      errors: state.fieldErrors,
+                      name: "customerId",
+                      required: true,
+                      errorId: fieldErrorId("customerId"),
+                    })}
                   >
                     <option value="">Select customer</option>
                     {customerOptions.map((customer) => (
@@ -119,17 +136,25 @@ export function QuotationForm({
                       </option>
                     ))}
                   </select>
-                  <FieldError errors={state.fieldErrors} name="customerId" />
+                  <FieldError errors={state.fieldErrors} name="customerId" id={fieldErrorId("customerId")} />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="vehicleId">Vehicle</Label>
+                  <Label htmlFor="vehicleId" required>
+                    Vehicle
+                  </Label>
                   <select
                     id="vehicleId"
                     name="vehicleId"
                     value={vehicleId}
                     onChange={(event) => setVehicleId(event.target.value)}
-                    className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className={formSelectClassName(state.fieldErrors, "vehicleId")}
+                    {...fieldAriaProps({
+                      errors: state.fieldErrors,
+                      name: "vehicleId",
+                      required: true,
+                      errorId: fieldErrorId("vehicleId"),
+                    })}
                   >
                     <option value="">Select vehicle</option>
                     {availableVehicles.map((vehicle) => (
@@ -138,24 +163,32 @@ export function QuotationForm({
                       </option>
                     ))}
                   </select>
-                  <FieldError errors={state.fieldErrors} name="vehicleId" />
+                  <FieldError errors={state.fieldErrors} name="vehicleId" id={fieldErrorId("vehicleId")} />
                 </div>
               </div>
 
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="status">Quotation status</Label>
+                  <Label htmlFor="status" required>
+                    Quotation status
+                  </Label>
                   <select
                     id="status"
                     name="status"
                     value={status}
                     onChange={(event) => setStatus(event.target.value as QuotationFormValues["status"])}
-                    className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className={formSelectClassName(state.fieldErrors, "status")}
+                    {...fieldAriaProps({
+                      errors: state.fieldErrors,
+                      name: "status",
+                      required: true,
+                      errorId: fieldErrorId("status"),
+                    })}
                   >
                     <option value="draft">Draft</option>
                     <option value="pending_approval">Pending approval</option>
                   </select>
-                  <FieldError errors={state.fieldErrors} name="status" />
+                  <FieldError errors={state.fieldErrors} name="status" id={fieldErrorId("status")} />
                 </div>
               </div>
 
@@ -166,9 +199,16 @@ export function QuotationForm({
                     id="natureOfRepair"
                     name="natureOfRepair"
                     value={natureOfRepair}
+                    className={fieldControlClassName(state.fieldErrors, "natureOfRepair")}
+                    {...fieldAriaProps({
+                      errors: state.fieldErrors,
+                      name: "natureOfRepair",
+                      required: false,
+                      errorId: fieldErrorId("natureOfRepair"),
+                    })}
                     onChange={(event) => setNatureOfRepair(event.target.value)}
                   />
-                  <FieldError errors={state.fieldErrors} name="natureOfRepair" />
+                  <FieldError errors={state.fieldErrors} name="natureOfRepair" id={fieldErrorId("natureOfRepair")} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="inspectionNotes">Inspection notes</Label>
@@ -176,9 +216,16 @@ export function QuotationForm({
                     id="inspectionNotes"
                     name="inspectionNotes"
                     value={inspectionNotes}
+                    className={fieldControlClassName(state.fieldErrors, "inspectionNotes")}
+                    {...fieldAriaProps({
+                      errors: state.fieldErrors,
+                      name: "inspectionNotes",
+                      required: false,
+                      errorId: fieldErrorId("inspectionNotes"),
+                    })}
                     onChange={(event) => setInspectionNotes(event.target.value)}
                   />
-                  <FieldError errors={state.fieldErrors} name="inspectionNotes" />
+                  <FieldError errors={state.fieldErrors} name="inspectionNotes" id={fieldErrorId("inspectionNotes")} />
                 </div>
               </div>
             </CardContent>
@@ -221,7 +268,7 @@ export function QuotationForm({
 
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
                       <div className="space-y-2">
-                        <Label>Item type</Label>
+                        <Label required>Item type</Label>
                         <select
                           value={item.itemType}
                           onChange={(event) =>
@@ -233,7 +280,13 @@ export function QuotationForm({
                               unitPrice: formatMoneyInputValue(0),
                             })
                           }
-                          className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          className={formSelectClassName(state.fieldErrors, "items")}
+                          {...fieldAriaProps({
+                            errors: state.fieldErrors,
+                            name: "items",
+                            required: true,
+                            errorId: fieldErrorId("items"),
+                          })}
                         >
                           <option value="product">Product</option>
                           <option value="service">Service</option>
@@ -244,7 +297,7 @@ export function QuotationForm({
                       {item.itemType === "product" ? (
                         <div className="space-y-2 xl:col-span-2">
                           <div className="flex items-center justify-between gap-3">
-                            <Label>Product</Label>
+                            <Label required>Product</Label>
                             {options.permissions.canCreateProducts ? (
                               <QuickCreateProductDialog
                                 triggerLabel="Add new product"
@@ -285,7 +338,13 @@ export function QuotationForm({
                                 unitPrice: selected ? formatMoneyInputValue(selected.unitPrice) : formatMoneyInputValue(0),
                               });
                             }}
-                            className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            className={formSelectClassName(state.fieldErrors, "items")}
+                            {...fieldAriaProps({
+                              errors: state.fieldErrors,
+                              name: "items",
+                              required: true,
+                              errorId: fieldErrorId("items"),
+                            })}
                           >
                             <option value="">Select product</option>
                             {filteredProducts.map((product) => (
@@ -299,7 +358,7 @@ export function QuotationForm({
                       ) : item.itemType === "service" ? (
                         <div className="space-y-2 xl:col-span-2">
                           <div className="flex items-center justify-between gap-3">
-                            <Label>Service</Label>
+                            <Label required>Service</Label>
                             {options.permissions.canCreateServices ? (
                               <QuickCreateServiceDialog
                                 triggerLabel="Add new service"
@@ -339,7 +398,13 @@ export function QuotationForm({
                                 unitPrice: selected ? formatMoneyInputValue(selected.unitPrice) : formatMoneyInputValue(0),
                               });
                             }}
-                            className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            className={formSelectClassName(state.fieldErrors, "items")}
+                            {...fieldAriaProps({
+                              errors: state.fieldErrors,
+                              name: "items",
+                              required: true,
+                              errorId: fieldErrorId("items"),
+                            })}
                           >
                             <option value="">Select service</option>
                             {filteredServices.map((service) => (
@@ -352,26 +417,40 @@ export function QuotationForm({
                         </div>
                       ) : (
                         <div className="space-y-2 xl:col-span-2">
-                          <Label>Description</Label>
+                          <Label required>Description</Label>
                           <Input
                             value={item.description}
                             onChange={(event) =>
                               updateItem(setItems, item.key, { description: event.target.value })
                             }
                             placeholder="Manual labor description"
+                            className={fieldControlClassName(state.fieldErrors, "items")}
+                            {...fieldAriaProps({
+                              errors: state.fieldErrors,
+                              name: "items",
+                              required: true,
+                              errorId: fieldErrorId("items"),
+                            })}
                           />
                         </div>
                       )}
 
                       {item.itemType !== "labor" ? (
                         <div className="space-y-2 xl:col-span-2">
-                          <Label>Description</Label>
+                          <Label required>Description</Label>
                           <Input
                             value={item.description}
                             onChange={(event) =>
                               updateItem(setItems, item.key, { description: event.target.value })
                             }
                             placeholder="Description"
+                            className={fieldControlClassName(state.fieldErrors, "items")}
+                            {...fieldAriaProps({
+                              errors: state.fieldErrors,
+                              name: "items",
+                              required: true,
+                              errorId: fieldErrorId("items"),
+                            })}
                           />
                         </div>
                       ) : null}
@@ -379,17 +458,24 @@ export function QuotationForm({
 
                     <div className="mt-4 grid gap-4 md:grid-cols-3 xl:grid-cols-4">
                       <div className="space-y-2">
-                        <Label>Quantity</Label>
+                        <Label required>Quantity</Label>
                         <Input
                           inputMode="decimal"
                           value={item.quantity}
                           onChange={(event) =>
                             updateItem(setItems, item.key, { quantity: event.target.value })
                           }
+                          className={fieldControlClassName(state.fieldErrors, "items")}
+                          {...fieldAriaProps({
+                            errors: state.fieldErrors,
+                            name: "items",
+                            required: true,
+                            errorId: fieldErrorId("items"),
+                          })}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Unit price</Label>
+                        <Label required>Unit price</Label>
                         <Input
                           inputMode="decimal"
                           type="number"
@@ -398,6 +484,13 @@ export function QuotationForm({
                           onChange={(event) =>
                             updateItem(setItems, item.key, { unitPrice: event.target.value })
                           }
+                          className={fieldControlClassName(state.fieldErrors, "items")}
+                          {...fieldAriaProps({
+                            errors: state.fieldErrors,
+                            name: "items",
+                            required: true,
+                            errorId: fieldErrorId("items"),
+                          })}
                         />
                       </div>
                       <div className="space-y-2">
@@ -411,7 +504,7 @@ export function QuotationForm({
                 );
               })}
 
-              <FieldError errors={state.fieldErrors} name="items" />
+              <FieldError errors={state.fieldErrors} name="items" id={fieldErrorId("items")} />
             </CardContent>
           </Card>
         </div>
@@ -424,7 +517,9 @@ export function QuotationForm({
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="discount">Discount</Label>
+                <Label htmlFor="discount" required>
+                  Discount
+                </Label>
                 <Input
                   id="discount"
                   name="discount"
@@ -433,11 +528,20 @@ export function QuotationForm({
                   step={MONEY_INPUT_STEP}
                   value={discount}
                   onChange={(event) => setDiscount(event.target.value)}
+                  className={fieldControlClassName(state.fieldErrors, "discount")}
+                  {...fieldAriaProps({
+                    errors: state.fieldErrors,
+                    name: "discount",
+                    required: true,
+                    errorId: fieldErrorId("discount"),
+                  })}
                 />
-                <FieldError errors={state.fieldErrors} name="discount" />
+                <FieldError errors={state.fieldErrors} name="discount" id={fieldErrorId("discount")} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="tax">Tax</Label>
+                <Label htmlFor="tax" required>
+                  Tax
+                </Label>
                 <Input
                   id="tax"
                   name="tax"
@@ -446,8 +550,15 @@ export function QuotationForm({
                   step={MONEY_INPUT_STEP}
                   value={tax}
                   onChange={(event) => setTax(event.target.value)}
+                  className={fieldControlClassName(state.fieldErrors, "tax")}
+                  {...fieldAriaProps({
+                    errors: state.fieldErrors,
+                    name: "tax",
+                    required: true,
+                    errorId: fieldErrorId("tax"),
+                  })}
                 />
-                <FieldError errors={state.fieldErrors} name="tax" />
+                <FieldError errors={state.fieldErrors} name="tax" id={fieldErrorId("tax")} />
               </div>
 
               <div className="rounded-[1.25rem] border border-border/70 bg-muted/30 p-4 text-sm">

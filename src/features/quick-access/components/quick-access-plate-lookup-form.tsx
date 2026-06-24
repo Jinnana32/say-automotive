@@ -5,7 +5,9 @@ import { Camera, Loader2, ScanSearch, VideoOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { SearchInput } from "@/components/shared/search-input";
+import { fieldAriaProps } from "@/components/shared/form-status";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { extractPlateCandidatesFromTextBlocks, normalizeQuickAccessPlate } from "@/features/quick-access/utils";
 
 type BrowserTextDetector = {
@@ -163,20 +165,27 @@ export function QuickAccessPlateLookupForm({
   return (
     <div className="space-y-4">
       <form
-        className="flex flex-col gap-3 md:flex-row"
+        className="flex flex-col gap-3 md:flex-row md:items-end"
         onSubmit={(event) => {
           event.preventDefault();
           submitPlateLookup(plateInput);
         }}
       >
-        <SearchInput
-          value={plateInput}
-          onChange={(event) => setPlateInput(event.target.value.toUpperCase())}
-          placeholder="Enter plate number"
-          autoCapitalize="characters"
-          autoCorrect="off"
-          spellCheck={false}
-        />
+        <div className="min-w-0 flex-1 space-y-2">
+          <Label htmlFor="quickAccessPlateSearch" required>
+            Plate number
+          </Label>
+          <SearchInput
+            id="quickAccessPlateSearch"
+            value={plateInput}
+            onChange={(event) => setPlateInput(event.target.value.toUpperCase())}
+            placeholder="Enter plate number"
+            autoCapitalize="characters"
+            autoCorrect="off"
+            spellCheck={false}
+            {...fieldAriaProps({ name: "plate", required: true })}
+          />
+        </div>
         <Button type="submit" className="shrink-0" disabled={isPending}>
           {isPending ? <Loader2 className="size-4 animate-spin" /> : <ScanSearch className="size-4" />}
           Search record

@@ -31,7 +31,15 @@ import type {
   StaffScheduleSummary,
 } from "@/features/attendance/types";
 
-export const ATTENDANCE_STATUS_VALUES = ["present", "late", "half_day", "absent"] as const;
+export const UNPAID_DAY_OFF_STATUS_LABEL = "Day Off (Unpaid)";
+
+export const ATTENDANCE_STATUS_VALUES = [
+  "present",
+  "late",
+  "half_day",
+  "absent",
+  "unpaid_day_off",
+] as const;
 
 export const ATTENDANCE_STATUS_OPTIONS: Array<{
   value: AttendanceStatus;
@@ -41,6 +49,7 @@ export const ATTENDANCE_STATUS_OPTIONS: Array<{
   { value: "late", label: "Late" },
   { value: "half_day", label: "Half day" },
   { value: "absent", label: "Absent" },
+  { value: "unpaid_day_off", label: UNPAID_DAY_OFF_STATUS_LABEL },
 ];
 
 export const ATTENDANCE_FILTER_OPTIONS: Array<{
@@ -51,9 +60,14 @@ export const ATTENDANCE_FILTER_OPTIONS: Array<{
   { value: "late", label: "Late" },
   { value: "half_day", label: "Half day" },
   { value: "absent", label: "Absent" },
+  { value: "unpaid_day_off", label: UNPAID_DAY_OFF_STATUS_LABEL },
   { value: "missing_timeout", label: "Missing timeout" },
   { value: "unrecorded", label: "No record" },
 ];
+
+export function isNonTimedAttendanceStatus(status: AttendanceStatus) {
+  return status === "absent" || status === "unpaid_day_off";
+}
 
 export const ATTENDANCE_ROLE_OPTIONS: Array<{
   value: StaffRole;
@@ -159,6 +173,8 @@ export function formatAttendanceStatusLabel(status: AttendanceStatus | Attendanc
       return "Half day";
     case "absent":
       return "Absent";
+    case "unpaid_day_off":
+      return UNPAID_DAY_OFF_STATUS_LABEL;
     case "missing_timeout":
       return "Missing timeout";
     case "unrecorded":
@@ -177,6 +193,8 @@ export function getAttendanceStatusTone(status: AttendanceStatus | AttendanceFil
       return "info";
     case "absent":
       return "destructive";
+    case "unpaid_day_off":
+      return "info";
     case "unrecorded":
       return "neutral";
   }

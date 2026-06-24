@@ -3,7 +3,14 @@
 import { useActionState } from "react";
 
 import { FormSection } from "@/components/shared/form-section";
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormRequiredFieldsNote,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+} from "@/components/shared/form-status";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +52,7 @@ export function OperationalRulesForm({
       description="Payment, release, barcode, and shelf-location behavior."
     >
       <form action={formAction} className="space-y-4">
+        <FormRequiredFieldsNote />
         <FormStatusMessage message={state.message} />
 
         <div className="space-y-3">
@@ -128,33 +136,51 @@ export function OperationalRulesForm({
 
         <div className="grid gap-4 rounded-2xl border border-border/70 bg-muted/15 px-4 py-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="payrollStandardDailyHours">Standard daily hours</Label>
+            <Label htmlFor="payrollStandardDailyHours" required>
+              Standard daily hours
+            </Label>
             <Input
               id="payrollStandardDailyHours"
               name="payrollStandardDailyHours"
               inputMode="decimal"
               value={values.payrollStandardDailyHours}
               onChange={(event) => updateFormValue("payrollStandardDailyHours", event.target.value)}
+              className={fieldControlClassName(state.fieldErrors, "payrollStandardDailyHours")}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "payrollStandardDailyHours",
+                required: true,
+                errorId: fieldErrorId("payrollStandardDailyHours"),
+              })}
             />
             <p className="text-sm text-muted-foreground">
               Used to convert daily salary into an hourly rate for overtime and late deductions.
             </p>
-            <FieldError errors={state.fieldErrors} name="payrollStandardDailyHours" />
+            <FieldError errors={state.fieldErrors} name="payrollStandardDailyHours" id={fieldErrorId("payrollStandardDailyHours")} />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="payrollHolidayPremiumRate">Holiday premium (%)</Label>
+            <Label htmlFor="payrollHolidayPremiumRate" required>
+              Holiday premium (%)
+            </Label>
             <Input
               id="payrollHolidayPremiumRate"
               name="payrollHolidayPremiumRate"
               inputMode="decimal"
               value={values.payrollHolidayPremiumRate}
               onChange={(event) => updateFormValue("payrollHolidayPremiumRate", event.target.value)}
+              className={fieldControlClassName(state.fieldErrors, "payrollHolidayPremiumRate")}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "payrollHolidayPremiumRate",
+                required: true,
+                errorId: fieldErrorId("payrollHolidayPremiumRate"),
+              })}
             />
             <p className="text-sm text-muted-foreground">
               Extra percentage paid only when a staff member actually works on a holiday date.
             </p>
-            <FieldError errors={state.fieldErrors} name="payrollHolidayPremiumRate" />
+            <FieldError errors={state.fieldErrors} name="payrollHolidayPremiumRate" id={fieldErrorId("payrollHolidayPremiumRate")} />
           </div>
         </div>
 

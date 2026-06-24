@@ -2208,7 +2208,7 @@ export type Database = {
     };
     Enums: {
       approval_status: "not_required" | "pending" | "approved" | "rejected";
-      attendance_status: "present" | "absent" | "late" | "half_day";
+      attendance_status: "present" | "absent" | "late" | "half_day" | "unpaid_day_off";
       customer_type: "individual" | "company" | "fleet";
       invoice_status: "unpaid" | "partially_paid" | "paid" | "cancelled";
       job_order_status:

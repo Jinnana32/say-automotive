@@ -2,7 +2,13 @@
 
 import { useActionState, useEffect, useMemo, useState } from "react";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -139,11 +145,20 @@ export function JobOrderAdditionalItemForm({
       ) : null}
 
       <div className="space-y-2">
-        <Label htmlFor="itemType">Item type</Label>
+        <Label htmlFor="itemType" required>
+          Item type
+        </Label>
         <NativeSelect
           id="itemType"
           name="itemType"
           value={itemType}
+          className={fieldControlClassName(state.fieldErrors, "itemType")}
+          {...fieldAriaProps({
+            errors: state.fieldErrors,
+            name: "itemType",
+            required: true,
+            errorId: fieldErrorId("itemType"),
+          })}
           onChange={(event) => {
             const nextType = event.target.value as JobOrderItemType | "";
             setItemType(nextType);
@@ -158,13 +173,15 @@ export function JobOrderAdditionalItemForm({
           <option value="service">Service</option>
           <option value="labor">Manual labor</option>
         </NativeSelect>
-        <FieldError errors={state.fieldErrors} name="itemType" />
+        <FieldError errors={state.fieldErrors} name="itemType" id={fieldErrorId("itemType")} />
       </div>
 
       {isProductType ? (
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-3">
-            <Label htmlFor="productId">Product</Label>
+            <Label htmlFor="productId" required>
+              Product
+            </Label>
             {catalogOptions?.permissions.canCreateProducts ? (
               <QuickCreateProductDialog
                 triggerLabel="Add new product"
@@ -214,6 +231,13 @@ export function JobOrderAdditionalItemForm({
               id="productId"
               name="productId"
               value={productId}
+              className={fieldControlClassName(state.fieldErrors, "productId")}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "productId",
+                required: true,
+                errorId: fieldErrorId("productId"),
+              })}
               onChange={(event) => {
                 const nextProductId = event.target.value;
                 const selected = catalogOptions.products.find((product) => product.id === nextProductId);
@@ -235,12 +259,14 @@ export function JobOrderAdditionalItemForm({
               <option value="">Loading products...</option>
             </NativeSelect>
           )}
-          <FieldError errors={state.fieldErrors} name="productId" />
+          <FieldError errors={state.fieldErrors} name="productId" id={fieldErrorId("productId")} />
         </div>
       ) : isServiceType ? (
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-3">
-            <Label htmlFor="serviceId">Service</Label>
+            <Label htmlFor="serviceId" required>
+              Service
+            </Label>
             {catalogOptions?.permissions.canCreateServices ? (
               <QuickCreateServiceDialog
                 triggerLabel="Add new service"
@@ -290,6 +316,13 @@ export function JobOrderAdditionalItemForm({
               id="serviceId"
               name="serviceId"
               value={serviceId}
+              className={fieldControlClassName(state.fieldErrors, "serviceId")}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: "serviceId",
+                required: true,
+                errorId: fieldErrorId("serviceId"),
+              })}
               onChange={(event) => {
                 const nextServiceId = event.target.value;
                 const selected = catalogOptions.services.find((service) => service.id === nextServiceId);
@@ -311,7 +344,7 @@ export function JobOrderAdditionalItemForm({
               <option value="">Loading services...</option>
             </NativeSelect>
           )}
-          <FieldError errors={state.fieldErrors} name="serviceId" />
+          <FieldError errors={state.fieldErrors} name="serviceId" id={fieldErrorId("serviceId")} />
         </div>
       ) : isLaborType ? (
         <div className="rounded-2xl border border-border/70 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
@@ -330,32 +363,52 @@ export function JobOrderAdditionalItemForm({
       {!isServiceType ? <input type="hidden" name="serviceId" value="" /> : null}
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description" required>
+          Description
+        </Label>
         <Input
           id="description"
           name="description"
           value={description}
           onChange={(event) => setDescription(event.target.value)}
           placeholder="Describe the additional charge"
+          className={fieldControlClassName(state.fieldErrors, "description")}
+          {...fieldAriaProps({
+            errors: state.fieldErrors,
+            name: "description",
+            required: true,
+            errorId: fieldErrorId("description"),
+          })}
         />
-        <FieldError errors={state.fieldErrors} name="description" />
+        <FieldError errors={state.fieldErrors} name="description" id={fieldErrorId("description")} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="quantity">Quantity</Label>
+          <Label htmlFor="quantity" required>
+            Quantity
+          </Label>
           <Input
             id="quantity"
             name="quantity"
             inputMode="decimal"
             value={quantity}
             onChange={(event) => setQuantity(event.target.value)}
+            className={fieldControlClassName(state.fieldErrors, "quantity")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "quantity",
+              required: true,
+              errorId: fieldErrorId("quantity"),
+            })}
           />
-          <FieldError errors={state.fieldErrors} name="quantity" />
+          <FieldError errors={state.fieldErrors} name="quantity" id={fieldErrorId("quantity")} />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="unitPrice">Unit price</Label>
+          <Label htmlFor="unitPrice" required>
+            Unit price
+          </Label>
           <Input
             id="unitPrice"
             name="unitPrice"
@@ -365,8 +418,15 @@ export function JobOrderAdditionalItemForm({
             value={unitPrice}
             onChange={(event) => setUnitPrice(event.target.value)}
             placeholder="0.00"
+            className={fieldControlClassName(state.fieldErrors, "unitPrice")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "unitPrice",
+              required: true,
+              errorId: fieldErrorId("unitPrice"),
+            })}
           />
-          <FieldError errors={state.fieldErrors} name="unitPrice" />
+          <FieldError errors={state.fieldErrors} name="unitPrice" id={fieldErrorId("unitPrice")} />
         </div>
       </div>
 

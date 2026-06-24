@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { MoreHorizontal } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -136,28 +137,36 @@ export function TableRowActionsMenuConfirm({
   tone?: RowActionTone;
   disabled?: boolean;
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <ConfirmActionDialog
-      title={title}
-      description={description}
-      action={action}
-      fields={fields}
-      confirmLabel={confirmLabel}
-      cancelLabel={cancelLabel}
-      confirmVariant={confirmVariant}
-      trigger={({ openDialog }) => (
-        <DropdownMenuItem
-          className={cn(
-            itemBaseClass,
-            tone === "destructive" && "text-destructive hover:bg-destructive/10 hover:text-destructive",
-          )}
-          onSelect={() => openDialog()}
-          disabled={disabled}
-        >
-          {Icon ? <Icon className="size-4" /> : null}
-          <span>{label}</span>
-        </DropdownMenuItem>
-      )}
-    />
+    <>
+      <DropdownMenuItem
+        className={cn(
+          itemBaseClass,
+          tone === "destructive" && "text-destructive hover:bg-destructive/10 hover:text-destructive",
+        )}
+        onSelect={(event) => {
+          event.preventDefault();
+          setIsOpen(true);
+        }}
+        disabled={disabled}
+      >
+        {Icon ? <Icon className="size-4" /> : null}
+        <span>{label}</span>
+      </DropdownMenuItem>
+      <ConfirmActionDialog
+        title={title}
+        description={description}
+        action={action}
+        fields={fields}
+        confirmLabel={confirmLabel}
+        cancelLabel={cancelLabel}
+        confirmVariant={confirmVariant}
+        closeOnSubmit={false}
+        open={isOpen}
+        onOpenChange={setIsOpen}
+      />
+    </>
   );
 }

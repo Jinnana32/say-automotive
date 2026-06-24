@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { SearchInput } from "@/components/shared/search-input";
+import { fieldAriaProps } from "@/components/shared/form-status";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 export function QuickAccessCustomerLookupForm({
   initialLastName,
@@ -37,19 +39,26 @@ export function QuickAccessCustomerLookupForm({
   return (
     <div className="space-y-4">
       <form
-        className="flex flex-col gap-3 md:flex-row"
+        className="flex flex-col gap-3 md:flex-row md:items-end"
         onSubmit={(event) => {
           event.preventDefault();
           submitLookup(lastNameInput);
         }}
       >
-        <SearchInput
-          value={lastNameInput}
-          onChange={(event) => setLastNameInput(event.target.value)}
-          placeholder="Enter customer last name"
-          autoCorrect="off"
-          spellCheck={false}
-        />
+        <div className="min-w-0 flex-1 space-y-2">
+          <Label htmlFor="quickAccessCustomerLastName" required>
+            Last name
+          </Label>
+          <SearchInput
+            id="quickAccessCustomerLastName"
+            value={lastNameInput}
+            onChange={(event) => setLastNameInput(event.target.value)}
+            placeholder="Enter customer last name"
+            autoCorrect="off"
+            spellCheck={false}
+            {...fieldAriaProps({ name: "lastName", required: true })}
+          />
+        </div>
         <Button type="submit" className="shrink-0" disabled={isPending}>
           {isPending ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />}
           Search customer

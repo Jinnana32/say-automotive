@@ -3,7 +3,13 @@
 import { useActionState } from "react";
 
 import { FormSection } from "@/components/shared/form-section";
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import {
+  FieldError,
+  FormStatusMessage,
+  fieldAriaProps,
+  fieldControlClassName,
+  fieldErrorId,
+} from "@/components/shared/form-status";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
@@ -41,9 +47,24 @@ export function VehicleMakeLookupSection({ makes }: { makes: VehicleMakeItem[] }
     >
       <form action={formAction} className="grid gap-4 md:grid-cols-[minmax(0,1fr)_140px_auto]">
         <div className="space-y-2">
-          <Label htmlFor="vehicleMakeName">Make name</Label>
-          <Input id="vehicleMakeName" name="name" placeholder="Toyota" value={values.name} onChange={(event) => updateFormValue("name", event.target.value)} />
-          <FieldError errors={state.fieldErrors} name="name" />
+          <Label htmlFor="vehicleMakeName" required>
+            Make name
+          </Label>
+          <Input
+            id="vehicleMakeName"
+            name="name"
+            placeholder="Toyota"
+            value={values.name}
+            onChange={(event) => updateFormValue("name", event.target.value)}
+            className={fieldControlClassName(state.fieldErrors, "name")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "name",
+              required: true,
+              errorId: fieldErrorId("name"),
+            })}
+          />
+          <FieldError errors={state.fieldErrors} name="name" id={fieldErrorId("name")} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="vehicleMakeSortOrder">Sort order</Label>
@@ -110,8 +131,22 @@ export function VehicleModelLookupSection({
     >
       <form action={formAction} className="grid gap-4 md:grid-cols-[220px_minmax(0,1fr)_140px_auto]">
         <div className="space-y-2">
-          <Label htmlFor="vehicleModelMakeId">Make</Label>
-          <NativeSelect id="vehicleModelMakeId" name="makeId" value={values.makeId} onChange={(event) => updateFormValue("makeId", event.target.value)}>
+          <Label htmlFor="vehicleModelMakeId" required>
+            Make
+          </Label>
+          <NativeSelect
+            id="vehicleModelMakeId"
+            name="makeId"
+            value={values.makeId}
+            className={fieldControlClassName(state.fieldErrors, "makeId")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "makeId",
+              required: true,
+              errorId: fieldErrorId("makeId"),
+            })}
+            onChange={(event) => updateFormValue("makeId", event.target.value)}
+          >
             <option value="">Select make</option>
             {makes.map((make) => (
               <option key={make.id} value={make.id}>
@@ -119,12 +154,27 @@ export function VehicleModelLookupSection({
               </option>
             ))}
           </NativeSelect>
-          <FieldError errors={state.fieldErrors} name="makeId" />
+          <FieldError errors={state.fieldErrors} name="makeId" id={fieldErrorId("makeId")} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="vehicleModelName">Model name</Label>
-          <Input id="vehicleModelName" name="name" placeholder="Vios" value={values.name} onChange={(event) => updateFormValue("name", event.target.value)} />
-          <FieldError errors={state.fieldErrors} name="name" />
+          <Label htmlFor="vehicleModelName" required>
+            Model name
+          </Label>
+          <Input
+            id="vehicleModelName"
+            name="name"
+            placeholder="Vios"
+            value={values.name}
+            onChange={(event) => updateFormValue("name", event.target.value)}
+            className={fieldControlClassName(state.fieldErrors, "name")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "name",
+              required: true,
+              errorId: fieldErrorId("name"),
+            })}
+          />
+          <FieldError errors={state.fieldErrors} name="name" id={fieldErrorId("name")} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="vehicleModelSortOrder">Sort order</Label>
@@ -186,9 +236,24 @@ export function VehicleLookupOptionSection({ group }: { group: VehicleLookupOpti
       <form action={formAction} className="grid gap-4 md:grid-cols-[minmax(0,1fr)_120px_auto]">
         <input type="hidden" name="lookupType" value={group.lookupType} />
         <div className="space-y-2">
-          <Label htmlFor={`${group.lookupType}-label`}>Label</Label>
-          <Input id={`${group.lookupType}-label`} name="label" placeholder={getPlaceholder(group.lookupType)} value={values.label} onChange={(event) => updateFormValue("label", event.target.value)} />
-          <FieldError errors={state.fieldErrors} name="label" />
+          <Label htmlFor={`${group.lookupType}-label`} required>
+            Label
+          </Label>
+          <Input
+            id={`${group.lookupType}-label`}
+            name="label"
+            placeholder={getPlaceholder(group.lookupType)}
+            value={values.label}
+            onChange={(event) => updateFormValue("label", event.target.value)}
+            className={fieldControlClassName(state.fieldErrors, "label")}
+            {...fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "label",
+              required: true,
+              errorId: fieldErrorId("label"),
+            })}
+          />
+          <FieldError errors={state.fieldErrors} name="label" id={fieldErrorId("label")} />
         </div>
         <div className="space-y-2">
           <Label htmlFor={`${group.lookupType}-sortOrder`}>Sort order</Label>
