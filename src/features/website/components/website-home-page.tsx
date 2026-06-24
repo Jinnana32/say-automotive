@@ -114,7 +114,7 @@ const SERVICE_CARDS = [
 const BRAND_LOGOS = [
   { name: 'Valvoline', src: '/brand-logos/valvoline.png' },
   { name: 'Shell Helix', src: '/brand-logos/new shell logo.png' },
-  { name: 'Mobil 1', src: '/brand-logos/Mobil1_logo.png' },
+  { name: 'Mobil 1', src: '/brand-logos/Mobil1_logo.png', imageClassName: 'max-h-10 max-w-[190px]' },
   { name: 'Totachi', src: '/brand-logos/totachi-seeklogo.com_.svg' },
   { name: 'Varta', src: '/brand-logos/Varta.png' },
   { name: 'Dirty Life Race Wheels', src: '/brand-logos/Dirty Wheels.png' },
