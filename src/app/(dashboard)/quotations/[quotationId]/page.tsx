@@ -63,7 +63,16 @@ export default async function QuotationDetailPage({
 
       <PageHeader
         title={quotation.quotationNumber}
-        description={`${quotation.customerName} • ${quotation.vehicleLabel}`}
+        titleClassName="whitespace-nowrap"
+        description={
+          <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span>{quotation.customerName}</span>
+            <span className="text-muted-foreground/70" aria-hidden="true">
+              ·
+            </span>
+            <span>{quotation.vehicleLabel}</span>
+          </span>
+        }
         actions={
           <>
             <Button asChild variant="outline">
@@ -111,7 +120,7 @@ export default async function QuotationDetailPage({
         }
       />
 
-      <DetailSummaryGrid className="grid-cols-2">
+      <DetailSummaryGrid className="sm:grid-cols-2 xl:grid-cols-3">
         <DetailSummaryItem
           label="Customer"
           value={quotation.customerName}

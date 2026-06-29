@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Eye, FileText } from "lucide-react";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
 import { DataTableFilters } from "@/components/shared/data-table-filters";
@@ -148,12 +147,12 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
                           <TableRowActionsMenuLink
                             href={`/payments/${payment.id}`}
                             label="Open payment"
-                            icon={Eye}
+                            iconName="eye"
                           />
                           <TableRowActionsMenuLink
                             href={`/invoices/${payment.invoiceId}`}
                             label="Open invoice"
-                            icon={FileText}
+                            iconName="fileText"
                           />
                         </TableRowActionsMenu>
                       </TableCell>

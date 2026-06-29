@@ -740,7 +740,7 @@ function readString(formData: FormData, key: string) {
   return typeof value === "string" ? value : "";
 }
 
-function redirectTimekeepingFeedback(params: { tab?: string; error?: string }) {
+function redirectTimekeepingFeedback(params: { tab?: string; error?: string }): never {
   const search = new URLSearchParams();
 
   if (params.tab && params.tab !== "access") {
@@ -755,7 +755,7 @@ function redirectTimekeepingFeedback(params: { tab?: string; error?: string }) {
   redirect(`/settings/timekeeping${query ? `?${query}` : ""}`);
 }
 
-function redirectAttendanceFeedback(params: { tab?: string; error?: string }) {
+function redirectAttendanceFeedback(params: { tab?: string; error?: string }): never {
   const search = new URLSearchParams();
 
   if (params.tab) {

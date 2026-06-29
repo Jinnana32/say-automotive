@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Eye, Pencil } from "lucide-react";
+import { Eye } from "lucide-react";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
 import { DataTableFilters } from "@/components/shared/data-table-filters";
@@ -158,12 +158,12 @@ export default async function QuotationsPage({ searchParams }: QuotationsPagePro
                           <TableRowActionsMenuLink
                             href={`/quotations/${quotation.id}`}
                             label="View quotation"
-                            icon={Eye}
+                            iconName="eye"
                           />
                           <TableRowActionsMenuLink
                             href={`/quotations/${quotation.id}/edit`}
                             label="Edit quotation"
-                            icon={Pencil}
+                            iconName="pencil"
                           />
                         </TableRowActionsMenu>
                       )}

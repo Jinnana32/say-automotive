@@ -2,7 +2,17 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { MoreHorizontal } from "lucide-react";
+import {
+  CalendarClock,
+  Check,
+  Eye,
+  FileText,
+  HandCoins,
+  MoreHorizontal,
+  Pencil,
+  Power,
+  Trash2,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { ConfirmActionDialog, type ConfirmActionField } from "@/components/shared/confirm-action-dialog";
@@ -17,6 +27,31 @@ import { Button, type ButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type RowActionTone = "default" | "destructive";
+
+const TABLE_ROW_ACTION_ICONS = {
+  eye: Eye,
+  pencil: Pencil,
+  fileText: FileText,
+  trash: Trash2,
+  check: Check,
+  power: Power,
+  calendarClock: CalendarClock,
+  handCoins: HandCoins,
+} as const;
+
+export type TableRowActionIconName = keyof typeof TABLE_ROW_ACTION_ICONS;
+
+type RowActionIconProps = {
+  icon?: LucideIcon;
+  iconName?: TableRowActionIconName;
+  className?: string;
+};
+
+function RowActionIcon({ icon, iconName, className = "size-4" }: RowActionIconProps) {
+  const Icon = icon ?? (iconName ? TABLE_ROW_ACTION_ICONS[iconName] : undefined);
+
+  return Icon ? <Icon className={className} /> : null;
+}
 
 const itemBaseClass =
   "group flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm outline-none transition-colors focus:bg-muted/70";
@@ -60,12 +95,14 @@ export function TableRowActionsMenuSeparator() {
 export function TableRowActionsMenuLink({
   href,
   label,
-  icon: Icon,
+  icon,
+  iconName,
   tone = "default",
 }: {
   href: string;
   label: string;
   icon?: LucideIcon;
+  iconName?: TableRowActionIconName;
   tone?: RowActionTone;
 }) {
   return (
@@ -77,7 +114,7 @@ export function TableRowActionsMenuLink({
       )}
     >
       <Link href={href} aria-label={label} title={label}>
-        {Icon ? <Icon className="size-4" /> : null}
+        <RowActionIcon icon={icon} iconName={iconName} />
         <span>{label}</span>
       </Link>
     </DropdownMenuItem>
@@ -86,13 +123,15 @@ export function TableRowActionsMenuLink({
 
 export function TableRowActionsMenuButton({
   label,
-  icon: Icon,
+  icon,
+  iconName,
   tone = "default",
   onSelect,
   disabled = false,
 }: {
   label: string;
   icon?: LucideIcon;
+  iconName?: TableRowActionIconName;
   tone?: RowActionTone;
   onSelect: () => void;
   disabled?: boolean;
@@ -106,7 +145,7 @@ export function TableRowActionsMenuButton({
       onSelect={() => onSelect()}
       disabled={disabled}
     >
-      {Icon ? <Icon className="size-4" /> : null}
+      <RowActionIcon icon={icon} iconName={iconName} />
       <span>{label}</span>
     </DropdownMenuItem>
   );
@@ -121,7 +160,8 @@ export function TableRowActionsMenuConfirm({
   confirmLabel = "Confirm",
   cancelLabel = "Cancel",
   confirmVariant = "destructive",
-  icon: Icon,
+  icon,
+  iconName,
   tone = "destructive",
   disabled = false,
 }: {
@@ -134,6 +174,7 @@ export function TableRowActionsMenuConfirm({
   cancelLabel?: string;
   confirmVariant?: ButtonProps["variant"];
   icon?: LucideIcon;
+  iconName?: TableRowActionIconName;
   tone?: RowActionTone;
   disabled?: boolean;
 }) {
@@ -152,7 +193,7 @@ export function TableRowActionsMenuConfirm({
         }}
         disabled={disabled}
       >
-        {Icon ? <Icon className="size-4" /> : null}
+        <RowActionIcon icon={icon} iconName={iconName} />
         <span>{label}</span>
       </DropdownMenuItem>
       <ConfirmActionDialog
