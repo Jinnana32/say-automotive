@@ -73,7 +73,7 @@ export function BusinessProfileForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="businessLogo">Replace logo</Label>
+            <Label htmlFor="businessLogo" optional>Replace logo</Label>
             <Input
               id="businessLogo"
               name="businessLogo"
@@ -109,7 +109,7 @@ export function BusinessProfileForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="businessContact">Business contact</Label>
+            <Label htmlFor="businessContact" optional>Business contact</Label>
             <Input
               id="businessContact"
               name="businessContact"
@@ -128,7 +128,7 @@ export function BusinessProfileForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="businessVatRegistrationNo">VAT registration no.</Label>
+          <Label htmlFor="businessVatRegistrationNo" optional>VAT registration no.</Label>
           <Input
             id="businessVatRegistrationNo"
             name="businessVatRegistrationNo"
@@ -146,7 +146,7 @@ export function BusinessProfileForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="businessEmail">Business email</Label>
+          <Label htmlFor="businessEmail" optional>Business email</Label>
           <Input
             id="businessEmail"
             name="businessEmail"
@@ -164,7 +164,7 @@ export function BusinessProfileForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="businessAddress">Business address</Label>
+          <Label htmlFor="businessAddress" optional>Business address</Label>
           <Textarea
             id="businessAddress"
             name="businessAddress"
@@ -204,7 +204,7 @@ export function BusinessProfileForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="receiptFooter">Receipt footer</Label>
+            <Label htmlFor="receiptFooter" optional>Receipt footer</Label>
             <Textarea
               id="receiptFooter"
               name="receiptFooter"

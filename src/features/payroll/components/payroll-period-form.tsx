@@ -135,7 +135,7 @@ export function PayrollPeriodForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="payrollNotes">Notes</Label>
+        <Label htmlFor="payrollNotes" optional>Notes</Label>
         <Textarea
           id="payrollNotes"
           name="notes"

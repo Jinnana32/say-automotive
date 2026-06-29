@@ -4,6 +4,7 @@ import { useActionState, useMemo } from "react";
 
 import {
   FieldError,
+  FormRequiredFieldsNote,
   FormStatusMessage,
   fieldAriaProps,
   fieldControlClassName,
@@ -64,6 +65,7 @@ export function JobOrderItemEditForm({
       <input type="hidden" name="redirectTab" value={redirectTab} />
 
       <FormStatusMessage message={state.message} />
+      <FormRequiredFieldsNote />
 
       <div className="rounded-2xl border border-border/70 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
         <div className="space-y-1">

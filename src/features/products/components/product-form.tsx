@@ -113,7 +113,7 @@ export function ProductForm({
 
             <div className="mt-5 grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="owningBranchId">Owning branch</Label>
+                <Label htmlFor="owningBranchId" optional>Owning branch</Label>
                 <select
                   id="owningBranchId"
                   name="owningBranchId"
@@ -198,13 +198,13 @@ export function ProductForm({
 
           <div className="grid gap-6 md:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="sku">SKU</Label>
+              <Label htmlFor="sku" optional>SKU</Label>
               <Input id="sku" name="sku" value={values.sku} onChange={(event) => updateFormValue("sku", event.target.value)} />
               <FieldError errors={state.fieldErrors} name="sku" />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="barcode">Barcode</Label>
+              <Label htmlFor="barcode" optional>Barcode</Label>
               <Input id="barcode" name="barcode" value={values.barcode} onChange={(event) => updateFormValue("barcode", event.target.value)} />
               <FieldError errors={state.fieldErrors} name="barcode" />
             </div>
@@ -237,6 +237,7 @@ export function ProductForm({
               value={values.categoryId}
               options={categories}
               errors={state.fieldErrors}
+              optional
               onChange={(value) => updateFormValue("categoryId", value)}
             />
             <SelectField
@@ -245,6 +246,7 @@ export function ProductForm({
               value={values.brandId}
               options={brands}
               errors={state.fieldErrors}
+              optional
               onChange={(value) => updateFormValue("brandId", value)}
             />
             <SelectField
@@ -253,19 +255,20 @@ export function ProductForm({
               value={values.supplierId}
               options={suppliers}
               errors={state.fieldErrors}
+              optional
               onChange={(value) => updateFormValue("supplierId", value)}
             />
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="partNumber">Part number</Label>
+              <Label htmlFor="partNumber" optional>Part number</Label>
               <Input id="partNumber" name="partNumber" value={values.partNumber} onChange={(event) => updateFormValue("partNumber", event.target.value)} />
               <FieldError errors={state.fieldErrors} name="partNumber" />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="oemNumber">OEM number</Label>
+              <Label htmlFor="oemNumber" optional>OEM number</Label>
               <Input id="oemNumber" name="oemNumber" value={values.oemNumber} onChange={(event) => updateFormValue("oemNumber", event.target.value)} />
               <FieldError errors={state.fieldErrors} name="oemNumber" />
             </div>
@@ -275,12 +278,12 @@ export function ProductForm({
             <NumberField name="costPrice" label="Cost price" value={values.costPrice} errors={state.fieldErrors} onChange={(value) => updateFormValue("costPrice", value)} step={MONEY_INPUT_STEP} required />
             <NumberField name="sellingPrice" label="Selling price" value={values.sellingPrice} errors={state.fieldErrors} onChange={(value) => updateFormValue("sellingPrice", value)} step={MONEY_INPUT_STEP} required />
             <NumberField name="reorderLevel" label="Reorder level" value={values.reorderLevel} errors={state.fieldErrors} onChange={(value) => updateFormValue("reorderLevel", value)} step={MONEY_INPUT_STEP} required />
-            <NumberField name="warrantyDurationDays" label="Warranty days" value={values.warrantyDurationDays} errors={state.fieldErrors} onChange={(value) => updateFormValue("warrantyDurationDays", value)} />
+            <NumberField name="warrantyDurationDays" label="Warranty days" value={values.warrantyDurationDays} errors={state.fieldErrors} optional onChange={(value) => updateFormValue("warrantyDurationDays", value)} />
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="shelfLocation">Shelf location</Label>
+              <Label htmlFor="shelfLocation" optional>Shelf location</Label>
               <Input id="shelfLocation" name="shelfLocation" value={values.shelfLocation} onChange={(event) => updateFormValue("shelfLocation", event.target.value)} />
               <FieldError errors={state.fieldErrors} name="shelfLocation" />
             </div>
@@ -320,7 +323,7 @@ export function ProductForm({
 
             <div className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="productImage">Upload photo</Label>
+                <Label htmlFor="productImage" optional>Upload photo</Label>
                 <Input
                   id="productImage"
                   name="productImage"
@@ -342,7 +345,7 @@ export function ProductForm({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="productImageUrl">External image URL</Label>
+                <Label htmlFor="productImageUrl" optional>External image URL</Label>
                 <Input
                   id="productImageUrl"
                   name="productImageUrl"
@@ -401,7 +404,7 @@ export function ProductForm({
 
             <div className="mt-5 grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="websiteSlug">Website slug</Label>
+                <Label htmlFor="websiteSlug" optional>Website slug</Label>
                 <Input
                   id="websiteSlug"
                   name="websiteSlug"
@@ -424,7 +427,7 @@ export function ProductForm({
 
             <div className="mt-5 grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="websiteBadge">Website badge</Label>
+                <Label htmlFor="websiteBadge" optional>Website badge</Label>
                 <Input
                   id="websiteBadge"
                   name="websiteBadge"
@@ -436,7 +439,7 @@ export function ProductForm({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="websiteImageUrl">Feature image URL</Label>
+                <Label htmlFor="websiteImageUrl" optional>Feature image URL</Label>
                 <Input
                   id="websiteImageUrl"
                   name="websiteImageUrl"
@@ -449,7 +452,11 @@ export function ProductForm({
             </div>
 
             <div className="mt-5 space-y-2">
-              <Label htmlFor="websiteShortDescription" required={values.websiteVisible}>
+              <Label
+                htmlFor="websiteShortDescription"
+                required={values.websiteVisible}
+                optional={!values.websiteVisible}
+              >
                 Public short description
               </Label>
               <Textarea
@@ -471,7 +478,7 @@ export function ProductForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description" optional>Description</Label>
             <Textarea id="description" name="description" value={values.description} onChange={(event) => updateFormValue("description", event.target.value)} />
             <FieldError errors={state.fieldErrors} name="description" />
           </div>
@@ -497,6 +504,8 @@ function SelectField({
   options,
   errors,
   onChange,
+  optional,
+  required,
 }: {
   name: string;
   label: string;
@@ -504,10 +513,12 @@ function SelectField({
   options: ReferenceOption[];
   errors?: Record<string, string[] | undefined>;
   onChange: (value: string) => void;
+  optional?: boolean;
+  required?: boolean;
 }) {
   return (
     <div className="space-y-2">
-      <Label htmlFor={name}>{label}</Label>
+      <Label htmlFor={name} required={required} optional={optional}>{label}</Label>
       <select
         id={name}
         name={name}
@@ -541,6 +552,7 @@ function NumberField({
   onChange,
   step,
   required,
+  optional,
 }: {
   name: string;
   label: string;
@@ -549,10 +561,11 @@ function NumberField({
   onChange: (value: string) => void;
   step?: string;
   required?: boolean;
+  optional?: boolean;
 }) {
   return (
     <div className="space-y-2">
-      <Label htmlFor={name} required={required}>{label}</Label>
+      <Label htmlFor={name} required={required} optional={optional}>{label}</Label>
       <Input
         id={name}
         name={name}

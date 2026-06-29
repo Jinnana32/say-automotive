@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Plus } from "lucide-react";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import { FieldError, FormRequiredFieldsNote, FormStatusMessage } from "@/components/shared/form-status";
 import { ModalDialog } from "@/components/shared/modal-dialog";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Button, type ButtonProps } from "@/components/ui/button";
@@ -29,7 +29,7 @@ const INITIAL_VALUES = {
 export function QuickCreateServiceDialog({
   onCreated,
   triggerLabel = "Add new service",
-  triggerVariant = "outline",
+  triggerVariant = "addSubtle",
   triggerSize = "sm",
 }: {
   onCreated: (service: ServiceInlineCreateResult) => void;
@@ -127,9 +127,10 @@ function QuickCreateServiceDialogForm({
           <input type="hidden" name="status" value="active" />
 
           <FormStatusMessage message={state.message} />
+          <FormRequiredFieldsNote />
 
           <div className="space-y-2">
-            <Label htmlFor="quickServiceName">Service name</Label>
+            <Label htmlFor="quickServiceName" required>Service name</Label>
             <Input
               id="quickServiceName"
               name="name"
@@ -141,7 +142,7 @@ function QuickCreateServiceDialogForm({
 
           <div className="grid gap-5 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="quickServiceCategory">Category</Label>
+              <Label htmlFor="quickServiceCategory" optional>Category</Label>
               <Input
                 id="quickServiceCategory"
                 name="category"
@@ -155,7 +156,7 @@ function QuickCreateServiceDialogForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="quickServicePrice">Labor price</Label>
+              <Label htmlFor="quickServicePrice" required>Labor price</Label>
               <Input
                 id="quickServicePrice"
                 name="laborPrice"
@@ -173,7 +174,7 @@ function QuickCreateServiceDialogForm({
 
           <div className="grid gap-5 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="quickServiceDuration">Estimated duration (minutes)</Label>
+              <Label htmlFor="quickServiceDuration" optional>Estimated duration (minutes)</Label>
               <Input
                 id="quickServiceDuration"
                 name="estimatedDurationMinutes"
@@ -191,7 +192,7 @@ function QuickCreateServiceDialogForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="quickServiceDescription">Description</Label>
+            <Label htmlFor="quickServiceDescription" optional>Description</Label>
             <Textarea
               id="quickServiceDescription"
               name="description"

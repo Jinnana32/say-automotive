@@ -69,7 +69,7 @@ export function InventorySettingsForm({ products }: { products: InventoryProduct
 
       <div className="grid gap-5 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="reorderLevel">Reorder level</Label>
+          <Label htmlFor="reorderLevel" optional>Reorder level</Label>
           <Input
             id="reorderLevel"
             name="reorderLevel"
@@ -88,7 +88,7 @@ export function InventorySettingsForm({ products }: { products: InventoryProduct
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="shelfLocation">Shelf location</Label>
+          <Label htmlFor="shelfLocation" optional>Shelf location</Label>
           <Input
             id="shelfLocation"
             name="shelfLocation"

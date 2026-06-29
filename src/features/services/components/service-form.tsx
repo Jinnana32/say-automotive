@@ -76,7 +76,7 @@ export function ServiceForm({
 
             <div className="mt-5 grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="owningBranchId">Owning branch</Label>
+                <Label htmlFor="owningBranchId" optional>Owning branch</Label>
                 <select
                   id="owningBranchId"
                   name="owningBranchId"
@@ -140,7 +140,7 @@ export function ServiceForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category" optional>Category</Label>
               <Input
                 id="category"
                 name="category"
@@ -176,7 +176,7 @@ export function ServiceForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="estimatedDurationMinutes">Estimated duration (minutes)</Label>
+              <Label htmlFor="estimatedDurationMinutes" optional>Estimated duration (minutes)</Label>
               <Input
                 id="estimatedDurationMinutes"
                 name="estimatedDurationMinutes"
@@ -196,7 +196,7 @@ export function ServiceForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description" optional>Description</Label>
             <Textarea
               id="description"
               name="description"

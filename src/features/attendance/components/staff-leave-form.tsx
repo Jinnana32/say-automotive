@@ -164,7 +164,7 @@ export function StaffLeaveForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="leaveNotes">Notes</Label>
+        <Label htmlFor="leaveNotes" optional>Notes</Label>
         <Textarea
           id="leaveNotes"
           name="notes"

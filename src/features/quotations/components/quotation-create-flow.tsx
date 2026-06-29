@@ -1,10 +1,12 @@
 'use client';
 
 import { useActionState, useEffect, useMemo, useState } from 'react';
-import { ChevronRight, Plus } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
+
+import { AddEntryButton } from '@/components/shared/add-entry-button';
 
 import { EmptyState } from '@/components/shared/empty-state';
-import { FieldError, FormStatusMessage } from '@/components/shared/form-status';
+import { FieldError, FormRequiredFieldsNote, FormStatusMessage, fieldAriaProps } from '@/components/shared/form-status';
 import { SearchInput } from '@/components/shared/search-input';
 import { SectionCard } from '@/components/shared/section-card';
 import {
@@ -576,10 +578,13 @@ export function QuotationCreateFlow({
               >
                 <div className="space-y-5">
                   <FormStatusMessage message={quotationState.message} />
+                  <FormRequiredFieldsNote />
 
                   <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_220px]">
                     <div className="space-y-2">
-                      <Label htmlFor="natureOfRepair">Nature of repair</Label>
+                      <Label htmlFor="natureOfRepair" optional>
+                        Nature of repair
+                      </Label>
                       <Textarea
                         id="natureOfRepair"
                         value={values.natureOfRepair}
@@ -594,7 +599,9 @@ export function QuotationCreateFlow({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="inspectionNotes">Inspection notes</Label>
+                      <Label htmlFor="inspectionNotes" optional>
+                        Inspection notes
+                      </Label>
                       <Textarea
                         id="inspectionNotes"
                         value={values.inspectionNotes}
@@ -609,7 +616,9 @@ export function QuotationCreateFlow({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="quotationStatus">Quotation status</Label>
+                      <Label htmlFor="quotationStatus" required>
+                        Quotation status
+                      </Label>
                       <NativeSelect
                         id="quotationStatus"
                         value={values.status}
@@ -633,6 +642,25 @@ export function QuotationCreateFlow({
                   </div>
 
                   <div className="space-y-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">Line items</p>
+                        <p className="text-xs text-muted-foreground">
+                          Add a product, service, or manual labor line for each quoted item.
+                        </p>
+                      </div>
+                      <AddEntryButton
+                        onClick={() =>
+                          setValues((current) => ({
+                            ...current,
+                            items: [...current.items, createQuotationItem()],
+                          }))
+                        }
+                      >
+                        Add line item
+                      </AddEntryButton>
+                    </div>
+
                     {values.items.map((item, index) => {
                       const lineTotal = calculateQuotationLineTotal(item);
 
@@ -674,7 +702,7 @@ export function QuotationCreateFlow({
 
                           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
                             <div className="space-y-2">
-                              <Label>Item type</Label>
+                              <Label required>Item type</Label>
                               <NativeSelect
                                 value={item.itemType}
                                 onChange={(event) =>
@@ -696,7 +724,7 @@ export function QuotationCreateFlow({
 
                             {item.itemType === 'product' ? (
                               <div className="space-y-2 xl:col-span-2">
-                                <Label>Product</Label>
+                                <Label required>Product</Label>
                                 <NativeSelect
                                   value={item.productId}
                                   onChange={(event) => {
@@ -760,7 +788,7 @@ export function QuotationCreateFlow({
                               </div>
                             ) : item.itemType === 'service' ? (
                               <div className="space-y-2 xl:col-span-2">
-                                <Label>Service</Label>
+                                <Label required>Service</Label>
                                 <NativeSelect
                                   value={item.serviceId}
                                   onChange={(event) => {
@@ -823,7 +851,7 @@ export function QuotationCreateFlow({
                               </div>
                             ) : (
                               <div className="space-y-2 xl:col-span-2">
-                                <Label>Description</Label>
+                                <Label required>Description</Label>
                                 <Input
                                   value={item.description}
                                   onChange={(event) =>
@@ -838,7 +866,7 @@ export function QuotationCreateFlow({
 
                             {item.itemType !== 'labor' ? (
                               <div className="space-y-2 xl:col-span-2">
-                                <Label>Description</Label>
+                                <Label required>Description</Label>
                                 <Input
                                   value={item.description}
                                   onChange={(event) =>
@@ -853,7 +881,7 @@ export function QuotationCreateFlow({
 
                           <div className="mt-4 grid gap-4 md:grid-cols-3 xl:grid-cols-4">
                             <div className="space-y-2">
-                              <Label>Quantity</Label>
+                              <Label required>Quantity</Label>
                               <Input
                                 inputMode="decimal"
                                 value={item.quantity}
@@ -865,7 +893,7 @@ export function QuotationCreateFlow({
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label>Unit price</Label>
+                              <Label required>Unit price</Label>
                               <Input
                                 inputMode="decimal"
                                 type="number"
@@ -889,9 +917,8 @@ export function QuotationCreateFlow({
                       );
                     })}
 
-                    <Button
-                      type="button"
-                      variant="outline"
+                    <AddEntryButton
+                      className="w-full sm:w-auto"
                       onClick={() =>
                         setValues((current) => ({
                           ...current,
@@ -899,9 +926,8 @@ export function QuotationCreateFlow({
                         }))
                       }
                     >
-                      <Plus className="size-4" />
-                      Add item
-                    </Button>
+                      Add another line item
+                    </AddEntryButton>
 
                     <FieldError
                       errors={quotationState.fieldErrors}
@@ -917,7 +943,9 @@ export function QuotationCreateFlow({
               >
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="discount">Discount</Label>
+                    <Label htmlFor="discount" required>
+                      Discount
+                    </Label>
                     <Input
                       id="discount"
                       inputMode="decimal"
@@ -934,7 +962,9 @@ export function QuotationCreateFlow({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="tax">Tax</Label>
+                    <Label htmlFor="tax" required>
+                      Tax
+                    </Label>
                     <Input
                       id="tax"
                       inputMode="decimal"
@@ -1039,7 +1069,9 @@ export function QuotationCreateFlow({
 
                   <div className="grid gap-4 md:grid-cols-3">
                     <div className="space-y-2">
-                      <Label htmlFor="reviewStatus">Quotation status</Label>
+                      <Label htmlFor="reviewStatus" required>
+                        Quotation status
+                      </Label>
                       <NativeSelect
                         id="reviewStatus"
                         value={values.status}
@@ -1061,7 +1093,9 @@ export function QuotationCreateFlow({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="reviewDiscount">Discount</Label>
+                      <Label htmlFor="reviewDiscount" required>
+                        Discount
+                      </Label>
                       <Input
                         id="reviewDiscount"
                         inputMode="decimal"
@@ -1078,7 +1112,9 @@ export function QuotationCreateFlow({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="reviewTax">Tax</Label>
+                      <Label htmlFor="reviewTax" required>
+                        Tax
+                      </Label>
                       <Input
                         id="reviewTax"
                         inputMode="decimal"
@@ -1301,14 +1337,18 @@ function QuickCustomerCreateForm({
         <input type="hidden" name="notes" value={values.notes} />
 
         <FormStatusMessage message={state.message} />
+        <FormRequiredFieldsNote />
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="quickCustomerType">Customer type</Label>
+            <Label htmlFor="quickCustomerType" required>
+              Customer type
+            </Label>
             <NativeSelect
               id="quickCustomerType"
               name="customerType"
               value={values.customerType}
+              aria-required
               onChange={(event) =>
                 updateFormValue(
                   'customerType',
@@ -1322,7 +1362,9 @@ function QuickCustomerCreateForm({
             </NativeSelect>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="quickCustomerContact">Contact number</Label>
+            <Label htmlFor="quickCustomerContact" optional>
+              Contact number
+            </Label>
             <Input
               id="quickCustomerContact"
               name="contactNumber"
@@ -1339,11 +1381,18 @@ function QuickCustomerCreateForm({
         {values.customerType === 'individual' ? (
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="quickCustomerFirstName">First name</Label>
+              <Label htmlFor="quickCustomerFirstName" required>
+                First name
+              </Label>
               <Input
                 id="quickCustomerFirstName"
                 name="firstName"
                 value={values.firstName}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: 'firstName',
+                  required: true,
+                })}
                 onChange={(event) =>
                   updateFormValue('firstName', event.target.value)
                 }
@@ -1351,11 +1400,18 @@ function QuickCustomerCreateForm({
               <FieldError errors={state.fieldErrors} name="firstName" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="quickCustomerLastName">Last name</Label>
+              <Label htmlFor="quickCustomerLastName" required>
+                Last name
+              </Label>
               <Input
                 id="quickCustomerLastName"
                 name="lastName"
                 value={values.lastName}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: 'lastName',
+                  required: true,
+                })}
                 onChange={(event) =>
                   updateFormValue('lastName', event.target.value)
                 }
@@ -1366,13 +1422,18 @@ function QuickCustomerCreateForm({
           </div>
         ) : (
           <div className="space-y-2">
-            <Label htmlFor="quickCustomerCompanyName">
+            <Label htmlFor="quickCustomerCompanyName" required>
               {values.customerType === 'fleet' ? 'Fleet name' : 'Company name'}
             </Label>
             <Input
               id="quickCustomerCompanyName"
               name="companyName"
               value={values.companyName}
+              {...fieldAriaProps({
+                errors: state.fieldErrors,
+                name: 'companyName',
+                required: true,
+              })}
               onChange={(event) =>
                 updateFormValue('companyName', event.target.value)
               }
@@ -1384,14 +1445,15 @@ function QuickCustomerCreateForm({
         )}
 
         <div className="space-y-2">
-          <Label htmlFor="quickCustomerEmail">Email</Label>
+          <Label htmlFor="quickCustomerEmail" optional>
+            Email
+          </Label>
           <Input
             id="quickCustomerEmail"
             name="email"
             type="email"
             value={values.email}
             onChange={(event) => updateFormValue('email', event.target.value)}
-            placeholder="Optional"
           />
           <FieldError errors={state.fieldErrors} name="email" />
         </div>
@@ -1483,16 +1545,24 @@ function QuickVehicleCreateForm({
         <input type="hidden" name="customerId" value={customerId} />
 
         <FormStatusMessage message={state.message} />
+        <FormRequiredFieldsNote />
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="quickVehicleMake">Make</Label>
+            <Label htmlFor="quickVehicleMake" required>
+              Make
+            </Label>
             <TextAutocomplete
               id="quickVehicleMake"
               name="make"
               value={values.make}
               onValueChange={(value) => updateFormValue('make', value)}
               placeholder="Toyota"
+              inputProps={fieldAriaProps({
+                errors: state.fieldErrors,
+                name: 'make',
+                required: true,
+              })}
               options={lookupData.makes.map((option) => ({
                 value: option.name,
               }))}
@@ -1500,13 +1570,20 @@ function QuickVehicleCreateForm({
             <FieldError errors={state.fieldErrors} name="make" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="quickVehicleModel">Model</Label>
+            <Label htmlFor="quickVehicleModel" required>
+              Model
+            </Label>
             <TextAutocomplete
               id="quickVehicleModel"
               name="model"
               value={values.model}
               onValueChange={(value) => updateFormValue('model', value)}
               placeholder="Vios"
+              inputProps={fieldAriaProps({
+                errors: state.fieldErrors,
+                name: 'model',
+                required: true,
+              })}
               helperText="If the model is missing from the lookup, keep typing a custom value."
               emptyMessage={
                 normalizedMake
@@ -1524,7 +1601,9 @@ function QuickVehicleCreateForm({
 
         <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2">
-            <Label htmlFor="quickVehicleYear">Year</Label>
+            <Label htmlFor="quickVehicleYear" optional>
+              Year
+            </Label>
             <NativeSelect
               id="quickVehicleYear"
               name="year"
@@ -1541,7 +1620,9 @@ function QuickVehicleCreateForm({
             <FieldError errors={state.fieldErrors} name="year" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="quickVehiclePlate">Plate number</Label>
+            <Label htmlFor="quickVehiclePlate" optional>
+              Plate number
+            </Label>
             <Input
               id="quickVehiclePlate"
               name="plateNumber"
@@ -1553,7 +1634,9 @@ function QuickVehicleCreateForm({
             <FieldError errors={state.fieldErrors} name="plateNumber" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="quickVehicleMileage">Mileage</Label>
+            <Label htmlFor="quickVehicleMileage" optional>
+              Mileage
+            </Label>
             <Input
               id="quickVehicleMileage"
               name="mileage"
@@ -1569,7 +1652,9 @@ function QuickVehicleCreateForm({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="quickVehicleTransmission">Transmission</Label>
+            <Label htmlFor="quickVehicleTransmission" optional>
+              Transmission
+            </Label>
             <TextAutocomplete
               id="quickVehicleTransmission"
               name="transmission"
@@ -1582,7 +1667,9 @@ function QuickVehicleCreateForm({
             <FieldError errors={state.fieldErrors} name="transmission" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="quickVehicleFuelType">Fuel type</Label>
+            <Label htmlFor="quickVehicleFuelType" optional>
+              Fuel type
+            </Label>
             <TextAutocomplete
               id="quickVehicleFuelType"
               name="fuelType"
@@ -1598,7 +1685,9 @@ function QuickVehicleCreateForm({
 
         <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2">
-            <Label htmlFor="quickVehicleColor">Color</Label>
+            <Label htmlFor="quickVehicleColor" optional>
+              Color
+            </Label>
             <TextAutocomplete
               id="quickVehicleColor"
               name="color"
@@ -1609,7 +1698,9 @@ function QuickVehicleCreateForm({
             <FieldError errors={state.fieldErrors} name="color" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="quickVehicleEngineSize">Engine size</Label>
+            <Label htmlFor="quickVehicleEngineSize" optional>
+              Engine size
+            </Label>
             <Input
               id="quickVehicleEngineSize"
               name="engineSize"
@@ -1621,7 +1712,9 @@ function QuickVehicleCreateForm({
             <FieldError errors={state.fieldErrors} name="engineSize" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="quickVehicleVariant">Variant</Label>
+            <Label htmlFor="quickVehicleVariant" optional>
+              Variant
+            </Label>
             <Input
               id="quickVehicleVariant"
               name="variant"
@@ -1635,7 +1728,9 @@ function QuickVehicleCreateForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="quickVehicleVin">VIN</Label>
+          <Label htmlFor="quickVehicleVin" optional>
+            VIN
+          </Label>
           <Input
             id="quickVehicleVin"
             name="vin"

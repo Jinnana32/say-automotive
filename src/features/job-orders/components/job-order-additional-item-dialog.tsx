@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
 
+import { AddEntryButton } from "@/components/shared/add-entry-button";
 import { ModalDialog } from "@/components/shared/modal-dialog";
-import { Button } from "@/components/ui/button";
 import { JobOrderAdditionalItemForm } from "@/features/job-orders/components/job-order-additional-item-form";
 import type { JobOrderDetailTab } from "@/features/job-orders/types";
 
@@ -23,18 +22,14 @@ export function JobOrderAdditionalItemDialog({
       description="Additional items follow the shop approval rule before they affect billing or stock usage."
       size="lg"
       trigger={({ openDialog }) => (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
+        <AddEntryButton
           onClick={() => {
             setDialogInstance((currentValue) => currentValue + 1);
             openDialog();
           }}
         >
-          <Plus className="size-4" />
-          Add additional item
-        </Button>
+          Add another line item
+        </AddEntryButton>
       )}
     >
       {({ closeDialog }) => (

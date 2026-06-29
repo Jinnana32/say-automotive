@@ -169,7 +169,7 @@ export function PayrollPeriodItemAdjustmentsDialog({
 
               <div className="grid gap-4 md:grid-cols-[180px_minmax(0,1fr)_160px]">
                 <div className="space-y-2">
-                  <Label htmlFor={`adjustmentType-${item.id}`}>Type</Label>
+                  <Label htmlFor={`adjustmentType-${item.id}`} required>Type</Label>
                   <select
                     id={`adjustmentType-${item.id}`}
                     name="adjustmentType"
@@ -186,7 +186,7 @@ export function PayrollPeriodItemAdjustmentsDialog({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor={`adjustmentLabel-${item.id}`}>Label</Label>
+                  <Label htmlFor={`adjustmentLabel-${item.id}`} required>Label</Label>
                   <Input
                     id={`adjustmentLabel-${item.id}`}
                     name="label"
@@ -198,7 +198,7 @@ export function PayrollPeriodItemAdjustmentsDialog({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor={`adjustmentAmount-${item.id}`}>Amount</Label>
+                  <Label htmlFor={`adjustmentAmount-${item.id}`} required>Amount</Label>
                   <Input
                     id={`adjustmentAmount-${item.id}`}
                     name="amount"
@@ -212,7 +212,7 @@ export function PayrollPeriodItemAdjustmentsDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor={`adjustmentNotes-${item.id}`}>Notes</Label>
+                <Label htmlFor={`adjustmentNotes-${item.id}`} optional>Notes</Label>
                 <Textarea
                   id={`adjustmentNotes-${item.id}`}
                   name="notes"

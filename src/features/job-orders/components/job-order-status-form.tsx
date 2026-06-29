@@ -49,7 +49,7 @@ export function JobOrderStatusForm({
       <FormStatusMessage message={state.message} />
 
       <div className="space-y-2">
-        <Label htmlFor={`nextStatus-${jobOrderId}`}>Next status</Label>
+        <Label htmlFor={`nextStatus-${jobOrderId}`} required>Next status</Label>
         <NativeSelect
           id={`nextStatus-${jobOrderId}`}
           name="nextStatus"

@@ -81,7 +81,9 @@ export function AssignMechanicForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="taskDescription">Task description</Label>
+              <Label htmlFor="taskDescription" optional>
+                Task description
+              </Label>
               <Textarea
                 id="taskDescription"
                 name="taskDescription"

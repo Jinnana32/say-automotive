@@ -69,6 +69,7 @@ export function WebsitePostForm({
               label="Slug"
               value={values.slug}
               errors={state.fieldErrors}
+              optional
               placeholder="auto-generated-from-title"
               onChange={(value) => updateFormValue("slug", value)}
             />
@@ -128,6 +129,7 @@ export function WebsitePostForm({
             label="Cover image URL"
             value={values.coverImageUrl}
             errors={state.fieldErrors}
+            optional
             placeholder="https://..."
             onChange={(value) => updateFormValue("coverImageUrl", value)}
           />
@@ -211,6 +213,7 @@ function TextField({
   errors,
   placeholder,
   required = false,
+  optional = false,
   onChange,
 }: {
   name: string;
@@ -219,11 +222,12 @@ function TextField({
   errors?: Record<string, string[] | undefined>;
   placeholder?: string;
   required?: boolean;
+  optional?: boolean;
   onChange: (value: string) => void;
 }) {
   return (
     <div className="space-y-2">
-      <Label htmlFor={name} required={required}>
+      <Label htmlFor={name} required={required} optional={optional}>
         {label}
       </Label>
       <Input

@@ -4,6 +4,7 @@ import { useActionState } from "react";
 
 import {
   FieldError,
+  FormRequiredFieldsNote,
   FormStatusMessage,
   fieldAriaProps,
   fieldControlClassName,
@@ -44,6 +45,7 @@ export function RecordPaymentForm({
       {jobOrderId ? <input type="hidden" name="jobOrderId" value={jobOrderId} /> : null}
 
       <FormStatusMessage message={state.message} />
+      <FormRequiredFieldsNote />
 
       <div className="rounded-xl border border-border/70 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
         {allowPartialPayments
@@ -104,7 +106,7 @@ export function RecordPaymentForm({
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="referenceNumber">Reference number</Label>
+          <Label htmlFor="referenceNumber" optional>Reference number</Label>
           <Input
             id="referenceNumber"
             name="referenceNumber"
@@ -122,7 +124,7 @@ export function RecordPaymentForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="notes">Notes</Label>
+          <Label htmlFor="notes" optional>Notes</Label>
           <Input
             id="notes"
             name="notes"

@@ -4,6 +4,7 @@ import { useActionState } from "react";
 
 import {
   FieldError,
+  FormRequiredFieldsNote,
   FormStatusMessage,
   fieldAriaProps,
   fieldControlClassName,
@@ -49,11 +50,14 @@ export function JobOrderDetailsForm({
           <input type="hidden" name="jobOrderId" value={detail.id} />
           <input type="hidden" name="redirectTab" value={redirectTab} />
 
+          <FormRequiredFieldsNote />
           <FormStatusMessage message={state.message} />
 
           <div className="grid gap-5 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="mileageIn">Mileage in</Label>
+              <Label htmlFor="mileageIn" optional>
+                Mileage in
+              </Label>
               <Input
                 id="mileageIn"
                 name="mileageIn"
@@ -71,7 +75,9 @@ export function JobOrderDetailsForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="mileageOut">Mileage out</Label>
+              <Label htmlFor="mileageOut" optional>
+                Mileage out
+              </Label>
               <Input
                 id="mileageOut"
                 name="mileageOut"
@@ -90,7 +96,9 @@ export function JobOrderDetailsForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="customerConcern">Customer concern</Label>
+            <Label htmlFor="customerConcern" optional>
+              Customer concern
+            </Label>
             <Textarea
               id="customerConcern"
               name="customerConcern"
@@ -107,7 +115,9 @@ export function JobOrderDetailsForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="inspectionNotes">Inspection notes</Label>
+            <Label htmlFor="inspectionNotes" optional>
+              Inspection notes
+            </Label>
             <Textarea
               id="inspectionNotes"
               name="inspectionNotes"
@@ -124,7 +134,9 @@ export function JobOrderDetailsForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="diagnosis">Diagnosis</Label>
+            <Label htmlFor="diagnosis" optional>
+              Diagnosis
+            </Label>
             <Textarea
               id="diagnosis"
               name="diagnosis"
@@ -141,7 +153,9 @@ export function JobOrderDetailsForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="workPerformed">Work performed</Label>
+            <Label htmlFor="workPerformed" optional>
+              Work performed
+            </Label>
             <Textarea
               id="workPerformed"
               name="workPerformed"

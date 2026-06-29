@@ -1,9 +1,11 @@
 "use client";
 
 import { useActionState, useEffect } from "react";
+import { Plus } from "lucide-react";
 
 import {
   FieldError,
+  FormRequiredFieldsNote,
   FormStatusMessage,
   fieldAriaProps,
   fieldControlClassName,
@@ -45,6 +47,7 @@ export function AttendanceAllowedIpForm({
 
   return (
     <form action={formAction} className="space-y-4">
+      <FormRequiredFieldsNote />
       <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
         <div className="space-y-2">
           <Label htmlFor="attendanceAllowedIpAddress" required>
@@ -73,7 +76,7 @@ export function AttendanceAllowedIpForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="attendanceAllowedIpLabel">Label</Label>
+          <Label htmlFor="attendanceAllowedIpLabel" optional>Label</Label>
           <Input
             id="attendanceAllowedIpLabel"
             name="label"
@@ -101,7 +104,10 @@ export function AttendanceAllowedIpForm({
               Use detected public IP
             </Button>
           ) : null}
-          <SubmitButton pendingLabel="Adding...">Add IP</SubmitButton>
+          <SubmitButton pendingLabel="Adding..." variant="add">
+            <Plus className="size-4" />
+            Add IP
+          </SubmitButton>
         </div>
       </div>
 

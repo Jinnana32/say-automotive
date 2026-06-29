@@ -50,6 +50,7 @@ export function BranchHolidayDialog({
           <Button
             type="button"
             size="sm"
+            variant="add"
             onClick={() => {
               setDialogInstance((currentValue) => currentValue + 1);
               openDialog();

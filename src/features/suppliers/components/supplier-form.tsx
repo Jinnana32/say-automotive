@@ -68,7 +68,7 @@ export function SupplierForm({
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="contactPerson">Contact person</Label>
+              <Label htmlFor="contactPerson" optional>Contact person</Label>
               <Input
                 id="contactPerson"
                 name="contactPerson"
@@ -86,7 +86,7 @@ export function SupplierForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="contactNumber">Contact number</Label>
+              <Label htmlFor="contactNumber" optional>Contact number</Label>
               <Input
                 id="contactNumber"
                 name="contactNumber"
@@ -106,7 +106,7 @@ export function SupplierForm({
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" optional>Email</Label>
               <Input
                 id="email"
                 name="email"
@@ -120,7 +120,7 @@ export function SupplierForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="paymentTerms">Payment terms</Label>
+              <Label htmlFor="paymentTerms" optional>Payment terms</Label>
               <Input
                 id="paymentTerms"
                 name="paymentTerms"
@@ -139,7 +139,7 @@ export function SupplierForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
+            <Label htmlFor="address" optional>Address</Label>
             <Textarea
               id="address"
               name="address"
@@ -157,7 +157,7 @@ export function SupplierForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="notes">Notes</Label>
+            <Label htmlFor="notes" optional>Notes</Label>
             <Textarea
               id="notes"
               name="notes"

@@ -223,7 +223,7 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
 
               <div className="grid gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="customerId">Customer</Label>
+                  <Label htmlFor="customerId" optional>Customer</Label>
                   <select
                     id="customerId"
                     name="customerId"
@@ -242,7 +242,7 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="discount">Discount amount</Label>
+                  <Label htmlFor="discount" required>Discount amount</Label>
                   <Input
                     id="discount"
                     name="discount"
@@ -355,7 +355,7 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="paymentAmount">Payment amount</Label>
+                  <Label htmlFor="paymentAmount" required>Payment amount</Label>
                   <Input
                     id="paymentAmount"
                     name="paymentAmount"
@@ -373,7 +373,7 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="paymentMethod">Payment method</Label>
+                  <Label htmlFor="paymentMethod" required>Payment method</Label>
                   <select
                     id="paymentMethod"
                     name="paymentMethod"
@@ -395,13 +395,13 @@ export function PosTerminal({ terminal }: { terminal: PosTerminalData }) {
 
               <div className="grid gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="referenceNumber">Reference number</Label>
+                  <Label htmlFor="referenceNumber" optional>Reference number</Label>
                   <Input id="referenceNumber" name="referenceNumber" />
                   <FieldError errors={state.fieldErrors} name="referenceNumber" />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="notes">Sale notes</Label>
+                  <Label htmlFor="notes" optional>Sale notes</Label>
                   <Textarea id="notes" name="notes" />
                   <FieldError errors={state.fieldErrors} name="notes" />
                 </div>

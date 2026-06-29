@@ -136,7 +136,7 @@ export function CompensationProfileForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="compensationOvertimeRate">Overtime rate</Label>
+          <Label htmlFor="compensationOvertimeRate" optional>Overtime rate</Label>
           <Input
             id="compensationOvertimeRate"
             name="overtimeRate"
@@ -182,7 +182,7 @@ export function CompensationProfileForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="compensationNotes">Notes</Label>
+        <Label htmlFor="compensationNotes" optional>Notes</Label>
         <Textarea
           id="compensationNotes"
           name="notes"

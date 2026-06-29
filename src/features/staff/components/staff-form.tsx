@@ -90,7 +90,7 @@ export function StaffForm({
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="staffCode">Staff ID</Label>
+              <Label htmlFor="staffCode" optional>Staff ID</Label>
               <Input
                 id="staffCode"
                 name="staffCode"
@@ -126,7 +126,7 @@ export function StaffForm({
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="documentTitle">Document title / Print title</Label>
+              <Label htmlFor="documentTitle" optional>Document title / Print title</Label>
               <Input
                 id="documentTitle"
                 name="documentTitle"
@@ -193,7 +193,7 @@ export function StaffForm({
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="contactNumber">Contact number</Label>
+              <Label htmlFor="contactNumber" optional>Contact number</Label>
               <Input
                 id="contactNumber"
                 name="contactNumber"
@@ -211,7 +211,7 @@ export function StaffForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="emergencyContactNumber">Emergency contact number</Label>
+              <Label htmlFor="emergencyContactNumber" optional>Emergency contact number</Label>
               <Input
                 id="emergencyContactNumber"
                 name="emergencyContactNumber"
@@ -230,7 +230,7 @@ export function StaffForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
+            <Label htmlFor="address" optional>Address</Label>
             <Textarea
               id="address"
               name="address"
@@ -249,7 +249,7 @@ export function StaffForm({
 
           <div className="grid gap-6 md:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="sssNumber">SSS number</Label>
+              <Label htmlFor="sssNumber" optional>SSS number</Label>
               <Input
                 id="sssNumber"
                 name="sssNumber"
@@ -267,7 +267,7 @@ export function StaffForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="philhealthNumber">PhilHealth number</Label>
+              <Label htmlFor="philhealthNumber" optional>PhilHealth number</Label>
               <Input
                 id="philhealthNumber"
                 name="philhealthNumber"
@@ -285,7 +285,7 @@ export function StaffForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="tinNumber">TIN</Label>
+              <Label htmlFor="tinNumber" optional>TIN</Label>
               <Input
                 id="tinNumber"
                 name="tinNumber"
@@ -304,7 +304,7 @@ export function StaffForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="emergencyContactName">Emergency contact name</Label>
+            <Label htmlFor="emergencyContactName" optional>Emergency contact name</Label>
             <Input
               id="emergencyContactName"
               name="emergencyContactName"

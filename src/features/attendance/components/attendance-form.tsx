@@ -97,7 +97,7 @@ export function AttendanceForm({
 
         <div className="grid gap-5 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="timeIn">Time in</Label>
+            <Label htmlFor="timeIn" optional>Time in</Label>
             <Input
               id="timeIn"
               name="timeIn"
@@ -117,7 +117,7 @@ export function AttendanceForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="timeOut">Time out</Label>
+            <Label htmlFor="timeOut" optional>Time out</Label>
             <Input
               id="timeOut"
               name="timeOut"
@@ -139,7 +139,7 @@ export function AttendanceForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="attendanceNotes">Notes</Label>
+        <Label htmlFor="attendanceNotes" optional>Notes</Label>
         <Textarea
           id="attendanceNotes"
           name="notes"

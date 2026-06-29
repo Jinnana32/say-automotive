@@ -164,7 +164,9 @@ export function CustomerForm({
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="contactNumber">Contact number</Label>
+              <Label htmlFor="contactNumber" optional>
+                Contact number
+              </Label>
               <Input
                 id="contactNumber"
                 name="contactNumber"
@@ -175,20 +177,26 @@ export function CustomerForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" optional>
+                Email
+              </Label>
               <Input id="email" name="email" type="email" value={values.email} onChange={(event) => updateFormValue("email", event.target.value)} />
               <FieldError errors={state.fieldErrors} name="email" />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
+            <Label htmlFor="address" optional>
+              Address
+            </Label>
             <Textarea id="address" name="address" value={values.address} onChange={(event) => updateFormValue("address", event.target.value)} />
             <FieldError errors={state.fieldErrors} name="address" />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="notes">Notes</Label>
+            <Label htmlFor="notes" optional>
+              Notes
+            </Label>
             <Textarea id="notes" name="notes" value={values.notes} onChange={(event) => updateFormValue("notes", event.target.value)} />
             <FieldError errors={state.fieldErrors} name="notes" />
           </div>

@@ -13,6 +13,7 @@ import {
   fieldErrorId,
   formSelectClassName,
 } from "@/components/shared/form-status";
+import { AddEntryButton } from "@/components/shared/add-entry-button";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -194,7 +195,9 @@ export function QuotationForm({
 
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="natureOfRepair">Nature of repair</Label>
+                  <Label htmlFor="natureOfRepair" optional>
+                    Nature of repair
+                  </Label>
                   <Textarea
                     id="natureOfRepair"
                     name="natureOfRepair"
@@ -211,7 +214,9 @@ export function QuotationForm({
                   <FieldError errors={state.fieldErrors} name="natureOfRepair" id={fieldErrorId("natureOfRepair")} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="inspectionNotes">Inspection notes</Label>
+                  <Label htmlFor="inspectionNotes" optional>
+                    Inspection notes
+                  </Label>
                   <Textarea
                     id="inspectionNotes"
                     name="inspectionNotes"
@@ -239,9 +244,9 @@ export function QuotationForm({
                   Products and services can be catalog-driven. Labor can stay manual when needed.
                 </CardDescription>
               </div>
-              <Button type="button" variant="outline" onClick={() => setItems((current) => [...current, createQuotationItem()])}>
-                Add item
-              </Button>
+              <AddEntryButton onClick={() => setItems((current) => [...current, createQuotationItem()])}>
+                Add line item
+              </AddEntryButton>
             </CardHeader>
             <CardContent className="space-y-4">
               {items.map((item, index) => {
@@ -503,6 +508,13 @@ export function QuotationForm({
                   </div>
                 );
               })}
+
+              <AddEntryButton
+                className="w-full sm:w-auto"
+                onClick={() => setItems((current) => [...current, createQuotationItem()])}
+              >
+                Add another line item
+              </AddEntryButton>
 
               <FieldError errors={state.fieldErrors} name="items" id={fieldErrorId("items")} />
             </CardContent>

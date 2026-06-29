@@ -102,7 +102,7 @@ export function InventoryStockInForm({ products }: { products: InventoryProductO
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="stockInNotes">Notes</Label>
+            <Label htmlFor="stockInNotes" optional>Notes</Label>
             <Textarea
               id="stockInNotes"
               name="notes"

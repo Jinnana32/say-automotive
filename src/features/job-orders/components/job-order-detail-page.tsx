@@ -502,6 +502,11 @@ export function JobOrderDetailPage({
                   </TableBody>
                 </Table>
               </div>
+              {jobOrder.canAddAdditionalItems ? (
+                <div className="border-t border-border/70 px-5 py-4">
+                  <JobOrderAdditionalItemDialog jobOrderId={jobOrder.id} redirectTab={activeTab} />
+                </div>
+              ) : null}
             </SectionCard>
 
             <JobOrderChecklistPanel

@@ -86,7 +86,9 @@ export function JobOrderPartUsageForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor={`${mode}-notes-${jobOrderItemId}`}>Notes</Label>
+          <Label htmlFor={`${mode}-notes-${jobOrderItemId}`} optional>
+            Notes
+          </Label>
           <Input
             id={`${mode}-notes-${jobOrderItemId}`}
             name="notes"

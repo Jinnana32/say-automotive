@@ -1,9 +1,11 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useState } from "react";
+import { Plus } from "lucide-react";
 
 import {
   FieldError,
+  FormRequiredFieldsNote,
   FormStatusMessage,
   fieldAriaProps,
   fieldControlClassName,
@@ -137,6 +139,7 @@ export function JobOrderAdditionalItemForm({
       <input type="hidden" name="redirectTab" value={redirectTab} />
 
       <FormStatusMessage message={state.message} />
+      <FormRequiredFieldsNote />
 
       {catalogState.status === "error" ? (
         <div className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
@@ -352,7 +355,9 @@ export function JobOrderAdditionalItemForm({
         </div>
       ) : (
         <div className="space-y-2">
-          <Label htmlFor="catalogSelection">Catalog item</Label>
+          <Label htmlFor="catalogSelection" optional>
+            Catalog item
+          </Label>
           <NativeSelect id="catalogSelection" value="" disabled>
             <option value="">Select item type first</option>
           </NativeSelect>
@@ -434,8 +439,9 @@ export function JobOrderAdditionalItemForm({
         <Button type="button" variant="outline" onClick={closeDialog}>
           Cancel
         </Button>
-        <SubmitButton pendingLabel="Adding..." disabled={!isFormValid}>
-          Add item
+        <SubmitButton pendingLabel="Adding..." disabled={!isFormValid} variant="add">
+          <Plus className="size-4" />
+          Add line item
         </SubmitButton>
       </div>
     </form>

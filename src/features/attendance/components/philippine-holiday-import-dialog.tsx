@@ -132,7 +132,7 @@ function PhilippineHolidayImportForm({
 
       <div className="grid gap-5 lg:grid-cols-[220px_minmax(0,1fr)]">
         <div className="space-y-2">
-          <Label htmlFor="philippineHolidayYear">Year</Label>
+          <Label htmlFor="philippineHolidayYear" required>Year</Label>
           <NativeSelect
             id="philippineHolidayYear"
             value={String(selectedYear)}

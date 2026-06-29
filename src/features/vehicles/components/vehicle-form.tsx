@@ -178,7 +178,9 @@ export function VehicleForm({
 
           <div className="grid gap-6 md:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="year">Year</Label>
+              <Label htmlFor="year" optional>
+                Year
+              </Label>
               <NativeSelect
                 id="year"
                 name="year"
@@ -203,7 +205,9 @@ export function VehicleForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="mileage">Mileage</Label>
+              <Label htmlFor="mileage" optional>
+                Mileage
+              </Label>
               <Input
                 id="mileage"
                 name="mileage"
@@ -222,7 +226,9 @@ export function VehicleForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="transmission">Transmission</Label>
+              <Label htmlFor="transmission" optional>
+                Transmission
+              </Label>
               <Input
                 id="transmission"
                 name="transmission"
@@ -248,7 +254,9 @@ export function VehicleForm({
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="plateNumber">Plate number</Label>
+              <Label htmlFor="plateNumber" optional>
+                Plate number
+              </Label>
               <Input
                 id="plateNumber"
                 name="plateNumber"
@@ -266,7 +274,9 @@ export function VehicleForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="vin">VIN</Label>
+              <Label htmlFor="vin" optional>
+                VIN
+              </Label>
               <Input
                 id="vin"
                 name="vin"
@@ -286,7 +296,9 @@ export function VehicleForm({
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="engineSize">Engine size</Label>
+              <Label htmlFor="engineSize" optional>
+                Engine size
+              </Label>
               <Input
                 id="engineSize"
                 name="engineSize"
@@ -304,7 +316,9 @@ export function VehicleForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="variant">Variant</Label>
+              <Label htmlFor="variant" optional>
+                Variant
+              </Label>
               <Input
                 id="variant"
                 name="variant"
@@ -324,7 +338,9 @@ export function VehicleForm({
 
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="fuelType">Fuel type</Label>
+              <Label htmlFor="fuelType" optional>
+                Fuel type
+              </Label>
               <Input
                 id="fuelType"
                 name="fuelType"
@@ -348,7 +364,9 @@ export function VehicleForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="color">Color</Label>
+              <Label htmlFor="color" optional>
+                Color
+              </Label>
               <Input
                 id="color"
                 name="color"

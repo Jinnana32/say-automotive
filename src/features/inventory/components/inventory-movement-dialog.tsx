@@ -195,7 +195,7 @@ export function InventoryMovementDialog({
 
           <div className="grid gap-5 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="inventoryMovementMode">Movement approach</Label>
+              <Label htmlFor="inventoryMovementMode" required>Movement approach</Label>
               <NativeSelect
                 id="inventoryMovementMode"
                 name="movementMode"
@@ -216,7 +216,7 @@ export function InventoryMovementDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="inventoryMovementProductId">Product</Label>
+              <Label htmlFor="inventoryMovementProductId" required>Product</Label>
               {lockProduct && productId ? <input type="hidden" name="productId" value={productId} /> : null}
               <NativeSelect
                 id="inventoryMovementProductId"
@@ -292,7 +292,7 @@ export function InventoryMovementDialog({
 
           <div className="grid gap-5 md:grid-cols-[220px_minmax(0,1fr)]">
             <div className="space-y-2">
-              <Label htmlFor="inventoryMovementQuantity">{quantityLabel}</Label>
+              <Label htmlFor="inventoryMovementQuantity" required>{quantityLabel}</Label>
               <Input
                 id="inventoryMovementQuantity"
                 name="quantity"
@@ -304,11 +304,12 @@ export function InventoryMovementDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="inventoryMovementNotes">
+              <Label
+                htmlFor="inventoryMovementNotes"
+                required={movementMode === "recount" || movementMode === "damaged"}
+                optional={movementMode === "stock_in"}
+              >
                 Notes
-                {movementMode === "recount" || movementMode === "damaged"
-                  ? " (required)"
-                  : ""}
               </Label>
               <Textarea
                 id="inventoryMovementNotes"

@@ -99,7 +99,7 @@ export function DtrAmendmentReviewForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor={`reviewAdminNote-${amendment.id}`}>Admin note</Label>
+        <Label htmlFor={`reviewAdminNote-${amendment.id}`} optional>Admin note</Label>
         <Textarea
           id={`reviewAdminNote-${amendment.id}`}
           name="adminNote"

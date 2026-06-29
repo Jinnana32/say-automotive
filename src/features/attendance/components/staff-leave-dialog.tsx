@@ -41,6 +41,7 @@ export function StaffLeaveDialog({
           <Button
             type="button"
             size="sm"
+            variant="add"
             onClick={() => openWithFreshState(openDialog)}
           >
             <CalendarRange className="mr-2 size-4" />

@@ -173,7 +173,7 @@ export function StaffScheduleForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="scheduleNotes">Notes</Label>
+        <Label htmlFor="scheduleNotes" optional>Notes</Label>
         <Textarea
           id="scheduleNotes"
           name="notes"

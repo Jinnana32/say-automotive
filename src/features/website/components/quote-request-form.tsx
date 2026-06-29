@@ -81,6 +81,7 @@ export function QuoteRequestForm({
             label="Contact number"
             value={values.contactNumber}
             errors={state.fieldErrors}
+            optional
             onChange={(value) => updateFormValue("contactNumber", value)}
           />
           <Field
@@ -208,6 +209,7 @@ export function QuoteRequestForm({
               label="Year"
               value={values.vehicleYear}
               errors={state.fieldErrors}
+              optional
               onChange={(value) => updateFormValue("vehicleYear", value)}
             />
             <div className="space-y-2">
@@ -252,6 +254,7 @@ export function QuoteRequestForm({
               label="Engine size"
               value={values.engineSize}
               errors={state.fieldErrors}
+              optional
               onChange={(value) => updateFormValue("engineSize", value)}
             />
             <Field
@@ -259,6 +262,7 @@ export function QuoteRequestForm({
               label="Liters of oil"
               value={values.oilRequirementLiters}
               errors={state.fieldErrors}
+              optional
               onChange={(value) => updateFormValue("oilRequirementLiters", value)}
             />
           </div>
@@ -403,6 +407,7 @@ function Field({
   value,
   errors,
   required = false,
+  optional = false,
   onChange,
 }: {
   name: string;
@@ -410,11 +415,12 @@ function Field({
   value: string;
   errors?: Record<string, string[] | undefined>;
   required?: boolean;
+  optional?: boolean;
   onChange: (value: string) => void;
 }) {
   return (
     <div className="space-y-2">
-      <Label htmlFor={name} required={required} className="text-sm font-medium text-slate-800">
+      <Label htmlFor={name} required={required} optional={optional} className="text-sm font-medium text-slate-800">
         {label}
       </Label>
       <Input

@@ -23,6 +23,10 @@ const buttonVariants = cva(
         outline: "border border-border bg-background text-foreground hover:bg-muted/70",
         ghost: "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        add:
+          "rounded-2xl border border-emerald-300 bg-emerald-100 font-semibold text-emerald-800 shadow-sm hover:border-emerald-400 hover:bg-emerald-200 hover:text-emerald-900 focus-visible:ring-emerald-400",
+        addSubtle:
+          "rounded-xl border border-emerald-200 bg-emerald-50/80 font-medium text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100 hover:text-emerald-800 focus-visible:ring-emerald-400",
       },
       size: {
         default: "h-10 px-4 py-2",

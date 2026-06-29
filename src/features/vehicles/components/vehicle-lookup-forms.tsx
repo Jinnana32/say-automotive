@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { Plus } from "lucide-react";
 
 import { FormSection } from "@/components/shared/form-section";
 import {
@@ -67,12 +68,15 @@ export function VehicleMakeLookupSection({ makes }: { makes: VehicleMakeItem[] }
           <FieldError errors={state.fieldErrors} name="name" id={fieldErrorId("name")} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="vehicleMakeSortOrder">Sort order</Label>
+          <Label htmlFor="vehicleMakeSortOrder" optional>Sort order</Label>
           <Input id="vehicleMakeSortOrder" name="sortOrder" inputMode="numeric" placeholder="0" value={values.sortOrder} onChange={(event) => updateFormValue("sortOrder", event.target.value)} />
           <FieldError errors={state.fieldErrors} name="sortOrder" />
         </div>
         <div className="flex items-end">
-          <SubmitButton pendingLabel="Adding...">Add make</SubmitButton>
+          <SubmitButton pendingLabel="Adding..." variant="add">
+            <Plus className="size-4" />
+            Add make
+          </SubmitButton>
         </div>
       </form>
       <FormStatusMessage message={state.message} />
@@ -177,12 +181,15 @@ export function VehicleModelLookupSection({
           <FieldError errors={state.fieldErrors} name="name" id={fieldErrorId("name")} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="vehicleModelSortOrder">Sort order</Label>
+          <Label htmlFor="vehicleModelSortOrder" optional>Sort order</Label>
           <Input id="vehicleModelSortOrder" name="sortOrder" inputMode="numeric" placeholder="0" value={values.sortOrder} onChange={(event) => updateFormValue("sortOrder", event.target.value)} />
           <FieldError errors={state.fieldErrors} name="sortOrder" />
         </div>
         <div className="flex items-end">
-          <SubmitButton pendingLabel="Adding...">Add model</SubmitButton>
+          <SubmitButton pendingLabel="Adding..." variant="add">
+            <Plus className="size-4" />
+            Add model
+          </SubmitButton>
         </div>
       </form>
       <FormStatusMessage message={state.message} />
@@ -256,7 +263,7 @@ export function VehicleLookupOptionSection({ group }: { group: VehicleLookupOpti
           <FieldError errors={state.fieldErrors} name="label" id={fieldErrorId("label")} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor={`${group.lookupType}-sortOrder`}>Sort order</Label>
+          <Label htmlFor={`${group.lookupType}-sortOrder`} optional>Sort order</Label>
           <Input
             id={`${group.lookupType}-sortOrder`}
             name="sortOrder"
@@ -268,7 +275,10 @@ export function VehicleLookupOptionSection({ group }: { group: VehicleLookupOpti
           <FieldError errors={state.fieldErrors} name="sortOrder" />
         </div>
         <div className="flex items-end">
-          <SubmitButton pendingLabel="Adding...">Add option</SubmitButton>
+          <SubmitButton pendingLabel="Adding..." variant="add">
+            <Plus className="size-4" />
+            Add option
+          </SubmitButton>
         </div>
       </form>
       <FormStatusMessage message={state.message} />

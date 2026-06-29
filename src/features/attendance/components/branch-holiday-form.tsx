@@ -181,7 +181,7 @@ export function BranchHolidayForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="holidayNotes">Notes</Label>
+        <Label htmlFor="holidayNotes" optional>Notes</Label>
         <Textarea
           id="holidayNotes"
           name="notes"

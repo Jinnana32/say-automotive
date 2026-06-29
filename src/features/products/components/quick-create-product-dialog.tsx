@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Plus } from "lucide-react";
 
-import { FieldError, FormStatusMessage } from "@/components/shared/form-status";
+import { FieldError, FormRequiredFieldsNote, FormStatusMessage } from "@/components/shared/form-status";
 import { ModalDialog } from "@/components/shared/modal-dialog";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Button, type ButtonProps } from "@/components/ui/button";
@@ -51,7 +51,7 @@ const INITIAL_VALUES = {
 export function QuickCreateProductDialog({
   onCreated,
   triggerLabel = "Add new product",
-  triggerVariant = "outline",
+  triggerVariant = "addSubtle",
   triggerSize = "sm",
   initialOptions = null,
 }: {
@@ -248,6 +248,7 @@ function QuickCreateProductDialogForm({
           <input type="hidden" name="status" value="active" />
 
           <FormStatusMessage message={state.message} />
+          <FormRequiredFieldsNote />
 
           {optionsState.status === "error" ? (
             <div className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
@@ -257,7 +258,7 @@ function QuickCreateProductDialogForm({
 
           <div className="grid gap-5 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="quickProductName">Product name</Label>
+              <Label htmlFor="quickProductName" required>Product name</Label>
               <Input
                 id="quickProductName"
                 name="name"
@@ -268,7 +269,7 @@ function QuickCreateProductDialogForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="quickProductType">Product type</Label>
+              <Label htmlFor="quickProductType" required>Product type</Label>
               <NativeSelect
                 id="quickProductType"
                 name="productType"
@@ -289,7 +290,7 @@ function QuickCreateProductDialogForm({
 
           <div className="grid gap-5 md:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="quickProductSku">SKU</Label>
+              <Label htmlFor="quickProductSku" optional>SKU</Label>
               <Input
                 id="quickProductSku"
                 name="sku"
@@ -300,7 +301,7 @@ function QuickCreateProductDialogForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="quickProductBarcode">Barcode</Label>
+              <Label htmlFor="quickProductBarcode" optional>Barcode</Label>
               <Input
                 id="quickProductBarcode"
                 name="barcode"
@@ -311,7 +312,7 @@ function QuickCreateProductDialogForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="quickProductUnit">Base unit</Label>
+              <Label htmlFor="quickProductUnit" required>Base unit</Label>
               <NativeSelect
                 id="quickProductUnit"
                 name="unitId"
@@ -332,7 +333,7 @@ function QuickCreateProductDialogForm({
 
           <div className="grid gap-5 md:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="quickProductSellingPrice">Selling price</Label>
+              <Label htmlFor="quickProductSellingPrice" required>Selling price</Label>
               <Input
                 id="quickProductSellingPrice"
                 name="sellingPrice"
@@ -348,7 +349,7 @@ function QuickCreateProductDialogForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="quickProductCostPrice">Cost price</Label>
+              <Label htmlFor="quickProductCostPrice" required>Cost price</Label>
               <Input
                 id="quickProductCostPrice"
                 name="costPrice"
@@ -362,7 +363,7 @@ function QuickCreateProductDialogForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="quickProductReorder">Reorder level</Label>
+              <Label htmlFor="quickProductReorder" required>Reorder level</Label>
               <Input
                 id="quickProductReorder"
                 name="reorderLevel"
@@ -383,6 +384,7 @@ function QuickCreateProductDialogForm({
               id="quickProductCategory"
               name="categoryId"
               label="Category"
+              optional
               value={values.categoryId}
               disabled={isOptionsLoading}
               options={options?.categories ?? []}
@@ -392,6 +394,7 @@ function QuickCreateProductDialogForm({
               id="quickProductBrand"
               name="brandId"
               label="Brand"
+              optional
               value={values.brandId}
               disabled={isOptionsLoading}
               options={options?.brands ?? []}
@@ -401,6 +404,7 @@ function QuickCreateProductDialogForm({
               id="quickProductSupplier"
               name="supplierId"
               label="Supplier"
+              optional
               value={values.supplierId}
               disabled={isOptionsLoading}
               options={options?.suppliers ?? []}
@@ -409,7 +413,7 @@ function QuickCreateProductDialogForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="quickProductShelfLocation">Shelf location</Label>
+            <Label htmlFor="quickProductShelfLocation" optional>Shelf location</Label>
             <Input
               id="quickProductShelfLocation"
               name="shelfLocation"
@@ -443,6 +447,7 @@ function SelectField({
   value,
   options,
   disabled,
+  optional,
   onChange,
 }: {
   id: string;
@@ -451,11 +456,12 @@ function SelectField({
   value: string;
   options: ProductFormOptionsData["categories"];
   disabled: boolean;
+  optional?: boolean;
   onChange: (value: string) => void;
 }) {
   return (
     <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
+      <Label htmlFor={id} optional={optional}>{label}</Label>
       <NativeSelect
         id={id}
         name={name}
