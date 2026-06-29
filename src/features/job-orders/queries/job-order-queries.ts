@@ -96,12 +96,14 @@ export async function listJobOrders(filters?: {
   const vehicleIds = [...new Set(jobOrders.map((row) => row.vehicle_id))];
   const quotationIds = [...new Set(jobOrders.flatMap((row) => (row.quotation_id ? [row.quotation_id] : [])))];
 
-  const [itemsByJobOrderId, mechanicCountMap, customerMap, vehicleMap, quotationMap] = await Promise.all([
+  const [itemsByJobOrderId, mechanicCountMap, customerMap, vehicleMap, quotationMap, invoicedJobOrderIds] =
+    await Promise.all([
     getJobOrderItemsMap(jobOrderIds),
     getMechanicCountMap(jobOrderIds),
     getCustomerNameMap(customerIds),
     getVehicleLabelMap(vehicleIds),
     getQuotationNumberMap(quotationIds),
+    getInvoicedJobOrderIdSet(jobOrderIds),
   ]);
 
   return jobOrders.map((row) =>
@@ -112,6 +114,7 @@ export async function listJobOrders(filters?: {
       quotationNumber: row.quotation_id ? quotationMap.get(row.quotation_id) ?? null : null,
       assignedMechanicCount: mechanicCountMap.get(row.id) ?? 0,
       items: itemsByJobOrderId.get(row.id) ?? [],
+      hasInvoice: invoicedJobOrderIds.has(row.id),
     }),
   );
 }
@@ -395,6 +398,29 @@ async function getJobOrderItemsMap(jobOrderIds: string[]) {
   }
 
   return map;
+}
+
+async function getInvoicedJobOrderIdSet(jobOrderIds: string[]) {
+  if (jobOrderIds.length === 0) {
+    return new Set<string>();
+  }
+
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("invoices")
+    .select("job_order_id")
+    .in("job_order_id", jobOrderIds)
+    .neq("status", "cancelled");
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return new Set(
+    ((data ?? []) as { job_order_id: string | null }[])
+      .map((row) => row.job_order_id)
+      .filter((jobOrderId): jobOrderId is string => Boolean(jobOrderId)),
+  );
 }
 
 async function getMechanicCountMap(jobOrderIds: string[]) {

@@ -5,7 +5,8 @@ import {
   getJobOrderById,
   getJobOrderMechanicOptions,
 } from "@/features/job-orders/queries/job-order-queries";
-import { resolveJobOrderDetailTab } from "@/features/job-orders/utils";
+import { canDeleteJobOrdersByRole, resolveJobOrderDetailTab } from "@/features/job-orders/utils";
+import { requireAuthenticatedStaff } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 
@@ -21,9 +22,10 @@ type JobOrderDetailRouteProps = {
 export default async function JobOrderDetailRoute({ params, searchParams }: JobOrderDetailRouteProps) {
   const { jobOrderId } = await params;
   const { tab } = await searchParams;
-  const [jobOrder, mechanics] = await Promise.all([
+  const [jobOrder, mechanics, session] = await Promise.all([
     getJobOrderById(jobOrderId),
     getJobOrderMechanicOptions(),
+    requireAuthenticatedStaff(),
   ]);
 
   if (!jobOrder) {
@@ -40,6 +42,7 @@ export default async function JobOrderDetailRoute({ params, searchParams }: JobO
       jobOrder={jobOrder}
       availableMechanics={availableMechanics}
       activeTab={resolveJobOrderDetailTab(tab)}
+      canDeleteJobOrder={canDeleteJobOrdersByRole(session.role) && jobOrder.canDelete}
     />
   );
 }

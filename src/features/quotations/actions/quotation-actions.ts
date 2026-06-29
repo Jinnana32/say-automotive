@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { applyBranchFilter, getBranchScopedServerClient } from "@/lib/branches";
+import { writeAuditLog } from "@/lib/audit";
 import { INITIAL_FORM_ACTION_STATE, toFormActionState, type FormActionState } from "@/lib/forms";
 import {
   parseQuotationFormData,
@@ -84,6 +85,48 @@ export async function rejectQuotationAction(formData: FormData) {
 
   revalidateQuotationPaths(quotationId);
   redirect(`/quotations/${quotationId}`);
+}
+
+export async function deleteQuotationAction(formData: FormData) {
+  const quotationId = readRequiredId(formData, "quotationId");
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("quotations:write");
+  const { data: quotation, error: fetchError } = await applyBranchFilter(
+    supabase
+      .from("quotations")
+      .select("id, quotation_number, status, branch_id, customer_id, vehicle_id, total_amount"),
+    branchScope.selectedBranchId,
+  )
+    .eq("id", quotationId)
+    .maybeSingle();
+
+  if (fetchError) {
+    redirect(`/quotations?error=${encodeURIComponent(fetchError.message)}`);
+  }
+
+  if (!quotation) {
+    redirect("/quotations?error=Quotation%20not%20found.");
+  }
+
+  const { error } = await supabase.rpc("delete_quotation", {
+    p_quotation_id: quotationId,
+  });
+
+  if (error) {
+    redirect(`/quotations?error=${encodeURIComponent(error.message)}`);
+  }
+
+  await writeAuditLog(supabase, {
+    action: `Deleted quotation ${quotation.quotation_number}`,
+    entityType: "quotation",
+    entityId: quotation.id,
+    userId: context.userId,
+    beforeData: quotation,
+  });
+
+  revalidatePath("/quotations");
+  revalidatePath("/dashboard");
+  revalidatePath(`/customers/${quotation.customer_id}`);
+  redirect("/quotations");
 }
 
 async function saveQuotation(formData: FormData): Promise<FormActionState> {

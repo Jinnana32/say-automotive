@@ -49,6 +49,7 @@ export type JobOrderListItem = {
   billableTotal: number;
   pendingApprovalCount: number;
   pendingApprovalTotal: number;
+  canDelete: boolean;
 };
 
 export type JobOrderItemDetail = {
@@ -136,6 +137,7 @@ export type JobOrderDetail = JobOrderListItem & {
   canUpdateStatus: boolean;
   canGenerateInvoice: boolean;
   canReleaseVehicle: boolean;
+  canDelete: boolean;
   availableNextStatuses: JobOrderStatus[];
 };
 

@@ -1,5 +1,5 @@
 import type { CustomerOption } from "@/features/customers/types";
-import type { QuotationFormItem, QuotationVehicleOption } from "@/features/quotations/types";
+import type { QuotationFormItem, QuotationStatus, QuotationVehicleOption } from "@/features/quotations/types";
 import { formatMoneyInputValue, roundCurrency } from "@/lib/currency";
 
 type OptionWithId = {
@@ -77,4 +77,8 @@ export function resolveQuotationCreateFlowSelection(params: {
     customerId: hasRequestedCustomer ? params.requestedCustomerId ?? "" : "",
     vehicleId: "",
   };
+}
+
+export function canDeleteQuotation(status: QuotationStatus) {
+  return status !== "approved";
 }

@@ -8,6 +8,7 @@ import {
   type JobOrderStatus,
   type SimplifiedJobOrderStatus,
 } from "@/features/job-orders/types";
+import type { StaffRole } from "@/lib/auth/permissions";
 import { roundCurrency } from "@/lib/currency";
 
 const FINAL_MECHANIC_LOCKED_STATUSES: JobOrderStatus[] = [
@@ -27,6 +28,13 @@ const FINAL_ITEM_LOCKED_STATUSES: JobOrderStatus[] = [
 ];
 
 const DETAIL_LOCKED_STATUSES: JobOrderStatus[] = ["released", "cancelled"];
+
+const NON_DELETABLE_JOB_ORDER_STATUSES: JobOrderStatus[] = [
+  "completed",
+  "ready_for_billing",
+  "paid",
+  "released",
+];
 
 export const JOB_ORDER_STATUS_WORKFLOW: JobOrderStatus[] = [
   "pending",
@@ -126,6 +134,32 @@ export function canUpdateJobOrderChecklist(status: JobOrderStatus) {
 
 export function canResolveAdditionalItems(status: JobOrderStatus) {
   return !FINAL_ITEM_LOCKED_STATUSES.includes(status);
+}
+
+export function jobOrderHasUsedParts(
+  items: Pick<JobOrderItemDetail, "usageStatus">[],
+) {
+  return items.some((item) => item.usageStatus === "used");
+}
+
+export function canDeleteJobOrder(params: {
+  status: JobOrderStatus;
+  hasInvoice: boolean;
+  items: Pick<JobOrderItemDetail, "usageStatus">[];
+}) {
+  if (params.hasInvoice) {
+    return false;
+  }
+
+  if (NON_DELETABLE_JOB_ORDER_STATUSES.includes(params.status)) {
+    return false;
+  }
+
+  return !jobOrderHasUsedParts(params.items);
+}
+
+export function canDeleteJobOrdersByRole(role: StaffRole) {
+  return role === "owner" || role === "admin" || role === "service_advisor";
 }
 
 export function canGenerateJobOrderInvoice(status: JobOrderStatus, invoiceId: string | null) {

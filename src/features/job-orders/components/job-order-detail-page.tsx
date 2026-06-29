@@ -33,6 +33,7 @@ import {
 import { AssignMechanicForm } from '@/features/job-orders/components/assign-mechanic-form';
 import { JobOrderAdditionalItemDialog } from '@/features/job-orders/components/job-order-additional-item-dialog';
 import { JobOrderChecklistPanel } from '@/features/job-orders/components/job-order-checklist-panel';
+import { JobOrderDeleteButton } from '@/features/job-orders/components/job-order-delete-button';
 import { JobOrderDetailTabs } from '@/features/job-orders/components/job-order-detail-tabs';
 import { JobOrderDetailsForm } from '@/features/job-orders/components/job-order-details-form';
 import { JobOrderItemApprovalAction } from '@/features/job-orders/components/job-order-item-approval-action';
@@ -56,10 +57,12 @@ export function JobOrderDetailPage({
   jobOrder,
   availableMechanics,
   activeTab,
+  canDeleteJobOrder = false,
 }: {
   jobOrder: JobOrderDetail;
   availableMechanics: JobOrderMechanicOption[];
   activeTab: JobOrderDetailTab;
+  canDeleteJobOrder?: boolean;
 }) {
   const isReleased = jobOrder.status === 'released';
   const jobProgressLines = buildJobProgressLines(jobOrder);
@@ -131,6 +134,12 @@ export function JobOrderDetailPage({
                   Open invoice
                 </Link>
               </Button>
+            ) : null}
+            {canDeleteJobOrder ? (
+              <JobOrderDeleteButton
+                jobOrderId={jobOrder.id}
+                jobOrderNumber={jobOrder.jobOrderNumber}
+              />
             ) : null}
           </div>
         </div>

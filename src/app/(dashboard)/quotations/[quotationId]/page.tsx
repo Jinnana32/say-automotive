@@ -23,11 +23,13 @@ import {
   approveQuotationAction,
   rejectQuotationAction,
 } from '@/features/quotations/actions/quotation-actions';
+import { QuotationDeleteButton } from '@/features/quotations/components/quotation-delete-button';
 import {
   QuotationStatusBadge,
   formatQuotationStatus,
 } from '@/features/quotations/components/quotation-status-badge';
 import { getQuotationById } from '@/features/quotations/queries/quotation-queries';
+import { canDeleteQuotation } from '@/features/quotations/utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,6 +52,7 @@ export default async function QuotationDetailPage({
   const canApprove =
     quotation.status === 'draft' || quotation.status === 'pending_approval';
   const canEdit = quotation.status !== 'approved';
+  const canDelete = canDeleteQuotation(quotation.status) && !quotation.jobOrderId;
 
   return (
     <div className="space-y-6">
@@ -115,6 +118,12 @@ export default async function QuotationDetailPage({
                   </Button>
                 </form>
               </>
+            ) : null}
+            {canDelete ? (
+              <QuotationDeleteButton
+                quotationId={quotation.id}
+                quotationNumber={quotation.quotationNumber}
+              />
             ) : null}
           </>
         }

@@ -1,19 +1,20 @@
 import Link from "next/link";
-import { Eye } from "lucide-react";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
 import { DataTableFilters } from "@/components/shared/data-table-filters";
 import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
-import { IconActionLink } from "@/components/shared/icon-action";
+import { FormStatusMessage } from "@/components/shared/form-status";
 import { PageHeader } from "@/components/shared/page-header";
 import { TableCellLink } from "@/components/shared/table-cell-link";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { JobOrderRowActions } from "@/features/job-orders/components/job-order-row-actions";
 import { JobOrderStatusBadge } from "@/features/job-orders/components/job-order-status-badge";
 import { listJobOrders } from "@/features/job-orders/queries/job-order-queries";
 import type { JobOrderStatus } from "@/features/job-orders/types";
-import { getSimplifiedJobOrderStatus } from "@/features/job-orders/utils";
+import { canDeleteJobOrdersByRole, getSimplifiedJobOrderStatus } from "@/features/job-orders/utils";
+import { requireAuthenticatedStaff } from "@/lib/auth/session";
 import { formatCurrency } from "@/lib/currency";
 import { formatDate, formatDateTime } from "@/lib/dates";
 import { paginateItems } from "@/lib/pagination";
@@ -25,13 +26,18 @@ type JobOrdersPageProps = {
     search?: string;
     status?: JobOrderStatus | "";
     page?: string;
+    error?: string;
   }>;
 };
 
 export default async function JobOrdersPage({ searchParams }: JobOrdersPageProps) {
-  const { search = "", status: rawStatus = "", page } = await searchParams;
+  const { search = "", status: rawStatus = "", page, error } = await searchParams;
   const status = rawStatus ? getSimplifiedJobOrderStatus(rawStatus) : "";
-  const jobOrders = await listJobOrders({ search, status });
+  const [jobOrders, session] = await Promise.all([
+    listJobOrders({ search, status }),
+    requireAuthenticatedStaff(),
+  ]);
+  const canDeleteJobOrders = canDeleteJobOrdersByRole(session.role);
   const pagination = paginateItems(jobOrders, page);
 
   return (
@@ -45,6 +51,8 @@ export default async function JobOrdersPage({ searchParams }: JobOrdersPageProps
           </Button>
         }
       />
+
+      <FormStatusMessage message={error} />
 
       <DataTableCard
         title="Job order board"
@@ -158,10 +166,10 @@ export default async function JobOrdersPage({ searchParams }: JobOrdersPageProps
                       </TableCellLink>
                     </TableCell>
                     <TableCell className="w-14 text-right">
-                      <IconActionLink
-                        href={`/job-orders/${jobOrder.id}`}
-                        label={`Open job order ${jobOrder.jobOrderNumber}`}
-                        icon={Eye}
+                      <JobOrderRowActions
+                        jobOrderId={jobOrder.id}
+                        jobOrderNumber={jobOrder.jobOrderNumber}
+                        canDelete={canDeleteJobOrders && jobOrder.canDelete}
                       />
                     </TableCell>
                   </TableRow>

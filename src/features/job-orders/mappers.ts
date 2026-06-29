@@ -17,6 +17,7 @@ import {
   calculateJobOrderPendingApprovalCount,
   calculateJobOrderPendingApprovalTotal,
   calculateJobOrderRejectedAdditionalTotal,
+  canDeleteJobOrder,
   mapJobOrderDetailCapabilities,
 } from "@/features/job-orders/utils";
 
@@ -119,6 +120,7 @@ export function mapJobOrderRowToListItem(params: {
   quotationNumber: string | null;
   assignedMechanicCount: number;
   items: JobOrderItemDetail[];
+  hasInvoice: boolean;
 }): JobOrderListItem {
   return {
     id: params.row.id,
@@ -138,6 +140,11 @@ export function mapJobOrderRowToListItem(params: {
     billableTotal: calculateJobOrderBillableTotal(params.items),
     pendingApprovalCount: calculateJobOrderPendingApprovalCount(params.items),
     pendingApprovalTotal: calculateJobOrderPendingApprovalTotal(params.items),
+    canDelete: canDeleteJobOrder({
+      status: params.row.status,
+      hasInvoice: params.hasInvoice,
+      items: params.items,
+    }),
   };
 }
 
@@ -173,6 +180,7 @@ export function mapJobOrderDetail(params: {
     quotationNumber: params.quotationNumber,
     assignedMechanicCount: params.mechanics.length,
     items: params.items,
+    hasInvoice: params.invoice !== null && params.invoice.status !== "cancelled",
   });
 
   return mapJobOrderDetailCapabilities(

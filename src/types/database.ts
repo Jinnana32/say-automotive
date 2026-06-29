@@ -2063,6 +2063,18 @@ export type Database = {
         };
         Returns: string;
       };
+      delete_quotation: {
+        Args: {
+          p_quotation_id: string;
+        };
+        Returns: undefined;
+      };
+      delete_job_order: {
+        Args: {
+          p_job_order_id: string;
+        };
+        Returns: undefined;
+      };
       approve_quotation_to_job_order: {
         Args: {
           p_quotation_id: string;

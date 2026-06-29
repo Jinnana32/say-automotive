@@ -1,18 +1,16 @@
 import Link from "next/link";
-import { Eye } from "lucide-react";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
 import { DataTableFilters } from "@/components/shared/data-table-filters";
 import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
-import { IconActionLink } from "@/components/shared/icon-action";
 import { PageHeader } from "@/components/shared/page-header";
 import { TableCellLink } from "@/components/shared/table-cell-link";
-import { TableRowActionsMenu, TableRowActionsMenuLink } from "@/components/shared/table-row-actions-menu";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/currency";
 import { formatDate } from "@/lib/dates";
+import { QuotationRowActions } from "@/features/quotations/components/quotation-row-actions";
 import { QuotationStatusBadge } from "@/features/quotations/components/quotation-status-badge";
 import { listQuotations } from "@/features/quotations/queries/quotation-queries";
 import { paginateItems } from "@/lib/pagination";
@@ -147,26 +145,11 @@ export default async function QuotationsPage({ searchParams }: QuotationsPagePro
                       </TableCellLink>
                     </TableCell>
                     <TableCell className="w-14 text-right">
-                      {quotation.status === "approved" ? (
-                        <IconActionLink
-                          href={`/quotations/${quotation.id}`}
-                          label={`View quotation ${quotation.quotationNumber}`}
-                          icon={Eye}
-                        />
-                      ) : (
-                        <TableRowActionsMenu label={`Open row actions for ${quotation.quotationNumber}`}>
-                          <TableRowActionsMenuLink
-                            href={`/quotations/${quotation.id}`}
-                            label="View quotation"
-                            iconName="eye"
-                          />
-                          <TableRowActionsMenuLink
-                            href={`/quotations/${quotation.id}/edit`}
-                            label="Edit quotation"
-                            iconName="pencil"
-                          />
-                        </TableRowActionsMenu>
-                      )}
+                      <QuotationRowActions
+                        quotationId={quotation.id}
+                        quotationNumber={quotation.quotationNumber}
+                        status={quotation.status}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

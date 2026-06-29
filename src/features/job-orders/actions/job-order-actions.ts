@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { getBranchScopedServerClient } from "@/lib/branches";
 import {
   additionalJobOrderItemSchema,
   jobOrderDetailsSchema,
@@ -434,6 +435,50 @@ export async function setJobOrderItemChecklistStateAction(formData: FormData) {
 
   revalidateJobOrderPaths(values.jobOrderId);
   redirect(buildJobOrderRedirectPath(values.jobOrderId, redirectTab));
+}
+
+export async function deleteJobOrderAction(formData: FormData) {
+  const jobOrderId = readRequiredValue(formData, "jobOrderId");
+  const { context, supabase } = await getBranchScopedServerClient("job_orders:write");
+  const { data: jobOrder, error: fetchError } = await supabase
+    .from("job_orders")
+    .select("id, job_order_number, status, branch_id, customer_id, vehicle_id, quotation_id")
+    .eq("id", jobOrderId)
+    .maybeSingle();
+
+  if (fetchError) {
+    redirect(`/job-orders?error=${encodeURIComponent(fetchError.message)}`);
+  }
+
+  if (!jobOrder) {
+    redirect("/job-orders?error=Job%20order%20not%20found%20or%20you%20do%20not%20have%20access.");
+  }
+
+  const { error } = await supabase.rpc("delete_job_order", {
+    p_job_order_id: jobOrderId,
+  });
+
+  if (error) {
+    redirect(`/job-orders?error=${encodeURIComponent(error.message)}`);
+  }
+
+  await writeAuditLog(supabase, {
+    action: `Deleted job order ${jobOrder.job_order_number}`,
+    entityType: "job_order",
+    entityId: jobOrder.id,
+    userId: context.userId,
+    beforeData: jobOrder,
+  });
+
+  revalidatePath("/job-orders");
+  revalidatePath("/quotations");
+  revalidatePath("/dashboard");
+  if (jobOrder.quotation_id) {
+    revalidatePath(`/quotations/${jobOrder.quotation_id}`);
+  }
+  revalidatePath(`/customers/${jobOrder.customer_id}`);
+  revalidatePath(`/vehicles/${jobOrder.vehicle_id}`);
+  redirect("/job-orders");
 }
 
 function readRequiredValue(formData: FormData, key: string) {
