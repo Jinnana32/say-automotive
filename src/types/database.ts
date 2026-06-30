@@ -1603,6 +1603,32 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["quotations"]["Insert"]>;
         Relationships: [];
       };
+      quotation_revisions: {
+        Row: {
+          id: string;
+          quotation_id: string;
+          job_order_id: string;
+          revised_by: string | null;
+          revised_at: string;
+          previous_total_amount: number;
+          new_total_amount: number;
+          change_summary: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          quotation_id: string;
+          job_order_id: string;
+          revised_by?: string | null;
+          revised_at?: string;
+          previous_total_amount?: number;
+          new_total_amount?: number;
+          change_summary?: Json;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["quotation_revisions"]["Insert"]>;
+        Relationships: [];
+      };
       sale_items: {
         Row: {
           id: string;
@@ -2172,6 +2198,19 @@ export type Database = {
           p_total_amount: number;
           p_items: Json;
           p_created_by?: string | null;
+        };
+        Returns: string;
+      };
+      sync_quotation_with_job_order: {
+        Args: {
+          p_quotation_id: string;
+          p_nature_of_repair?: string | null;
+          p_inspection_notes?: string | null;
+          p_subtotal: number;
+          p_discount: number;
+          p_tax: number;
+          p_total_amount: number;
+          p_items: Json;
         };
         Returns: string;
       };

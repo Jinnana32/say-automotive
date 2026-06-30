@@ -17,6 +17,8 @@ export function createQuotationItem(
     description: initial?.description ?? "",
     quantity: initial?.quantity ?? "1",
     unitPrice: initial?.unitPrice ?? formatMoneyInputValue(0),
+    jobOrderItemId: initial?.jobOrderItemId,
+    quotationItemId: initial?.quotationItemId,
   };
 }
 
@@ -81,4 +83,33 @@ export function resolveQuotationCreateFlowSelection(params: {
 
 export function canDeleteQuotation(status: QuotationStatus) {
   return status !== "approved";
+}
+
+const REVISE_LOCKED_JOB_ORDER_STATUSES = new Set([
+  "completed",
+  "ready_for_billing",
+  "paid",
+  "released",
+  "cancelled",
+]);
+
+export function canReviseQuotation(params: {
+  status: QuotationStatus;
+  jobOrderId: string | null;
+  jobOrderStatus?: string | null;
+  hasActiveInvoice?: boolean;
+}) {
+  if (params.status !== "approved" || !params.jobOrderId) {
+    return false;
+  }
+
+  if (params.hasActiveInvoice) {
+    return false;
+  }
+
+  if (!params.jobOrderStatus) {
+    return true;
+  }
+
+  return !REVISE_LOCKED_JOB_ORDER_STATUSES.has(params.jobOrderStatus);
 }

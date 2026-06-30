@@ -11,6 +11,10 @@ import {
   quotationFormSchema,
 } from "@/features/quotations/schemas/quotation-form-schema";
 import {
+  parseQuotationReviseFormData,
+  quotationReviseFormSchema,
+} from "@/features/quotations/schemas/quotation-revise-schema";
+import {
   calculateQuotationGrandTotal,
   calculateQuotationLineTotal,
   calculateQuotationSubtotal,
@@ -29,6 +33,116 @@ export async function updateQuotationAction(
   formData: FormData,
 ): Promise<FormActionState> {
   return saveQuotation(formData);
+}
+
+export async function reviseQuotationAction(
+  _prevState: FormActionState = INITIAL_FORM_ACTION_STATE,
+  formData: FormData,
+): Promise<FormActionState> {
+  const parsed = quotationReviseFormSchema.safeParse(parseQuotationReviseFormData(formData));
+
+  if (!parsed.success) {
+    return toFormActionState(parsed.error);
+  }
+
+  const values = parsed.data;
+  const { branchScope, context, supabase } = await getBranchScopedServerClient("quotations:write");
+  const subtotal = calculateQuotationSubtotal(values.items);
+  const discount = toNumeric(values.discount);
+  const tax = toNumeric(values.tax);
+  const totalAmount = calculateQuotationGrandTotal({
+    items: values.items,
+    discount: values.discount,
+    tax: values.tax,
+  });
+
+  const { data: quotation, error: fetchError } = await applyBranchFilter(
+    supabase.from("quotations").select("id, quotation_number, branch_id, customer_id, vehicle_id"),
+    branchScope.selectedBranchId,
+  )
+    .eq("id", values.quotationId)
+    .maybeSingle();
+
+  if (fetchError) {
+    return {
+      status: "error",
+      message: fetchError.message,
+    };
+  }
+
+  if (!quotation) {
+    return {
+      status: "error",
+      message: "Quotation does not exist.",
+    };
+  }
+
+  if (quotation.customer_id !== values.customerId || quotation.vehicle_id !== values.vehicleId) {
+    return {
+      status: "error",
+      message: "Customer and vehicle cannot be changed while revising an approved quotation.",
+    };
+  }
+
+  const rpcItems = values.items.map((item, index) => ({
+    line_number: index + 1,
+    item_type: item.itemType,
+    product_id: item.productId || null,
+    service_id: item.serviceId || null,
+    description: item.description.trim(),
+    quantity: toNumeric(item.quantity),
+    unit_price: toNumeric(item.unitPrice),
+    total: calculateQuotationLineTotal(item),
+    job_order_item_id: item.jobOrderItemId ?? null,
+    quotation_item_id: item.quotationItemId ?? null,
+  }));
+
+  const { error } = await supabase.rpc("sync_quotation_with_job_order", {
+    p_quotation_id: values.quotationId,
+    p_nature_of_repair: values.natureOfRepair || null,
+    p_inspection_notes: values.inspectionNotes || null,
+    p_subtotal: subtotal,
+    p_discount: discount,
+    p_tax: tax,
+    p_total_amount: totalAmount,
+    p_items: rpcItems,
+  });
+
+  if (error) {
+    return {
+      status: "error",
+      message: error.message,
+    };
+  }
+
+  const { data: jobOrder } = await supabase
+    .from("job_orders")
+    .select("id")
+    .eq("quotation_id", values.quotationId)
+    .maybeSingle();
+
+  await writeAuditLog(supabase, {
+    action: `Revised quotation ${quotation.quotation_number}`,
+    entityType: "quotation",
+    entityId: values.quotationId,
+    userId: context.userId,
+    afterData: {
+      subtotal,
+      discount,
+      tax,
+      totalAmount,
+      lineCount: values.items.length,
+    },
+  });
+
+  revalidateQuotationPaths(values.quotationId);
+  revalidatePath("/job-orders");
+
+  if (jobOrder?.id) {
+    revalidatePath(`/job-orders/${jobOrder.id}`);
+  }
+
+  redirect(`/quotations/${values.quotationId}`);
 }
 
 export async function approveQuotationAction(formData: FormData) {
@@ -202,6 +316,7 @@ function revalidateQuotationPaths(quotationId: string) {
   revalidatePath("/quotations");
   revalidatePath(`/quotations/${quotationId}`);
   revalidatePath(`/quotations/${quotationId}/edit`);
+  revalidatePath(`/quotations/${quotationId}/revise`);
   revalidatePath("/dashboard");
 }
 

@@ -1,79 +1,47 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  calculateQuotationGrandTotal,
-  calculateQuotationLineTotal,
-  calculateQuotationSubtotal,
-  createQuotationItem,
-  dedupeOptionsById,
-  resolveQuotationCreateFlowSelection,
-} from "@/features/quotations/utils";
+import { canReviseQuotation } from "@/features/quotations/utils";
 
-describe("quotation utils", () => {
-  it("calculates line totals", () => {
-    const lineTotal = calculateQuotationLineTotal(
-      createQuotationItem({ quantity: "2", unitPrice: "550.505" }),
-    );
-
-    expect(lineTotal).toBe(1101.01);
-  });
-
-  it("calculates subtotal and grand total", () => {
-    const items = [
-      createQuotationItem({ quantity: "2", unitPrice: "500" }),
-      createQuotationItem({ quantity: "1", unitPrice: "250" }),
-    ];
-
-    expect(calculateQuotationSubtotal(items)).toBe(1250);
-    expect(calculateQuotationGrandTotal({ items, discount: "100", tax: "12" })).toBe(1162);
-  });
-
-  it("prefills the quotation flow from a valid customer selection", () => {
+describe("canReviseQuotation", () => {
+  it("allows revise for approved quotations with an active editable job order", () => {
     expect(
-      resolveQuotationCreateFlowSelection({
-        requestedCustomerId: "customer-1",
-        customers: [{ id: "customer-1", label: "Alex Santos" }],
-        vehicles: [],
+      canReviseQuotation({
+        status: "approved",
+        jobOrderId: "job-order-1",
+        jobOrderStatus: "in_progress",
+        hasActiveInvoice: false,
       }),
-    ).toEqual({
-      customerId: "customer-1",
-      vehicleId: "",
-    });
+    ).toBe(true);
   });
 
-  it("prefills the quotation flow from a valid vehicle and derives its customer", () => {
+  it("blocks revise without a linked job order", () => {
     expect(
-      resolveQuotationCreateFlowSelection({
-        requestedCustomerId: "customer-2",
-        requestedVehicleId: "vehicle-1",
-        customers: [
-          { id: "customer-1", label: "Alex Santos" },
-          { id: "customer-2", label: "Chris Dela Cruz" },
-        ],
-        vehicles: [
-          {
-            id: "vehicle-1",
-            customerId: "customer-1",
-            label: "Toyota Vios · ABC1234",
-          },
-        ],
+      canReviseQuotation({
+        status: "approved",
+        jobOrderId: null,
+        jobOrderStatus: null,
       }),
-    ).toEqual({
-      customerId: "customer-1",
-      vehicleId: "vehicle-1",
-    });
+    ).toBe(false);
   });
 
-  it("deduplicates option arrays by id and keeps the latest entry", () => {
+  it("blocks revise when an active invoice exists", () => {
     expect(
-      dedupeOptionsById([
-        { id: "product-1", label: "Old label" },
-        { id: "product-2", label: "Battery" },
-        { id: "product-1", label: "Updated label" },
-      ]),
-    ).toEqual([
-      { id: "product-1", label: "Updated label" },
-      { id: "product-2", label: "Battery" },
-    ]);
+      canReviseQuotation({
+        status: "approved",
+        jobOrderId: "job-order-1",
+        jobOrderStatus: "in_progress",
+        hasActiveInvoice: true,
+      }),
+    ).toBe(false);
+  });
+
+  it("blocks revise for completed job orders", () => {
+    expect(
+      canReviseQuotation({
+        status: "approved",
+        jobOrderId: "job-order-1",
+        jobOrderStatus: "completed",
+      }),
+    ).toBe(false);
   });
 });

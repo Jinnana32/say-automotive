@@ -1,3 +1,4 @@
+import type { JobOrderDetail } from "@/features/job-orders/types";
 import type { TableRow } from "@/types/database";
 
 import { formatMoneyInputValue } from "@/lib/currency";
@@ -109,6 +110,39 @@ export function mapQuotationDetailToFormValues(detail: QuotationDetail): Quotati
         description: item.description,
         quantity: String(item.quantity),
         unitPrice: formatMoneyInputValue(item.unitPrice),
+      }),
+    ),
+  };
+}
+
+export function mapJobOrderDetailToReviseFormValues(params: {
+  quotation: QuotationDetail;
+  jobOrder: JobOrderDetail;
+}): QuotationFormValues {
+  const billableItems = params.jobOrder.items
+    .filter((item) => item.approvalStatus === "not_required" || item.approvalStatus === "approved")
+    .sort((left, right) => left.lineNumber - right.lineNumber);
+
+  return {
+    quotationId: params.quotation.id,
+    customerId: params.quotation.customerId,
+    vehicleId: params.quotation.vehicleId,
+    natureOfRepair: params.quotation.natureOfRepair ?? "",
+    inspectionNotes: params.jobOrder.inspectionNotes ?? params.quotation.inspectionNotes ?? "",
+    status: "pending_approval",
+    discount: formatMoneyInputValue(params.quotation.discount),
+    tax: formatMoneyInputValue(params.quotation.tax),
+    items: billableItems.map((item) =>
+      createQuotationItem({
+        key: item.id,
+        itemType: item.itemType,
+        productId: item.productId ?? "",
+        serviceId: item.serviceId ?? "",
+        description: item.description,
+        quantity: String(item.quantity),
+        unitPrice: formatMoneyInputValue(item.unitPrice),
+        jobOrderItemId: item.id,
+        quotationItemId: item.sourceQuotationItemId ?? undefined,
       }),
     ),
   };

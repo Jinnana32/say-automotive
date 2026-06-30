@@ -24,6 +24,7 @@ export function QuotationRowActions({
 }) {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const canEdit = status !== "approved";
+  const canRevise = status === "approved";
   const canDelete = canDeleteQuotation(status);
 
   return (
@@ -38,6 +39,13 @@ export function QuotationRowActions({
           <TableRowActionsMenuLink
             href={`/quotations/${quotationId}/edit`}
             label="Edit quotation"
+            iconName="pencil"
+          />
+        ) : null}
+        {canRevise ? (
+          <TableRowActionsMenuLink
+            href={`/quotations/${quotationId}/revise`}
+            label="Revise quotation"
             iconName="pencil"
           />
         ) : null}

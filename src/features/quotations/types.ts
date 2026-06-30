@@ -88,6 +88,8 @@ export type QuotationFormItem = {
   description: string;
   quantity: string;
   unitPrice: string;
+  jobOrderItemId?: string;
+  quotationItemId?: string;
 };
 
 export type QuotationFormValues = {

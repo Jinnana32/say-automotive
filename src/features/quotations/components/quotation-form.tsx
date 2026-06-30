@@ -20,7 +20,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { createQuotationAction, updateQuotationAction } from "@/features/quotations/actions/quotation-actions";
+import { createQuotationAction, reviseQuotationAction, updateQuotationAction } from "@/features/quotations/actions/quotation-actions";
 import { QuickCreateProductDialog } from "@/features/products/components/quick-create-product-dialog";
 import { serializeQuotationItems } from "@/features/quotations/schemas/quotation-form-schema";
 import { QuickCreateServiceDialog } from "@/features/services/components/quick-create-service-dialog";
@@ -48,14 +48,18 @@ export function QuotationForm({
   initialValues,
   options,
 }: {
-  mode: "create" | "edit";
+  mode: "create" | "edit" | "revise";
   initialValues: QuotationFormValues;
   options: QuotationFormOptions;
 }) {
-  const [state, formAction] = useActionState(
-    mode === "create" ? createQuotationAction : updateQuotationAction,
-    INITIAL_FORM_ACTION_STATE,
-  );
+  const formAction =
+    mode === "create"
+      ? createQuotationAction
+      : mode === "revise"
+        ? reviseQuotationAction
+        : updateQuotationAction;
+  const [state, formActionState] = useActionState(formAction, INITIAL_FORM_ACTION_STATE);
+  const isRevise = mode === "revise";
   const [customerId, setCustomerId] = useState(initialValues.customerId);
   const [vehicleId, setVehicleId] = useState(initialValues.vehicleId);
   const [status, setStatus] = useState(initialValues.status);
@@ -80,9 +84,16 @@ export function QuotationForm({
   const grandTotal = calculateQuotationGrandTotal({ items, discount, tax });
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formActionState} className="space-y-6">
       {initialValues.quotationId ? (
         <input type="hidden" name="quotationId" value={initialValues.quotationId} />
+      ) : null}
+
+      {isRevise ? (
+        <>
+          <input type="hidden" name="customerId" value={customerId} />
+          <input type="hidden" name="vehicleId" value={vehicleId} />
+        </>
       ) : null}
 
       <input type="hidden" name="itemsJson" value={serializeQuotationItems(items)} />
@@ -91,10 +102,17 @@ export function QuotationForm({
         <div className="space-y-6">
           <Card className="border-border/70 shadow-sm">
             <CardHeader>
-              <CardTitle>{mode === "create" ? "Quotation details" : "Edit quotation"}</CardTitle>
+              <CardTitle>
+                {mode === "create"
+                  ? "Quotation details"
+                  : mode === "revise"
+                    ? "Revise quotation"
+                    : "Edit quotation"}
+              </CardTitle>
               <CardDescription>
-                Quotations are estimates only. They should not touch inventory until approval and
-                later job-order usage.
+                {mode === "revise"
+                  ? "Updates save to both the customer quotation and the linked job order. Discount and tax apply to the quotation document; final invoice amounts may differ."
+                  : "Quotations are estimates only. They should not touch inventory until approval and later job-order usage."}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -108,8 +126,9 @@ export function QuotationForm({
                   </Label>
                   <select
                     id="customerId"
-                    name="customerId"
+                    name={isRevise ? undefined : "customerId"}
                     value={customerId}
+                    disabled={isRevise}
                     onChange={(event) => {
                       const nextCustomerId = event.target.value;
                       const nextAvailableVehicles = vehicleOptions.filter(
@@ -146,8 +165,9 @@ export function QuotationForm({
                   </Label>
                   <select
                     id="vehicleId"
-                    name="vehicleId"
+                    name={isRevise ? undefined : "vehicleId"}
                     value={vehicleId}
+                    disabled={isRevise}
                     onChange={(event) => setVehicleId(event.target.value)}
                     className={formSelectClassName(state.fieldErrors, "vehicleId")}
                     {...fieldAriaProps({
@@ -168,30 +188,32 @@ export function QuotationForm({
                 </div>
               </div>
 
-              <div className="grid gap-6 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="status" required>
-                    Quotation status
-                  </Label>
-                  <select
-                    id="status"
-                    name="status"
-                    value={status}
-                    onChange={(event) => setStatus(event.target.value as QuotationFormValues["status"])}
-                    className={formSelectClassName(state.fieldErrors, "status")}
-                    {...fieldAriaProps({
-                      errors: state.fieldErrors,
-                      name: "status",
-                      required: true,
-                      errorId: fieldErrorId("status"),
-                    })}
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="pending_approval">Pending approval</option>
-                  </select>
-                  <FieldError errors={state.fieldErrors} name="status" id={fieldErrorId("status")} />
+              {!isRevise ? (
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="status" required>
+                      Quotation status
+                    </Label>
+                    <select
+                      id="status"
+                      name="status"
+                      value={status}
+                      onChange={(event) => setStatus(event.target.value as QuotationFormValues["status"])}
+                      className={formSelectClassName(state.fieldErrors, "status")}
+                      {...fieldAriaProps({
+                        errors: state.fieldErrors,
+                        name: "status",
+                        required: true,
+                        errorId: fieldErrorId("status"),
+                      })}
+                    >
+                      <option value="draft">Draft</option>
+                      <option value="pending_approval">Pending approval</option>
+                    </select>
+                    <FieldError errors={state.fieldErrors} name="status" id={fieldErrorId("status")} />
+                  </div>
                 </div>
-              </div>
+              ) : null}
 
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
@@ -593,8 +615,16 @@ export function QuotationForm({
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <SubmitButton pendingLabel={mode === "create" ? "Saving..." : "Updating..."}>
-                  {mode === "create" ? "Save quotation" : "Save changes"}
+                <SubmitButton
+                  pendingLabel={
+                    mode === "create" ? "Saving..." : mode === "revise" ? "Revising..." : "Updating..."
+                  }
+                >
+                  {mode === "create"
+                    ? "Save quotation"
+                    : mode === "revise"
+                      ? "Save revised quotation"
+                      : "Save changes"}
                 </SubmitButton>
                 <Button asChild variant="outline" type="button">
                   <Link href={mode === "create" ? "/quotations" : `/quotations/${initialValues.quotationId}`}>

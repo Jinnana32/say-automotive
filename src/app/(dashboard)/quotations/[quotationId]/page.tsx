@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/table';
 import { formatCurrency } from '@/lib/currency';
 import { formatDate, formatDateTime } from '@/lib/dates';
+import { getJobOrderById } from '@/features/job-orders/queries/job-order-queries';
 import {
   approveQuotationAction,
   rejectQuotationAction,
@@ -29,7 +30,7 @@ import {
   formatQuotationStatus,
 } from '@/features/quotations/components/quotation-status-badge';
 import { getQuotationById } from '@/features/quotations/queries/quotation-queries';
-import { canDeleteQuotation } from '@/features/quotations/utils';
+import { canDeleteQuotation, canReviseQuotation } from '@/features/quotations/utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,6 +53,17 @@ export default async function QuotationDetailPage({
   const canApprove =
     quotation.status === 'draft' || quotation.status === 'pending_approval';
   const canEdit = quotation.status !== 'approved';
+  const jobOrder =
+    quotation.status === 'approved' && quotation.jobOrderId
+      ? await getJobOrderById(quotation.jobOrderId)
+      : null;
+  const canRevise = canReviseQuotation({
+    status: quotation.status,
+    jobOrderId: quotation.jobOrderId,
+    jobOrderStatus: jobOrder?.status ?? null,
+    hasActiveInvoice:
+      Boolean(jobOrder?.invoiceId) && jobOrder?.invoiceStatus !== 'cancelled',
+  });
   const canDelete = canDeleteQuotation(quotation.status) && !quotation.jobOrderId;
 
   return (
@@ -94,6 +106,13 @@ export default async function QuotationDetailPage({
               <Button asChild variant="outline">
                 <Link href={`/quotations/${quotation.id}/edit`}>
                   Edit quotation
+                </Link>
+              </Button>
+            ) : null}
+            {canRevise ? (
+              <Button asChild variant="outline">
+                <Link href={`/quotations/${quotation.id}/revise`}>
+                  Revise quotation
                 </Link>
               </Button>
             ) : null}
