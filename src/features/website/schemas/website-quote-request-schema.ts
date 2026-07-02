@@ -7,8 +7,13 @@ const currentYear = new Date().getFullYear() + 1;
 export const websiteQuoteRequestSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required."),
   lastName: z.string().trim().min(1, "Last name is required."),
-  contactNumber: z.string().trim(),
-  email: z.string().trim().email("Enter a valid email address."),
+  contactNumber: z.string().trim().min(1, "Contact number is required."),
+  email: z
+    .string()
+    .trim()
+    .email("Enter a valid email address.")
+    .or(z.literal(""))
+    .transform((value) => value.trim()),
   province: z.string().trim().min(1, "Province is required."),
   city: z.string().trim().min(1, "City is required."),
   barangay: z.string().trim().min(1, "Barangay is required."),

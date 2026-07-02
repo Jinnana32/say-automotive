@@ -136,11 +136,15 @@ export function mapJobOrderRowToListItem(params: {
     startedAt: params.row.started_at,
     completedAt: params.row.completed_at,
     releasedAt: params.row.released_at,
+    isHistorical: params.row.is_historical,
+    serviceDate: params.row.service_date,
+    historicalRecordedAt: params.row.historical_recorded_at,
     assignedMechanicCount: params.assignedMechanicCount,
     billableTotal: calculateJobOrderBillableTotal(params.items),
     pendingApprovalCount: calculateJobOrderPendingApprovalCount(params.items),
     pendingApprovalTotal: calculateJobOrderPendingApprovalTotal(params.items),
     canDelete: canDeleteJobOrder({
+      isHistorical: params.row.is_historical,
       status: params.row.status,
       hasInvoice: params.hasInvoice,
       items: params.items,
@@ -192,6 +196,9 @@ export function mapJobOrderDetail(params: {
       inspectionNotes: params.row.inspection_notes,
       diagnosis: params.row.diagnosis,
       workPerformed: params.row.work_performed,
+      isHistorical: params.row.is_historical,
+      serviceDate: params.row.service_date,
+      historicalRecordedAt: params.row.historical_recorded_at,
       allowReleaseWithBalance:
         params.settings?.allow_release_with_balance ?? false,
       requireFullPaymentBeforeRelease:

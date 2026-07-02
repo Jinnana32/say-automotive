@@ -17,11 +17,15 @@ type VehicleDetailPageProps = {
   params: Promise<{
     vehicleId: string;
   }>;
+  searchParams: Promise<{
+    historicalSaved?: string;
+  }>;
 };
 
-export default async function VehicleDetailPage({ params }: VehicleDetailPageProps) {
+export default async function VehicleDetailPage({ params, searchParams }: VehicleDetailPageProps) {
   const session = await requireAuthenticatedStaff();
   const { vehicleId } = await params;
+  const { historicalSaved } = await searchParams;
   const vehicle = await getVehicleById(vehicleId);
 
   if (!vehicle) {
@@ -29,6 +33,7 @@ export default async function VehicleDetailPage({ params }: VehicleDetailPagePro
   }
 
   const canManageVehicles = session.capabilities.includes("vehicles:write");
+  const canRecordPastService = session.capabilities.includes("job_orders:write");
   const canViewServiceHistory = session.capabilities.includes("job_orders:read");
   const serviceHistory = canViewServiceHistory
     ? await listServiceHistoryByVehicleIds([vehicle.id])
@@ -49,6 +54,11 @@ export default async function VehicleDetailPage({ params }: VehicleDetailPagePro
         description="Vehicle profile, linked customer, and service history derived from actual job orders."
         actions={
           <>
+            {canRecordPastService ? (
+              <Button asChild variant="outline">
+                <Link href={`/vehicles/${vehicle.id}/past-service/new`}>Record past service</Link>
+              </Button>
+            ) : null}
             <Button asChild variant="outline">
               <Link href={`/customers/${vehicle.customerId}`}>View customer</Link>
             </Button>
@@ -60,6 +70,12 @@ export default async function VehicleDetailPage({ params }: VehicleDetailPagePro
           </>
         }
       />
+
+      {historicalSaved === "1" ? (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+          Past service record saved to this vehicle&apos;s service history.
+        </div>
+      ) : null}
 
       <DetailSummaryGrid>
         <DetailSummaryItem

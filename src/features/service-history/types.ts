@@ -43,6 +43,7 @@ export type ServiceHistoryEntry = {
   jobOrderNumber: string;
   status: JobOrderStatus;
   phase: ServiceHistoryPhase;
+  isHistorical: boolean;
   serviceDate: string;
   createdAt: string;
   startedAt: string | null;

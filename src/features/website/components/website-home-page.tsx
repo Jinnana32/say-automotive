@@ -462,9 +462,9 @@ export function WebsiteHomePage({
           <div className="mt-8 flex justify-center">
             <Button
               asChild
-              variant="outlineLight"
+              variant="yellowPrimary"
               size="pill"
-              className="h-12 rounded-xl border-white/16 bg-white/5 px-6 text-sm font-semibold uppercase tracking-[0.16em]"
+              className="h-12 rounded-xl px-7 text-sm font-semibold uppercase tracking-[0.16em] shadow-[0_16px_32px_rgba(214,40,40,0.24)]"
             >
               <Link
                 href={GOOGLE_REVIEWS_URL}
@@ -689,7 +689,7 @@ function ServicePreviewCard({
           href="/get-quote"
           className="mt-5 inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-white transition hover:text-brand-red"
         >
-          Learn More
+          Request Quote
           <ArrowRight className="size-4" />
         </Link>
       </div>

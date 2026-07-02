@@ -4,6 +4,7 @@ import {
   buildServiceHistoryItems,
   buildServiceHistorySummary,
   buildUsageQuantityMap,
+  resolveServiceHistoryDate,
   resolveServiceHistoryPhase,
 } from "@/features/service-history/utils";
 import type { ServiceHistoryEntry } from "@/features/service-history/types";
@@ -13,6 +14,30 @@ describe("service history utils", () => {
     expect(resolveServiceHistoryPhase("in_progress")).toBe("active");
     expect(resolveServiceHistoryPhase("released")).toBe("history");
     expect(resolveServiceHistoryPhase("cancelled")).toBeNull();
+  });
+
+  it("uses service_date for historical records", () => {
+    const resolved = resolveServiceHistoryDate({
+      isHistorical: true,
+      serviceDate: "2024-03-15",
+      releasedAt: "2026-05-20T05:00:00.000Z",
+      completedAt: "2026-05-20T04:00:00.000Z",
+      createdAt: "2026-05-20T00:00:00.000Z",
+    });
+
+    expect(resolved).toContain("2024-03-15");
+  });
+
+  it("prefers release and completion timestamps for live job orders", () => {
+    expect(
+      resolveServiceHistoryDate({
+        isHistorical: false,
+        serviceDate: null,
+        releasedAt: "2026-05-20T05:00:00.000Z",
+        completedAt: "2026-05-20T04:00:00.000Z",
+        createdAt: "2026-05-20T00:00:00.000Z",
+      }),
+    ).toBe("2026-05-20T05:00:00.000Z");
   });
 
   it("prefers actual product usage and keeps rejected extras separate", () => {
@@ -126,6 +151,7 @@ describe("service history utils", () => {
       jobOrderNumber: "JO-0001",
       status: "released",
       phase: "history",
+      isHistorical: false,
       serviceDate: "2026-05-08T00:00:00.000+08:00",
       createdAt: "2026-05-08T00:00:00.000+08:00",
       startedAt: null,

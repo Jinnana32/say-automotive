@@ -50,6 +50,7 @@ export function QuickAccessPage({
           canCreateQuotations={searchState.permissions.canCreateQuotations}
           canViewQuotations={searchState.permissions.canViewQuotations}
           canViewServiceHistory={searchState.permissions.canViewServiceHistory}
+          canRecordPastService={searchState.permissions.canRecordPastService}
         />
       ) : (
         <div className="flex min-h-[55vh] flex-1 items-center justify-center">

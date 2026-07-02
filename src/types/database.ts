@@ -1014,6 +1014,9 @@ export type Database = {
           started_at: string | null;
           completed_at: string | null;
           released_at: string | null;
+          is_historical: boolean;
+          service_date: string | null;
+          historical_recorded_at: string | null;
           created_by: string | null;
           created_at: string;
           updated_at: string;
@@ -1035,6 +1038,9 @@ export type Database = {
           started_at?: string | null;
           completed_at?: string | null;
           released_at?: string | null;
+          is_historical?: boolean;
+          service_date?: string | null;
+          historical_recorded_at?: string | null;
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -2211,6 +2217,20 @@ export type Database = {
           p_tax: number;
           p_total_amount: number;
           p_items: Json;
+        };
+        Returns: string;
+      };
+      create_historical_service_record: {
+        Args: {
+          p_vehicle_id: string;
+          p_service_date: string;
+          p_work_performed: string;
+          p_customer_concern?: string | null;
+          p_diagnosis?: string | null;
+          p_inspection_notes?: string | null;
+          p_mileage_in?: number | null;
+          p_mileage_out?: number | null;
+          p_items?: Json;
         };
         Returns: string;
       };

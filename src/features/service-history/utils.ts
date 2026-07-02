@@ -1,3 +1,5 @@
+import { DateTime } from "luxon";
+
 import type { JobOrderItemDetail, JobOrderMechanicAssignment, JobOrderStatus } from "@/features/job-orders/types";
 import { calculateJobOrderBillableTotal } from "@/features/job-orders/utils";
 import type { ServiceHistoryEntry, ServiceHistoryLineItem, ServiceHistoryPhase } from "@/features/service-history/types";
@@ -29,10 +31,20 @@ export function resolveServiceHistoryPhase(status: JobOrderStatus): ServiceHisto
 }
 
 export function resolveServiceHistoryDate(params: {
+  isHistorical?: boolean;
+  serviceDate?: string | null;
   releasedAt: string | null;
   completedAt: string | null;
   createdAt: string;
 }) {
+  if (params.isHistorical && params.serviceDate) {
+    return (
+      DateTime.fromISO(params.serviceDate, { zone: "Asia/Manila" })
+        .set({ hour: 12, minute: 0, second: 0, millisecond: 0 })
+        .toISO() ?? params.serviceDate
+    );
+  }
+
   return params.releasedAt ?? params.completedAt ?? params.createdAt;
 }
 

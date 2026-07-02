@@ -143,10 +143,15 @@ export function jobOrderHasUsedParts(
 }
 
 export function canDeleteJobOrder(params: {
+  isHistorical?: boolean;
   status: JobOrderStatus;
   hasInvoice: boolean;
   items: Pick<JobOrderItemDetail, "usageStatus">[];
 }) {
+  if (params.isHistorical) {
+    return false;
+  }
+
   if (params.hasInvoice) {
     return false;
   }
@@ -254,6 +259,7 @@ export function mapJobOrderDetailCapabilities(
   return {
     ...detail,
     ...buildJobOrderDetailCapabilities({
+      isHistorical: detail.isHistorical,
       status: detail.status,
       invoiceId: detail.invoiceId,
       invoiceStatus: detail.invoiceStatus,
@@ -381,6 +387,7 @@ export function groupJobOrderChecklistItems(items: JobOrderItemDetail[]) {
 }
 
 function buildJobOrderDetailCapabilities(params: {
+  isHistorical: boolean;
   status: JobOrderStatus;
   invoiceId: string | null;
   invoiceStatus: "unpaid" | "partially_paid" | "paid" | "cancelled" | null;
@@ -393,6 +400,21 @@ function buildJobOrderDetailCapabilities(params: {
   canUpdateStatusRole: boolean;
   canManageBillingRole: boolean;
 }) {
+  if (params.isHistorical) {
+    return {
+      canEditDetails: false,
+      canEditItems: false,
+      canAssignMechanics: false,
+      canAddAdditionalItems: false,
+      canResolveAdditionalItems: false,
+      canUpdateChecklist: false,
+      canUpdateStatus: false,
+      canGenerateInvoice: false,
+      canReleaseVehicle: false,
+      availableNextStatuses: [],
+    };
+  }
+
   return {
     canEditDetails: canEditJobOrderDetails(params.status),
     canEditItems: canEditJobOrderItems(params.status),

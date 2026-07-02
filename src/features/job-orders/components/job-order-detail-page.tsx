@@ -51,7 +51,7 @@ import { CreateInvoiceForm } from '@/features/invoices/components/create-invoice
 import { InvoiceStatusBadge } from '@/features/invoices/components/invoice-status-badge';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/currency';
-import { formatDateTime } from '@/lib/dates';
+import { formatDate, formatDateTime } from "@/lib/dates";
 
 export function JobOrderDetailPage({
   jobOrder,
@@ -69,6 +69,13 @@ export function JobOrderDetailPage({
 
   return (
     <div className="space-y-5">
+      {jobOrder.isHistorical ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-950">
+          Historical service record for{' '}
+          {jobOrder.serviceDate ? formatDate(jobOrder.serviceDate) : 'a past visit'}. This entry
+          is read-only and excluded from billing, inventory, and status workflows.
+        </div>
+      ) : null}
       <div className="rounded-2xl border border-border/70 bg-background/95 px-5 py-4 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/90 lg:top-[5.25rem]">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0 space-y-2">

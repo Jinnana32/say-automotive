@@ -262,8 +262,8 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                   </p>
                   <div className="mt-6 grid gap-4 sm:grid-cols-3">
                     <FeatureMiniCard
-                      title="Ask about stock"
-                      description="Confirm current availability before visiting the shop."
+                      title="Check Availability"
+                      description="Confirm current stock before visiting the shop."
                     />
                     <FeatureMiniCard
                       title="Check fitment"

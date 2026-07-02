@@ -81,7 +81,7 @@ export function QuoteRequestForm({
             label="Contact number"
             value={values.contactNumber}
             errors={state.fieldErrors}
-            optional
+            required
             onChange={(value) => updateFormValue("contactNumber", value)}
           />
           <Field
@@ -89,7 +89,7 @@ export function QuoteRequestForm({
             label="Email"
             value={values.email}
             errors={state.fieldErrors}
-            required
+            optional
             onChange={(value) => updateFormValue("email", value)}
           />
         </div>

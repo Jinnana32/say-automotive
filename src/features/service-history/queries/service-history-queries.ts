@@ -41,6 +41,8 @@ type JobOrderRow = Pick<
   | "started_at"
   | "completed_at"
   | "released_at"
+  | "is_historical"
+  | "service_date"
   | "mileage_in"
   | "mileage_out"
   | "customer_concern"
@@ -301,7 +303,10 @@ function mapJobOrderToServiceHistoryEntry(params: {
       jobOrderNumber: params.row.job_order_number,
       status: params.row.status,
       phase,
+      isHistorical: params.row.is_historical,
       serviceDate: resolveServiceHistoryDate({
+        isHistorical: params.row.is_historical,
+        serviceDate: params.row.service_date,
         releasedAt: params.row.released_at,
         completedAt: params.row.completed_at,
         createdAt: params.row.created_at,

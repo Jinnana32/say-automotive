@@ -33,6 +33,9 @@ function buildJobOrder(
       ? "2026-05-20T04:00:00.000Z"
       : null,
     releasedAt: status === "released" ? "2026-05-20T05:00:00.000Z" : null,
+    isHistorical: false,
+    serviceDate: null,
+    historicalRecordedAt: null,
     assignedMechanicCount: 1,
     billableTotal: 2400,
     pendingApprovalCount: 0,
@@ -65,6 +68,7 @@ function buildJobOrder(
     canUpdateStatus: true,
     canGenerateInvoice: false,
     canReleaseVehicle: status === "completed" || status === "ready_for_billing" || status === "paid",
+    canDelete: false,
     availableNextStatuses:
       status === "pending"
         ? ["in_progress", "cancelled"]

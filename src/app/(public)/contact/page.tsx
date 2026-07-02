@@ -106,9 +106,11 @@ export default async function ContactPage() {
               <ContactSummaryCard
                 icon={<Clock3 className="size-5" />}
                 label="Store Hours"
-                value={`${STORE_HOURS.weekdays}\n${STORE_HOURS.sunday}`}
                 className="sm:col-span-2 lg:col-span-1"
-              />
+              >
+                <p className="mt-2 text-base leading-7 text-white/84">{STORE_HOURS.weekdays}</p>
+                <p className="text-base leading-7 text-white/84">{STORE_HOURS.sunday}</p>
+              </ContactSummaryCard>
             </div>
           </div>
         </div>
@@ -309,11 +311,13 @@ function ContactSummaryCard({
   icon,
   label,
   value,
+  children,
   className,
 }: {
   icon: React.ReactNode;
   label: string;
-  value: string;
+  value?: string;
+  children?: React.ReactNode;
   className?: string;
 }) {
   return (
@@ -324,7 +328,9 @@ function ContactSummaryCard({
       <p className="mt-4 text-sm font-semibold uppercase tracking-[0.16em] text-white/52">
         {label}
       </p>
-      <p className="mt-2 whitespace-pre-line text-base leading-7 text-white/84">{value}</p>
+      {children ?? (
+        <p className="mt-2 whitespace-pre-line text-base leading-7 text-white/84">{value}</p>
+      )}
     </div>
   );
 }

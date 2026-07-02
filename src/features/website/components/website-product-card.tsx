@@ -61,9 +61,7 @@ export function WebsiteProductCard({
             {product.name}
           </h3>
           <p className="text-sm leading-6 text-white/68">
-            {product.shortDescription ??
-              product.description ??
-              "Featured automotive product from SAY Auto Care."}
+            {product.shortDescription ?? product.description}
           </p>
         </div>
 
@@ -73,7 +71,7 @@ export function WebsiteProductCard({
               In-store item
             </p>
             <p className="text-xl font-semibold text-brand-red sm:text-2xl">
-              Ask the shop
+              Check Availability
             </p>
             <p className="mt-1 text-xs uppercase tracking-[0.14em] text-white/46">
               {product.unitLabel}

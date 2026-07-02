@@ -50,7 +50,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               {product.name}
             </h1>
             <p className="max-w-3xl text-base leading-8 text-white/72">
-              {product.shortDescription ?? product.description ?? "Website-published product."}
+              {product.shortDescription ?? product.description}
             </p>
           </div>
         </div>
@@ -87,7 +87,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 Availability and fitment
               </p>
               <p className="mt-2 text-3xl font-semibold text-brand-red">
-                Call or visit the shop
+                Check Availability
               </p>
               <p className="mt-2 text-sm text-white/72">
                 {product.categoryName ?? product.productType} · {product.unitLabel}
@@ -119,7 +119,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 size="pill"
                 className="h-12 rounded-xl px-6 text-sm font-semibold uppercase tracking-[0.16em]"
               >
-                <Link href="/contact">Contact the shop about this item</Link>
+                <Link href="/contact">Ask Availability</Link>
               </Button>
               <Button
                 asChild

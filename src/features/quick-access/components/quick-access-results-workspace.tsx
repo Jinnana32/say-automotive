@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Eye } from "lucide-react";
+import { Eye, History } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import { DetailSummaryGrid, DetailSummaryItem } from "@/components/shared/detail-summary-grid";
 import { EmptyState } from "@/components/shared/empty-state";
-import { IconActionLink } from "@/components/shared/icon-action";
+import { IconActionGroup, IconActionLink } from "@/components/shared/icon-action";
 import { SectionCard } from "@/components/shared/section-card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { QuotationStatusBadge } from "@/features/quotations/components/quotation-status-badge";
@@ -33,6 +33,7 @@ export function QuickAccessResultsWorkspace({
   canCreateQuotations,
   canViewQuotations,
   canViewServiceHistory,
+  canRecordPastService,
 }: {
   records: QuickAccessCustomerRecord[];
   plateQuery: string;
@@ -40,6 +41,7 @@ export function QuickAccessResultsWorkspace({
   canCreateQuotations: boolean;
   canViewQuotations: boolean;
   canViewServiceHistory: boolean;
+  canRecordPastService: boolean;
 }) {
   const [activeRecordId, setActiveRecordId] = useState(records[0]?.id ?? "");
   const activeRecord =
@@ -104,6 +106,7 @@ export function QuickAccessResultsWorkspace({
         canCreateQuotations={canCreateQuotations}
         canViewQuotations={canViewQuotations}
         canViewServiceHistory={canViewServiceHistory}
+        canRecordPastService={canRecordPastService}
       />
     </div>
   );
@@ -115,12 +118,14 @@ function QuickAccessRecordPanel({
   canCreateQuotations,
   canViewQuotations,
   canViewServiceHistory,
+  canRecordPastService,
 }: {
   record: QuickAccessCustomerRecord;
   searchSummary: string;
   canCreateQuotations: boolean;
   canViewQuotations: boolean;
   canViewServiceHistory: boolean;
+  canRecordPastService: boolean;
 }) {
   const highlightedVehicle =
     record.vehicles.find((vehicle) => vehicle.id === record.highlightedVehicleId) ?? null;
@@ -357,6 +362,7 @@ function QuickAccessRecordPanel({
         <QuickAccessVehiclesTable
           vehicles={record.vehicles}
           highlightedVehicleId={record.highlightedVehicleId}
+          canRecordPastService={canRecordPastService}
         />
       </SectionCard>
 
@@ -443,9 +449,11 @@ function QuickAccessRecordPanel({
 function QuickAccessVehiclesTable({
   vehicles,
   highlightedVehicleId,
+  canRecordPastService,
 }: {
   vehicles: QuickAccessCustomerRecord["vehicles"];
   highlightedVehicleId: string | null;
+  canRecordPastService: boolean;
 }) {
   const pageSize = 5;
   const [page, setPage] = useState(1);
@@ -518,12 +526,21 @@ function QuickAccessVehiclesTable({
                     </StatusBadge>
                   </TableCell>
                   <TableCell>{formatDateTime(vehicle.updatedAt)}</TableCell>
-                  <TableCell className="w-14 text-right">
-                    <IconActionLink
-                      href={`/vehicles/${vehicle.id}`}
-                      label={`Open vehicle ${vehicle.make} ${vehicle.model}`}
-                      icon={Eye}
-                    />
+                  <TableCell className="w-24 text-right">
+                    <IconActionGroup>
+                      <IconActionLink
+                        href={`/vehicles/${vehicle.id}`}
+                        label={`Open vehicle ${vehicle.make} ${vehicle.model}`}
+                        icon={Eye}
+                      />
+                      {canRecordPastService ? (
+                        <IconActionLink
+                          href={`/vehicles/${vehicle.id}/past-service/new`}
+                          label={`Record past service for ${vehicle.make} ${vehicle.model}`}
+                          icon={History}
+                        />
+                      ) : null}
+                    </IconActionGroup>
                   </TableCell>
                 </TableRow>
               );

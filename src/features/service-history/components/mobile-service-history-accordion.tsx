@@ -36,6 +36,7 @@ export function MobileServiceHistoryAccordion({
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-medium text-muted-foreground">{formatDate(entry.serviceDate)}</p>
                     <JobOrderStatusBadge status={entry.status} />
+                    {entry.isHistorical ? <Badge variant="secondary">Historical record</Badge> : null}
                     {showVehicleLabel ? <Badge variant="outline">{entry.vehicleLabel}</Badge> : null}
                   </div>
                   <div className="space-y-1">
@@ -75,6 +76,7 @@ export function MobileServiceHistoryAccordion({
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-medium text-muted-foreground">{formatDate(entry.serviceDate)}</p>
                     <JobOrderStatusBadge status={entry.status} />
+                    {entry.isHistorical ? <Badge variant="secondary">Historical record</Badge> : null}
                     {showVehicleLabel ? <Badge variant="outline">{entry.vehicleLabel}</Badge> : null}
                   </div>
                   <div className="space-y-1">

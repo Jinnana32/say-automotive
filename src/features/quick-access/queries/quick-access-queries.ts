@@ -46,6 +46,7 @@ export async function getQuickAccessSearchState({
     canCreateQuotations: context.capabilities.includes("quotations:write"),
     canViewQuotations: context.capabilities.includes("quotations:read"),
     canViewServiceHistory: context.capabilities.includes("job_orders:read"),
+    canRecordPastService: context.capabilities.includes("job_orders:write"),
   };
   const directPlateQuery = plate?.trim() ?? "";
   const directCustomerLastNameQuery = directPlateQuery ? "" : lastName?.trim() ?? "";

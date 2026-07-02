@@ -23,6 +23,7 @@ export type QuickAccessPermissions = {
   canCreateQuotations: boolean;
   canViewQuotations: boolean;
   canViewServiceHistory: boolean;
+  canRecordPastService: boolean;
 };
 
 export type QuickAccessSearchState = {

@@ -45,6 +45,9 @@ export type JobOrderListItem = {
   startedAt: string | null;
   completedAt: string | null;
   releasedAt: string | null;
+  isHistorical: boolean;
+  serviceDate: string | null;
+  historicalRecordedAt: string | null;
   assignedMechanicCount: number;
   billableTotal: number;
   pendingApprovalCount: number;

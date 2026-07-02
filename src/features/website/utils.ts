@@ -3,6 +3,73 @@ import type {
   WebsiteQuoteRequestStatus,
 } from "@/features/website/types";
 
+const PLACEHOLDER_DESCRIPTION_PATTERNS = [
+  /^sample\s*test$/i,
+  /^simple\s*parts$/i,
+  /^featured automotive product from say auto care\.?$/i,
+] as const;
+
+export const WEBSITE_TIRE_PRODUCT_DESCRIPTION =
+  "Passenger tire option available for fitment checking. Contact the shop for availability and current pricing.";
+
+export const WEBSITE_DEFAULT_PRODUCT_DESCRIPTION =
+  "Workshop product available for fitment and availability checking. Contact the shop for current stock and pricing.";
+
+export function sanitizeWebsiteBrandName(name: string | null | undefined) {
+  if (!name) {
+    return null;
+  }
+
+  return name.replace(/Maxtrex/gi, "Maxtrek");
+}
+
+export function sanitizeWebsiteProductName(name: string) {
+  return name.replace(/Maxtrex/gi, "Maxtrek");
+}
+
+export function isPlaceholderWebsiteProductDescription(text: string | null | undefined) {
+  const normalized = text?.trim() ?? "";
+
+  if (!normalized) {
+    return true;
+  }
+
+  return PLACEHOLDER_DESCRIPTION_PATTERNS.some((pattern) => pattern.test(normalized));
+}
+
+export function isWebsiteTireProduct(input: {
+  name: string;
+  categoryName?: string | null;
+  productType?: string | null;
+}) {
+  const haystack = `${input.name} ${input.categoryName ?? ""} ${input.productType ?? ""}`.toLowerCase();
+  return haystack.includes("tire");
+}
+
+export function resolveWebsiteProductDisplayDescription(input: {
+  name: string;
+  shortDescription?: string | null;
+  description?: string | null;
+  categoryName?: string | null;
+  productType?: string | null;
+}) {
+  const candidates = [input.shortDescription, input.description];
+
+  for (const candidate of candidates) {
+    const normalized = candidate?.trim() ?? "";
+
+    if (normalized && !isPlaceholderWebsiteProductDescription(normalized)) {
+      return normalized;
+    }
+  }
+
+  if (isWebsiteTireProduct(input)) {
+    return WEBSITE_TIRE_PRODUCT_DESCRIPTION;
+  }
+
+  return WEBSITE_DEFAULT_PRODUCT_DESCRIPTION;
+}
+
 export function slugify(value: string) {
   return value
     .trim()

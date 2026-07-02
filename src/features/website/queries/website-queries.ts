@@ -17,7 +17,10 @@ import type {
 } from "@/features/website/types";
 import {
   isUuidLike,
+  resolveWebsiteProductDisplayDescription,
   resolveWebsiteProductRouteSegment,
+  sanitizeWebsiteBrandName,
+  sanitizeWebsiteProductName,
 } from "@/features/website/utils";
 import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -481,21 +484,34 @@ function mapProductRowToWebsiteCatalogProduct(
     units: Map<string, string>;
   },
 ): WebsiteCatalogProduct {
+  const categoryName = row.category_id ? dictionaries.categories.get(row.category_id) ?? null : null;
+  const brandName = row.brand_id ? dictionaries.brands.get(row.brand_id) ?? null : null;
+  const name = sanitizeWebsiteProductName(row.name);
+  const descriptionContext = {
+    name,
+    categoryName,
+    productType: row.product_type,
+  };
+
   return {
     id: row.id,
-    name: row.name,
+    name,
     slug: resolveWebsiteProductRouteSegment({
       id: row.id,
       websiteSlug: row.website_slug,
     }),
     productType: row.product_type,
-    categoryName: row.category_id ? dictionaries.categories.get(row.category_id) ?? null : null,
-    brandName: row.brand_id ? dictionaries.brands.get(row.brand_id) ?? null : null,
+    categoryName,
+    brandName: sanitizeWebsiteBrandName(brandName),
     unitLabel: dictionaries.units.get(row.unit_id) ?? "Unit",
     price: row.selling_price,
     badge: row.website_badge,
-    shortDescription: row.website_short_description,
-    description: row.description,
+    shortDescription: resolveWebsiteProductDisplayDescription({
+      ...descriptionContext,
+      shortDescription: row.website_short_description,
+      description: null,
+    }),
+    description: resolveWebsiteProductDisplayDescription(descriptionContext),
     imageUrl: resolveProductImageUrl({
       productImagePath: row.product_image_path,
       productImageUrl: row.product_image_url,
