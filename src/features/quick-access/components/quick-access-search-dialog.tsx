@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, CarFront, Search, UserRound } from "lucide-react";
+import { ArrowLeft, CarFront, UserRound } from "lucide-react";
 import { useState } from "react";
 
 import { ModalDialog } from "@/components/shared/modal-dialog";
@@ -14,27 +14,21 @@ type QuickAccessSearchMode = "choose" | "vehicle" | "customer";
 export function QuickAccessSearchDialog({
   initialPlate,
   initialCustomerLastName,
+  open,
+  onOpenChange,
 }: {
   initialPlate: string;
   initialCustomerLastName: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   return (
     <ModalDialog
       title="Start quick lookup"
       description="Choose the search path that best matches what the customer gives you first."
       size="lg"
-      trigger={({ openDialog }) => (
-        <Button
-          type="button"
-          variant="bluePrimary"
-          size="pill"
-          onClick={openDialog}
-          className="fixed bottom-6 right-6 z-40 shadow-2xl shadow-slate-950/25"
-        >
-          <Search className="size-4" />
-          Find record
-        </Button>
-      )}
+      open={open}
+      onOpenChange={onOpenChange}
     >
       {({ closeDialog }) => (
         <QuickAccessSearchDialogBody

@@ -13,7 +13,7 @@ import {
   formatJobOrderStatus,
   toTitleCaseWords,
 } from "@/features/job-orders/utils";
-import { formatCurrency, formatPrintCurrencyNumber } from "@/lib/currency";
+import { formatPrintCurrency, formatPrintCurrencyNumber } from "@/lib/currency";
 import { formatDocumentDate, formatDateTime } from "@/lib/dates";
 
 const JOB_ORDER_PAGE_CAPACITY = 18.8;
@@ -197,34 +197,34 @@ export function JobOrderPrintLayout({
                         lines={[
                           {
                             label: "Parts:",
-                            value: formatCurrency(breakdown.totalParts),
+                            value: formatPrintCurrency(breakdown.totalParts),
                           },
                           {
                             label: "Labor:",
-                            value: formatCurrency(breakdown.totalLabor),
+                            value: formatPrintCurrency(breakdown.totalLabor),
                           },
                           {
                             label: "Pending Extras:",
-                            value: formatCurrency(breakdown.pendingExtras),
+                            value: formatPrintCurrency(breakdown.pendingExtras),
                           },
                           {
                             label: "Rejected Extras:",
-                            value: formatCurrency(breakdown.rejectedExtras),
+                            value: formatPrintCurrency(breakdown.rejectedExtras),
                           },
                           {
                             label: "Billable Total:",
-                            value: formatCurrency(breakdown.billableTotal),
+                            value: formatPrintCurrency(breakdown.billableTotal),
                             emphasized: true,
                           },
                           ...(jobOrder.invoiceId
                             ? [
                                 {
                                   label: "Invoice Total:",
-                                  value: formatCurrency(jobOrder.invoiceTotalAmount ?? 0),
+                                  value: formatPrintCurrency(jobOrder.invoiceTotalAmount ?? 0),
                                 },
                                 {
                                   label: "Balance:",
-                                  value: formatCurrency(jobOrder.invoiceBalance ?? 0),
+                                  value: formatPrintCurrency(jobOrder.invoiceBalance ?? 0),
                                 },
                               ]
                             : []),

@@ -9,13 +9,14 @@ export const dynamic = "force-dynamic";
 type NewVehiclePageProps = {
   searchParams: Promise<{
     customerId?: string;
+    plateNumber?: string;
   }>;
 };
 
 export default async function NewVehiclePage({ searchParams }: NewVehiclePageProps) {
   await requireStaffCapability("vehicles:write");
 
-  const { customerId = "" } = await searchParams;
+  const { customerId = "", plateNumber = "" } = await searchParams;
   const [customerOptions, lookupData] = await Promise.all([
     listCustomerOptions(),
     getVehicleFormLookupData(),
@@ -37,7 +38,7 @@ export default async function NewVehiclePage({ searchParams }: NewVehiclePagePro
           year: "",
           transmission: "",
           mileage: "",
-          plateNumber: "",
+          plateNumber: plateNumber.trim(),
           vin: "",
           engineSize: "",
           variant: "",

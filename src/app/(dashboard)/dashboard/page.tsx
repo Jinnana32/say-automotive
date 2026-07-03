@@ -26,6 +26,7 @@ import {
 import { QuotationStatusBadge } from '@/features/quotations/components/quotation-status-badge';
 import { JobOrderStatusBadge } from '@/features/job-orders/components/job-order-status-badge';
 import { InvoiceStatusBadge } from '@/features/invoices/components/invoice-status-badge';
+import { RevenueTrendChart } from '@/features/reports/components/revenue-trend-chart';
 import { getDashboardData } from '@/features/dashboard/queries/dashboard-queries';
 import { formatCurrency } from '@/lib/currency';
 import { formatDate } from '@/lib/dates';
@@ -222,29 +223,10 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.35fr_0.95fr]">
-        <SectionCard
-          title="Collections trend"
-          description="Monthly payment intake across the last six months."
-        >
-          {dashboard.revenueTrend.length === 0 ? (
-            <EmptyState
-              title="No payment trend yet"
-              description="Once invoice payments are recorded, monthly collections will appear here."
-            />
-          ) : (
-            <TrendBars
-              data={dashboard.revenueTrend}
-              valueFormatter={(value) => formatCurrency(value)}
-              footerLabel="Total collected"
-              footerValue={formatCurrency(
-                dashboard.revenueTrend.reduce(
-                  (sum, item) => sum + item.value,
-                  0,
-                ),
-              )}
-            />
-          )}
-        </SectionCard>
+        <RevenueTrendChart
+          data={dashboard.quotationAndServiceTrend}
+          groupBy="monthly"
+        />
 
         <SectionCard
           title="Service throughput"

@@ -16,6 +16,7 @@ import {
   isPossiblePlateMatch,
   normalizeQuickAccessPlate,
   resolveQuickAccessQuery,
+  buildQuickAccessNoMatchRedirectPath,
 } from "@/features/quick-access/utils";
 import { mapVehicleDetail } from "@/features/vehicles/mappers";
 import type { TableRow } from "@/types/database";
@@ -75,6 +76,17 @@ export async function getQuickAccessSearchState({
           permissions.canViewQuotations,
         )
       : [];
+
+  const noMatchRedirectPath = buildQuickAccessNoMatchRedirectPath({
+    plateQuery,
+    customerLastNameQuery,
+    canCreateVehicle: context.capabilities.includes("vehicles:write"),
+    canCreateQuotation: context.capabilities.includes("quotations:write"),
+  });
+
+  if (records.length === 0 && noMatchRedirectPath) {
+    redirect(noMatchRedirectPath);
+  }
 
   return {
     plateQuery,

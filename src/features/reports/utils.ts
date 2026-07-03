@@ -229,22 +229,22 @@ export function buildTrendBuckets(
   return buckets;
 }
 
-export function buildRevenueTrend<TPayment, TRelease>(params: {
+export function buildRevenueTrend<TQuotation, TRelease>(params: {
   buckets: Array<{
     key: string;
     label: string;
     fromIso: string;
     toIso: string;
   }>;
-  payments: TPayment[];
+  approvedQuotations: TQuotation[];
   releases: TRelease[];
-  getPaymentDate: (row: TPayment) => string;
-  getPaymentAmount: (row: TPayment) => number;
+  getApprovedDate: (row: TQuotation) => string;
+  getApprovedAmount: (row: TQuotation) => number;
   getReleaseDate: (row: TRelease) => string;
 }): RevenueTrendPoint[] {
   return params.buckets.map((bucket) => {
-    const bucketPayments = filterByIsoDateRange(params.payments, {
-      getDate: params.getPaymentDate,
+    const bucketApprovals = filterByIsoDateRange(params.approvedQuotations, {
+      getDate: params.getApprovedDate,
       fromIso: bucket.fromIso,
       toIso: bucket.toIso,
     });
@@ -257,8 +257,8 @@ export function buildRevenueTrend<TPayment, TRelease>(params: {
     return {
       key: bucket.key,
       label: bucket.label,
-      paymentsCollected: roundCurrency(
-        bucketPayments.reduce((sum, row) => sum + params.getPaymentAmount(row), 0),
+      approvedQuotationValue: roundCurrency(
+        bucketApprovals.reduce((sum, row) => sum + params.getApprovedAmount(row), 0),
       ),
       vehiclesReleased: bucketReleases.length,
     };
@@ -268,21 +268,19 @@ export function buildRevenueTrend<TPayment, TRelease>(params: {
 export function buildWorkflowFunnel(params: {
   quotationsCreated: number;
   quotationsApproved: number;
+  approvedQuotationValue: number;
   jobOrdersOpened: number;
   vehiclesReleased: number;
-  invoicesWithPaymentActivity: number;
-  paymentsCollected: number;
 }): WorkflowFunnelStep[] {
   return [
     { label: "Quotations created", count: params.quotationsCreated },
-    { label: "Quotations approved", count: params.quotationsApproved },
+    {
+      label: "Quotations approved",
+      count: params.quotationsApproved,
+      helper: `₱${formatCurrencyNumber(params.approvedQuotationValue)} approved value`,
+    },
     { label: "Job orders opened", count: params.jobOrdersOpened },
     { label: "Vehicles released", count: params.vehiclesReleased },
-    {
-      label: "Invoices with payments",
-      count: params.invoicesWithPaymentActivity,
-      helper: `₱${formatCurrencyNumber(params.paymentsCollected)} collected`,
-    },
   ];
 }
 

@@ -19,7 +19,7 @@ export function RevenueTrendChart({
 }) {
   const chartHeight = SVG_HEIGHT - PADDING.top - PADDING.bottom;
   const chartWidth = SVG_WIDTH - PADDING.left - PADDING.right;
-  const maxRevenue = Math.max(...data.map((point) => point.paymentsCollected), 0);
+  const maxApprovedValue = Math.max(...data.map((point) => point.approvedQuotationValue), 0);
   const maxReleased = Math.max(...data.map((point) => point.vehiclesReleased), 0);
   const labelStride = Math.max(1, Math.ceil(data.length / 8));
 
@@ -28,9 +28,9 @@ export function RevenueTrendChart({
     const x = PADDING.left + step * index + step / 2;
     const barWidth = Math.max(Math.min(step * 0.5, 28), 12);
     const releasedHeight = maxReleased > 0 ? (point.vehiclesReleased / maxReleased) * chartHeight : 0;
-    const revenueY =
-      maxRevenue > 0
-        ? PADDING.top + chartHeight - (point.paymentsCollected / maxRevenue) * chartHeight
+    const approvedValueY =
+      maxApprovedValue > 0
+        ? PADDING.top + chartHeight - (point.approvedQuotationValue / maxApprovedValue) * chartHeight
         : PADDING.top + chartHeight;
 
     return {
@@ -40,27 +40,27 @@ export function RevenueTrendChart({
       barWidth,
       releasedY: PADDING.top + chartHeight - releasedHeight,
       releasedHeight,
-      revenueY,
+      approvedValueY,
       showLabel: index % labelStride === 0 || index === data.length - 1,
     };
   });
 
-  const revenuePath = points
-    .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.revenueY}`)
+  const approvedValuePath = points
+    .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.approvedValueY}`)
     .join(" ");
 
   return (
     <Card className="border-border/70 shadow-sm">
       <CardHeader>
-        <CardTitle>Revenue and service trend</CardTitle>
+        <CardTitle>Quotation and service trend</CardTitle>
         <CardDescription>
-          Payments collected and vehicles released, grouped {groupBy}.
+          Approved quotation value and vehicles released, grouped {groupBy}.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
           <LegendSwatch color={REPORT_NAVY_MUTED} label="Vehicles released" />
-          <LegendSwatch color={REPORT_NAVY} label="Payments collected" />
+          <LegendSwatch color={REPORT_NAVY} label="Approved quotation value" />
         </div>
 
         {data.length === 0 ? (
@@ -71,7 +71,7 @@ export function RevenueTrendChart({
               viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
               className="min-w-[720px]"
               role="img"
-              aria-label="Trend chart for payments collected and vehicles released"
+              aria-label="Trend chart for approved quotation value and vehicles released"
             >
               {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
                 const y = PADDING.top + chartHeight - ratio * chartHeight;
@@ -112,14 +112,14 @@ export function RevenueTrendChart({
                 </g>
               ))}
 
-              {revenuePath ? (
+              {approvedValuePath ? (
                 <>
-                  <path d={revenuePath} fill="none" stroke={REPORT_NAVY} strokeWidth="3" />
+                  <path d={approvedValuePath} fill="none" stroke={REPORT_NAVY} strokeWidth="3" />
                   {points.map((point) => (
                     <circle
                       key={`${point.key}-circle`}
                       cx={point.x}
-                      cy={point.revenueY}
+                      cy={point.approvedValueY}
                       r="4"
                       fill={REPORT_RED_ACCENT}
                     />
@@ -132,8 +132,8 @@ export function RevenueTrendChart({
 
         <div className="grid gap-3 md:grid-cols-2">
           <MiniSummary
-            label="Total payments collected"
-            value={formatCurrency(data.reduce((sum, point) => sum + point.paymentsCollected, 0))}
+            label="Total approved quotation value"
+            value={formatCurrency(data.reduce((sum, point) => sum + point.approvedQuotationValue, 0))}
           />
           <MiniSummary
             label="Total vehicles released"

@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { recordInvoicePaymentAction } from "@/features/invoices/actions/invoice-actions";
 import { PAYMENT_METHOD_OPTIONS } from "@/features/invoices/types";
-import { formatMoneyInputValue, MONEY_INPUT_STEP } from "@/lib/currency";
+import { formatNumberForInput, MONEY_INPUT_STEP } from "@/lib/currency";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 import { useFormValues } from "@/lib/use-form-values";
 
@@ -33,7 +33,7 @@ export function RecordPaymentForm({
 }) {
   const [state, formAction] = useActionState(recordInvoicePaymentAction, INITIAL_FORM_ACTION_STATE);
   const { values, updateFormValue } = useFormValues({
-    amount: formatMoneyInputValue(balance),
+    amount: formatNumberForInput(balance, { maxDecimals: 2 }),
     paymentMethod: "cash",
     referenceNumber: "",
     notes: "",

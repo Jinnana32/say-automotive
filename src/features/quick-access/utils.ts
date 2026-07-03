@@ -35,6 +35,28 @@ export function resolveQuickAccessQuery(value: string) {
   };
 }
 
+export function buildQuickAccessNoMatchRedirectPath({
+  plateQuery,
+  customerLastNameQuery,
+  canCreateVehicle,
+  canCreateQuotation,
+}: {
+  plateQuery: string;
+  customerLastNameQuery: string;
+  canCreateVehicle: boolean;
+  canCreateQuotation: boolean;
+}) {
+  if (plateQuery && canCreateVehicle) {
+    return `/vehicles/new?plateNumber=${encodeURIComponent(plateQuery)}`;
+  }
+
+  if (customerLastNameQuery && canCreateQuotation) {
+    return `/quotations/new?lastName=${encodeURIComponent(customerLastNameQuery)}`;
+  }
+
+  return null;
+}
+
 export function extractPlateCandidatesFromTextBlocks(textBlocks: string[]) {
   const candidates = new Set<string>();
 

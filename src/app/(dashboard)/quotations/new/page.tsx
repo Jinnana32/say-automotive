@@ -13,13 +13,14 @@ type NewQuotationPageProps = {
   searchParams: Promise<{
     customerId?: string;
     vehicleId?: string;
+    lastName?: string;
   }>;
 };
 
 export default async function NewQuotationPage({
   searchParams,
 }: NewQuotationPageProps) {
-  const { customerId, vehicleId } = await searchParams;
+  const { customerId, vehicleId, lastName } = await searchParams;
   const options = await getQuotationCreateFlowOptions();
   const selection = resolveQuotationCreateFlowSelection({
     requestedCustomerId: customerId,
@@ -36,6 +37,7 @@ export default async function NewQuotationPage({
       />
       <QuotationCreateFlow
         options={options}
+        prefillLastName={lastName?.trim() ?? ""}
         initialValues={{
           customerId: selection.customerId,
           vehicleId: selection.vehicleId,

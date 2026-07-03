@@ -7,6 +7,7 @@ import {
   looksLikeQuickAccessPlateLookup,
   normalizeQuickAccessPlate,
   resolveQuickAccessQuery,
+  buildQuickAccessNoMatchRedirectPath,
 } from "@/features/quick-access/utils";
 
 describe("quick access plate helpers", () => {
@@ -42,5 +43,34 @@ describe("quick access plate helpers", () => {
       plateQuery: "",
       customerLastNameQuery: "Dela Cruz",
     });
+  });
+
+  it("builds redirect paths for unmatched quick access lookups", () => {
+    expect(
+      buildQuickAccessNoMatchRedirectPath({
+        plateQuery: "ABC1234",
+        customerLastNameQuery: "",
+        canCreateVehicle: true,
+        canCreateQuotation: true,
+      }),
+    ).toBe("/vehicles/new?plateNumber=ABC1234");
+
+    expect(
+      buildQuickAccessNoMatchRedirectPath({
+        plateQuery: "",
+        customerLastNameQuery: "Villanueva",
+        canCreateVehicle: true,
+        canCreateQuotation: true,
+      }),
+    ).toBe("/quotations/new?lastName=Villanueva");
+
+    expect(
+      buildQuickAccessNoMatchRedirectPath({
+        plateQuery: "",
+        customerLastNameQuery: "Villanueva",
+        canCreateVehicle: true,
+        canCreateQuotation: false,
+      }),
+    ).toBeNull();
   });
 });

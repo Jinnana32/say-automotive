@@ -2,6 +2,8 @@ import { DateTime } from "luxon";
 
 import { applyBranchFilter, getBranchScopedServerClient } from "@/lib/branches";
 import { getBusinessNow } from "@/lib/dates";
+import type { RevenueTrendPoint } from "@/features/reports/types";
+import { buildRevenueTrend, buildTrendBuckets } from "@/features/reports/utils";
 import type { TableRow } from "@/types/database";
 
 type CustomerRow = Pick<TableRow<"customers">, "id" | "display_name">;
@@ -24,7 +26,11 @@ type InventoryStockRow = Pick<
   TableRow<"inventory_stocks">,
   "product_id" | "available_quantity" | "reorder_level"
 >;
-type PaymentRow = Pick<TableRow<"payments">, "amount" | "paid_at">;
+type QuotationTrendRow = Pick<
+  TableRow<"quotations">,
+  "status" | "total_amount" | "approved_at"
+>;
+type JobOrderReleaseRow = Pick<TableRow<"job_orders">, "released_at">;
 
 export type DashboardData = {
   metrics: {
@@ -65,10 +71,7 @@ export type DashboardData = {
     status: TableRow<"invoices">["status"];
     balance: number;
   }>;
-  revenueTrend: Array<{
-    label: string;
-    value: number;
-  }>;
+  quotationAndServiceTrend: RevenueTrendPoint[];
   serviceTrend: Array<{
     label: string;
     value: number;
@@ -144,7 +147,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       : Promise.resolve(0),
   ]);
 
-  const [recentQuotations, recentJobOrders, inventoryAlerts, unpaidInvoices, revenueTrend, serviceTrend] =
+  const [recentQuotations, recentJobOrders, inventoryAlerts, unpaidInvoices, quotationAndServiceTrend, serviceTrend] =
     await Promise.all([
       context.capabilities.includes("quotations:read")
         ? getRecentQuotations(supabase, branchScope.selectedBranchId)
@@ -158,8 +161,12 @@ export async function getDashboardData(): Promise<DashboardData> {
       context.capabilities.includes("invoices:read")
         ? getUnpaidInvoices(supabase, branchScope.selectedBranchId)
         : Promise.resolve([]),
-      context.capabilities.includes("payments:read")
-        ? getRevenueTrend(supabase, branchScope.selectedBranchId)
+      context.capabilities.includes("quotations:read")
+        ? getQuotationAndServiceTrend(
+            supabase,
+            branchScope.selectedBranchId,
+            context.capabilities.includes("job_orders:read"),
+          )
         : Promise.resolve([]),
       context.capabilities.includes("job_orders:read")
         ? getServiceTrend(supabase, branchScope.selectedBranchId)
@@ -179,7 +186,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     recentJobOrders,
     inventoryAlerts,
     unpaidInvoices,
-    revenueTrend,
+    quotationAndServiceTrend,
     serviceTrend,
   };
 }
@@ -327,32 +334,63 @@ async function getUnpaidInvoices(
   }));
 }
 
-async function getRevenueTrend(
+async function getQuotationAndServiceTrend(
   supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
   branchId: string | null,
+  includeReleases: boolean,
 ) {
-  const start = getBusinessNow().startOf("month").minus({ months: 5 });
-  const { data, error } = await applyBranchFilter(
-    supabase
-    .from("payments")
-    .select("amount, paid_at")
-    .gte("paid_at", start.toUTC().toISO()),
-    branchId,
-  );
+  const now = getBusinessNow();
+  const from = now.startOf("month").minus({ months: 5 });
+  const to = now.endOf("day");
+  const trendFilters = {
+    from: from.toISODate() ?? "",
+    to: to.toISODate() ?? "",
+    groupBy: "monthly" as const,
+  };
+  const buckets = buildTrendBuckets(trendFilters);
+  const rangeStartIso = from.toUTC().toISO() ?? "";
 
-  if (error) {
-    throw new Error(error.message);
+  const [quotationsResult, jobOrdersResult] = await Promise.all([
+    applyBranchFilter(
+      supabase
+        .from("quotations")
+        .select("status, total_amount, approved_at")
+        .eq("status", "approved")
+        .not("approved_at", "is", null)
+        .gte("approved_at", rangeStartIso),
+      branchId,
+    ),
+    includeReleases
+      ? applyBranchFilter(
+          supabase
+            .from("job_orders")
+            .select("released_at")
+            .not("released_at", "is", null)
+            .gte("released_at", rangeStartIso),
+          branchId,
+        )
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+
+  if (quotationsResult.error) {
+    throw new Error(quotationsResult.error.message);
   }
 
-  const paymentRows = (data ?? []) as PaymentRow[];
-  return buildMonthlySeries(start, 6, (monthStart, monthEnd) =>
-    paymentRows
-      .filter((row) => {
-        const paidAt = DateTime.fromISO(row.paid_at).setZone("Asia/Manila");
-        return paidAt >= monthStart && paidAt < monthEnd;
-      })
-      .reduce((sum, row) => sum + row.amount, 0),
-  );
+  if (jobOrdersResult.error) {
+    throw new Error(jobOrdersResult.error.message);
+  }
+
+  const approvedQuotations = (quotationsResult.data ?? []) as QuotationTrendRow[];
+  const releasedJobOrders = (jobOrdersResult.data ?? []) as JobOrderReleaseRow[];
+
+  return buildRevenueTrend({
+    buckets,
+    approvedQuotations,
+    releases: releasedJobOrders,
+    getApprovedDate: (row) => row.approved_at ?? "",
+    getApprovedAmount: (row) => row.total_amount,
+    getReleaseDate: (row) => row.released_at ?? "",
+  });
 }
 
 async function getServiceTrend(

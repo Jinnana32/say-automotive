@@ -62,7 +62,7 @@ export type ReportsFilterState = {
 export type RevenueTrendPoint = {
   key: string;
   label: string;
-  paymentsCollected: number;
+  approvedQuotationValue: number;
   vehiclesReleased: number;
 };
 

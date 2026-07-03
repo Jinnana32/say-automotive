@@ -57,7 +57,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
     <div className="space-y-6">
       <PageHeader
         title="Reports"
-        description="Operational and financial performance across quotations, jobs, billing, payments, POS sales, and inventory movement."
+        description="Operational and financial performance across quotations, job orders, POS sales, and inventory movement."
         actions={
           <>
             <Button asChild variant="outlineBlue">

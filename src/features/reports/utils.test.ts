@@ -116,17 +116,19 @@ describe("reports utils", () => {
       buildWorkflowFunnel({
         quotationsCreated: 10,
         quotationsApproved: 6,
+        approvedQuotationValue: 5800,
         jobOrdersOpened: 5,
         vehiclesReleased: 4,
-        invoicesWithPaymentActivity: 3,
-        paymentsCollected: 5800,
       }),
     ).toEqual([
       { label: "Quotations created", count: 10 },
-      { label: "Quotations approved", count: 6 },
+      {
+        label: "Quotations approved",
+        count: 6,
+        helper: "₱5,800 approved value",
+      },
       { label: "Job orders opened", count: 5 },
       { label: "Vehicles released", count: 4 },
-      { label: "Invoices with payments", count: 3, helper: "₱5,800.0000 collected" },
     ]);
   });
 

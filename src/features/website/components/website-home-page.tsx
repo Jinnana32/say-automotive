@@ -32,10 +32,10 @@ const GOOGLE_REVIEWS_URL =
   'https://www.google.com/maps/place/SAY+Auto+Care+Center+%2F+Mags+%26+Tires/@10.7204706,122.5314177,17z/data=!4m8!3m7!1s0x33aefb11f1e70e4f:0x551d5bca1b30e393!8m2!3d10.7204653!4d122.5339926!9m1!1b1!16s%2Fg%2F11y2dx8r3_';
 
 const HERO_FEATURES = [
-  { label: 'Expert Technicians', icon: Wrench },
-  { label: 'Premium Equipment', icon: Gauge },
-  { label: 'Quality Service', icon: ShieldCheck },
-  { label: 'Customer Focused', icon: Users },
+  { label: 'Expert Team', icon: Wrench },
+  { label: 'Premium Tools', icon: Gauge },
+  { label: 'Quality Work', icon: ShieldCheck },
+  { label: 'Customer First', icon: Users },
 ] as const;
 
 const EXPERTISE_HIGHLIGHTS = [
@@ -373,7 +373,7 @@ export function WebsiteHomePage({
         id="brands"
         className="scroll-mt-28 bg-[#030B18] px-4 py-16 sm:px-6 lg:px-8 lg:py-20"
       >
-        <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/10 bg-slate-50 px-4 py-8 shadow-[0_30px_70px_rgba(0,0,0,0.28)] sm:px-8 sm:py-10 lg:px-14 lg:py-12">
+        <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/20 bg-white/95 px-4 py-8 shadow-[0_30px_70px_rgba(0,0,0,0.28)] backdrop-blur-sm sm:px-8 sm:py-10 lg:px-14 lg:py-12">
           <div className="mx-auto max-w-3xl text-center">
             <p className="inline-flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.24em] text-brand-red">
               <span className="h-px w-8 bg-brand-red" />
@@ -396,8 +396,12 @@ export function WebsiteHomePage({
 
           <div className="mx-auto mt-8 grid max-w-6xl grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {BRAND_LOGOS.filter((brand) => brand.src.trim().length > 0).map(
-              (brand) => (
-                <BrandLogoTile key={brand.name} brand={brand} />
+              (brand, index, brands) => (
+                <BrandLogoTile
+                  key={brand.name}
+                  brand={brand}
+                  className={getTrailingBrandTileClassName(index, brands.length)}
+                />
               ),
             )}
           </div>
@@ -540,14 +544,6 @@ export function WebsiteHomePage({
               >
                 <Link href="/contact">Contact Us</Link>
               </Button>
-              <Button
-                asChild
-                variant="yellowPrimary"
-                size="pill"
-                className="h-11 rounded-xl px-5 text-sm font-semibold uppercase tracking-[0.16em]"
-              >
-                <Link href="/get-quote">Service Quote</Link>
-              </Button>
             </div>
           </div>
         </div>
@@ -598,11 +594,11 @@ function HeroFeature({
   label: string;
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-4 shadow-[0_18px_40px_rgba(0,0,0,0.16)] backdrop-blur-sm">
+    <div className="rounded-2xl border border-white/20 bg-white/95 px-4 py-4 shadow-[0_18px_40px_rgba(11,31,77,0.14)] backdrop-blur-sm">
       <div className="flex size-11 items-center justify-center rounded-2xl bg-brand-red/10 text-brand-red">
         <Icon className="size-5" />
       </div>
-      <p className="mt-4 text-sm font-semibold uppercase tracking-[0.14em] text-white/90">
+      <p className="mt-4 text-sm font-semibold uppercase leading-tight tracking-[0.12em] text-brand-navy">
         {label}
       </p>
     </div>
@@ -635,17 +631,36 @@ function ExpertiseHighlightCard({
   );
 }
 
+function getTrailingBrandTileClassName(index: number, total: number) {
+  if (index !== total - 1) {
+    return undefined;
+  }
+
+  return cn(
+    total % 2 !== 0 && 'col-span-2 justify-self-center',
+    total % 3 === 1
+      ? 'sm:col-span-3 sm:justify-self-center'
+      : 'sm:col-span-1 sm:justify-self-auto',
+    total % 4 === 1
+      ? 'md:col-span-4 md:justify-self-center'
+      : 'md:col-span-1 md:justify-self-auto',
+    'lg:col-span-1 lg:justify-self-auto',
+  );
+}
+
 function BrandLogoTile({
   brand,
+  className,
 }: {
   brand: {
     name: string;
     src: string;
     imageClassName?: string;
   };
+  className?: string;
 }) {
   return (
-    <div className="flex h-16 items-center justify-center">
+    <div className={cn('flex h-16 items-center justify-center', className)}>
       <Image
         src={brand.src}
         alt={`${brand.name} logo`}

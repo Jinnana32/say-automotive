@@ -11,13 +11,10 @@ export default async function SettingsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Settings"
-        description="Business identity, billing behavior, and numbering controls."
+        description="Business identity and operational billing behavior."
       />
 
-      <SettingsPageTabs
-        settings={settingsPage.settings}
-        documentSequences={settingsPage.documentSequences}
-      />
+      <SettingsPageTabs settings={settingsPage.settings} />
     </div>
   );
 }

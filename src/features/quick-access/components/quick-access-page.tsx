@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
-import { Search } from 'lucide-react';
+import { useState } from 'react';
+import { Plus, Search } from 'lucide-react';
 
 import { EmptyState } from '@/components/shared/empty-state';
 import { PageHeader } from '@/components/shared/page-header';
@@ -7,27 +10,35 @@ import { Button } from '@/components/ui/button';
 import { QuickAccessResultsWorkspace } from '@/features/quick-access/components/quick-access-results-workspace';
 import { QuickAccessSearchDialog } from '@/features/quick-access/components/quick-access-search-dialog';
 import type { QuickAccessSearchState } from '@/features/quick-access/types';
-import { QuickQuotation } from './quick-quotation';
 
 export function QuickAccessPage({
   searchState,
 }: {
   searchState: QuickAccessSearchState;
 }) {
+  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
   const hasSearch = Boolean(
     searchState.plateQuery || searchState.customerLastNameQuery,
   );
   const hasResults = searchState.records.length > 0;
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-7xl flex-col gap-6 pb-24">
+    <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-7xl flex-col gap-6">
       <PageHeader
         title="Quick Access"
         description="Use this intake workspace to pull up a returning customer or vehicle record quickly, then jump into the next action."
         actions={
-          <Button asChild variant="outline">
-            <Link href="/dashboard">Back to dashboard</Link>
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button asChild variant="bluePrimary">
+              <Link href="/quotations/new">
+                <Plus className="size-4" />
+                New Quotation
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/dashboard">Back to dashboard</Link>
+            </Button>
+          </div>
         }
       />
 
@@ -37,7 +48,13 @@ export function QuickAccessPage({
             <EmptyState
               icon={<Search className="size-5" />}
               title="No active lookup yet"
-              description="Start with the floating search button to look up a vehicle by plate number or pull up a customer by last name."
+              description="Look up a vehicle by plate number or find a customer by last name to open their service record."
+              action={
+                <Button type="button" variant="bluePrimary" size="lg" onClick={() => setSearchDialogOpen(true)}>
+                  <Search className="size-4" />
+                  Find record
+                </Button>
+              }
             />
           </div>
         </div>
@@ -67,11 +84,11 @@ export function QuickAccessPage({
         </div>
       )}
 
-      <QuickQuotation />
-
       <QuickAccessSearchDialog
         initialPlate={searchState.plateQuery}
         initialCustomerLastName={searchState.customerLastNameQuery}
+        open={searchDialogOpen}
+        onOpenChange={setSearchDialogOpen}
       />
     </div>
   );

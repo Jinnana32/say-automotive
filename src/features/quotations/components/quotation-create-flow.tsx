@@ -84,9 +84,11 @@ const INITIAL_QUOTATION_CREATE_FLOW_ACTION_STATE = {
 export function QuotationCreateFlow({
   options,
   initialValues,
+  prefillLastName = '',
 }: {
   options: QuotationCreateFlowOptions;
   initialValues: QuotationFormValues;
+  prefillLastName?: string;
 }) {
   const [quotationState, quotationFormAction] = useActionState(
     createQuotationAction,
@@ -105,8 +107,9 @@ export function QuotationCreateFlow({
     dedupeOptionsById(options.services),
   );
   const [customerSearch, setCustomerSearch] = useState('');
-  const [customerMode, setCustomerMode] =
-    useState<IntakeSelectionMode>('choose');
+  const [customerMode, setCustomerMode] = useState<IntakeSelectionMode>(
+    prefillLastName.trim() ? 'new' : 'choose',
+  );
   const [vehicleMode, setVehicleMode] = useState<IntakeSelectionMode>('choose');
   const { values, setValues, updateFormValue } = useFormValues(initialValues);
   const [currentStep, setCurrentStep] = useState<QuotationCreateStep>(
@@ -317,6 +320,7 @@ export function QuotationCreateFlow({
 
             {customerMode === 'new' ? (
               <QuickCustomerCreateForm
+                initialLastName={prefillLastName}
                 onBack={() => setCustomerMode('choose')}
                 onCreated={(customer) => {
                   setCustomerOptions((current) =>
@@ -1277,9 +1281,11 @@ export function QuotationCreateFlow({
 }
 
 function QuickCustomerCreateForm({
+  initialLastName = '',
   onBack,
   onCreated,
 }: {
+  initialLastName?: string;
   onBack: () => void;
   onCreated: (customer: CustomerOption) => void;
 }) {
@@ -1294,7 +1300,7 @@ function QuickCustomerCreateForm({
     useFormValues<CustomerFormValues>({
       customerType: 'individual',
       firstName: '',
-      lastName: '',
+      lastName: initialLastName,
       companyName: '',
       contactNumber: '',
       email: '',

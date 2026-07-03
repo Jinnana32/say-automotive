@@ -11,7 +11,7 @@ export function ReportsPrintLayout({
 }) {
   const { reports, businessProfile, generatedAt } = document;
   const activeTrendRows = reports.revenueTrend.filter(
-    (point) => point.paymentsCollected > 0 || point.vehiclesReleased > 0,
+    (point) => point.approvedQuotationValue > 0 || point.vehiclesReleased > 0,
   );
   const omittedTrendBucketCount =
     reports.revenueTrend.length - activeTrendRows.length;
@@ -92,17 +92,17 @@ export function ReportsPrintLayout({
 
           <section className="report-section-keep mt-4 grid gap-5 sm:grid-cols-2">
             <TableSection
-              title="Revenue and Service Trend"
-              description="Grouped summary of collected payments and released vehicles."
-              columns={["Bucket", "Payments", "Released"]}
+              title="Quotation and Service Trend"
+              description="Grouped summary of approved quotation value and released vehicles."
+              columns={["Bucket", "Approved Value", "Released"]}
               rows={activeTrendRows.map(
                 (point): [string, string, string] => [
                   point.label,
-                  formatPrintCurrency(point.paymentsCollected),
+                  formatPrintCurrency(point.approvedQuotationValue),
                   String(point.vehiclesReleased),
                 ],
               )}
-              emptyMessage="No payment or vehicle release activity recorded in this period."
+              emptyMessage="No approved quotation or vehicle release activity recorded in this period."
               footerNote={
                 omittedTrendBucketCount > 0
                   ? "Empty trend buckets were omitted for readability."
@@ -111,7 +111,7 @@ export function ReportsPrintLayout({
             />
             <TableSection
               title="Workflow Funnel"
-              description="Operational movement from quotations through paid billing."
+              description="Operational movement from quotations through job orders and release."
               columns={["Stage", "Count", "Helper"]}
               rows={reports.workflowFunnel.map(
                 (step): [string, string, string] => [

@@ -145,7 +145,8 @@ export async function getReportsPageData(input: {
     getDate: (row) => row.approved_at,
     fromIso,
     toIso,
-  });
+  }).filter((row) => row.status === "approved" && row.approved_at);
+  const approvedQuotationValue = sumBy(periodApprovedQuotations, (row) => row.total_amount);
   const periodJobOrders = filterByIsoDateRange(jobOrderRows, {
     getDate: (row) => row.created_at,
     fromIso,
@@ -191,7 +192,7 @@ export async function getReportsPageData(input: {
       ? roundCurrency(sumBy(periodInvoices, (row) => row.total_amount) / periodInvoices.length)
       : 0;
 
-  const paymentInvoiceIds = new Set(periodPayments.map((row) => row.invoice_id));
+
   const unpaidInvoices = invoiceRows.filter(isUnpaidInvoice);
   const unpaidCustomerIds = [
     ...new Set(unpaidInvoices.flatMap((invoice) => (invoice.customer_id ? [invoice.customer_id] : []))),
@@ -208,10 +209,10 @@ export async function getReportsPageData(input: {
     filters,
     periodPerformanceMetrics: [
       {
-        label: "Payments collected",
-        value: sumBy(periodPayments, (row) => row.amount),
+        label: "Approved quotation value",
+        value: approvedQuotationValue,
         kind: "currency",
-        helper: `${periodPayments.length} payment record${periodPayments.length === 1 ? "" : "s"} in range`,
+        helper: `${periodApprovedQuotations.length} quotation${periodApprovedQuotations.length === 1 ? "" : "s"} approved in range`,
         tone: "success",
       },
       {
@@ -224,7 +225,7 @@ export async function getReportsPageData(input: {
         label: "Quotation value",
         value: sumBy(periodQuotations, (row) => row.total_amount),
         kind: "currency",
-        helper: `${periodQuotations.length} quotation${periodQuotations.length === 1 ? "" : "s"} created`,
+        helper: `${periodQuotations.length} quotation${periodQuotations.length === 1 ? "" : "s"} created in range`,
       },
       {
         label: "Job orders opened",
@@ -298,19 +299,18 @@ export async function getReportsPageData(input: {
     ],
     revenueTrend: buildRevenueTrend({
       buckets: trendBuckets,
-      payments: periodPayments,
+      approvedQuotations: periodApprovedQuotations,
       releases: periodReleasedJobOrders,
-      getPaymentDate: (row) => row.paid_at,
-      getPaymentAmount: (row) => row.amount,
+      getApprovedDate: (row) => row.approved_at ?? "",
+      getApprovedAmount: (row) => row.total_amount,
       getReleaseDate: (row) => row.released_at ?? "",
     }),
     workflowFunnel: buildWorkflowFunnel({
       quotationsCreated: periodQuotations.length,
       quotationsApproved: periodApprovedQuotations.length,
+      approvedQuotationValue,
       jobOrdersOpened: periodJobOrders.length,
       vehiclesReleased: periodReleasedJobOrders.length,
-      invoicesWithPaymentActivity: paymentInvoiceIds.size,
-      paymentsCollected: sumBy(periodPayments, (row) => row.amount),
     }),
     topServices: buildTopPerformers(
       serviceInvoiceItems.map((item) => ({

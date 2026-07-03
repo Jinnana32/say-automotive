@@ -1,17 +1,18 @@
 export const APP_MONEY_DECIMAL_PLACES = 4;
 export const PRINT_MONEY_DECIMAL_PLACES = 4;
-export const MONEY_INPUT_STEP = "0.0001";
+export const UI_MONEY_DISPLAY_DECIMAL_PLACES = 2;
+export const MONEY_INPUT_STEP = "0.01";
 
-const phpFormatter = new Intl.NumberFormat("en-PH", {
+const phpUiFormatter = new Intl.NumberFormat("en-PH", {
   style: "currency",
   currency: "PHP",
-  minimumFractionDigits: APP_MONEY_DECIMAL_PLACES,
-  maximumFractionDigits: APP_MONEY_DECIMAL_PLACES,
+  minimumFractionDigits: 0,
+  maximumFractionDigits: UI_MONEY_DISPLAY_DECIMAL_PLACES,
 });
 
-const phpNumberFormatter = new Intl.NumberFormat("en-PH", {
-  minimumFractionDigits: APP_MONEY_DECIMAL_PLACES,
-  maximumFractionDigits: APP_MONEY_DECIMAL_PLACES,
+const phpUiNumberFormatter = new Intl.NumberFormat("en-PH", {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: UI_MONEY_DISPLAY_DECIMAL_PLACES,
 });
 
 const phpPrintFormatter = new Intl.NumberFormat("en-PH", {
@@ -28,6 +29,20 @@ const phpPrintNumberFormatter = new Intl.NumberFormat("en-PH", {
 
 export function roundCurrency(value: number) {
   return Number(value.toFixed(APP_MONEY_DECIMAL_PLACES));
+}
+
+function roundCurrencyForDisplay(value: number) {
+  return Number(roundCurrency(value).toFixed(UI_MONEY_DISPLAY_DECIMAL_PLACES));
+}
+
+function trimTrailingZeros(value: number, maxDecimals: number) {
+  const raw = value.toFixed(maxDecimals);
+
+  if (!raw.includes(".")) {
+    return raw;
+  }
+
+  return raw.replace(/0+$/, "").replace(/\.$/, "");
 }
 
 export function parseMoneyInput(
@@ -70,20 +85,72 @@ export function isPositiveMoneyInput(
   return parsed !== null && parsed > 0;
 }
 
+export function formatCurrencyForUI(value: number) {
+  const rounded = roundCurrencyForDisplay(value);
+
+  if (Number.isInteger(rounded)) {
+    return phpUiFormatter.format(rounded);
+  }
+
+  return new Intl.NumberFormat("en-PH", {
+    style: "currency",
+    currency: "PHP",
+    minimumFractionDigits: UI_MONEY_DISPLAY_DECIMAL_PLACES,
+    maximumFractionDigits: UI_MONEY_DISPLAY_DECIMAL_PLACES,
+  }).format(rounded);
+}
+
 export function formatCurrency(value: number) {
-  return phpFormatter.format(roundCurrency(value));
+  return formatCurrencyForUI(value);
 }
 
 export function formatCurrencyNumber(value: number) {
-  return phpNumberFormatter.format(roundCurrency(value));
+  const rounded = roundCurrencyForDisplay(value);
+
+  if (Number.isInteger(rounded)) {
+    return phpUiNumberFormatter.format(rounded);
+  }
+
+  return new Intl.NumberFormat("en-PH", {
+    minimumFractionDigits: UI_MONEY_DISPLAY_DECIMAL_PLACES,
+    maximumFractionDigits: UI_MONEY_DISPLAY_DECIMAL_PLACES,
+  }).format(rounded);
 }
 
-export function formatMoneyInputValue(value: number) {
-  return roundCurrency(value).toFixed(APP_MONEY_DECIMAL_PLACES);
+export function formatNumberForInput(
+  value: number,
+  options?: {
+    emptyZero?: boolean;
+    maxDecimals?: number;
+  },
+) {
+  const maxDecimals = options?.maxDecimals ?? APP_MONEY_DECIMAL_PLACES;
+  const rounded = roundCurrency(value);
+  const normalized = Number(rounded.toFixed(maxDecimals));
+
+  if (normalized === 0) {
+    return options?.emptyZero ? "" : "0";
+  }
+
+  return trimTrailingZeros(normalized, maxDecimals);
+}
+
+export function formatMoneyInputValue(
+  value: number,
+  options?: {
+    emptyZero?: boolean;
+    maxDecimals?: number;
+  },
+) {
+  return formatNumberForInput(value, options);
+}
+
+export function formatCurrencyForPrint(value: number) {
+  return phpPrintFormatter.format(Number(value.toFixed(PRINT_MONEY_DECIMAL_PLACES)));
 }
 
 export function formatPrintCurrency(value: number) {
-  return phpPrintFormatter.format(Number(value.toFixed(PRINT_MONEY_DECIMAL_PLACES)));
+  return formatCurrencyForPrint(value);
 }
 
 export function formatPrintCurrencyNumber(value: number) {

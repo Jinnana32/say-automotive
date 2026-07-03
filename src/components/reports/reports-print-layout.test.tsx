@@ -29,8 +29,8 @@ const documentFixture: ReportsPrintDocument = {
       { label: "Low Stock Items", value: 3, kind: "count", helper: "Needs replenishment" },
     ],
     revenueTrend: [
-      { key: "2026-05-01", label: "May 1", paymentsCollected: 5000, vehiclesReleased: 2 },
-      { key: "2026-05-02", label: "May 2", paymentsCollected: 0, vehiclesReleased: 0 },
+      { key: "2026-05-01", label: "May 1", approvedQuotationValue: 5000, vehiclesReleased: 2 },
+      { key: "2026-05-02", label: "May 2", approvedQuotationValue: 0, vehiclesReleased: 0 },
     ],
     workflowFunnel: [
       { label: "Quoted", count: 10, helper: "Current period" },
