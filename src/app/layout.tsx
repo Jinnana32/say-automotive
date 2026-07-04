@@ -18,6 +18,14 @@ const displayFont = Barlow_Condensed({
 export const metadata: Metadata = {
   title: "SAY Auto Care Center",
   description: "SAY Auto Care Center website and workshop operations system.",
+  icons: {
+    icon: [
+      { url: "/favicon-shield-transparent.png", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({

@@ -296,7 +296,7 @@ export function WebsiteHomePage({
                 systems.
               </p>
             </div>
-            <div className="grid grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4 lg:gap-4">
               {EXPERTISE_HIGHLIGHTS.map((highlight) => (
                 <ExpertiseHighlightCard
                   key={highlight.title}
@@ -375,20 +375,20 @@ export function WebsiteHomePage({
       >
         <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/20 bg-white/95 px-4 py-8 shadow-[0_30px_70px_rgba(0,0,0,0.28)] backdrop-blur-sm sm:px-8 sm:py-10 lg:px-14 lg:py-12">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="inline-flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.24em] text-brand-red">
-              <span className="h-px w-8 bg-brand-red" />
+            <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-red sm:gap-3 sm:text-sm sm:tracking-[0.24em]">
+              <span className="h-px w-5 bg-brand-red sm:w-8" />
               Trusted Automotive Brands
-              <span className="h-px w-8 bg-brand-red" />
+              <span className="h-px w-5 bg-brand-red sm:w-8" />
             </p>
-            <h2 className="mt-4 text-3xl font-semibold uppercase tracking-[0.03em] text-[#061B3D] sm:text-4xl">
+            <h2 className="mt-3 text-2xl font-semibold uppercase tracking-[0.02em] text-[#061B3D] sm:mt-4 sm:text-4xl sm:tracking-[0.03em]">
               Brands We Work With
             </h2>
-            <p className="mt-4 text-base leading-8 text-slate-600">
+            <p className="mt-3 text-sm leading-6 text-slate-600 sm:mt-4 sm:text-base sm:leading-8">
               We carry and work with trusted automotive brands for tires,
               batteries, suspension, 4x4 accessories, lubricants, and
               maintenance products.
             </p>
-            <p className="mt-1.5 text-sm leading-7 text-slate-500">
+            <p className="mt-1 text-xs leading-5 text-slate-500 sm:mt-1.5 sm:text-sm sm:leading-7">
               Availability may vary. Contact the shop for fitment, pricing, and
               current stock.
             </p>
@@ -412,7 +412,7 @@ export function WebsiteHomePage({
         id="why-choose-us"
         className="border-y border-white/10 bg-[#061224]"
       >
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-center lg:px-8 lg:py-20">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-start lg:px-8 lg:py-20">
           <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#07172d] shadow-[0_26px_60px_rgba(0,0,0,0.28)]">
             <div className="relative aspect-[16/11]">
               <Image
@@ -434,7 +434,7 @@ export function WebsiteHomePage({
               align="left"
             />
 
-            <div className="grid grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:gap-4">
               {TRUST_POINTS.map((point) => (
                 <TrustPoint key={point.title} point={point} />
               ))}
@@ -617,14 +617,17 @@ function ExpertiseHighlightCard({
   const Icon = highlight.icon;
 
   return (
-    <div className="min-w-0 rounded-lg border border-white/10 bg-white/[0.04] px-1.5 py-2.5 shadow-[0_14px_34px_rgba(0,0,0,0.16)] sm:rounded-[1.5rem] sm:px-4 sm:py-4">
-      <div className="mx-auto flex size-7 items-center justify-center rounded-lg bg-brand-red/10 text-brand-red sm:mx-0 sm:size-10 sm:rounded-2xl">
-        <Icon className="size-3.5 sm:size-5" />
+    <div className="min-w-0 overflow-visible rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-3 shadow-[0_14px_34px_rgba(0,0,0,0.16)] sm:rounded-[1.5rem] sm:px-4 sm:py-4">
+      <div className="flex size-8 items-center justify-center rounded-lg bg-brand-red/10 text-brand-red sm:mx-0 sm:size-10 sm:rounded-2xl">
+        <Icon className="size-4 sm:size-5" />
       </div>
-      <p className="mt-1.5 text-center text-[9px] font-semibold uppercase leading-tight tracking-[0.05em] text-white line-clamp-4 sm:mt-3 sm:text-left sm:text-sm sm:leading-snug sm:tracking-[0.12em] sm:line-clamp-none">
+      <p className="mt-2 text-left text-xs font-semibold uppercase leading-snug tracking-[0.04em] text-white sm:mt-3 sm:text-sm sm:leading-snug sm:tracking-[0.12em]">
         {highlight.title}
       </p>
-      <p className="mt-1.5 hidden text-sm leading-6 text-white/66 sm:block">
+      <p className="mt-2 text-left text-xs leading-5 text-white/80 sm:hidden">
+        {highlight.description}
+      </p>
+      <p className="mt-2 hidden text-left text-sm leading-6 text-white/66 sm:mt-2 sm:block">
         {highlight.description}
       </p>
     </div>
@@ -665,7 +668,7 @@ function BrandLogoTile({
   className?: string;
 }) {
   return (
-    <div className={cn('flex h-9 items-center justify-center sm:h-11 md:h-14 lg:h-16', className)}>
+    <div className={cn('flex h-11 items-center justify-center sm:h-11 md:h-14 lg:h-16', className)}>
       <Image
         src={brand.src}
         alt={`${brand.name} logo`}
@@ -673,7 +676,7 @@ function BrandLogoTile({
         height={48}
         unoptimized={brand.src.endsWith('.svg')}
         className={cn(
-          'h-auto w-full max-h-6 max-w-[52px] object-contain sm:max-h-7 sm:max-w-[64px] md:max-h-10 md:max-w-[120px] lg:max-h-12 lg:max-w-[220px]',
+          'h-auto w-full max-h-[29px] max-w-[63px] object-contain sm:max-h-7 sm:max-w-[64px] md:max-h-10 md:max-w-[120px] lg:max-h-12 lg:max-w-[220px]',
           brand.imageClassName,
         )}
       />
@@ -729,14 +732,17 @@ function TrustPoint({
   const Icon = point.icon;
 
   return (
-    <div className="min-w-0 rounded-lg border border-white/10 bg-white/[0.04] px-1.5 py-2.5 sm:rounded-[1.5rem] sm:px-5 sm:py-5">
-      <div className="mx-auto flex size-7 items-center justify-center rounded-lg bg-brand-red/10 text-brand-red sm:mx-0 sm:size-11 sm:rounded-2xl">
-        <Icon className="size-3.5 sm:size-5" />
+    <div className="flex min-w-0 flex-col overflow-visible rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3.5 sm:h-full sm:rounded-[1.5rem] sm:px-5 sm:py-5">
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-red/10 text-brand-red sm:size-11 sm:rounded-2xl">
+        <Icon className="size-4 sm:size-5" />
       </div>
-      <p className="mt-1.5 text-center text-[9px] font-semibold uppercase leading-tight tracking-[0.05em] text-white line-clamp-4 sm:mt-4 sm:text-left sm:text-lg sm:normal-case sm:leading-snug sm:tracking-normal sm:line-clamp-none">
+      <p className="mt-2.5 text-left text-xs font-semibold uppercase leading-snug tracking-[0.04em] text-white sm:mt-4 sm:text-lg sm:normal-case sm:leading-snug sm:tracking-normal">
         {point.title}
       </p>
-      <p className="mt-1.5 hidden text-sm leading-7 text-white/68 sm:mt-2 sm:block">
+      <p className="mt-2 text-left text-xs leading-5 text-white/80 sm:hidden">
+        {point.description}
+      </p>
+      <p className="mt-2 hidden text-left text-sm leading-7 text-white/68 sm:mt-2 sm:block">
         {point.description}
       </p>
     </div>

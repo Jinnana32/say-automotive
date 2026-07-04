@@ -108,11 +108,11 @@ function PublicNavLink({
 
 function FooterSectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mb-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white sm:text-sm">
+    <div className="mb-2.5 md:mb-4">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white sm:text-sm sm:tracking-[0.24em]">
         {children}
       </p>
-      <span className="mt-2 block h-px w-10 bg-brand-red" aria-hidden="true" />
+      <span className="mt-1.5 block h-px w-8 bg-brand-red md:mt-2 md:w-10" aria-hidden="true" />
     </div>
   );
 }
@@ -125,7 +125,7 @@ function FooterSection({
   className?: string;
 }) {
   return (
-    <section className={cn('pb-7 last:pb-0 md:pb-0', className)}>
+    <section className={cn('pb-5 last:pb-0 md:pb-0', className)}>
       {children}
     </section>
   );
@@ -147,7 +147,7 @@ function FooterLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="text-sm leading-6 text-[#a8b0c2] transition hover:text-white md:text-white/70"
+      className="text-[13px] leading-5 text-[#a8b0c2] transition hover:text-white md:text-sm md:leading-6 md:text-white/70"
     >
       {label}
     </Link>
@@ -232,11 +232,11 @@ function FooterHoursRow({
   value: string;
 }) {
   return (
-    <div className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
+    <div className="flex items-start gap-2.5 py-2 first:pt-0 last:pb-0 md:gap-3 md:py-3">
       <FooterIconBadge icon={Icon} />
       <div className="min-w-0 space-y-0.5">
-        <p className="text-sm font-medium leading-snug text-white">{label}</p>
-        <p className="text-sm leading-snug text-[#a8b0c2] md:text-white/70">{value}</p>
+        <p className="text-[13px] font-medium leading-snug text-white md:text-sm">{label}</p>
+        <p className="text-[13px] leading-snug text-[#a8b0c2] md:text-sm md:text-white/70">{value}</p>
       </div>
     </div>
   );
@@ -335,8 +335,8 @@ export function PublicSiteShell({
 
       <footer className="overflow-x-hidden bg-[#020817] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.04),transparent_42%),linear-gradient(180deg,#031024_0%,#020817_100%)]">
         <div className="mx-auto max-w-7xl px-5 py-8 md:px-6 md:py-14 lg:px-8">
-          <div className="grid grid-cols-1 gap-7 md:grid-cols-2 md:gap-x-8 md:gap-y-10 lg:grid-cols-[minmax(0,1.2fr)_0.8fr_1fr_0.9fr]">
-            <FooterSection className="space-y-4 md:col-span-2 md:space-y-5 lg:col-span-1">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-5 md:grid-cols-2 md:gap-x-8 md:gap-y-10 lg:grid-cols-[minmax(0,1.2fr)_0.8fr_1fr_0.9fr]">
+            <FooterSection className="col-span-2 space-y-3 md:col-span-2 md:space-y-5 lg:col-span-1">
               <BrandLogo
                 src={websiteLogoSrc}
                 alt={shellData.businessName}
@@ -351,9 +351,9 @@ export function PublicSiteShell({
               </p>
             </FooterSection>
 
-            <FooterSection>
+            <FooterSection className="col-span-1 md:col-span-1 md:row-start-2 md:col-start-1 lg:col-start-auto lg:row-start-auto">
               <FooterSectionHeading>Quick Links</FooterSectionHeading>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-3 md:flex md:flex-col md:gap-3">
+              <div className="flex flex-col gap-1.5 md:gap-3">
                 {publicNavLinks.map((link) => (
                   <FooterLink
                     key={link.href}
@@ -364,9 +364,14 @@ export function PublicSiteShell({
               </div>
             </FooterSection>
 
-            <FooterSection>
+            <FooterSection className="col-span-1 md:col-span-2 md:row-start-3 lg:col-span-1 lg:row-start-auto lg:col-start-auto">
+              <FooterSectionHeading>Store Hours</FooterSectionHeading>
+              <FooterStoreHoursCard />
+            </FooterSection>
+
+            <FooterSection className="col-span-2 md:col-span-1 md:row-start-2 md:col-start-2 lg:col-start-auto lg:row-start-auto">
               <FooterSectionHeading>Contact Us</FooterSectionHeading>
-              <div className="space-y-2.5 md:space-y-3">
+              <div className="space-y-2 md:space-y-3">
                 {shellData.contactNumber ? (
                   <FooterContactRow
                     icon={PhoneCall}
@@ -402,11 +407,6 @@ export function PublicSiteShell({
                   {FACEBOOK_LABEL}
                 </FooterContactRow>
               </div>
-            </FooterSection>
-
-            <FooterSection className="md:col-span-2 lg:col-span-1">
-              <FooterSectionHeading>Store Hours</FooterSectionHeading>
-              <FooterStoreHoursCard />
             </FooterSection>
           </div>
 
