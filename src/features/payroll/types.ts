@@ -25,6 +25,7 @@ export type CompensationProfileSummary = {
   overtimeRate: number | null;
   allowancePerPeriod: number;
   effectiveStartDate: string;
+  exemptFromAttendance: boolean;
   notes: string | null;
 };
 
@@ -36,6 +37,12 @@ export type PayrollCompensationRosterItem = {
   isPayrollEligible: boolean;
   schedule: StaffScheduleSummary | null;
   profile: CompensationProfileSummary | null;
+};
+
+export type PayrollExcludedStaffItem = {
+  staffId: string;
+  fullName: string;
+  role: StaffRole;
 };
 
 export type PayrollDashboardSummary = {
@@ -73,6 +80,7 @@ export type PayrollPageData = {
   summary: PayrollDashboardSummary;
   payrollPeriods: PayrollPeriodSummary[];
   compensationRoster: PayrollCompensationRosterItem[];
+  excludedPayrollStaff: PayrollExcludedStaffItem[];
   totalCompensationRosterCount: number;
   visibleCompensationRosterCount: number;
 };
@@ -84,6 +92,7 @@ export type CompensationProfileFormValues = {
   overtimeRate: string;
   allowancePerPeriod: string;
   effectiveStartDate: string;
+  exemptFromAttendance: boolean;
   notes: string;
 };
 
@@ -295,6 +304,14 @@ export type PayrollPeriodItemBreakdownData = {
 };
 
 export type PayrollPrintDocument = PayrollPeriodDetailData & {
+  businessProfile: PrintDocumentBusinessProfile;
+  generatedAt: string;
+};
+
+export type PayslipPrintDocument = {
+  period: PayrollPeriodSummary;
+  settings: PayrollSettingsSummary;
+  item: PayrollPeriodItemSummary;
   businessProfile: PrintDocumentBusinessProfile;
   generatedAt: string;
 };

@@ -137,7 +137,7 @@ function ChecklistRow({
         item.approvalStatus === "rejected" && "bg-destructive/5",
       )}
     >
-      <div className="grid gap-4 md:grid-cols-[auto_minmax(0,1.8fr)_120px_220px] md:items-start">
+      <div className="grid gap-4 lg:grid-cols-[auto_minmax(0,1.8fr)_120px_220px] lg:items-start">
         <ChecklistToggle
           jobOrderId={jobOrderId}
           item={item}

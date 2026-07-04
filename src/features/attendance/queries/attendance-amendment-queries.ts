@@ -10,6 +10,7 @@ import {
 } from "@/lib/network/request-ip";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { mapStaffDevice, resolveMechanicPortalDeviceStatus } from "@/features/attendance/server-device-utils";
+import { mapAttendanceAccessSettings } from "@/features/attendance/mappers/access-settings";
 import type {
   AttendanceAccessSettings,
   AttendanceAllowedIpSummary,
@@ -37,6 +38,10 @@ type BusinessSettingsRow = Pick<
   | "allow_attendance_admin_override"
   | "allow_dtr_amendments"
   | "require_shop_ip_for_mechanic_attendance"
+  | "require_shop_location_for_mechanic_attendance"
+  | "attendance_geofence_latitude"
+  | "attendance_geofence_longitude"
+  | "attendance_geofence_radius_meters"
 >;
 type AttendanceAllowedIpRow = TableRow<"attendance_allowed_ips">;
 type DtrAmendmentRow = TableRow<"dtr_amendment_requests">;
@@ -391,7 +396,7 @@ export async function getAttendanceAccessContext({
     admin
       .from("business_settings")
       .select(
-        "require_shop_ip_for_mechanic_attendance, allow_dtr_amendments, allow_attendance_admin_override",
+        "require_shop_ip_for_mechanic_attendance, require_shop_location_for_mechanic_attendance, attendance_geofence_latitude, attendance_geofence_longitude, attendance_geofence_radius_meters, allow_dtr_amendments, allow_attendance_admin_override",
       )
       .eq("branch_id", resolvedBranchId)
       .single(),
@@ -542,13 +547,6 @@ function collectRelatedStaffIds(rows: DtrAmendmentRow[]) {
   );
 }
 
-function mapAttendanceAccessSettings(row: BusinessSettingsRow): AttendanceAccessSettings {
-  return {
-    requireShopIpForMechanicAttendance: row.require_shop_ip_for_mechanic_attendance,
-    allowDtrAmendments: row.allow_dtr_amendments,
-    allowAttendanceAdminOverride: row.allow_attendance_admin_override,
-  };
-}
 
 function mapAllowedIp(row: AttendanceAllowedIpRow): AttendanceAllowedIpSummary {
   return {
@@ -587,6 +585,10 @@ function mapAttendanceTimeLog(row: AttendanceTimeLogRow): AttendanceTimeLogSumma
     source: row.source as AttendanceTimeLogSummary["source"],
     requestIp: row.request_ip,
     isShopIpValid: row.is_shop_ip_valid,
+    requestLatitude: row.request_latitude,
+    requestLongitude: row.request_longitude,
+    locationAccuracyMeters: row.location_accuracy_meters,
+    isLocationValid: row.is_location_valid,
     isDeviceApproved: row.is_device_approved,
     userAgent: row.user_agent,
     createdAt: row.created_at,

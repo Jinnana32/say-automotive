@@ -11,6 +11,7 @@ describe("compensationProfileSchema", () => {
       overtimeRate: "-1",
       allowancePerPeriod: "0",
       effectiveStartDate: "",
+      exemptFromAttendance: false,
       notes: "",
     });
 
@@ -25,6 +26,7 @@ describe("compensationProfileSchema", () => {
       overtimeRate: "10.00",
       allowancePerPeriod: "0.00",
       effectiveStartDate: "2026-05-01",
+      exemptFromAttendance: false,
       notes: "",
     });
 

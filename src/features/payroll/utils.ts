@@ -356,6 +356,7 @@ export function buildCompensationProfileFormValues(
     overtimeRate: profile?.overtimeRate ? formatMoneyInputValue(profile.overtimeRate) : "",
     allowancePerPeriod: profile ? formatMoneyInputValue(profile.allowancePerPeriod) : formatMoneyInputValue(0),
     effectiveStartDate: profile?.effectiveStartDate ?? getBusinessNow().toFormat("yyyy-LL-dd"),
+    exemptFromAttendance: profile?.exemptFromAttendance ?? false,
     notes: profile?.notes ?? "",
   };
 }
@@ -443,6 +444,7 @@ export function resolvePayrollReadinessStatus({
   hadAttendanceActivity,
   missingAttendanceDayCount,
   missingTimeoutCount,
+  exemptFromAttendance = false,
 }: {
   hasCompensationProfile: boolean;
   hasSchedule: boolean;
@@ -450,8 +452,9 @@ export function resolvePayrollReadinessStatus({
   hadAttendanceActivity: boolean;
   missingAttendanceDayCount: number;
   missingTimeoutCount: number;
+  exemptFromAttendance?: boolean;
 }): PayrollStaffReadinessStatus {
-  if (missingTimeoutCount > 0) {
+  if (!exemptFromAttendance && missingTimeoutCount > 0) {
     return "needs_dtr_completion";
   }
 
@@ -463,7 +466,7 @@ export function resolvePayrollReadinessStatus({
     return "missing_schedule";
   }
 
-  if (missingAttendanceDayCount > 0) {
+  if (!exemptFromAttendance && missingAttendanceDayCount > 0) {
     return "missing_attendance";
   }
 
@@ -471,7 +474,7 @@ export function resolvePayrollReadinessStatus({
     return "not_configured";
   }
 
-  if (expectedWorkdayCount === 0 && !hadAttendanceActivity) {
+  if (expectedWorkdayCount === 0 && !hadAttendanceActivity && !exemptFromAttendance) {
     return "configured_no_activity";
   }
 

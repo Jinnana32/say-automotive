@@ -181,6 +181,29 @@ export function CompensationProfileForm({
         </div>
       </div>
 
+      <div className="rounded-2xl border border-border/70 bg-muted/20 px-4 py-4">
+        <label className="flex items-start gap-3">
+          <input
+            type="checkbox"
+            name="exemptFromAttendance"
+            value="true"
+            checked={values.exemptFromAttendance}
+            onChange={(event) => updateFormValue("exemptFromAttendance", event.target.checked)}
+            className="mt-1 size-4 rounded border-border text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+          <span className="space-y-1">
+            <span className="block text-sm font-medium text-foreground">
+              Fixed pay without attendance
+            </span>
+            <span className="block text-sm text-muted-foreground">
+              Include this staff member in payroll based on scheduled workdays in the cutoff, even
+              when they do not sign in or sign out. Use for office or admin roles with a fixed daily
+              rate such as sales managers.
+            </span>
+          </span>
+        </label>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="compensationNotes" optional>Notes</Label>
         <Textarea

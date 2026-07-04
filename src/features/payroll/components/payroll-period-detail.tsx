@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { GeneratePayrollCutButton } from "@/features/payroll/components/generate-payroll-cut-button";
 import { PayrollPeriodItemAdjustmentsDialog } from "@/features/payroll/components/payroll-period-item-adjustments-dialog";
 import { PayrollPeriodItemBreakdownDrawer } from "@/features/payroll/components/payroll-period-item-breakdown-drawer";
+import { PayrollPeriodItemPayslipActions } from "@/features/payroll/components/payroll-period-item-payslip-actions";
 import { PayrollPeriodStatusBadge } from "@/features/payroll/components/payroll-period-status-badge";
 import { PayrollPeriodStatusForm } from "@/features/payroll/components/payroll-period-status-form";
 import type { PayrollPeriodDetailData } from "@/features/payroll/types";
@@ -251,8 +252,13 @@ export function PayrollPeriodDetail({ data }: { data: PayrollPeriodDetailData })
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="w-14 text-right">
-                      <PayrollPeriodItemAdjustmentsDialog item={item} />
+                    <TableCell className="w-28 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        {hasGeneratedCut ? (
+                          <PayrollPeriodItemPayslipActions periodId={period.id} item={item} />
+                        ) : null}
+                        <PayrollPeriodItemAdjustmentsDialog item={item} />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

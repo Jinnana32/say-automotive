@@ -1,4 +1,5 @@
 import { Eye } from "lucide-react";
+import Link from "next/link";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
 import { DataTableFilters } from "@/components/shared/data-table-filters";
@@ -39,6 +40,7 @@ export function PayrollPageContent({
     summary,
     payrollPeriods,
     compensationRoster,
+    excludedPayrollStaff,
     totalCompensationRosterCount,
     visibleCompensationRosterCount,
   } = data;
@@ -291,6 +293,40 @@ export function PayrollPageContent({
           </div>
         )}
       </DataTableCard>
+
+      {excludedPayrollStaff.length > 0 ? (
+        <DataTableCard
+          title="Not included in payroll yet"
+          description="Owner and admin staff are excluded by default. Open their staff record, turn on Include in payroll, then return here to set compensation."
+        >
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Staff member</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {excludedPayrollStaff.map((item) => (
+                  <TableRow key={item.staffId}>
+                    <TableCell className="font-semibold text-foreground">{item.fullName}</TableCell>
+                    <TableCell className="capitalize text-muted-foreground">
+                      {item.role.replaceAll("_", " ")}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button asChild variant="outline" size="sm">
+                        <Link href={`/staff/${item.staffId}/edit`}>Include in payroll</Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </DataTableCard>
+      ) : null}
     </div>
   );
 }

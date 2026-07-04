@@ -109,6 +109,10 @@ export async function insertAttendanceTimeLog({
   source,
   requestIp,
   isShopIpValid,
+  requestLatitude,
+  requestLongitude,
+  locationAccuracyMeters,
+  isLocationValid,
   isDeviceApproved,
   userAgent,
 }: {
@@ -124,6 +128,10 @@ export async function insertAttendanceTimeLog({
   source: AttendanceLogSource;
   requestIp: string | null;
   isShopIpValid: boolean;
+  requestLatitude?: number | null;
+  requestLongitude?: number | null;
+  locationAccuracyMeters?: number | null;
+  isLocationValid: boolean;
   isDeviceApproved: boolean;
   userAgent: string | null;
 }) {
@@ -139,6 +147,10 @@ export async function insertAttendanceTimeLog({
     source,
     request_ip: requestIp,
     is_shop_ip_valid: isShopIpValid,
+    request_latitude: requestLatitude ?? null,
+    request_longitude: requestLongitude ?? null,
+    location_accuracy_meters: locationAccuracyMeters ?? null,
+    is_location_valid: isLocationValid,
     is_device_approved: isDeviceApproved,
     user_agent: userAgent,
   };

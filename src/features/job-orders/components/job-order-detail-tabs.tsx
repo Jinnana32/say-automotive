@@ -39,13 +39,28 @@ export function JobOrderDetailTabs({
   }
 
   return (
-    <Tabs value={currentTab} onValueChange={handleTabChange} defaultValue={activeTab} className="space-y-4">
+    <Tabs
+      value={currentTab}
+      onValueChange={handleTabChange}
+      defaultValue={activeTab}
+      className="min-w-0 space-y-4"
+    >
       <TabsList className="w-full justify-start">
-        <TabsTrigger value="overview">Overview</TabsTrigger>
-        <TabsTrigger value="billing">Billing</TabsTrigger>
-        <TabsTrigger value="work-items">Work Items</TabsTrigger>
-        <TabsTrigger value="parts-usage">Parts Usage</TabsTrigger>
-        <TabsTrigger value="mechanics">Mechanics</TabsTrigger>
+        <TabsTrigger value="overview" className="px-2.5 py-1.5 text-xs sm:px-3 sm:py-2 sm:text-sm lg:min-h-10 lg:px-4">
+          Overview
+        </TabsTrigger>
+        <TabsTrigger value="billing" className="px-2.5 py-1.5 text-xs sm:px-3 sm:py-2 sm:text-sm lg:min-h-10 lg:px-4">
+          Billing
+        </TabsTrigger>
+        <TabsTrigger value="work-items" className="px-2.5 py-1.5 text-xs sm:px-3 sm:py-2 sm:text-sm lg:min-h-10 lg:px-4">
+          Work Items
+        </TabsTrigger>
+        <TabsTrigger value="parts-usage" className="px-2.5 py-1.5 text-xs sm:px-3 sm:py-2 sm:text-sm lg:min-h-10 lg:px-4">
+          Parts Usage
+        </TabsTrigger>
+        <TabsTrigger value="mechanics" className="px-2.5 py-1.5 text-xs sm:px-3 sm:py-2 sm:text-sm lg:min-h-10 lg:px-4">
+          Mechanics
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="overview">{overview}</TabsContent>

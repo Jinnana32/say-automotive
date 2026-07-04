@@ -35,6 +35,7 @@ const dailyProfile: CompensationProfileSummary = {
   overtimeRate: null,
   allowancePerPeriod: 0,
   effectiveStartDate: "2026-01-01",
+  exemptFromAttendance: false,
   notes: null,
 };
 
@@ -364,5 +365,41 @@ describe("computePayrollItem", () => {
         payReason: "Approved unpaid leave / not counted as paid day",
       }),
     ]);
+  });
+
+  it("pays scheduled workdays for staff marked as fixed pay without attendance", () => {
+    const breakdown = computePayrollItemBreakdown({
+      staffId: "staff-admin",
+      fullName: "Nia Grace Ariete",
+      role: "admin",
+      schedule: baseSchedule,
+      compensationProfile: {
+        ...dailyProfile,
+        baseRate: 700,
+        exemptFromAttendance: true,
+      },
+      attendanceRecords: [],
+      holidays: [],
+      leaveEntries: [],
+      periodStartDate: "2026-05-04",
+      periodEndDate: "2026-05-08",
+      settings: {
+        standardDailyHours: 8,
+        holidayPremiumRate: 0.3,
+      },
+    });
+
+    expect(breakdown.item.readinessStatus).toBe("ready");
+    expect(breakdown.item.paidDayUnits).toBe(5);
+    expect(breakdown.item.basePay).toBe(3500);
+    expect(breakdown.item.warningCodes).not.toContain("missing_attendance");
+    expect(breakdown.days.filter((day) => day.isPaid)).toHaveLength(5);
+    expect(breakdown.days[0]).toEqual(
+      expect.objectContaining({
+        date: "2026-05-04",
+        isPaid: true,
+        payReason: "Fixed pay scheduled workday (attendance not required).",
+      }),
+    );
   });
 });

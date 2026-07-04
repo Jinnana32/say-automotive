@@ -558,6 +558,15 @@ export async function updateAttendanceAccessSettingsAction(
   const payload = {
     require_shop_ip_for_mechanic_attendance:
       parsed.data.requireShopIpForMechanicAttendance,
+    require_shop_location_for_mechanic_attendance:
+      parsed.data.requireShopLocationForMechanicAttendance,
+    attendance_geofence_latitude: parsed.data.requireShopLocationForMechanicAttendance
+      ? parsed.data.geofenceLatitude
+      : currentSettings.attendance_geofence_latitude,
+    attendance_geofence_longitude: parsed.data.requireShopLocationForMechanicAttendance
+      ? parsed.data.geofenceLongitude
+      : currentSettings.attendance_geofence_longitude,
+    attendance_geofence_radius_meters: parsed.data.geofenceRadiusMeters,
     allow_dtr_amendments: parsed.data.allowDtrAmendments,
     allow_attendance_admin_override: parsed.data.allowAttendanceAdminOverride,
   };

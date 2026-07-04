@@ -68,7 +68,7 @@ export function JobOrderDetailPage({
   const jobProgressLines = buildJobProgressLines(jobOrder);
 
   return (
-    <div className="space-y-5">
+    <div className="min-w-0 space-y-5">
       {jobOrder.isHistorical ? (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-950">
           Historical service record for{' '}
@@ -76,8 +76,8 @@ export function JobOrderDetailPage({
           is read-only and excluded from billing, inventory, and status workflows.
         </div>
       ) : null}
-      <div className="rounded-2xl border border-border/70 bg-background/95 px-5 py-4 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/90 lg:top-[5.25rem]">
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+      <div className="min-w-0 rounded-2xl border border-border/70 bg-background/95 px-4 py-4 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/90 sm:px-5 lg:top-[5.25rem]">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 space-y-2">
             <Breadcrumbs
               items={[
@@ -96,7 +96,7 @@ export function JobOrderDetailPage({
               ) : null}
             </div>
             <div className="space-y-1">
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
                 {jobOrder.jobOrderNumber}
               </h1>
               <p className="text-sm text-muted-foreground">
@@ -105,7 +105,7 @@ export function JobOrderDetailPage({
             </div>
           </div>
 
-          <div className="flex w-full flex-wrap items-center gap-2 md:w-auto md:shrink-0 md:justify-end">
+          <div className="flex w-full min-w-0 flex-wrap items-center gap-2 lg:w-auto lg:shrink-0 lg:justify-end">
             <ActionDropdown
               label="Print job order"
               variant="outline"
@@ -152,7 +152,7 @@ export function JobOrderDetailPage({
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-4">
         <SummaryCard
           title="Customer & vehicle"
           icon={CarFront}
@@ -248,12 +248,12 @@ export function JobOrderDetailPage({
       <JobOrderDetailTabs
         activeTab={activeTab}
         overview={
-          <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
+          <div className="grid min-w-0 gap-5 xl:grid-cols-[0.9fr_1.1fr]">
             <SectionCard
               title="Customer and vehicle"
               description="Reference details for the shop team before moving into notes or actions."
             >
-              <DetailSummaryGrid className="md:grid-cols-2 xl:grid-cols-2">
+              <DetailSummaryGrid className="lg:grid-cols-2 xl:grid-cols-2">
                 <DetailSummaryItem
                   label="Customer"
                   value={
@@ -318,7 +318,7 @@ export function JobOrderDetailPage({
             description="Invoice readiness is based on actual approved work items, not the original estimate."
           >
             <div className="space-y-4">
-              <MetricGrid className="md:grid-cols-3 xl:grid-cols-3">
+              <MetricGrid className="grid-cols-1 md:grid-cols-1 lg:grid-cols-3 xl:grid-cols-3">
                 <StatCard
                   title="Billable total"
                   value={formatCurrency(jobOrder.billableTotal)}
@@ -622,14 +622,14 @@ function SummaryCard({
   children?: React.ReactNode;
 }) {
   return (
-    <Card className="border-border/70 shadow-sm">
+    <Card className="min-w-0 border-border/70 shadow-sm">
       <CardContent className="p-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 space-y-1">
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               {title}
             </p>
-            <div className="text-base font-semibold text-foreground">
+            <div className="text-base font-semibold break-words text-foreground">
               {value}
             </div>
           </div>
@@ -637,8 +637,8 @@ function SummaryCard({
             <Icon className="size-4" />
           </div>
         </div>
-        <div className="mt-3 flex items-start justify-between gap-3">
-          <div className="space-y-1">
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+          <div className="min-w-0 space-y-1">
             {lines.filter(Boolean).map((line, index) => (
               <p
                 key={`${title}-${index}`}
@@ -681,7 +681,7 @@ function ReadOnlyOperationalNotes({ detail }: { detail: JobOrderDetail }) {
       description="Completed and released records stay readable without opening an edit-heavy form."
     >
       <div className="space-y-5">
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-2">
           <ReadOnlyField
             label="Mileage in"
             value={

@@ -35,6 +35,7 @@ export const compensationProfileSchema = z.object({
   effectiveStartDate: z.string().trim().refine(isValidDate, {
     message: "Enter a valid effective date.",
   }),
+  exemptFromAttendance: z.boolean(),
   notes: z.string().trim().max(500, "Notes must be 500 characters or fewer."),
 });
 
@@ -96,6 +97,7 @@ export function parseCompensationProfileFormData(formData: FormData): Compensati
     overtimeRate: readString(formData, "overtimeRate"),
     allowancePerPeriod: readString(formData, "allowancePerPeriod"),
     effectiveStartDate: readString(formData, "effectiveStartDate"),
+    exemptFromAttendance: formData.get("exemptFromAttendance") === "true",
     notes: readString(formData, "notes"),
   };
 }

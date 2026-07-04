@@ -123,32 +123,32 @@ export function TimekeepingCalendarPageContent({
         </TabsList>
 
         <TabsContent value="access" className="space-y-6">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-            <Card className="border-border/70 shadow-sm">
-              <CardHeader className="space-y-1">
-                <CardTitle className="text-base font-semibold text-foreground">
-                  Mechanic portal access
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Control whether mechanic attendance must come from the approved
-                  shop network and whether amendment fallback stays available.
-                </p>
-              </CardHeader>
-              <CardContent>
-                <AttendanceAccessSettingsForm
-                  initialValues={data.attendanceAccessSettings}
-                />
-              </CardContent>
-            </Card>
+          <Card className="border-border/70 shadow-sm">
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-base font-semibold text-foreground">
+                Mechanic portal access
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Enable shop IP and/or shop location verification for mechanic punches.
+                At least one on-site check must stay enabled.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <AttendanceAccessSettingsForm
+                initialValues={data.attendanceAccessSettings}
+              />
+            </CardContent>
+          </Card>
 
-            <Card className="border-border/70 shadow-sm">
+          <Card className="border-border/70 shadow-sm">
               <CardHeader className="space-y-1">
                 <CardTitle className="text-base font-semibold text-foreground">
                   Approved shop IPs
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Attendance punches are treated as on-site only when the current
-                  public internet IP matches one of these branch addresses.
+                  Used when shop IP verification is enabled. Attendance punches are treated
+                  as on-site only when the current public internet IP matches one of these
+                  branch addresses.
                 </p>
               </CardHeader>
               <CardContent className="space-y-5">
@@ -243,7 +243,6 @@ export function TimekeepingCalendarPageContent({
                 )}
               </CardContent>
             </Card>
-          </div>
         </TabsContent>
 
         <TabsContent value="devices" className="space-y-6">

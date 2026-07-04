@@ -10,6 +10,7 @@ import {
   Clock3,
   LogIn,
   LogOut,
+  MapPin,
   ShieldCheck,
   Smartphone,
   WalletCards,
@@ -24,6 +25,7 @@ import { DtrAmendmentForm } from "@/features/attendance/components/dtr-amendment
 import { MechanicPortalClock } from "@/features/attendance/components/mechanic-portal-clock";
 import { MechanicPortalSlideAction } from "@/features/attendance/components/mechanic-portal-slide-action";
 import { MechanicPortalVerificationCard } from "@/features/attendance/components/mechanic-portal-verification-card";
+import { useMechanicPortalLocation } from "@/features/attendance/hooks/use-mechanic-portal-location";
 import { summarizeCurrentDevice } from "@/features/attendance/device-utils";
 import type { MechanicPortalAttendancePageData } from "@/features/attendance/types";
 import {
@@ -32,10 +34,12 @@ import {
   formatDtrAmendmentStatusLabel,
   formatDtrAmendmentTypeLabel,
   formatMechanicIpStatusMessage,
+  formatMechanicLocationStatusMessage,
   getDtrAmendmentStatusTone,
   getMechanicPortalPrimaryActionLabel,
   getMechanicPortalPrimaryLogType,
   INITIAL_ATTENDANCE_ENTRY_ACTION_STATE,
+  isMechanicPremiseVerificationPassed,
 } from "@/features/attendance/utils";
 import { formatDate, formatDateTime } from "@/lib/dates";
 import { cn } from "@/lib/utils";
@@ -51,10 +55,32 @@ export function MechanicPortalAttendancePage({
     INITIAL_ATTENDANCE_ENTRY_ACTION_STATE,
   );
   const nextLogType = getMechanicPortalPrimaryLogType(data.attendance);
+  const locationState = useMechanicPortalLocation({
+    required: data.settings.requireShopLocationForMechanicAttendance,
+    geofence: data.settings.geofence,
+  });
+  const locationStatus = {
+    isLocationRequired: data.settings.requireShopLocationForMechanicAttendance,
+    isAllowed: locationState.isAllowed,
+    latitude: locationState.latitude,
+    longitude: locationState.longitude,
+    accuracyMeters: locationState.accuracyMeters,
+    distanceMeters: locationState.distanceMeters,
+    errorMessage: locationState.errorMessage,
+  };
+  const premiseAllowed = isMechanicPremiseVerificationPassed({
+    settings: data.settings,
+    ipStatus: data.ipStatus,
+    locationStatus,
+  });
   const canPunch =
-    Boolean(nextLogType) && data.ipStatus.isAllowed && data.deviceStatus.isApproved;
+    Boolean(nextLogType) && data.deviceStatus.isApproved && premiseAllowed;
   const statusCopy = getAttendanceStatusCopy(data.attendance, data.todayAmendments);
   const networkSubtitle = getMechanicNetworkSummary(data);
+  const locationSubtitle = formatMechanicLocationStatusMessage(
+    locationStatus,
+    data.settings,
+  );
   const deviceSubtitle = summarizeCurrentDevice(data.deviceStatus.currentDevice);
   const actionLabel = getMechanicPortalPrimaryActionLabel(data.attendance);
   const visibleRecentRequests = data.recentAmendments.slice(0, 3);
@@ -139,14 +165,38 @@ export function MechanicPortalAttendancePage({
         <div className="mt-5">
           <form action={formAction} className="space-y-3">
             {nextLogType ? <input type="hidden" name="logType" value={nextLogType} /> : null}
+            {data.settings.requireShopLocationForMechanicAttendance ? (
+              <>
+                <input
+                  type="hidden"
+                  name="locationLatitude"
+                  value={locationState.latitude ?? ""}
+                />
+                <input
+                  type="hidden"
+                  name="locationLongitude"
+                  value={locationState.longitude ?? ""}
+                />
+                <input
+                  type="hidden"
+                  name="locationAccuracyMeters"
+                  value={locationState.accuracyMeters ?? ""}
+                />
+                <input
+                  type="hidden"
+                  name="locationCapturedAtMs"
+                  value={locationState.capturedAtMs ?? ""}
+                />
+              </>
+            ) : null}
 
             <MechanicPortalSlideAction pendingLabel="Saving..." disabled={!canPunch}>
               {actionLabel}
             </MechanicPortalSlideAction>
 
-            {!data.ipStatus.isAllowed || !data.deviceStatus.isApproved ? (
+            {!premiseAllowed || !data.deviceStatus.isApproved ? (
               <p className="px-1 text-sm leading-6 text-slate-500">
-                Time-in and time-out stay blocked until both the approved shop network and approved device are verified.
+                Time-in and time-out stay blocked until all required on-site checks and your approved device are verified.
               </p>
             ) : null}
 
@@ -160,20 +210,42 @@ export function MechanicPortalAttendancePage({
           <h2 className="text-base font-semibold text-slate-950">Verification Status</h2>
         </div>
         <div className="mt-4 space-y-3">
-          <MechanicPortalVerificationCard
-            icon={
-              data.ipStatus.isAllowed ? (
-                <ShieldCheck className="size-5" />
-              ) : (
-                <CircleAlert className="size-5" />
-              )
-            }
-            title={
-              data.ipStatus.isAllowed ? "Shop network verified" : "Shop network needs review"
-            }
-            subtitle={networkSubtitle}
-            tone={data.ipStatus.isAllowed ? "success" : "warning"}
-          />
+          {data.settings.requireShopIpForMechanicAttendance ? (
+            <MechanicPortalVerificationCard
+              icon={
+                data.ipStatus.isAllowed ? (
+                  <ShieldCheck className="size-5" />
+                ) : (
+                  <CircleAlert className="size-5" />
+                )
+              }
+              title={
+                data.ipStatus.isAllowed ? "Shop network verified" : "Shop network needs review"
+              }
+              subtitle={networkSubtitle}
+              tone={data.ipStatus.isAllowed ? "success" : "warning"}
+            />
+          ) : null}
+          {data.settings.requireShopLocationForMechanicAttendance ? (
+            <MechanicPortalVerificationCard
+              icon={
+                locationState.isAllowed ? (
+                  <MapPin className="size-5" />
+                ) : (
+                  <CircleAlert className="size-5" />
+                )
+              }
+              title={
+                locationState.isLoading
+                  ? "Checking shop location"
+                  : locationState.isAllowed
+                    ? "Shop location verified"
+                    : "Shop location needs review"
+              }
+              subtitle={locationSubtitle}
+              tone={locationState.isAllowed ? "success" : "warning"}
+            />
+          ) : null}
           <MechanicPortalVerificationCard
             icon={
               data.deviceStatus.isApproved ? (

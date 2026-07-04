@@ -6,6 +6,8 @@ import {
   formatCurrencyForPrint,
   formatCurrencyForUI,
   formatCurrencyNumber,
+  formatDocumentPrintCurrency,
+  formatDocumentPrintCurrencyNumber,
   formatMoneyInputValue,
   formatNumberForInput,
   formatPrintCurrency,
@@ -32,6 +34,12 @@ describe("currency helpers", () => {
     expect(formatCurrencyForPrint(180)).toBe("₱180.0000");
     expect(formatPrintCurrency(180)).toBe("₱180.0000");
     expect(formatPrintCurrencyNumber(5200.25)).toBe("5,200.2500");
+  });
+
+  it("formats quotation and job order document money with up to two decimals", () => {
+    expect(formatDocumentPrintCurrency(180)).toBe("₱180");
+    expect(formatDocumentPrintCurrency(180.5)).toBe("₱180.50");
+    expect(formatDocumentPrintCurrencyNumber(5200.25)).toBe("5,200.25");
   });
 
   it("rounds internal values to four decimals", () => {

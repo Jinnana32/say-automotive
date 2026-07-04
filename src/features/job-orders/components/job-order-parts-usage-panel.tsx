@@ -10,6 +10,7 @@ import type {
   JobOrderStatus,
 } from "@/features/job-orders/types";
 import { formatDateTime } from "@/lib/dates";
+import { cn } from "@/lib/utils";
 
 export function JobOrderPartsUsagePanel({
   jobOrderId,
@@ -67,9 +68,10 @@ export function JobOrderPartsUsagePanel({
                   key={item.id}
                   className="overflow-hidden rounded-2xl border border-border/70 bg-card [&_summary::-webkit-details-marker]:hidden"
                 >
-                  <summary className="flex cursor-pointer list-none items-center gap-3 p-4">
-                    <div className="grid flex-1 gap-3 md:grid-cols-[minmax(0,2.2fr)_repeat(4,minmax(0,0.8fr))]">
+                  <summary className="flex cursor-pointer list-none items-start gap-3 p-4">
+                    <div className="grid min-w-0 flex-1 grid-cols-2 gap-3 lg:grid-cols-[minmax(0,2.2fr)_repeat(4,minmax(0,0.8fr))]">
                       <SummaryCell
+                        className="col-span-2 lg:col-span-1"
                         label="Part"
                         value={item.description}
                         hint={`${formatQuantity(item.quantity)} planned · ${item.isAdditional ? "Extra line" : "Quoted line"}`}
@@ -196,14 +198,16 @@ function SummaryCell({
   value,
   hint,
   children,
+  className,
 }: {
   label: string;
   value: React.ReactNode;
   hint?: React.ReactNode;
   children?: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="min-w-0">
+    <div className={cn("min-w-0", className)}>
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
         {label}
       </p>

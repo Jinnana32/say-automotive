@@ -51,6 +51,7 @@ type StaffSavePayload = Pick<
   | "overtime_rate"
   | "allowance_per_period"
   | "effective_start_date"
+  | "exempt_from_attendance"
   | "notes"
 >;
 
@@ -76,6 +77,7 @@ export async function upsertCompensationProfileAction(
     overtime_rate: values.overtimeRate.trim() ? Number(values.overtimeRate) : null,
     allowance_per_period: Number(values.allowancePerPeriod),
     effective_start_date: values.effectiveStartDate,
+    exempt_from_attendance: values.exemptFromAttendance,
     notes: normalizeNullable(values.notes),
   };
   const { error } = await supabase.from("staff_compensation_profiles").upsert(payload, {
@@ -286,6 +288,7 @@ export async function generatePayrollCutAction(
         overtimeRate: row.overtime_rate,
         allowancePerPeriod: row.allowance_per_period,
         effectiveStartDate: row.effective_start_date,
+        exemptFromAttendance: row.exempt_from_attendance,
         notes: row.notes,
       },
     ]),

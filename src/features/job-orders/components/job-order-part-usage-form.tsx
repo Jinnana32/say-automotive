@@ -62,7 +62,7 @@ export function JobOrderPartUsageForm({
 
       <FormStatusMessage message={state.message} />
 
-      <div className="grid gap-3 md:grid-cols-[160px_1fr_auto]">
+      <div className="grid gap-3 lg:grid-cols-[160px_1fr_auto]">
         <div className="space-y-2">
           <Label htmlFor={`${mode}-quantity-${jobOrderItemId}`} required>
             Quantity

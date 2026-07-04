@@ -1,23 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { Eye } from "lucide-react";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
 import { DataTableFilters } from "@/components/shared/data-table-filters";
 import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
-import { IconActionButton } from "@/components/shared/icon-action";
 import { MetricGrid } from "@/components/shared/metric-grid";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DtrAmendmentReviewDialog } from "@/features/attendance/components/dtr-amendment-review-dialog";
-import type { AttendanceAmendmentsPageData, DtrAmendmentSummary } from "@/features/attendance/types";
+import { AttendanceAmendmentRowActions } from "@/features/attendance/components/attendance-amendment-row-actions";
+import type { AttendanceAmendmentsPageData } from "@/features/attendance/types";
 import {
   formatAttendanceLogTypeLabel,
   formatDtrAmendmentStatusLabel,
@@ -37,7 +35,6 @@ export function AttendanceAmendmentsPageContent({
   embedded?: boolean;
   paramPrefix?: string;
 }) {
-  const [reviewTarget, setReviewTarget] = useState<DtrAmendmentSummary | null>(null);
   const searchParams = useSearchParams();
   const searchParamName = embedded ? `${paramPrefix}Search` : "search";
   const statusParamName = embedded ? `${paramPrefix}Status` : "status";
@@ -73,18 +70,6 @@ export function AttendanceAmendmentsPageContent({
 
   return (
     <div className="w-full min-w-0 max-w-full space-y-6">
-      {reviewTarget ? (
-        <DtrAmendmentReviewDialog
-          amendment={reviewTarget}
-          open
-          onOpenChange={(open) => {
-            if (!open) {
-              setReviewTarget(null);
-            }
-          }}
-        />
-      ) : null}
-
       {embedded ? null : (
         <PageHeader
           title="DTR Amendments"
@@ -231,16 +216,8 @@ export function AttendanceAmendmentsPageContent({
                     <TableCell className="text-sm text-muted-foreground">
                       {amendment.requestedIp ?? "Unavailable"}
                     </TableCell>
-                    <TableCell className="w-14 text-right">
-                      {amendment.status === "pending" ? (
-                        <IconActionButton
-                          label={`Review amendment for ${amendment.staffName}`}
-                          icon={Eye}
-                          onClick={() => setReviewTarget(amendment)}
-                        />
-                      ) : (
-                        <span className="text-sm text-muted-foreground">Reviewed</span>
-                      )}
+                    <TableCell className="w-24 text-right">
+                      <AttendanceAmendmentRowActions amendment={amendment} />
                     </TableCell>
                   </TableRow>
                 ))}

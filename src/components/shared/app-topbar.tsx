@@ -154,8 +154,8 @@ function CreateActionsMenu({
       <DropdownMenuTrigger asChild>
         <Button
           type="button"
-          variant="ghost"
-          className="h-10 rounded-full border border-brand-red/20 bg-brand-red/[0.08] px-3 text-brand-red shadow-sm hover:bg-brand-red/[0.14] hover:text-brand-redDark focus-visible:ring-brand-red/20"
+          variant="navyPrimary"
+          className="h-10 rounded-full px-3"
           aria-label="Create new"
           title="Create new"
         >

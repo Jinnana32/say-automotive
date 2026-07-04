@@ -7,8 +7,8 @@ import type {
   QuotationPrintMode,
 } from "@/features/quotations/types";
 import {
-  formatPrintCurrency,
-  formatPrintCurrencyNumber,
+  formatDocumentPrintCurrency,
+  formatDocumentPrintCurrencyNumber,
 } from "@/lib/currency";
 import { formatDocumentDate } from "@/lib/dates";
 
@@ -217,10 +217,10 @@ function QuotationLineItemsSection({
                     {row.quantityLabel}
                   </td>
                   <td className="px-3 py-2.5 text-right align-top text-slate-800">
-                    {formatPrintCurrencyNumber(row.unitPrice)}
+                    {formatDocumentPrintCurrencyNumber(row.unitPrice)}
                   </td>
                   <td className="px-3 py-2.5 text-right align-top font-semibold text-slate-950">
-                    {formatPrintCurrencyNumber(row.amount)}
+                    {formatDocumentPrintCurrencyNumber(row.amount)}
                   </td>
                 </tr>
               ),
@@ -290,21 +290,21 @@ function QuotationTotalsPanel({
       ? [
           {
             label: "Total Parts",
-            value: formatPrintCurrency(breakdown.totalParts),
+            value: formatDocumentPrintCurrency(breakdown.totalParts),
           },
           {
             label: "Total Labor",
-            value: formatPrintCurrency(breakdown.totalLabor),
+            value: formatDocumentPrintCurrency(breakdown.totalLabor),
           },
           {
             label: "Subtotal",
-            value: formatPrintCurrency(breakdown.subtotal),
+            value: formatDocumentPrintCurrency(breakdown.subtotal),
           },
           ...(breakdown.discount > 0
             ? [
                 {
                   label: "Discount",
-                  value: formatPrintCurrency(breakdown.discount),
+                  value: formatDocumentPrintCurrency(breakdown.discount),
                 },
               ]
             : []),
@@ -312,7 +312,7 @@ function QuotationTotalsPanel({
             ? [
                 {
                   label: "Tax / VAT",
-                  value: formatPrintCurrency(breakdown.tax),
+                  value: formatDocumentPrintCurrency(breakdown.tax),
                 },
               ]
             : []),
@@ -323,7 +323,7 @@ function QuotationTotalsPanel({
               breakdown.mode === "parts"
                 ? "Parts Total"
                 : "Labor / Services Total",
-            value: formatPrintCurrency(breakdown.visibleSubtotal),
+            value: formatDocumentPrintCurrency(breakdown.visibleSubtotal),
           },
         ];
 
@@ -361,7 +361,7 @@ function QuotationTotalsPanel({
             {getTotalsFooterLabel(breakdown.mode)}
           </span>
           <span className="text-[20px] font-semibold leading-none">
-            {formatPrintCurrency(breakdown.visibleTotal)}
+            {formatDocumentPrintCurrency(breakdown.visibleTotal)}
           </span>
         </div>
       </div>

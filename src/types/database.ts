@@ -164,6 +164,10 @@ export type Database = {
           source: string;
           request_ip: string | null;
           is_shop_ip_valid: boolean;
+          request_latitude: number | null;
+          request_longitude: number | null;
+          location_accuracy_meters: number | null;
+          is_location_valid: boolean;
           is_device_approved: boolean;
           user_agent: string | null;
           created_at: string;
@@ -181,6 +185,10 @@ export type Database = {
           source: string;
           request_ip?: string | null;
           is_shop_ip_valid?: boolean;
+          request_latitude?: number | null;
+          request_longitude?: number | null;
+          location_accuracy_meters?: number | null;
+          is_location_valid?: boolean;
           is_device_approved?: boolean;
           user_agent?: string | null;
           created_at?: string;
@@ -347,6 +355,10 @@ export type Database = {
           require_full_payment_before_release: boolean;
           require_additional_item_preapproval: boolean;
           require_shop_ip_for_mechanic_attendance: boolean;
+          require_shop_location_for_mechanic_attendance: boolean;
+          attendance_geofence_latitude: number | null;
+          attendance_geofence_longitude: number | null;
+          attendance_geofence_radius_meters: number;
           allow_dtr_amendments: boolean;
           allow_attendance_admin_override: boolean;
           enable_barcode_support: boolean;
@@ -376,6 +388,10 @@ export type Database = {
           require_full_payment_before_release?: boolean;
           require_additional_item_preapproval?: boolean;
           require_shop_ip_for_mechanic_attendance?: boolean;
+          require_shop_location_for_mechanic_attendance?: boolean;
+          attendance_geofence_latitude?: number | null;
+          attendance_geofence_longitude?: number | null;
+          attendance_geofence_radius_meters?: number;
           allow_dtr_amendments?: boolean;
           allow_attendance_admin_override?: boolean;
           enable_barcode_support?: boolean;
@@ -1734,6 +1750,7 @@ export type Database = {
           overtime_rate: number | null;
           allowance_per_period: number;
           effective_start_date: string;
+          exempt_from_attendance: boolean;
           notes: string | null;
           created_at: string;
           updated_at: string;
@@ -1746,6 +1763,7 @@ export type Database = {
           overtime_rate?: number | null;
           allowance_per_period?: number;
           effective_start_date: string;
+          exempt_from_attendance?: boolean;
           notes?: string | null;
           created_at?: string;
           updated_at?: string;

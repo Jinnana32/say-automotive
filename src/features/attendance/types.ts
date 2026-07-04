@@ -24,10 +24,18 @@ export type DtrAmendmentType =
   | "other";
 export type DtrAmendmentStatus = "pending" | "approved" | "rejected";
 
+export type AttendanceGeofenceSettings = {
+  latitude: number | null;
+  longitude: number | null;
+  radiusMeters: number;
+};
+
 export type AttendanceAccessSettings = {
   requireShopIpForMechanicAttendance: boolean;
+  requireShopLocationForMechanicAttendance: boolean;
   allowDtrAmendments: boolean;
   allowAttendanceAdminOverride: boolean;
+  geofence: AttendanceGeofenceSettings;
 };
 
 export type AttendanceAllowedIpSummary = {
@@ -51,6 +59,10 @@ export type AttendanceTimeLogSummary = {
   source: AttendanceLogSource;
   requestIp: string | null;
   isShopIpValid: boolean;
+  requestLatitude: number | null;
+  requestLongitude: number | null;
+  locationAccuracyMeters: number | null;
+  isLocationValid: boolean;
   isDeviceApproved: boolean;
   userAgent: string | null;
   createdAt: string;
@@ -106,6 +118,16 @@ export type MechanicPortalIpStatus = {
   isShopIpRequired: boolean;
   isAllowed: boolean;
   matchedAllowedIp: AttendanceAllowedIpSummary | null;
+};
+
+export type MechanicPortalLocationStatus = {
+  isLocationRequired: boolean;
+  isAllowed: boolean;
+  latitude: number | null;
+  longitude: number | null;
+  accuracyMeters: number | null;
+  distanceMeters: number | null;
+  errorMessage: string | null;
 };
 
 export type MechanicPortalDeviceStatus = {
@@ -322,7 +344,7 @@ export type StaffLeaveManagementItem = StaffLeaveEntrySummary & {
 
 export type TimekeepingCalendarPageData = {
   branchName: string;
-  attendanceAccessSettings: AttendanceAccessSettings;
+  attendanceAccessSettings: AttendanceAccessSettingsFormValues;
   allowedIpAddresses: AttendanceAllowedIpSummary[];
   currentDetectedIp: string | null;
   observedRequestIp: string | null;
@@ -353,7 +375,15 @@ export type AttendanceEntryActionState = {
 
 export type TimekeepingActionState = AttendanceEntryActionState;
 
-export type AttendanceAccessSettingsFormValues = AttendanceAccessSettings;
+export type AttendanceAccessSettingsFormValues = {
+  requireShopIpForMechanicAttendance: boolean;
+  requireShopLocationForMechanicAttendance: boolean;
+  allowDtrAmendments: boolean;
+  allowAttendanceAdminOverride: boolean;
+  geofenceLatitude: string;
+  geofenceLongitude: string;
+  geofenceRadiusMeters: string;
+};
 
 export type AttendanceAllowedIpFormValues = {
   ipAddress: string;

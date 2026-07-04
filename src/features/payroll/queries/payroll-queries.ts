@@ -7,6 +7,7 @@ import type {
   CompensationProfileSummary,
   PayrollAttendanceSourceRecord,
   PayrollCompensationRosterItem,
+  PayrollExcludedStaffItem,
   PayrollPageData,
   PayrollPageFilters,
   PayrollPeriodDetailData,
@@ -49,7 +50,7 @@ type AttendanceRow = Pick<
 
 export async function getPayrollPageData(filters: PayrollPageFilters): Promise<PayrollPageData> {
   const { branchScope, supabase } = await getBranchScopedServerClient("payroll:read");
-  const [{ data: staffData, error: staffError }, { data: periodData, error: periodError }] =
+  const [{ data: staffData, error: staffError }, { data: excludedStaffData, error: excludedStaffError }, { data: periodData, error: periodError }] =
     await Promise.all([
       applyBranchFilter(
         supabase
@@ -59,6 +60,16 @@ export async function getPayrollPageData(filters: PayrollPageFilters): Promise<P
           )
           .eq("status", "active")
           .eq("is_payroll_eligible", true)
+          .order("last_name", { ascending: true })
+          .order("first_name", { ascending: true }),
+        branchScope.selectedBranchId,
+      ),
+      applyBranchFilter(
+        supabase
+          .from("staff")
+          .select("id, first_name, last_name, role")
+          .eq("status", "active")
+          .eq("is_payroll_eligible", false)
           .order("last_name", { ascending: true })
           .order("first_name", { ascending: true }),
         branchScope.selectedBranchId,
@@ -77,11 +88,22 @@ export async function getPayrollPageData(filters: PayrollPageFilters): Promise<P
     throw new Error(staffError.message);
   }
 
+  if (excludedStaffError) {
+    throw new Error(excludedStaffError.message);
+  }
+
   if (periodError) {
     throw new Error(periodError.message);
   }
 
   const staffRows = (staffData ?? []) as StaffRow[];
+  const excludedPayrollStaff = ((excludedStaffData ?? []) as Array<
+    Pick<StaffRow, "id" | "first_name" | "last_name" | "role">
+  >).map<PayrollExcludedStaffItem>((staffMember) => ({
+    staffId: staffMember.id,
+    fullName: `${staffMember.first_name} ${staffMember.last_name}`.trim(),
+    role: staffMember.role,
+  }));
   const staffIds = staffRows.map((staffMember) => staffMember.id);
   let compensationRows: CompensationRow[] = [];
   let scheduleRows: StaffScheduleRow[] = [];
@@ -167,6 +189,7 @@ export async function getPayrollPageData(filters: PayrollPageFilters): Promise<P
     },
     payrollPeriods: filteredPeriods,
     compensationRoster: filteredCompensationRoster,
+    excludedPayrollStaff,
     totalCompensationRosterCount: compensationRosterBase.length,
     visibleCompensationRosterCount: filteredCompensationRoster.length,
   };
@@ -529,6 +552,7 @@ function mapCompensationProfile(row: CompensationRow): CompensationProfileSummar
     overtimeRate: row.overtime_rate,
     allowancePerPeriod: row.allowance_per_period,
     effectiveStartDate: row.effective_start_date,
+    exemptFromAttendance: row.exempt_from_attendance,
     notes: row.notes,
   };
 }
@@ -653,6 +677,7 @@ function buildCompensationProfileFromPayrollItem(
     overtimeRate: item.overtimeRate,
     allowancePerPeriod: item.allowancePerPeriod,
     effectiveStartDate: "1970-01-01",
+    exemptFromAttendance: false,
     notes: null,
   };
 }

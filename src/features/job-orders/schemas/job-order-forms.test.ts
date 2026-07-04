@@ -8,6 +8,20 @@ import {
 } from "@/features/job-orders/schemas/job-order-forms";
 
 describe("job order forms", () => {
+  it("accepts mileage out without mileage in", () => {
+    const parsed = jobOrderDetailsSchema.safeParse({
+      jobOrderId: "34c25057-b0f8-4da0-9a27-c1792efa2ebd",
+      mileageIn: "",
+      mileageOut: "26000",
+      customerConcern: "",
+      inspectionNotes: "",
+      diagnosis: "",
+      workPerformed: "",
+    });
+
+    expect(parsed.success).toBe(true);
+  });
+
   it("rejects mileage out below mileage in", () => {
     const parsed = jobOrderDetailsSchema.safeParse({
       jobOrderId: "34c25057-b0f8-4da0-9a27-c1792efa2ebd",

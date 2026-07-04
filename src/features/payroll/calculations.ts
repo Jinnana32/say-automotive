@@ -166,17 +166,21 @@ export function computePayrollItemBreakdown(params: {
     holidayDates,
     leaveEntries: params.leaveEntries,
   });
-  const missingAttendanceDayCount = Math.max(
-    expectationSummary.expectedWorkdayCount - attendanceSummary.recordedDays,
-    0,
-  );
+  const exemptFromAttendance = params.compensationProfile?.exemptFromAttendance ?? false;
+  const missingAttendanceDayCount = exemptFromAttendance
+    ? 0
+    : Math.max(
+        expectationSummary.expectedWorkdayCount - attendanceSummary.recordedDays,
+        0,
+      );
   const readinessStatus = resolvePayrollReadinessStatus({
     hasCompensationProfile: params.compensationProfile !== null,
     hasSchedule: params.schedule !== null,
     expectedWorkdayCount: expectationSummary.expectedWorkdayCount,
     hadAttendanceActivity: attendanceSummary.recordedDays > 0,
     missingAttendanceDayCount,
-    missingTimeoutCount: attendanceSummary.missingTimeoutCount,
+    missingTimeoutCount: exemptFromAttendance ? 0 : attendanceSummary.missingTimeoutCount,
+    exemptFromAttendance,
   });
   const rateSummary = resolveCompensationRates({
     profile: params.compensationProfile,
@@ -287,7 +291,12 @@ export function computePayrollItemBreakdown(params: {
       paidDayUnits += 1;
       paidDayUnitsForDay = 1;
     } else if (scheduledWorkday && !leaveCovered && !holiday) {
-      dayWarningCodes.add("missing_attendance");
+      if (exemptFromAttendance) {
+        paidDayUnits += 1;
+        paidDayUnitsForDay = 1;
+      } else {
+        dayWarningCodes.add("missing_attendance");
+      }
     }
 
     if (holiday?.payTreatment === "custom") {
@@ -323,6 +332,7 @@ export function computePayrollItemBreakdown(params: {
         isWorkedDuringApprovedLeave: workedDuringApprovedLeave,
         isScheduledWorkday: scheduledWorkday,
         paidDayUnits: paidDayUnitsForDay,
+        isFixedPayScheduledDay: exemptFromAttendance,
       }),
       warningCodes: Array.from(dayWarningCodes),
       holidayLabel: holiday?.label ?? null,
@@ -690,6 +700,7 @@ function buildDayPayReason(params: {
   isWorkedDuringApprovedLeave: boolean;
   isScheduledWorkday: boolean;
   paidDayUnits: number;
+  isFixedPayScheduledDay?: boolean;
 }) {
   if (params.isWorkedDuringApprovedLeave) {
     const baseReason =
@@ -770,6 +781,10 @@ function buildDayPayReason(params: {
   }
 
   if (params.isScheduledWorkday) {
+    if (params.isFixedPayScheduledDay && params.paidDayUnits > 0 && !params.attendanceStatus) {
+      return "Fixed pay scheduled workday (attendance not required).";
+    }
+
     return "Recorded absent / no approved paid leave.";
   }
 

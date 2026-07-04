@@ -114,7 +114,7 @@ const SERVICE_CARDS = [
 const BRAND_LOGOS = [
   { name: 'Valvoline', src: '/brand-logos/valvoline.png' },
   { name: 'Shell Helix', src: '/brand-logos/new shell logo.png' },
-  { name: 'Mobil 1', src: '/brand-logos/Mobil1_logo.png', imageClassName: 'max-h-10 max-w-[190px]' },
+  { name: 'Mobil 1', src: '/brand-logos/Mobil1_logo.png', imageClassName: 'lg:max-h-10 lg:max-w-[190px]' },
   { name: 'Totachi', src: '/brand-logos/totachi-seeklogo.com_.svg' },
   { name: 'Varta', src: '/brand-logos/Varta.png' },
   { name: 'Dirty Life Race Wheels', src: '/brand-logos/Dirty Wheels.png' },
@@ -124,11 +124,11 @@ const BRAND_LOGOS = [
   { name: 'YSS Auto Suspension', src: '/brand-logos/yssauto-removebg-preview.png' },
   { name: 'Option 4WD', src: '/brand-logos/Option.png' },
   { name: 'Emtrac', src: '/brand-logos/Emtrac.png' },
-  { name: 'Sumaxx', src: '/brand-logos/Sumaxx.png', imageClassName: 'max-h-14' },
-  { name: 'ARB 4x4 Accessories', src: '/brand-logos/Arb.png', imageClassName: 'max-h-14' },
-  { name: 'Black Mamba', src: '/brand-logos/Black Mamba.png', imageClassName: 'max-h-14' },
+  { name: 'Sumaxx', src: '/brand-logos/Sumaxx.png', imageClassName: 'lg:max-h-14' },
+  { name: 'ARB 4x4 Accessories', src: '/brand-logos/Arb.png', imageClassName: 'lg:max-h-14' },
+  { name: 'Black Mamba', src: '/brand-logos/Black Mamba.png', imageClassName: 'lg:max-h-14' },
   { name: 'Bradley', src: '/brand-logos/Bradley-removebg-preview.png' },
-  { name: '4x Engineering', src: '/brand-logos/4x4 Engineering.png', imageClassName: 'max-h-14' },
+  { name: '4x Engineering', src: '/brand-logos/4x4 Engineering.png', imageClassName: 'lg:max-h-14' },
   { name: 'Explorer Extreme Performance', src: '/brand-logos/Explorer.png' },
   { name: 'Lenso Tires', src: '/brand-logos/Lenso.png' },
   { name: 'Warn', src: '/brand-logos/Warn-removebg-preview.png' },
@@ -256,7 +256,7 @@ export function WebsiteHomePage({
                 </Button>
               </div>
 
-              <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="mt-10 grid grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
                 {HERO_FEATURES.map(({ label, icon: Icon }) => (
                   <HeroFeature key={label} icon={Icon} label={label} />
                 ))}
@@ -296,7 +296,7 @@ export function WebsiteHomePage({
                 systems.
               </p>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
               {EXPERTISE_HIGHLIGHTS.map((highlight) => (
                 <ExpertiseHighlightCard
                   key={highlight.title}
@@ -335,7 +335,7 @@ export function WebsiteHomePage({
             description="From diagnostics to major repairs, SAY Auto Care covers the services customers ask for most."
           />
 
-          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-10 grid grid-cols-4 gap-2 sm:gap-3 lg:gap-5">
             {SERVICE_CARDS.map((service) => (
               <ServicePreviewCard key={service.title} service={service} />
             ))}
@@ -394,7 +394,7 @@ export function WebsiteHomePage({
             </p>
           </div>
 
-          <div className="mx-auto mt-8 grid max-w-6xl grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          <div className="mx-auto mt-8 grid max-w-6xl grid-cols-5 gap-x-2 gap-y-4 sm:gap-x-4 sm:gap-y-5 md:gap-x-6 md:gap-y-6 lg:gap-x-10 lg:gap-y-8">
             {BRAND_LOGOS.filter((brand) => brand.src.trim().length > 0).map(
               (brand, index, brands) => (
                 <BrandLogoTile
@@ -434,7 +434,7 @@ export function WebsiteHomePage({
               align="left"
             />
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
               {TRUST_POINTS.map((point) => (
                 <TrustPoint key={point.title} point={point} />
               ))}
@@ -594,11 +594,11 @@ function HeroFeature({
   label: string;
 }) {
   return (
-    <div className="rounded-2xl border border-white/20 bg-white/95 px-4 py-4 shadow-[0_18px_40px_rgba(11,31,77,0.14)] backdrop-blur-sm">
-      <div className="flex size-11 items-center justify-center rounded-2xl bg-brand-red/10 text-brand-red">
-        <Icon className="size-5" />
+    <div className="min-w-0 rounded-lg border border-white/20 bg-white/95 px-1.5 py-2.5 shadow-[0_18px_40px_rgba(11,31,77,0.14)] backdrop-blur-sm sm:rounded-2xl sm:px-4 sm:py-4">
+      <div className="mx-auto flex size-7 items-center justify-center rounded-lg bg-brand-red/10 text-brand-red sm:mx-0 sm:size-11 sm:rounded-2xl">
+        <Icon className="size-3.5 sm:size-5" />
       </div>
-      <p className="mt-4 text-sm font-semibold uppercase leading-tight tracking-[0.12em] text-brand-navy">
+      <p className="mt-1.5 text-center text-[9px] font-semibold uppercase leading-tight tracking-[0.06em] text-brand-navy sm:mt-4 sm:text-left sm:text-sm sm:tracking-[0.12em]">
         {label}
       </p>
     </div>
@@ -617,14 +617,14 @@ function ExpertiseHighlightCard({
   const Icon = highlight.icon;
 
   return (
-    <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-4 py-4 shadow-[0_14px_34px_rgba(0,0,0,0.16)]">
-      <div className="flex size-10 items-center justify-center rounded-2xl bg-brand-red/10 text-brand-red">
-        <Icon className="size-5" />
+    <div className="min-w-0 rounded-lg border border-white/10 bg-white/[0.04] px-1.5 py-2.5 shadow-[0_14px_34px_rgba(0,0,0,0.16)] sm:rounded-[1.5rem] sm:px-4 sm:py-4">
+      <div className="mx-auto flex size-7 items-center justify-center rounded-lg bg-brand-red/10 text-brand-red sm:mx-0 sm:size-10 sm:rounded-2xl">
+        <Icon className="size-3.5 sm:size-5" />
       </div>
-      <p className="mt-3 text-sm font-semibold uppercase tracking-[0.12em] text-white">
+      <p className="mt-1.5 text-center text-[9px] font-semibold uppercase leading-tight tracking-[0.05em] text-white line-clamp-4 sm:mt-3 sm:text-left sm:text-sm sm:leading-snug sm:tracking-[0.12em] sm:line-clamp-none">
         {highlight.title}
       </p>
-      <p className="mt-2 text-sm leading-6 text-white/66">
+      <p className="mt-1.5 hidden text-sm leading-6 text-white/66 sm:block">
         {highlight.description}
       </p>
     </div>
@@ -636,16 +636,21 @@ function getTrailingBrandTileClassName(index: number, total: number) {
     return undefined;
   }
 
-  return cn(
-    total % 2 !== 0 && 'col-span-2 justify-self-center',
-    total % 3 === 1
-      ? 'sm:col-span-3 sm:justify-self-center'
-      : 'sm:col-span-1 sm:justify-self-auto',
-    total % 4 === 1
-      ? 'md:col-span-4 md:justify-self-center'
-      : 'md:col-span-1 md:justify-self-auto',
-    'lg:col-span-1 lg:justify-self-auto',
-  );
+  const remainder = total % 5;
+
+  if (remainder === 1) {
+    return 'col-start-3';
+  }
+
+  if (remainder === 2) {
+    return 'col-start-2';
+  }
+
+  if (remainder === 3) {
+    return 'col-start-2';
+  }
+
+  return undefined;
 }
 
 function BrandLogoTile({
@@ -660,7 +665,7 @@ function BrandLogoTile({
   className?: string;
 }) {
   return (
-    <div className={cn('flex h-16 items-center justify-center', className)}>
+    <div className={cn('flex h-9 items-center justify-center sm:h-11 md:h-14 lg:h-16', className)}>
       <Image
         src={brand.src}
         alt={`${brand.name} logo`}
@@ -668,7 +673,7 @@ function BrandLogoTile({
         height={48}
         unoptimized={brand.src.endsWith('.svg')}
         className={cn(
-          'max-h-12 max-w-[220px] object-contain',
+          'h-auto w-full max-h-6 max-w-[52px] object-contain sm:max-h-7 sm:max-w-[64px] md:max-h-10 md:max-w-[120px] lg:max-h-12 lg:max-w-[220px]',
           brand.imageClassName,
         )}
       />
@@ -688,21 +693,21 @@ function ServicePreviewCard({
   const Icon = service.icon;
 
   return (
-    <div className="group relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[linear-gradient(180deg,rgba(9,24,53,0.96),rgba(3,11,24,0.98))] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.22)]">
+    <div className="group relative min-w-0 overflow-hidden rounded-xl border border-white/10 bg-[linear-gradient(180deg,rgba(9,24,53,0.96),rgba(3,11,24,0.98))] p-2.5 shadow-[0_20px_50px_rgba(0,0,0,0.22)] sm:rounded-[1.75rem] sm:p-6">
       <div className="absolute -right-10 top-0 h-24 w-24 rounded-full bg-brand-red/10 blur-3xl transition group-hover:bg-brand-red/18" />
       <div className="relative">
-        <div className="flex size-14 items-center justify-center rounded-2xl border border-brand-red/25 bg-brand-red/8 text-brand-red">
-          <Icon className="size-7" />
+        <div className="mx-auto flex size-8 items-center justify-center rounded-xl border border-brand-red/25 bg-brand-red/8 text-brand-red sm:mx-0 sm:size-14 sm:rounded-2xl">
+          <Icon className="size-4 sm:size-7" />
         </div>
-        <h3 className="mt-5 text-2xl font-semibold leading-tight text-white">
+        <h3 className="mt-2 text-center text-[10px] font-semibold leading-tight text-white line-clamp-3 sm:mt-5 sm:text-left sm:text-2xl sm:leading-tight sm:line-clamp-none">
           {service.title}
         </h3>
-        <p className="mt-3 text-sm leading-7 text-white/68">
+        <p className="mt-1.5 hidden text-sm leading-7 text-white/68 sm:mt-3 sm:block">
           {service.description}
         </p>
         <Link
           href="/get-quote"
-          className="mt-5 inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-white transition hover:text-brand-red"
+          className="mt-2 hidden items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-white transition hover:text-brand-red sm:mt-5 sm:inline-flex"
         >
           Request Quote
           <ArrowRight className="size-4" />
@@ -724,12 +729,14 @@ function TrustPoint({
   const Icon = point.icon;
 
   return (
-    <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-5 py-5">
-      <div className="flex size-11 items-center justify-center rounded-2xl bg-brand-red/10 text-brand-red">
-        <Icon className="size-5" />
+    <div className="min-w-0 rounded-lg border border-white/10 bg-white/[0.04] px-1.5 py-2.5 sm:rounded-[1.5rem] sm:px-5 sm:py-5">
+      <div className="mx-auto flex size-7 items-center justify-center rounded-lg bg-brand-red/10 text-brand-red sm:mx-0 sm:size-11 sm:rounded-2xl">
+        <Icon className="size-3.5 sm:size-5" />
       </div>
-      <p className="mt-4 text-lg font-semibold text-white">{point.title}</p>
-      <p className="mt-2 text-sm leading-7 text-white/68">
+      <p className="mt-1.5 text-center text-[9px] font-semibold uppercase leading-tight tracking-[0.05em] text-white line-clamp-4 sm:mt-4 sm:text-left sm:text-lg sm:normal-case sm:leading-snug sm:tracking-normal sm:line-clamp-none">
+        {point.title}
+      </p>
+      <p className="mt-1.5 hidden text-sm leading-7 text-white/68 sm:mt-2 sm:block">
         {point.description}
       </p>
     </div>

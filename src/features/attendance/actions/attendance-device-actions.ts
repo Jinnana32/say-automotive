@@ -146,6 +146,43 @@ export async function revokeStaffDeviceAction(formData: FormData) {
   revalidateAttendanceDevicePaths();
 }
 
+export async function deleteStaffDeviceAction(formData: FormData) {
+  const deviceId = readString(formData, "deviceId");
+
+  if (!deviceId) {
+    return;
+  }
+
+  const { context } = await getAuthorizedSupabaseServerClient("attendance:write");
+  const admin = getSupabaseAdminClient();
+  const { data: currentDeviceData, error: currentDeviceError } = await admin
+    .from("staff_devices")
+    .select("*")
+    .eq("id", deviceId)
+    .maybeSingle();
+
+  if (currentDeviceError || !currentDeviceData) {
+    return;
+  }
+
+  const currentDevice = currentDeviceData as StaffDeviceRow;
+  const { error } = await admin.from("staff_devices").delete().eq("id", currentDevice.id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  await writeAuditLog(admin, {
+    action: "Deleted mechanic attendance device record",
+    entityType: "staff_device",
+    entityId: currentDevice.id,
+    userId: context.userId,
+    beforeData: currentDevice,
+  });
+
+  revalidateAttendanceDevicePaths();
+}
+
 function revalidateAttendanceDevicePaths() {
   revalidatePath("/attendance/devices");
   revalidatePath("/attendance");

@@ -47,8 +47,14 @@ const attendanceData: MechanicPortalAttendancePageData = {
   todayDate: "2026-05-14",
   settings: {
     requireShopIpForMechanicAttendance: true,
+    requireShopLocationForMechanicAttendance: false,
     allowDtrAmendments: true,
     allowAttendanceAdminOverride: false,
+    geofence: {
+      latitude: null,
+      longitude: null,
+      radiusMeters: 100,
+    },
   },
   ipStatus: {
     requestIp: "124.217.16.204",
@@ -108,8 +114,14 @@ const historyData: MechanicPortalHistoryPageData = {
   initialSelectedDate: "2026-05-14",
   settings: {
     requireShopIpForMechanicAttendance: true,
+    requireShopLocationForMechanicAttendance: false,
     allowDtrAmendments: true,
     allowAttendanceAdminOverride: false,
+    geofence: {
+      latitude: null,
+      longitude: null,
+      radiusMeters: 100,
+    },
   },
   schedule: null,
   branchHolidays: [],
@@ -140,6 +152,10 @@ const historyData: MechanicPortalHistoryPageData = {
           source: "mechanic_portal",
           requestIp: "124.217.16.204",
           isShopIpValid: true,
+          requestLatitude: null,
+          requestLongitude: null,
+          locationAccuracyMeters: null,
+          isLocationValid: false,
           isDeviceApproved: true,
           userAgent: "Safari on iPhone",
           createdAt: "2026-05-14T01:35:00.000Z",

@@ -1,5 +1,6 @@
 export const APP_MONEY_DECIMAL_PLACES = 4;
 export const PRINT_MONEY_DECIMAL_PLACES = 4;
+export const DOCUMENT_PRINT_MONEY_DECIMAL_PLACES = 2;
 export const UI_MONEY_DISPLAY_DECIMAL_PLACES = 2;
 export const MONEY_INPUT_STEP = "0.01";
 
@@ -25,6 +26,18 @@ const phpPrintFormatter = new Intl.NumberFormat("en-PH", {
 const phpPrintNumberFormatter = new Intl.NumberFormat("en-PH", {
   minimumFractionDigits: PRINT_MONEY_DECIMAL_PLACES,
   maximumFractionDigits: PRINT_MONEY_DECIMAL_PLACES,
+});
+
+const phpDocumentPrintFormatter = new Intl.NumberFormat("en-PH", {
+  style: "currency",
+  currency: "PHP",
+  minimumFractionDigits: 0,
+  maximumFractionDigits: DOCUMENT_PRINT_MONEY_DECIMAL_PLACES,
+});
+
+const phpDocumentPrintNumberFormatter = new Intl.NumberFormat("en-PH", {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: DOCUMENT_PRINT_MONEY_DECIMAL_PLACES,
 });
 
 export function roundCurrency(value: number) {
@@ -157,4 +170,36 @@ export function formatPrintCurrencyNumber(value: number) {
   return phpPrintNumberFormatter.format(
     Number(value.toFixed(PRINT_MONEY_DECIMAL_PLACES)),
   );
+}
+
+export function formatDocumentPrintCurrency(value: number) {
+  const rounded = Number(
+    roundCurrency(value).toFixed(DOCUMENT_PRINT_MONEY_DECIMAL_PLACES),
+  );
+
+  if (Number.isInteger(rounded)) {
+    return phpDocumentPrintFormatter.format(rounded);
+  }
+
+  return new Intl.NumberFormat("en-PH", {
+    style: "currency",
+    currency: "PHP",
+    minimumFractionDigits: DOCUMENT_PRINT_MONEY_DECIMAL_PLACES,
+    maximumFractionDigits: DOCUMENT_PRINT_MONEY_DECIMAL_PLACES,
+  }).format(rounded);
+}
+
+export function formatDocumentPrintCurrencyNumber(value: number) {
+  const rounded = Number(
+    roundCurrency(value).toFixed(DOCUMENT_PRINT_MONEY_DECIMAL_PLACES),
+  );
+
+  if (Number.isInteger(rounded)) {
+    return phpDocumentPrintNumberFormatter.format(rounded);
+  }
+
+  return new Intl.NumberFormat("en-PH", {
+    minimumFractionDigits: DOCUMENT_PRINT_MONEY_DECIMAL_PLACES,
+    maximumFractionDigits: DOCUMENT_PRINT_MONEY_DECIMAL_PLACES,
+  }).format(rounded);
 }

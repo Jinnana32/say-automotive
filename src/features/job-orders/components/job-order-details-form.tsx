@@ -20,6 +20,10 @@ import type { JobOrderDetail, JobOrderDetailTab } from "@/features/job-orders/ty
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 import { useFormValues } from "@/lib/use-form-values";
 
+function formatMileageFieldValue(value: number | null) {
+  return value !== null ? String(value) : "";
+}
+
 export function JobOrderDetailsForm({
   detail,
   redirectTab,
@@ -29,13 +33,27 @@ export function JobOrderDetailsForm({
 }) {
   const [state, formAction] = useActionState(saveJobOrderDetailsAction, INITIAL_FORM_ACTION_STATE);
   const { values, updateFormValue } = useFormValues({
-    mileageIn: detail.mileageIn ?? "",
-    mileageOut: detail.mileageOut ?? "",
+    mileageIn: formatMileageFieldValue(detail.mileageIn),
+    mileageOut: formatMileageFieldValue(detail.mileageOut),
     customerConcern: detail.customerConcern ?? "",
     inspectionNotes: detail.inspectionNotes ?? "",
     diagnosis: detail.diagnosis ?? "",
     workPerformed: detail.workPerformed ?? "",
   });
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+    formData.set("mileageIn", values.mileageIn.trim());
+    formData.set("mileageOut", values.mileageOut.trim());
+    formData.set("customerConcern", values.customerConcern);
+    formData.set("inspectionNotes", values.inspectionNotes);
+    formData.set("diagnosis", values.diagnosis);
+    formData.set("workPerformed", values.workPerformed);
+
+    formAction(formData);
+  }
 
   return (
     <Card className="border-border/70 shadow-sm">
@@ -46,14 +64,14 @@ export function JobOrderDetailsForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={formAction} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <input type="hidden" name="jobOrderId" value={detail.id} />
           <input type="hidden" name="redirectTab" value={redirectTab} />
 
           <FormRequiredFieldsNote />
           <FormStatusMessage message={state.message} />
 
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid gap-5 lg:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="mileageIn" optional>
                 Mileage in

@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Power, RotateCcw } from "lucide-react";
+import { Check, Power, RotateCcw, Trash2 } from "lucide-react";
 
 import { ConfirmActionDialog } from "@/components/shared/confirm-action-dialog";
 import { IconActionConfirm } from "@/components/shared/icon-action";
 import { TableRowActionsMenu, TableRowActionsMenuButton } from "@/components/shared/table-row-actions-menu";
 import {
   approveStaffDeviceAction,
+  deleteStaffDeviceAction,
   revokeStaffDeviceAction,
 } from "@/features/attendance/actions/attendance-device-actions";
 import type { AttendanceStaffDeviceManagementItem } from "@/features/attendance/types";
@@ -20,21 +21,32 @@ export function AttendanceDeviceRowActions({
   const displayName = device.deviceName?.trim() || device.userAgent?.trim() || "this device";
   const [isApproveOpen, setIsApproveOpen] = useState(false);
   const [isRevokeOpen, setIsRevokeOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   return (
     <>
       {device.status === "approved" ? (
-        <IconActionConfirm
-          label="Reset device access"
-          icon={RotateCcw}
-          title={`Reset ${displayName}?`}
-          description="This will immediately block the mechanic from using this phone or browser for time-in/time-out."
-          confirmLabel="Reset device access"
-          cancelLabel="Cancel"
-          action={revokeStaffDeviceAction}
-          fields={[{ name: "deviceId", value: device.id }]}
-          tone="destructive"
-        />
+        <div className="flex items-center justify-end gap-1">
+          <IconActionConfirm
+            label="Reset device access"
+            icon={RotateCcw}
+            title={`Reset ${displayName}?`}
+            description="This will immediately block the mechanic from using this phone or browser for time-in/time-out."
+            confirmLabel="Reset device access"
+            cancelLabel="Cancel"
+            action={revokeStaffDeviceAction}
+            fields={[{ name: "deviceId", value: device.id }]}
+            tone="destructive"
+          />
+          <TableRowActionsMenu label={`Open row actions for ${displayName}`}>
+            <TableRowActionsMenuButton
+              label="Delete device record"
+              icon={Trash2}
+              tone="destructive"
+              onSelect={() => setIsDeleteOpen(true)}
+            />
+          </TableRowActionsMenu>
+        </div>
       ) : (
         <TableRowActionsMenu label={`Open row actions for ${displayName}`}>
           <TableRowActionsMenuButton
@@ -47,6 +59,12 @@ export function AttendanceDeviceRowActions({
             icon={Power}
             tone="destructive"
             onSelect={() => setIsRevokeOpen(true)}
+          />
+          <TableRowActionsMenuButton
+            label="Delete device record"
+            icon={Trash2}
+            tone="destructive"
+            onSelect={() => setIsDeleteOpen(true)}
           />
         </TableRowActionsMenu>
       )}
@@ -77,6 +95,18 @@ export function AttendanceDeviceRowActions({
           onOpenChange={setIsRevokeOpen}
         />
       ) : null}
+
+      <ConfirmActionDialog
+        title={`Delete ${displayName}?`}
+        description="This permanently removes the device record from review history. The mechanic will need to register the device again on their next portal visit."
+        confirmLabel="Delete device record"
+        cancelLabel="Cancel"
+        action={deleteStaffDeviceAction}
+        fields={[{ name: "deviceId", value: device.id }]}
+        confirmVariant="destructive"
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
+      />
     </>
   );
 }

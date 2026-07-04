@@ -19,6 +19,10 @@ vi.mock("@/features/attendance/actions/mechanic-portal-actions", () => ({
   reviewDtrAmendmentAction: vi.fn(),
 }));
 
+vi.mock("@/features/attendance/actions/dtr-amendment-actions", () => ({
+  deleteDtrAmendmentAction: vi.fn(),
+}));
+
 const amendmentsData: AttendanceAmendmentsPageData = {
   pendingCount: 1,
   totalCount: 1,
@@ -54,17 +58,14 @@ const amendmentsData: AttendanceAmendmentsPageData = {
 };
 
 describe("AttendanceAmendmentsPageContent", () => {
-  it("opens the review dialog from the row actions menu", async () => {
+  it("opens the review dialog from the row review action", async () => {
     const user = userEvent.setup();
 
     render(<AttendanceAmendmentsPageContent data={amendmentsData} />);
 
     await user.click(
-      screen.getByRole("button", { name: "Amendment actions for Jerick B. Tayona" }),
+      screen.getByRole("button", { name: "Review amendment for Jerick B. Tayona" }),
     );
-
-    const reviewAction = await screen.findByText("Review amendment");
-    await user.click(reviewAction);
 
     await waitFor(() => {
       expect(

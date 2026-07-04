@@ -5,6 +5,7 @@ import { normalizeStaffScheduleTimeInput, parseStaffScheduleTime } from "@/featu
 import type { StaffRole } from "@/lib/auth/permissions";
 import type {
   AttendanceAccessSettings,
+  AttendanceAccessSettingsFormValues,
   AttendanceDateLockSummary,
   AttendanceDailySummary,
   AttendanceEntryActionState,
@@ -24,6 +25,7 @@ import type {
   DtrAmendmentSummary,
   DtrAmendmentType,
   MechanicPortalIpStatus,
+  MechanicPortalLocationStatus,
   StaffLeaveEntrySummary,
   StaffLeaveFormValues,
   StaffLeaveType,
@@ -376,6 +378,73 @@ export function formatMechanicIpStatusMessage(
   }
 
   return "You are not connected to the approved shop network. Time-in/time-out is only allowed on-site. If this is a valid attendance issue, file a DTR amendment for admin approval.";
+}
+
+export function formatMechanicLocationStatusMessage(
+  locationStatus: MechanicPortalLocationStatus,
+  settings: AttendanceAccessSettings,
+) {
+  if (!settings.requireShopLocationForMechanicAttendance) {
+    return "Shop location validation is disabled for this branch.";
+  }
+
+  if (locationStatus.errorMessage) {
+    return locationStatus.errorMessage;
+  }
+
+  if (locationStatus.isAllowed) {
+    if (locationStatus.distanceMeters !== null) {
+      return `Within the approved shop area (${Math.round(locationStatus.distanceMeters)}m from center).`;
+    }
+
+    return "Within the approved shop area.";
+  }
+
+  if (locationStatus.distanceMeters !== null) {
+    return `You are outside the approved shop area (${Math.round(locationStatus.distanceMeters)}m away). Move closer to the branch or file a DTR amendment.`;
+  }
+
+  return "Waiting for your current location. Allow location access in your browser to verify on-site attendance.";
+}
+
+export function isMechanicPremiseVerificationPassed({
+  settings,
+  ipStatus,
+  locationStatus,
+}: {
+  settings: AttendanceAccessSettings;
+  ipStatus: MechanicPortalIpStatus;
+  locationStatus: MechanicPortalLocationStatus;
+}) {
+  const ipOk =
+    !settings.requireShopIpForMechanicAttendance || ipStatus.isAllowed;
+  const locationOk =
+    !settings.requireShopLocationForMechanicAttendance ||
+    locationStatus.isAllowed;
+
+  return ipOk && locationOk;
+}
+
+export function buildAttendanceAccessSettingsFormValues(
+  settings: AttendanceAccessSettings,
+): AttendanceAccessSettingsFormValues {
+  return {
+    requireShopIpForMechanicAttendance:
+      settings.requireShopIpForMechanicAttendance,
+    requireShopLocationForMechanicAttendance:
+      settings.requireShopLocationForMechanicAttendance,
+    allowDtrAmendments: settings.allowDtrAmendments,
+    allowAttendanceAdminOverride: settings.allowAttendanceAdminOverride,
+    geofenceLatitude:
+      settings.geofence.latitude !== null
+        ? String(settings.geofence.latitude)
+        : "",
+    geofenceLongitude:
+      settings.geofence.longitude !== null
+        ? String(settings.geofence.longitude)
+        : "",
+    geofenceRadiusMeters: String(settings.geofence.radiusMeters),
+  };
 }
 
 export function getMechanicPortalPrimaryLogType(

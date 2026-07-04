@@ -27,6 +27,8 @@ import {
   type DatabaseClient,
 } from "@/features/attendance/server-utils";
 import { getAttendanceAccessContext } from "@/features/attendance/queries/attendance-amendment-queries";
+import { resolveMechanicLocationSubmission } from "@/features/attendance/server-location-utils";
+import { isMechanicPremiseVerificationPassed } from "@/features/attendance/utils";
 import type {
   AttendanceEntryActionState,
   AttendanceLogType,
@@ -99,7 +101,25 @@ export async function recordMechanicAttendanceLogAction(
     };
   }
 
-  if (!accessContext.ipStatus.isAllowed) {
+  const locationSubmission = resolveMechanicLocationSubmission({
+    settings: accessContext.settings,
+    formData,
+  });
+  const premiseAllowed = isMechanicPremiseVerificationPassed({
+    settings: accessContext.settings,
+    ipStatus: accessContext.ipStatus,
+    locationStatus: {
+      isLocationRequired: locationSubmission.isRequired,
+      isAllowed: locationSubmission.isAllowed,
+      latitude: locationSubmission.latitude,
+      longitude: locationSubmission.longitude,
+      accuracyMeters: locationSubmission.accuracyMeters,
+      distanceMeters: locationSubmission.distanceMeters,
+      errorMessage: locationSubmission.errorMessage,
+    },
+  });
+
+  if (!premiseAllowed) {
     await writeAuditLog(admin, {
       action: "Blocked mechanic portal attendance attempt",
       entityType: "attendance_time_log",
@@ -109,7 +129,11 @@ export async function recordMechanicAttendanceLogAction(
         attendance_date: attendanceDate,
         attempted_log_type: nextExpectedLogType,
         request_ip: accessContext.ipStatus.requestIp,
-        is_shop_ip_valid: false,
+        is_shop_ip_valid: accessContext.ipStatus.isAllowed,
+        request_latitude: locationSubmission.latitude,
+        request_longitude: locationSubmission.longitude,
+        location_accuracy_meters: locationSubmission.accuracyMeters,
+        is_location_valid: locationSubmission.isAllowed,
         staff_device_id: accessContext.deviceStatus.currentDevice?.id ?? null,
         is_device_approved: accessContext.deviceStatus.isApproved,
       },
@@ -118,7 +142,11 @@ export async function recordMechanicAttendanceLogAction(
     return {
       status: "error",
       message:
-        "You are not connected to the approved shop network. File a DTR amendment if this attendance needs admin review.",
+        !accessContext.ipStatus.isAllowed &&
+        accessContext.settings.requireShopIpForMechanicAttendance
+          ? "You are not connected to the approved shop network. File a DTR amendment if this attendance needs admin review."
+          : locationSubmission.errorMessage ??
+            "On-site verification failed. File a DTR amendment if this attendance needs admin review.",
     };
   }
 
@@ -250,7 +278,11 @@ export async function recordMechanicAttendanceLogAction(
     loggedAt,
     source: "mechanic_portal",
     requestIp: accessContext.ipStatus.requestIp,
-    isShopIpValid: true,
+    isShopIpValid: accessContext.ipStatus.isAllowed,
+    requestLatitude: locationSubmission.latitude,
+    requestLongitude: locationSubmission.longitude,
+    locationAccuracyMeters: locationSubmission.accuracyMeters,
+    isLocationValid: locationSubmission.isAllowed,
     staffDeviceId: accessContext.deviceStatus.currentDevice?.id ?? null,
     isDeviceApproved: true,
     userAgent: accessContext.requestUserAgent,
@@ -598,6 +630,10 @@ export async function reviewDtrAmendmentAction(
     source: "admin_approved_amendment",
     requestIp: amendment.requested_ip,
     isShopIpValid: amendmentRequestIpIsValid,
+    requestLatitude: null,
+    requestLongitude: null,
+    locationAccuracyMeters: null,
+    isLocationValid: false,
     staffDeviceId: null,
     isDeviceApproved: false,
     userAgent: amendment.request_user_agent,

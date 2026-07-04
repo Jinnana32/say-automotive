@@ -9,11 +9,43 @@ describe("attendance settings schemas", () => {
   it("accepts boolean mechanic attendance settings", () => {
     const result = attendanceAccessSettingsSchema.safeParse({
       requireShopIpForMechanicAttendance: true,
+      requireShopLocationForMechanicAttendance: false,
       allowDtrAmendments: true,
       allowAttendanceAdminOverride: false,
+      geofenceLatitude: null,
+      geofenceLongitude: null,
+      geofenceRadiusMeters: 100,
     });
 
     expect(result.success).toBe(true);
+  });
+
+  it("requires at least one on-site verification method", () => {
+    const result = attendanceAccessSettingsSchema.safeParse({
+      requireShopIpForMechanicAttendance: false,
+      requireShopLocationForMechanicAttendance: false,
+      allowDtrAmendments: true,
+      allowAttendanceAdminOverride: false,
+      geofenceLatitude: null,
+      geofenceLongitude: null,
+      geofenceRadiusMeters: 100,
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("requires a configured geofence when location verification is enabled", () => {
+    const result = attendanceAccessSettingsSchema.safeParse({
+      requireShopIpForMechanicAttendance: false,
+      requireShopLocationForMechanicAttendance: true,
+      allowDtrAmendments: true,
+      allowAttendanceAdminOverride: false,
+      geofenceLatitude: null,
+      geofenceLongitude: null,
+      geofenceRadiusMeters: 100,
+    });
+
+    expect(result.success).toBe(false);
   });
 
   it("validates allowed public IP entries", () => {

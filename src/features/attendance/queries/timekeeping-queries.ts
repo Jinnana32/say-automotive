@@ -2,12 +2,14 @@ import { getBranchScopedServerClient } from "@/lib/branches";
 import { getServerRequestNetworkContext, normalizePublicIpAddress } from "@/lib/network/request-ip";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import type {
-  AttendanceAccessSettings,
+  AttendanceAccessSettingsFormValues,
   AttendanceAllowedIpSummary,
   BranchHolidaySummary,
   TimekeepingCalendarPageData,
 } from "@/features/attendance/types";
 import { getAttendanceDevicesPageData } from "@/features/attendance/queries/attendance-amendment-queries";
+import { mapAttendanceAccessSettings } from "@/features/attendance/mappers/access-settings";
+import { buildAttendanceAccessSettingsFormValues } from "@/features/attendance/utils";
 import type { TableRow } from "@/types/database";
 
 type BusinessSettingsRow = TableRow<"business_settings">;
@@ -92,7 +94,9 @@ export async function getTimekeepingCalendarPageData(): Promise<TimekeepingCalen
 
   return {
     branchName,
-    attendanceAccessSettings: mapAttendanceAccessSettings(settingsData as BusinessSettingsRow),
+    attendanceAccessSettings: buildAttendanceAccessSettingsFormValues(
+      mapAttendanceAccessSettings(settingsData as BusinessSettingsRow),
+    ),
     allowedIpAddresses: ((allowedIpData ?? []) as AttendanceAllowedIpRow[]).map(
       mapAllowedAttendanceIp,
     ),
@@ -117,13 +121,6 @@ function mapBranchHoliday(row: BranchHolidayRow): BranchHolidaySummary {
   };
 }
 
-function mapAttendanceAccessSettings(row: BusinessSettingsRow): AttendanceAccessSettings {
-  return {
-    requireShopIpForMechanicAttendance: row.require_shop_ip_for_mechanic_attendance,
-    allowDtrAmendments: row.allow_dtr_amendments,
-    allowAttendanceAdminOverride: row.allow_attendance_admin_override,
-  };
-}
 
 function mapAllowedAttendanceIp(row: AttendanceAllowedIpRow): AttendanceAllowedIpSummary {
   return {
