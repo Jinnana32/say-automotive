@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableScroll } from "@/components/shared/data-table-scroll";
 import { EmptyState } from "@/components/shared/empty-state";
 import { MetricGrid } from "@/components/shared/metric-grid";
 import { PageHeader } from "@/components/shared/page-header";
@@ -66,7 +67,7 @@ export default async function PosPage() {
               description="Completed sales will appear here once the first checkout is processed."
             />
           ) : (
-            <div className="overflow-x-auto">
+            <DataTableScroll>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -111,7 +112,7 @@ export default async function PosPage() {
                   ))}
                 </TableBody>
               </Table>
-            </div>
+          </DataTableScroll>
           )}
       </DataTableCard>
     </div>

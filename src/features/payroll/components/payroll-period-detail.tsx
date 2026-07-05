@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableScroll } from "@/components/shared/data-table-scroll";
 import { EmptyState } from "@/components/shared/empty-state";
 import { MetricGrid } from "@/components/shared/metric-grid";
 import { PageHeader } from "@/components/shared/page-header";
@@ -142,7 +143,7 @@ export function PayrollPeriodDetail({ data }: { data: PayrollPeriodDetailData })
             description="Generate the payroll cut for this period to compute payout rows, apply manual deductions, and print the summary."
           />
         ) : (
-          <div className="overflow-x-auto">
+          <DataTableScroll>
             <Table className="min-w-[1260px]">
               <TableHeader>
                 <TableRow>
@@ -264,7 +265,7 @@ export function PayrollPeriodDetail({ data }: { data: PayrollPeriodDetailData })
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </DataTableScroll>
         )}
       </DataTableCard>
     </div>

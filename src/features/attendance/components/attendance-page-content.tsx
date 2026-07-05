@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { DataTableFilters } from "@/components/shared/data-table-filters";
 import { DataTablePagination } from "@/components/shared/data-table-pagination";
+import { DataTableScroll } from "@/components/shared/data-table-scroll";
 import { EmptyState } from "@/components/shared/empty-state";
 import { FormStatusMessage } from "@/components/shared/form-status";
 import { PageHeader } from "@/components/shared/page-header";
@@ -177,7 +178,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
   }
 
   return (
-    <div className="w-full min-w-0 max-w-full space-y-6 overflow-x-hidden">
+    <div className="w-full min-w-0 max-w-full space-y-6">
       <PageHeader
         title="Attendance"
         description={`Daily time records and roster controls for ${selectedDateLabel}.`}
@@ -230,7 +231,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
         defaultValue="attendance"
         value={activeTab}
         onValueChange={updateTab}
-        className="w-full min-w-0 max-w-full space-y-6 overflow-x-hidden"
+        className="w-full min-w-0 max-w-full space-y-6"
       >
         <TabsList className="w-full max-w-full flex-wrap xl:w-fit">
           <TabsTrigger value="attendance">Attendance</TabsTrigger>
@@ -242,7 +243,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
           <TabsTrigger value="leave">Approved leave</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="attendance" className="w-full min-w-0 max-w-full space-y-6 overflow-x-hidden">
+        <TabsContent value="attendance" className="w-full min-w-0 max-w-full space-y-6">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {attendanceCards.map((card) => (
               <SummaryCard
@@ -455,7 +456,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                   />
                 ) : (
                   <div className="min-w-0 overflow-hidden rounded-[1.25rem] border border-border/70">
-                    <div className="min-w-0 max-w-full overflow-x-auto">
+                    <DataTableScroll>
                       <Table className="min-w-[640px] table-auto [&_th]:px-4 [&_th]:tracking-[0.12em] [&_td]:px-4 [&_td]:py-5 2xl:min-w-[920px] 2xl:[&_th]:px-5 2xl:[&_th]:tracking-[0.16em] 2xl:[&_td]:px-5">
                         <TableHeader>
                           <TableRow>
@@ -552,7 +553,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                           ))}
                         </TableBody>
                       </Table>
-                    </div>
+                    </DataTableScroll>
                   </div>
                 )}
 
@@ -570,7 +571,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
           </div>
         </TabsContent>
 
-        <TabsContent value="roster" className="w-full min-w-0 max-w-full space-y-6 overflow-x-hidden">
+        <TabsContent value="roster" className="w-full min-w-0 max-w-full space-y-6">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {rosterCards.map((card) => (
               <SummaryCard
@@ -648,7 +649,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                 />
               ) : (
                 <div className="min-w-0 overflow-hidden rounded-[1.25rem] border border-border/70">
-                  <div className="min-w-0 max-w-full overflow-x-auto">
+                  <DataTableScroll>
                     <Table className="min-w-[860px] xl:min-w-0">
                       <TableHeader>
                         <TableRow>
@@ -725,7 +726,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
                         ))}
                       </TableBody>
                     </Table>
-                  </div>
+                  </DataTableScroll>
                 </div>
               )}
 
@@ -742,7 +743,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
           </Card>
         </TabsContent>
 
-        <TabsContent value="amendments" className="w-full min-w-0 max-w-full space-y-6 overflow-x-hidden">
+        <TabsContent value="amendments" className="w-full min-w-0 max-w-full space-y-6">
           <AttendanceAmendmentsPageContent
             data={amendmentsReview}
             embedded
@@ -750,7 +751,7 @@ export function AttendancePageContent({ data }: { data: AttendancePageData }) {
           />
         </TabsContent>
 
-        <TabsContent value="leave" className="w-full min-w-0 max-w-full space-y-6 overflow-x-hidden">
+        <TabsContent value="leave" className="w-full min-w-0 max-w-full space-y-6">
           <ApprovedLeaveManagementSection data={leaveManagement} />
         </TabsContent>
       </Tabs>

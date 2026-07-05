@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableScroll } from "@/components/shared/data-table-scroll";
 import { DataTableFilters } from "@/components/shared/data-table-filters";
 import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -76,7 +77,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
         }
       />
 
-      <MetricGrid className="xl:grid-cols-5">
+      <MetricGrid className="grid-cols-2 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard title="Branch" value={inventory.branchName} description="Current operating branch" />
         <StatCard
           title="Tracked products"
@@ -166,7 +167,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
             />
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <DataTableScroll>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -226,7 +227,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </DataTableScroll>
         )}
       </DataTableCard>
 
@@ -256,7 +257,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
             />
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <DataTableScroll>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -293,7 +294,7 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </DataTableScroll>
         )}
       </DataTableCard>
     </div>

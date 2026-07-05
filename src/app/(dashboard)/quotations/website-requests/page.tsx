@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableScroll } from "@/components/shared/data-table-scroll";
 import { DataTableFilters } from "@/components/shared/data-table-filters";
 import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -88,7 +89,7 @@ export default async function WebsiteQuoteRequestsPage({
             description="Public quote requests will appear here once the website form is live."
           />
         ) : (
-          <div className="overflow-x-auto">
+          <DataTableScroll>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -159,7 +160,7 @@ export default async function WebsiteQuoteRequestsPage({
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </DataTableScroll>
         )}
       </DataTableCard>
     </div>

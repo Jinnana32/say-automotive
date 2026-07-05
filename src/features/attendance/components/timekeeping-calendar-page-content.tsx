@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { EmptyState } from "@/components/shared/empty-state";
 import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableScroll } from "@/components/shared/data-table-scroll";
 import { FormStatusMessage } from "@/components/shared/form-status";
 import { MetricGrid } from "@/components/shared/metric-grid";
 import { PageHeader } from "@/components/shared/page-header";
@@ -276,7 +277,7 @@ export function TimekeepingCalendarPageContent({
                 }
               />
             ) : (
-              <div className="overflow-x-auto">
+              <DataTableScroll>
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -320,7 +321,7 @@ export function TimekeepingCalendarPageContent({
                     ))}
                   </TableBody>
                 </Table>
-              </div>
+          </DataTableScroll>
             )}
           </DataTableCard>
         </TabsContent>

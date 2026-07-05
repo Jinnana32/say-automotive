@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Pencil } from "lucide-react";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableScroll } from "@/components/shared/data-table-scroll";
 import { DataTableFilters } from "@/components/shared/data-table-filters";
 import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -74,7 +75,7 @@ export default async function SuppliersPage({ searchParams }: SuppliersPageProps
               }
             />
           ) : (
-            <div className="overflow-hidden">
+            <DataTableScroll>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -113,7 +114,7 @@ export default async function SuppliersPage({ searchParams }: SuppliersPageProps
                   ))}
                 </TableBody>
               </Table>
-            </div>
+          </DataTableScroll>
           )}
       </DataTableCard>
     </div>

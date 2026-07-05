@@ -7,6 +7,7 @@ import {
   DetailSummaryItem,
 } from '@/components/shared/detail-summary-grid';
 import { EmptyState } from '@/components/shared/empty-state';
+import { DataTableScroll } from '@/components/shared/data-table-scroll';
 import { PageHeader } from '@/components/shared/page-header';
 import { SectionCard } from '@/components/shared/section-card';
 import { Button } from '@/components/ui/button';
@@ -177,7 +178,7 @@ export default async function InvoiceDetailPage({
             description="Snapshot of billable job-order items at invoice creation."
             contentClassName="p-0"
           >
-            <div className="overflow-x-auto">
+            <DataTableScroll>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -204,7 +205,7 @@ export default async function InvoiceDetailPage({
                   ))}
                 </TableBody>
               </Table>
-            </div>
+          </DataTableScroll>
           </SectionCard>
 
           <SectionCard

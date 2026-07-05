@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Barlow_Condensed, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
@@ -14,6 +14,11 @@ const displayFont = Barlow_Condensed({
   variable: "--font-barlow-condensed",
   weight: ["400", "600", "700"],
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   title: "SAY Auto Care Center",

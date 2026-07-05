@@ -2,6 +2,7 @@ import { Eye } from "lucide-react";
 import Link from "next/link";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableScroll } from "@/components/shared/data-table-scroll";
 import { DataTableFilters } from "@/components/shared/data-table-filters";
 import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -141,7 +142,7 @@ export function PayrollPageContent({
             action={<PayrollPeriodDialog />}
           />
         ) : (
-          <div className="overflow-x-auto">
+          <DataTableScroll>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -192,7 +193,7 @@ export function PayrollPageContent({
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </DataTableScroll>
         )}
       </DataTableCard>
 
@@ -229,7 +230,7 @@ export function PayrollPageContent({
             description="Try a different name or clear the compensation search filter."
           />
         ) : (
-          <div className="overflow-x-auto">
+          <DataTableScroll>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -290,7 +291,7 @@ export function PayrollPageContent({
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </DataTableScroll>
         )}
       </DataTableCard>
 
@@ -299,7 +300,7 @@ export function PayrollPageContent({
           title="Not included in payroll yet"
           description="Owner and admin staff are excluded by default. Open their staff record, turn on Include in payroll, then return here to set compensation."
         >
-          <div className="overflow-x-auto">
+          <DataTableScroll>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -324,7 +325,7 @@ export function PayrollPageContent({
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </DataTableScroll>
         </DataTableCard>
       ) : null}
     </div>

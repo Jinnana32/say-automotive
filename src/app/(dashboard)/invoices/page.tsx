@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Eye } from "lucide-react";
 
 import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableScroll } from "@/components/shared/data-table-scroll";
 import { DataTableFilters } from "@/components/shared/data-table-filters";
 import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -93,7 +94,7 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
             }
           />
         ) : (
-          <div className="overflow-x-auto">
+          <DataTableScroll>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -162,7 +163,7 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </DataTableScroll>
         )}
       </DataTableCard>
     </div>

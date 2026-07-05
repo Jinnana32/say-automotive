@@ -7,6 +7,7 @@ import { DataTableFilters } from "@/components/shared/data-table-filters";
 import { DataTablePagination } from "@/components/shared/data-table-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
 import { DataTableCard } from "@/components/shared/data-table-card";
+import { DataTableScroll } from "@/components/shared/data-table-scroll";
 import { MetricGrid } from "@/components/shared/metric-grid";
 import { StatCard } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -145,7 +146,7 @@ export function ApprovedLeaveManagementSection({
             action={<StaffLeaveDialog activeStaff={data.activeStaff} />}
           />
         ) : (
-          <div className="overflow-x-auto">
+          <DataTableScroll>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -198,7 +199,7 @@ export function ApprovedLeaveManagementSection({
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </DataTableScroll>
         )}
       </DataTableCard>
     </div>

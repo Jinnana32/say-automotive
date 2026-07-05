@@ -28,8 +28,8 @@ export function DataTableCard({
       className={className}
       contentClassName="p-0"
     >
-      {toolbar ? <div className="border-b border-border/70 p-4">{toolbar}</div> : null}
-      <div className={cn("p-4", contentClassName)}>{children}</div>
+      {toolbar ? <div className="border-b border-border/70 p-3 sm:p-4">{toolbar}</div> : null}
+      <div className={cn("p-3 sm:p-4", contentClassName)}>{children}</div>
       {footer}
     </SectionCard>
   );
