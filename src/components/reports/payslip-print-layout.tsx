@@ -1,7 +1,6 @@
 import { PrintDocumentPage } from "@/components/reports/print-document-page";
 import { PrintPageStack } from "@/components/reports/print-document-layout";
 import { ReportSectionHeading } from "@/components/reports/report-section-heading";
-import { ReportTotals } from "@/components/reports/report-totals";
 import type { PayslipPrintDocument } from "@/features/payroll/types";
 import {
   formatPayBasisLabel,
@@ -9,7 +8,7 @@ import {
   formatPayrollDayUnits,
   formatWorkedDuration,
 } from "@/features/payroll/utils";
-import { formatCurrencyForPrint } from "@/lib/currency";
+import { formatCurrencyForPayslip } from "@/lib/currency";
 import { formatDate, formatDateTime } from "@/lib/dates";
 
 export function PayslipPrintLayout({
@@ -17,7 +16,7 @@ export function PayslipPrintLayout({
 }: {
   document: PayslipPrintDocument;
 }) {
-  const { period, settings, item, businessProfile, generatedAt } = document;
+  const { period, item, businessProfile, generatedAt } = document;
 
   return (
     <PrintPageStack className="leading-[1.35]">
@@ -52,27 +51,12 @@ export function PayslipPrintLayout({
                   value={formatPayrollCoverage(period.periodStartDate, period.periodEndDate)}
                 />
                 <MetadataRow label="Payout date" value={formatDate(period.payoutDate)} />
-                <MetadataRow
-                  label="Payroll rule"
-                  value={`${settings.standardDailyHours}h day · ${(settings.holidayPremiumRate * 100).toFixed(2)}% holiday premium`}
-                />
               </div>
             </div>
           </div>
 
           <div className="overflow-hidden border border-brand-border bg-brand-soft/35 px-3 py-1.5">
-            <ReportTotals
-              lines={[
-                { label: "Base pay:", value: formatCurrencyForPrint(item.basePay) },
-                { label: "Allowance:", value: formatCurrencyForPrint(item.allowancePay) },
-                { label: "Holiday premium:", value: formatCurrencyForPrint(item.holidayPremiumPay) },
-                { label: "Overtime:", value: formatCurrencyForPrint(item.overtimePay) },
-                { label: "Late deductions:", value: formatCurrencyForPrint(item.lateDeductionAmount) },
-                { label: "Manual additions:", value: formatCurrencyForPrint(item.manualAdditionsTotal) },
-                { label: "Manual deductions:", value: formatCurrencyForPrint(item.manualDeductionsTotal) },
-                { label: "Net pay:", value: formatCurrencyForPrint(item.netPay), emphasized: true },
-              ]}
-            />
+            <PayslipSummary item={item} />
           </div>
         </section>
 
@@ -83,13 +67,13 @@ export function PayslipPrintLayout({
               label="Paid days"
               value={formatPayrollDayUnits(item.paidDayUnits)}
             />
-            <MetadataRow label="Present" value={String(item.presentCount)} />
+            <MetadataRow label="On-time days" value={String(item.presentCount)} />
             <MetadataRow label="Late" value={String(item.lateCount)} />
             <MetadataRow label="Half day" value={String(item.halfDayCount)} />
             <MetadataRow label="Absent" value={String(item.absentCount)} />
             <MetadataRow label="Worked hours" value={formatWorkedDuration(item.workedMinutes)} />
-            <MetadataRow label="Daily rate used" value={formatCurrencyForPrint(item.dailyRateUsed)} />
-            <MetadataRow label="Hourly rate used" value={formatCurrencyForPrint(item.hourlyRateUsed)} />
+            <MetadataRow label="Daily rate used" value={formatCurrencyForPayslip(item.dailyRateUsed)} />
+            <MetadataRow label="Hourly rate used" value={formatCurrencyForPayslip(item.hourlyRateUsed)} />
           </div>
         </section>
 
@@ -110,7 +94,7 @@ export function PayslipPrintLayout({
                     <td className="px-2.5 py-2 capitalize">{adjustment.adjustmentType}</td>
                     <td className="px-2.5 py-2">{adjustment.label}</td>
                     <td className="px-2.5 py-2 text-right">
-                      {formatCurrencyForPrint(adjustment.amount)}
+                      {formatCurrencyForPayslip(adjustment.amount)}
                     </td>
                   </tr>
                 ))}
@@ -120,6 +104,85 @@ export function PayslipPrintLayout({
         ) : null}
       </PrintDocumentPage>
     </PrintPageStack>
+  );
+}
+
+function PayslipSummary({
+  item,
+}: {
+  item: PayslipPrintDocument["item"];
+}) {
+  const earnings = [
+    { label: "Base pay", value: item.basePay },
+    { label: "Allowance", value: item.allowancePay },
+    { label: "Holiday premium", value: item.holidayPremiumPay },
+    { label: "Overtime", value: item.overtimePay },
+  ];
+  const additions =
+    item.manualAdditionsTotal > 0
+      ? [{ label: "Manual additions", value: item.manualAdditionsTotal }]
+      : [];
+
+  return (
+    <div className="w-full max-w-[250px] text-[12px]">
+      <PayslipSummaryGroup title="Earnings" lines={[...earnings, ...additions]} />
+      <PayslipSummaryGroup
+        title="Deductions"
+        lines={[
+          { label: "Late deductions", value: item.lateDeductionAmount },
+          { label: "Manual deductions", value: item.manualDeductionsTotal },
+        ]}
+      />
+      <div className="mt-1 border-t border-brand-border pt-1">
+        <PayslipSummaryLine label="Net pay" value={item.netPay} emphasized />
+      </div>
+    </div>
+  );
+}
+
+function PayslipSummaryGroup({
+  title,
+  lines,
+}: {
+  title: string;
+  lines: Array<{ label: string; value: number }>;
+}) {
+  return (
+    <div className="border-b border-brand-border/70 py-1 last:border-b-0">
+      <p className="pb-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+        {title}
+      </p>
+      {lines.map((line) => (
+        <PayslipSummaryLine key={line.label} label={line.label} value={line.value} />
+      ))}
+    </div>
+  );
+}
+
+function PayslipSummaryLine({
+  label,
+  value,
+  emphasized = false,
+}: {
+  label: string;
+  value: number;
+  emphasized?: boolean;
+}) {
+  return (
+    <div className="flex items-baseline justify-between gap-4 py-0.5">
+      <p className={emphasized ? "font-semibold text-brand-navy" : "font-semibold text-slate-700"}>
+        {label}:
+      </p>
+      <p
+        className={
+          emphasized
+            ? "text-[14px] font-semibold text-brand-navy"
+            : "font-semibold text-slate-700"
+        }
+      >
+        {formatCurrencyForPayslip(value)}
+      </p>
+    </div>
   );
 }
 

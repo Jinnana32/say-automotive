@@ -43,8 +43,8 @@ export function QuotationPrintLayout({
       {pages.map((page, index) => (
         <PrintDocumentPage
           key={page.key}
-          className="leading-[1.42]"
-          bodyClassName="pb-[9mm]"
+          className="quotation-print-page leading-[1.42]"
+          bodyClassName="pb-[4mm]"
           compactHeader={index > 0}
           businessProfile={businessProfile}
           documentTitle={getDocumentTitle(mode)}
