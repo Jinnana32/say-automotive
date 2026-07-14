@@ -13,6 +13,7 @@ export const customerFormSchema = z
     lastName: z.string().trim(),
     companyName: z.string().trim(),
     contactNumber: z.string().trim(),
+    contactNumberSecondary: z.string().trim(),
     email: z
       .string()
       .trim()
@@ -67,6 +68,7 @@ export function parseCustomerFormData(formData: FormData): CustomerFormValues {
     lastName: readString(formData, "lastName"),
     companyName: readString(formData, "companyName"),
     contactNumber: readString(formData, "contactNumber"),
+    contactNumberSecondary: readString(formData, "contactNumberSecondary"),
     email: readString(formData, "email"),
     address: readString(formData, "address"),
     notes: readString(formData, "notes"),

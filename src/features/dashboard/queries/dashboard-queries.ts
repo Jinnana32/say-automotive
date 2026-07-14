@@ -91,7 +91,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   ] = await Promise.all([
     getExactCount(
       applyBranchFilter(
-        supabase.from("customers").select("*", { count: "exact", head: true }),
+        supabase.from("customers").select("*", { count: "exact", head: true }).eq("status", "active"),
         branchScope.selectedBranchId,
       ),
     ),

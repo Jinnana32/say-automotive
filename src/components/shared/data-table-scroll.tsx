@@ -16,7 +16,7 @@ export function DataTableScroll({
         className,
       )}
     >
-      <div className={cn("inline-block align-middle", minWidthClassName)}>{children}</div>
+      <div className={cn("w-full align-middle", minWidthClassName)}>{children}</div>
     </div>
   );
 }

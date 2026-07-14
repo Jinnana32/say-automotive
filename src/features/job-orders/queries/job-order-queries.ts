@@ -30,13 +30,28 @@ import type {
 import { expandJobOrderStatusFilter } from "@/features/job-orders/utils";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
+/** Keep `.in(...)` URL payloads safely under PostgREST/gateway limits. */
+const IN_QUERY_CHUNK_SIZE = 80;
+
 type JobOrderRow = TableRow<"job_orders">;
 type JobOrderItemRow = TableRow<"job_order_items">;
 type JobOrderMechanicRow = TableRow<"job_order_mechanics">;
 type JobOrderPartUsageRow = TableRow<"job_order_part_usages">;
 type CustomerRow = Pick<TableRow<"customers">, "id" | "display_name">;
 type VehicleRow = TableRow<"vehicles">;
+type VehicleLabelRow = Pick<VehicleRow, "id" | "make" | "model" | "year" | "plate_number">;
 type QuotationRow = Pick<TableRow<"quotations">, "id" | "quotation_number">;
+type JobOrderListRow = JobOrderRow & {
+  customers: Pick<CustomerRow, "display_name"> | Pick<CustomerRow, "display_name">[] | null;
+  vehicles:
+    | Pick<VehicleRow, "make" | "model" | "year" | "plate_number">
+    | Pick<VehicleRow, "make" | "model" | "year" | "plate_number">[]
+    | null;
+  quotations:
+    | Pick<QuotationRow, "quotation_number">
+    | Pick<QuotationRow, "quotation_number">[]
+    | null;
+};
 type InvoiceSummaryRow = Pick<
   TableRow<"invoices">,
   "id" | "invoice_number" | "status" | "total_amount" | "paid_amount" | "balance"
@@ -66,7 +81,9 @@ export async function listJobOrders(filters?: {
   let query = applyBranchFilter(
     supabase
       .from("job_orders")
-      .select("*")
+      .select(
+        "*, customers!job_orders_customer_id_fkey(display_name), vehicles!job_orders_vehicle_id_fkey(make, model, year, plate_number), quotations!job_orders_quotation_id_fkey(quotation_number)",
+      )
       .order("created_at", { ascending: false }),
     branchScope.selectedBranchId,
   );
@@ -87,31 +104,26 @@ export async function listJobOrders(filters?: {
   const { data, error } = await query;
 
   if (error) {
-    throw new Error(error.message);
+    throw new Error(toReadableQueryError(error.message));
   }
 
-  const jobOrders = (data ?? []) as JobOrderRow[];
+  const jobOrders = (data ?? []) as JobOrderListRow[];
   const jobOrderIds = jobOrders.map((row) => row.id);
-  const customerIds = [...new Set(jobOrders.map((row) => row.customer_id))];
-  const vehicleIds = [...new Set(jobOrders.map((row) => row.vehicle_id))];
-  const quotationIds = [...new Set(jobOrders.flatMap((row) => (row.quotation_id ? [row.quotation_id] : [])))];
 
-  const [itemsByJobOrderId, mechanicCountMap, customerMap, vehicleMap, quotationMap, invoicedJobOrderIds] =
-    await Promise.all([
+  // Secondary lookups are chunked: a single `.in()` across 500+ UUIDs exceeds PostgREST URL limits
+  // and surfaces as an opaque `TypeError: fetch failed` in Next.js.
+  const [itemsByJobOrderId, mechanicCountMap, invoicedJobOrderIds] = await Promise.all([
     getJobOrderItemsMap(jobOrderIds),
     getMechanicCountMap(jobOrderIds),
-    getCustomerNameMap(customerIds),
-    getVehicleLabelMap(vehicleIds),
-    getQuotationNumberMap(quotationIds),
     getInvoicedJobOrderIdSet(jobOrderIds),
   ]);
 
   return jobOrders.map((row) =>
     mapJobOrderRowToListItem({
       row,
-      customerName: customerMap.get(row.customer_id) ?? "Unknown customer",
-      vehicleLabel: vehicleMap.get(row.vehicle_id) ?? "Unknown vehicle",
-      quotationNumber: row.quotation_id ? quotationMap.get(row.quotation_id) ?? null : null,
+      customerName: resolveRelatedDisplayName(row.customers) ?? "Unknown customer",
+      vehicleLabel: resolveRelatedVehicleLabel(row.vehicles) ?? "Unknown vehicle",
+      quotationNumber: row.quotation_id ? resolveRelatedQuotationNumber(row.quotations) : null,
       assignedMechanicCount: mechanicCountMap.get(row.id) ?? 0,
       items: itemsByJobOrderId.get(row.id) ?? [],
       hasInvoice: invoicedJobOrderIds.has(row.id),
@@ -374,24 +386,22 @@ export async function getJobOrderFormOptions(): Promise<JobOrderFormOptions> {
 }
 
 async function getJobOrderItemsMap(jobOrderIds: string[]) {
-  if (jobOrderIds.length === 0) {
-    return new Map<string, JobOrderItemDetail[]>();
-  }
-
   const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("job_order_items")
-    .select("*")
-    .in("job_order_id", jobOrderIds)
-    .order("line_number", { ascending: true });
-
-  if (error) {
-    throw new Error(error.message);
-  }
+  const rows = await fetchRowsByIdsInChunks<JobOrderItemRow>({
+    ids: jobOrderIds,
+    fetchChunk: async (chunk) =>
+      supabase
+        .from("job_order_items")
+        .select(
+          "id, job_order_id, source_quotation_item_id, line_number, item_type, product_id, service_id, description, quantity, unit_price, total, is_additional, approval_status, usage_status, checklist_completed, checklist_checked_at, checklist_checked_by_staff_id, approved_at, rejected_at",
+        )
+        .in("job_order_id", chunk)
+        .order("line_number", { ascending: true }),
+  });
 
   const map = new Map<string, JobOrderItemDetail[]>();
 
-  for (const row of (data ?? []) as JobOrderItemRow[]) {
+  for (const row of rows) {
     const currentItems = map.get(row.job_order_id) ?? [];
     currentItems.push(mapJobOrderItemRowToDetail({ row }));
     map.set(row.job_order_id, currentItems);
@@ -401,46 +411,35 @@ async function getJobOrderItemsMap(jobOrderIds: string[]) {
 }
 
 async function getInvoicedJobOrderIdSet(jobOrderIds: string[]) {
-  if (jobOrderIds.length === 0) {
-    return new Set<string>();
-  }
-
   const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("invoices")
-    .select("job_order_id")
-    .in("job_order_id", jobOrderIds)
-    .neq("status", "cancelled");
-
-  if (error) {
-    throw new Error(error.message);
-  }
+  const rows = await fetchRowsByIdsInChunks<{ job_order_id: string | null }>({
+    ids: jobOrderIds,
+    fetchChunk: async (chunk) =>
+      supabase
+        .from("invoices")
+        .select("job_order_id")
+        .in("job_order_id", chunk)
+        .neq("status", "cancelled"),
+  });
 
   return new Set(
-    ((data ?? []) as { job_order_id: string | null }[])
+    rows
       .map((row) => row.job_order_id)
       .filter((jobOrderId): jobOrderId is string => Boolean(jobOrderId)),
   );
 }
 
 async function getMechanicCountMap(jobOrderIds: string[]) {
-  if (jobOrderIds.length === 0) {
-    return new Map<string, number>();
-  }
-
   const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("job_order_mechanics")
-    .select("id, job_order_id")
-    .in("job_order_id", jobOrderIds);
-
-  if (error) {
-    throw new Error(error.message);
-  }
+  const rows = await fetchRowsByIdsInChunks<Pick<JobOrderMechanicRow, "id" | "job_order_id">>({
+    ids: jobOrderIds,
+    fetchChunk: async (chunk) =>
+      supabase.from("job_order_mechanics").select("id, job_order_id").in("job_order_id", chunk),
+  });
 
   const map = new Map<string, number>();
 
-  for (const row of (data ?? []) as Pick<JobOrderMechanicRow, "id" | "job_order_id">[]) {
+  for (const row of rows) {
     map.set(row.job_order_id, (map.get(row.job_order_id) ?? 0) + 1);
   }
 
@@ -448,77 +447,48 @@ async function getMechanicCountMap(jobOrderIds: string[]) {
 }
 
 async function getCustomerNameMap(customerIds: string[]) {
-  if (customerIds.length === 0) {
-    return new Map<string, string>();
-  }
-
   const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("customers")
-    .select("id, display_name")
-    .in("id", customerIds);
+  const rows = await fetchRowsByIdsInChunks<CustomerRow>({
+    ids: customerIds,
+    fetchChunk: async (chunk) =>
+      supabase.from("customers").select("id, display_name").in("id", chunk),
+  });
 
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return new Map(((data ?? []) as CustomerRow[]).map((row) => [row.id, row.display_name]));
+  return new Map(rows.map((row) => [row.id, row.display_name]));
 }
 
 async function getVehicleLabelMap(vehicleIds: string[]) {
-  if (vehicleIds.length === 0) {
-    return new Map<string, string>();
-  }
-
   const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase.from("vehicles").select("*").in("id", vehicleIds);
+  const rows = await fetchRowsByIdsInChunks<VehicleLabelRow>({
+    ids: vehicleIds,
+    fetchChunk: async (chunk) =>
+      supabase.from("vehicles").select("id, make, model, year, plate_number").in("id", chunk),
+  });
 
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return new Map(
-    ((data ?? []) as VehicleRow[]).map((vehicle) => {
-      return [vehicle.id, formatVehicleLabel(vehicle)];
-    }),
-  );
+  return new Map(rows.map((vehicle) => [vehicle.id, formatVehicleLabel(vehicle)]));
 }
 
 async function getQuotationNumberMap(quotationIds: string[]) {
-  if (quotationIds.length === 0) {
-    return new Map<string, string>();
-  }
-
   const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("quotations")
-    .select("id, quotation_number")
-    .in("id", quotationIds);
+  const rows = await fetchRowsByIdsInChunks<QuotationRow>({
+    ids: quotationIds,
+    fetchChunk: async (chunk) =>
+      supabase.from("quotations").select("id, quotation_number").in("id", chunk),
+  });
 
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return new Map(((data ?? []) as QuotationRow[]).map((row) => [row.id, row.quotation_number]));
+  return new Map(rows.map((row) => [row.id, row.quotation_number]));
 }
 
 async function getStaffNameMap(staffIds: string[]) {
-  if (staffIds.length === 0) {
-    return new Map<string, string>();
-  }
-
   const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("staff")
-    .select("id, first_name, last_name")
-    .in("id", staffIds);
-
-  if (error) {
-    throw new Error(error.message);
-  }
+  const rows = await fetchRowsByIdsInChunks<StaffRow>({
+    ids: staffIds,
+    fetchChunk: async (chunk) =>
+      supabase.from("staff").select("id, first_name, last_name").in("id", chunk),
+  });
 
   return new Map(
-    ((data ?? []) as StaffRow[]).map((row) => {
+    rows.map((row) => {
       const option = mapStaffRowToMechanicOption(row);
       return [option.id, option.label];
     }),
@@ -526,72 +496,133 @@ async function getStaffNameMap(staffIds: string[]) {
 }
 
 async function getInventoryStockMap(branchId: string, productIds: string[]) {
-  if (productIds.length === 0) {
-    return new Map<string, InventoryStockRow>();
-  }
-
   const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("inventory_stocks")
-    .select("product_id, quantity_on_hand, available_quantity, reorder_level, shelf_location")
-    .eq("branch_id", branchId)
-    .in("product_id", productIds);
+  const rows = await fetchRowsByIdsInChunks<InventoryStockRow>({
+    ids: productIds,
+    fetchChunk: async (chunk) =>
+      supabase
+        .from("inventory_stocks")
+        .select("product_id, quantity_on_hand, available_quantity, reorder_level, shelf_location")
+        .eq("branch_id", branchId)
+        .in("product_id", chunk),
+  });
 
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return new Map(
-    ((data ?? []) as InventoryStockRow[]).map((row) => [row.product_id, row]),
-  );
+  return new Map(rows.map((row) => [row.product_id, row]));
 }
 
 async function getProductInventoryMap(productIds: string[]) {
-  if (productIds.length === 0) {
-    return new Map<string, ProductInventoryRow>();
-  }
-
   const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("products")
-    .select("id, reorder_level, shelf_location")
-    .in("id", productIds);
+  const rows = await fetchRowsByIdsInChunks<ProductInventoryRow>({
+    ids: productIds,
+    fetchChunk: async (chunk) =>
+      supabase.from("products").select("id, reorder_level, shelf_location").in("id", chunk),
+  });
 
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return new Map(
-    ((data ?? []) as ProductInventoryRow[]).map((row) => [row.id, row]),
-  );
+  return new Map(rows.map((row) => [row.id, row]));
 }
 
 async function getStockMovementMap(stockMovementIds: string[]) {
-  if (stockMovementIds.length === 0) {
-    return new Map<string, StockMovementRow>();
-  }
-
   const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("stock_movements")
-    .select("id, previous_quantity, new_quantity")
-    .in("id", stockMovementIds);
+  const rows = await fetchRowsByIdsInChunks<StockMovementRow>({
+    ids: stockMovementIds,
+    fetchChunk: async (chunk) =>
+      supabase.from("stock_movements").select("id, previous_quantity, new_quantity").in("id", chunk),
+  });
 
-  if (error) {
-    throw new Error(error.message);
+  return new Map(rows.map((row) => [row.id, row]));
+}
+
+async function fetchRowsByIdsInChunks<T>(params: {
+  ids: string[];
+  fetchChunk: (
+    chunk: string[],
+  ) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>;
+}): Promise<T[]> {
+  if (params.ids.length === 0) {
+    return [];
   }
 
-  return new Map(
-    ((data ?? []) as StockMovementRow[]).map((row) => [row.id, row]),
+  const uniqueIds = [...new Set(params.ids)];
+  const chunks: string[][] = [];
+
+  for (let index = 0; index < uniqueIds.length; index += IN_QUERY_CHUNK_SIZE) {
+    chunks.push(uniqueIds.slice(index, index + IN_QUERY_CHUNK_SIZE));
+  }
+
+  const settled = await Promise.all(
+    chunks.map(async (chunk) => {
+      const { data, error } = await params.fetchChunk(chunk);
+      if (error) {
+        throw new Error(toReadableQueryError(error.message));
+      }
+      return (data ?? []) as T[];
+    }),
   );
+
+  return settled.flat();
 }
 
 function escapeSearchTerm(value: string) {
   return value.replaceAll(",", "\\,");
 }
 
-function formatVehicleLabel(vehicle: VehicleRow) {
+function formatVehicleLabel(vehicle: VehicleLabelRow) {
   const platePart = vehicle.plate_number ? ` · ${vehicle.plate_number}` : "";
   const yearPart = vehicle.year ? ` (${vehicle.year})` : "";
   return `${vehicle.make} ${vehicle.model}${yearPart}${platePart}`;
+}
+
+function resolveRelatedDisplayName(
+  value: JobOrderListRow["customers"],
+): string | null {
+  if (!value) {
+    return null;
+  }
+
+  if (Array.isArray(value)) {
+    return value[0]?.display_name ?? null;
+  }
+
+  return value.display_name || null;
+}
+
+function resolveRelatedVehicleLabel(
+  value: JobOrderListRow["vehicles"],
+): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const vehicle = Array.isArray(value) ? value[0] : value;
+  return vehicle ? formatVehicleLabel({ id: "", ...vehicle }) : null;
+}
+
+function resolveRelatedQuotationNumber(
+  value: JobOrderListRow["quotations"],
+): string | null {
+  if (!value) {
+    return null;
+  }
+
+  if (Array.isArray(value)) {
+    return value[0]?.quotation_number ?? null;
+  }
+
+  return value.quotation_number || null;
+}
+
+function toReadableQueryError(message: string) {
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("fetch failed") ||
+    normalized.includes("failed to fetch") ||
+    normalized.includes("network") ||
+    normalized.includes("enotfound") ||
+    normalized.includes("econn")
+  ) {
+    return "Could not reach the database. Check your internet connection and try again.";
+  }
+
+  return message;
 }

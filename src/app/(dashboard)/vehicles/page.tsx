@@ -101,83 +101,105 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
             }
           />
         ) : (
-          <DataTableScroll>
-            <Table>
+          <DataTableScroll minWidthClassName="min-w-[64rem]">
+            <Table className="table-fixed">
               <TableHeader>
                 <TableRow>
-                  <TableHead>Vehicle</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Plate / VIN</TableHead>
-                  <TableHead>Specs</TableHead>
-                  <TableHead>Operational</TableHead>
-                  <TableHead>Status</TableHead>
-                  {canManageVehicles ? <TableHead className="text-right">Actions</TableHead> : null}
+                  <TableHead className="w-[22%]">Vehicle</TableHead>
+                  <TableHead className="w-[18%]">Customer</TableHead>
+                  <TableHead className="w-[14%]">Plate</TableHead>
+                  <TableHead className="w-[18%]">Details</TableHead>
+                  <TableHead className="w-[14%]">Operational</TableHead>
+                  <TableHead className="w-[8%]">Status</TableHead>
+                  {canManageVehicles ? <TableHead className="w-14 text-right">Actions</TableHead> : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pagination.items.map((vehicle) => (
-                  <TableRow key={vehicle.id}>
-                    <TableCell>
-                      <TableCellLink href={`/vehicles/${vehicle.id}`}>
-                        <div className="space-y-1">
-                          <p className="font-medium text-foreground transition-colors group-hover:text-primary">
-                            {vehicle.make} {vehicle.model}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {vehicle.variant ?? "No variant"} · {vehicle.year ? String(vehicle.year) : "Year not set"}
-                          </p>
-                        </div>
-                      </TableCellLink>
-                    </TableCell>
-                    <TableCell>
-                      <TableCellLink href={`/vehicles/${vehicle.id}`} className="font-medium text-foreground">
-                        {vehicle.customerName}
-                      </TableCellLink>
-                    </TableCell>
-                    <TableCell>
-                      <TableCellLink href={`/vehicles/${vehicle.id}`}>
-                        <div className="space-y-1 text-sm">
-                          <p>{vehicle.plateNumber ?? "No plate number"}</p>
-                          <p className="text-xs text-muted-foreground">{vehicle.vin ?? "No VIN"}</p>
-                        </div>
-                      </TableCellLink>
-                    </TableCell>
-                    <TableCell>
-                      <TableCellLink href={`/vehicles/${vehicle.id}`}>
-                        <div className="space-y-1 text-sm">
-                          <p>{vehicle.transmission ?? "No transmission"}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {vehicle.fuelType ?? "No fuel type"}
-                          </p>
-                          <p className="text-xs text-muted-foreground">Engine size {vehicle.engineSize ?? "Not set"}</p>
-                        </div>
-                      </TableCellLink>
-                    </TableCell>
-                    <TableCell>
-                      <TableCellLink href={`/vehicles/${vehicle.id}`}>
-                        <div className="space-y-1 text-sm">
-                          <p>Mileage {formatMileage(vehicle.mileage)}</p>
-                          <p className="text-xs text-muted-foreground">Color {vehicle.color ?? "Not set"}</p>
-                        </div>
-                      </TableCellLink>
-                    </TableCell>
-                    <TableCell>
-                      <TableCellLink href={`/vehicles/${vehicle.id}`}>
-                        <StatusBadge tone={vehicle.status === "active" ? "success" : "neutral"}>
-                          {vehicle.status}
-                        </StatusBadge>
-                      </TableCellLink>
-                    </TableCell>
-                    {canManageVehicles ? (
-                      <TableCell className="w-14 text-right">
-                        <VehicleRowActions
-                          vehicleId={vehicle.id}
-                          vehicleLabel={`${vehicle.make} ${vehicle.model}${vehicle.plateNumber ? ` (${vehicle.plateNumber})` : ""}`}
-                        />
+                {pagination.items.map((vehicle) => {
+                  const detailLine = [
+                    vehicle.transmission,
+                    vehicle.fuelType,
+                    vehicle.engineSize ? `Engine ${vehicle.engineSize}` : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ");
+                  const operationalLine = [
+                    vehicle.mileage !== null ? formatMileage(vehicle.mileage) : null,
+                    vehicle.color ? vehicle.color : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ");
+
+                  return (
+                    <TableRow key={vehicle.id}>
+                      <TableCell>
+                        <TableCellLink href={`/vehicles/${vehicle.id}`}>
+                          <div className="min-w-0 space-y-1">
+                            <p className="truncate font-medium text-foreground transition-colors group-hover:text-primary">
+                              {vehicle.make} {vehicle.model}
+                            </p>
+                            <p className="truncate text-xs text-muted-foreground">
+                              {[vehicle.variant, vehicle.year ? String(vehicle.year) : null]
+                                .filter(Boolean)
+                                .join(" · ") || "—"}
+                            </p>
+                          </div>
+                        </TableCellLink>
                       </TableCell>
-                    ) : null}
-                  </TableRow>
-                ))}
+                      <TableCell>
+                        <TableCellLink
+                          href={`/vehicles/${vehicle.id}`}
+                          className="block truncate font-medium text-foreground"
+                        >
+                          {vehicle.customerName}
+                        </TableCellLink>
+                      </TableCell>
+                      <TableCell>
+                        <TableCellLink href={`/vehicles/${vehicle.id}`}>
+                          <div className="min-w-0 space-y-1 text-sm">
+                            <p className="truncate font-medium text-foreground">
+                              {vehicle.plateNumber ?? "—"}
+                            </p>
+                            {vehicle.vin ? (
+                              <p className="truncate text-xs text-muted-foreground">{vehicle.vin}</p>
+                            ) : null}
+                          </div>
+                        </TableCellLink>
+                      </TableCell>
+                      <TableCell>
+                        <TableCellLink
+                          href={`/vehicles/${vehicle.id}`}
+                          className="block truncate text-sm text-foreground"
+                        >
+                          {detailLine || "—"}
+                        </TableCellLink>
+                      </TableCell>
+                      <TableCell>
+                        <TableCellLink
+                          href={`/vehicles/${vehicle.id}`}
+                          className="block truncate text-sm text-foreground"
+                        >
+                          {operationalLine || "—"}
+                        </TableCellLink>
+                      </TableCell>
+                      <TableCell>
+                        <TableCellLink href={`/vehicles/${vehicle.id}`}>
+                          <StatusBadge tone={vehicle.status === "active" ? "success" : "neutral"}>
+                            {vehicle.status}
+                          </StatusBadge>
+                        </TableCellLink>
+                      </TableCell>
+                      {canManageVehicles ? (
+                        <TableCell className="w-14 text-right">
+                          <VehicleRowActions
+                            vehicleId={vehicle.id}
+                            vehicleLabel={`${vehicle.make} ${vehicle.model}${vehicle.plateNumber ? ` (${vehicle.plateNumber})` : ""}`}
+                          />
+                        </TableCell>
+                      ) : null}
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </DataTableScroll>
@@ -188,5 +210,5 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
 }
 
 function formatMileage(value: number | null) {
-  return value !== null ? `${value.toLocaleString()} km` : "Not set";
+  return value !== null ? `${value.toLocaleString()} km` : null;
 }

@@ -1,0 +1,483 @@
+{
+  "startedAt": "2026-07-14T01:25:18.033Z",
+  "dryRun": false,
+  "branchId": "d521b15c-c639-4c61-a1ee-6e700bb14f18",
+  "groupsRequested": 27,
+  "groupsProcessed": 27,
+  "groupsFailed": 0,
+  "totals": {
+    "vehiclesMoved": 33,
+    "quotationsMoved": 135,
+    "jobOrdersMoved": 25,
+    "invoicesMoved": 0,
+    "salesMoved": 0,
+    "customersDeactivated": 31,
+    "keepEnriched": 0
+  },
+  "results": [
+    {
+      "groupNo": 4,
+      "displayName": "Dennis Legarde",
+      "keepCustomerId": "8102dd2d-c31d-4b4f-ae14-33126eebfd49",
+      "mergeCustomerIds": [
+        "164405b1-adb5-4514-bed9-ab06a47c9a1a",
+        "4f52c7c3-65ca-48c0-9893-6a8db0aadc77"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 2,
+      "quotationsMoved": 4,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 2,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 5,
+      "displayName": "Gwyn Sorongon",
+      "keepCustomerId": "df6fa5cf-9dca-4b9f-8c35-6135b1631d5f",
+      "mergeCustomerIds": [
+        "5ac7ad51-627c-4518-86f1-3817c3636a41",
+        "280d1048-f742-4ff9-a810-02af3a057ac0"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 2,
+      "quotationsMoved": 7,
+      "jobOrdersMoved": 3,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 2,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 6,
+      "displayName": "Levantare Laboratory",
+      "keepCustomerId": "fa64eb5c-e24d-4765-9406-5c173c31c362",
+      "mergeCustomerIds": [
+        "9d182c04-1734-4769-97b3-175564d82017",
+        "028b3648-0b28-4c66-94dc-7629fe2d6d08"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 3,
+      "quotationsMoved": 27,
+      "jobOrdersMoved": 8,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 2,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 7,
+      "displayName": "Noel Adricula",
+      "keepCustomerId": "3c70a9da-064c-4972-9d05-1da990440584",
+      "mergeCustomerIds": [
+        "da44592b-8bd3-4a50-a9ff-31c083ddce36",
+        "7d30d96f-1f6f-489d-ba51-79c69f2bd3e9"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 2,
+      "quotationsMoved": 7,
+      "jobOrdersMoved": 2,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 2,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 10,
+      "displayName": "Anne Oquias",
+      "keepCustomerId": "a83ab43e-2a02-427c-a6d2-17c3b4912713",
+      "mergeCustomerIds": [
+        "aae838fd-3f13-4cd4-a4e0-01fe34364b1d"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 10,
+      "jobOrdersMoved": 4,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 11,
+      "displayName": "Ariel Longanes",
+      "keepCustomerId": "903fa8b8-dc0d-4a64-a73e-206b05992775",
+      "mergeCustomerIds": [
+        "0f0a335e-09c5-4ac3-8048-543326d0eff3"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 0,
+      "quotationsMoved": 0,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 12,
+      "displayName": "Arthur Zambrano",
+      "keepCustomerId": "d2967db5-d05c-4369-9399-d9b6b7958c77",
+      "mergeCustomerIds": [
+        "65ae6ece-dba6-4110-b168-1d9f3df6797b"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 2,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 16,
+      "displayName": "Buenaventura Montalban",
+      "keepCustomerId": "0e6c36cb-55c5-480a-90cc-6950643649e3",
+      "mergeCustomerIds": [
+        "73a2c43a-b96f-4bef-a4ab-5e0f6d3acde1"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 2,
+      "quotationsMoved": 4,
+      "jobOrdersMoved": 2,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 17,
+      "displayName": "CC Car Rental",
+      "keepCustomerId": "5492db67-dd81-470a-9eaa-e938d2eb9956",
+      "mergeCustomerIds": [
+        "2ee997b0-d949-4da5-a4f6-536ccd5db442"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 2,
+      "quotationsMoved": 6,
+      "jobOrdersMoved": 2,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 18,
+      "displayName": "Dandy Jano",
+      "keepCustomerId": "737bb324-1f44-4c2b-a307-929d281d53c1",
+      "mergeCustomerIds": [
+        "b4b88e08-91d3-4eb5-9bff-cd810defade0"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 2,
+      "jobOrdersMoved": 1,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 19,
+      "displayName": "Danny Locsin",
+      "keepCustomerId": "f43b0c81-ab9e-4266-bbe3-2d2b383a92cc",
+      "mergeCustomerIds": [
+        "b0437384-8fd6-489a-b69f-6f982a4eee13"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 2,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 22,
+      "displayName": "Francisco Fajarillo",
+      "keepCustomerId": "1fc2d790-b471-4e2f-aee0-624e6e812229",
+      "mergeCustomerIds": [
+        "4f3396fb-fed3-4347-87ee-b405ba158465"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 2,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 25,
+      "displayName": "Gry 88",
+      "keepCustomerId": "6b762786-902c-49ec-b96f-36bb6a8ea2cc",
+      "mergeCustomerIds": [
+        "e68ed82b-10b7-473a-bc8c-6dac58988be0"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 4,
+      "jobOrdersMoved": 1,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 27,
+      "displayName": "Jed Mendoza",
+      "keepCustomerId": "97113014-5b08-4f55-a683-be92df852cfa",
+      "mergeCustomerIds": [
+        "355fb771-7bc9-4e35-b2af-09df7881fa4b"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 5,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 28,
+      "displayName": "Jed Rosbero",
+      "keepCustomerId": "5742e7b3-c232-4eb3-9e93-3f64bbef553d",
+      "mergeCustomerIds": [
+        "6585e560-a0d3-4507-a8f5-6092d398fe91"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 4,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 29,
+      "displayName": "Jerry Unica",
+      "keepCustomerId": "6dd92dab-64c3-4707-9507-2cfca55bd61e",
+      "mergeCustomerIds": [
+        "ad2a67a3-a241-4f61-b718-02b4cc4bece1"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 5,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 30,
+      "displayName": "Joey Toralballa",
+      "keepCustomerId": "14292a3c-97dd-4401-a2ba-d1ef8963acae",
+      "mergeCustomerIds": [
+        "b9fe3e39-b612-444d-982e-4ec1fec9c62a"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 4,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 32,
+      "displayName": "Josh Altis",
+      "keepCustomerId": "0fd080c6-7a7e-4c1b-95f2-ef017faf2be8",
+      "mergeCustomerIds": [
+        "62d2cd74-6baa-4094-99b6-f374c0e99ab0"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 0,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 33,
+      "displayName": "Joy Ariete",
+      "keepCustomerId": "9e7489f1-5f27-446a-b7ac-2f0a0162c680",
+      "mergeCustomerIds": [
+        "d99625ef-ad58-43c6-aa6c-0ebee656e5b5"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 2,
+      "jobOrdersMoved": 1,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 36,
+      "displayName": "Leo Gaviette",
+      "keepCustomerId": "2f84a2ad-2066-43b8-aaa4-a221191f95e8",
+      "mergeCustomerIds": [
+        "7b627809-7cf6-4f99-999a-06840f6e9680"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 3,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 37,
+      "displayName": "Leonard Asong",
+      "keepCustomerId": "cadb838f-4115-4a4e-a087-978a9aec1515",
+      "mergeCustomerIds": [
+        "75d317ff-e2ee-41d8-978d-8e6c7f194ee0"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 8,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 39,
+      "displayName": "Mark Delmo",
+      "keepCustomerId": "123411ea-1438-4b7f-bff4-88790bb426de",
+      "mergeCustomerIds": [
+        "eaed8561-68e4-44b2-8804-06e6c36d78bb"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 4,
+      "jobOrdersMoved": 1,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 40,
+      "displayName": "Mark Espares",
+      "keepCustomerId": "8a0a8abe-3b84-4842-953f-1f81d0a1a394",
+      "mergeCustomerIds": [
+        "41799105-0dba-4ba1-9992-24cf37d19d99"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 1,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 43,
+      "displayName": "Mike Alegado",
+      "keepCustomerId": "2f067ad9-a210-4e92-98c7-51486d67b9c2",
+      "mergeCustomerIds": [
+        "25509328-5655-40b9-b32b-f0f5111d564d"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 0,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 49,
+      "displayName": "Rothel Monteclaro",
+      "keepCustomerId": "e6d4b1fe-4254-4714-a3f4-f2ee401c5acc",
+      "mergeCustomerIds": [
+        "c01096b2-fb1d-4ec8-8878-6aee5fce6c1a"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 8,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 52,
+      "displayName": "Villar Land Holding Corporation",
+      "keepCustomerId": "9987b174-b0e5-4551-9f74-4273176ccb55",
+      "mergeCustomerIds": [
+        "affebbea-ca8d-489d-8f9d-b843d7bbf73b"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 12,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    },
+    {
+      "groupNo": 53,
+      "displayName": "Vincent Palacio",
+      "keepCustomerId": "262965c2-ed73-4157-9fb7-34ee1f19dde7",
+      "mergeCustomerIds": [
+        "54f1c405-dc5d-4114-a23d-01f4f81e5819"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 2,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": false
+    }
+  ],
+  "finishedAt": "2026-07-14T01:25:51.576Z"
+}

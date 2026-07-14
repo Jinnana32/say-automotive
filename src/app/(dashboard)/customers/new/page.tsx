@@ -21,6 +21,7 @@ export default async function NewCustomerPage() {
           lastName: "",
           companyName: "",
           contactNumber: "",
+          contactNumberSecondary: "",
           email: "",
           address: "",
           notes: "",

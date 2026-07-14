@@ -198,6 +198,7 @@ async function searchQuickAccessByCustomerLastName(
     supabase
       .from("customers")
       .select("*")
+      .eq("status", "active")
       .or(`last_name.ilike.%${escapedLastName}%,display_name.ilike.%${escapedLastName}%`)
       .order("display_name", { ascending: true })
       .limit(12),

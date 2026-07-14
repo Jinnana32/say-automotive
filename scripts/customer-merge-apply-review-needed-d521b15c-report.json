@@ -1,0 +1,599 @@
+{
+  "startedAt": "2026-07-14T01:46:05.015Z",
+  "dryRun": false,
+  "confidence": "review-needed",
+  "branchId": "d521b15c-c639-4c61-a1ee-6e700bb14f18",
+  "groupsRequested": 27,
+  "groupsProcessed": 27,
+  "groupsFailed": 0,
+  "totals": {
+    "vehiclesMoved": 26,
+    "quotationsMoved": 96,
+    "jobOrdersMoved": 17,
+    "invoicesMoved": 0,
+    "salesMoved": 0,
+    "customersDeactivated": 34,
+    "keepEnriched": 27,
+    "secondaryPhonesSet": 3
+  },
+  "results": [
+    {
+      "groupNo": 1,
+      "displayName": "Philippine Ports Authority",
+      "keepCustomerId": "7938527e-ffad-484f-bb8f-12fbd5631933",
+      "mergeCustomerIds": [
+        "22468ecb-754a-43ff-aec8-2b73e76c43b1",
+        "63353913-d1da-4c0b-89a6-95353d884e6d",
+        "d3727dc1-f73d-40cb-b0bb-b0f17a0bde7c",
+        "0b2d8615-8dc4-4583-bf37-9f921f93c264",
+        "6468e4e5-5ce1-4f94-b664-44708b1743c4",
+        "178f9706-9341-4353-b056-b2c5db700de5"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 9,
+      "quotationsMoved": 46,
+      "jobOrdersMoved": 9,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 6,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: Loboc, Lapaz, Iloilo City\nAlternate address preserved from merge: Brgy.Loboc,Lapuz, Iloilo City\nAlternate address preserved from merge: Lapuz, Iloilo City\nAlternate address preserved from merge: Lapaz, Iloilo City\nAlternate address preserved from merge: Brgy. Loboc Lapuz, Iloilo City\nAlternate address preserved from merge: Brgy. Loboc, Lapaz, Iloilo City"
+      }
+    },
+    {
+      "groupNo": 2,
+      "displayName": "Bebbs Nellas",
+      "keepCustomerId": "20fa3276-0dfe-413c-9244-4d8c9301f00a",
+      "mergeCustomerIds": [
+        "57974bf0-a87d-45e0-97ca-71a253c22fa6",
+        "b2503e2b-311c-43f3-80f3-fa9611c758c8"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 3,
+      "jobOrdersMoved": 2,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 2,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: Mandurriao,Iloilo City"
+      }
+    },
+    {
+      "groupNo": 3,
+      "displayName": "Civil Service Commission",
+      "keepCustomerId": "c60ec7af-dde3-49a0-a1ca-44e925a05daf",
+      "mergeCustomerIds": [
+        "9ec647c5-b4a3-426c-b14f-e1c3d7118cce",
+        "57fd96dd-4f99-439c-8532-e62b7d12e054"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 0,
+      "quotationsMoved": 0,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 2,
+      "keepEnriched": true,
+      "secondaryPhoneSet": true,
+      "enrichmentPatch": {
+        "contact_number_secondary": "09173141067",
+        "notes": "Alternate address preserved from merge: Mandurriao, Iloilo City\nAlternate address preserved from merge: Mandurriao,Iloilo City"
+      }
+    },
+    {
+      "groupNo": 8,
+      "displayName": "Althea Capalla",
+      "keepCustomerId": "25443603-6ce0-40cf-ae88-251d459d4fcb",
+      "mergeCustomerIds": [
+        "5ec94d8c-06c1-4451-a1cf-2b93aa2a80cc"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 2,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": true,
+      "enrichmentPatch": {
+        "contact_number_secondary": "09955836622",
+        "notes": "Alternate address preserved from merge: Mandurriao,Iloilo City"
+      }
+    },
+    {
+      "groupNo": 9,
+      "displayName": "Annabelle Tabares",
+      "keepCustomerId": "d4951bc5-44b4-474a-83fd-eee26a98326e",
+      "mergeCustomerIds": [
+        "ffa9dbcf-712e-4d81-9b1f-355f8e353cc2"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 0,
+      "quotationsMoved": 0,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: San Jose ,San Miguel ,Iloilo"
+      }
+    },
+    {
+      "groupNo": 13,
+      "displayName": "Atty. Bernard Dofitas",
+      "keepCustomerId": "688f04ea-a92c-49fd-b92c-6948707563a1",
+      "mergeCustomerIds": [
+        "5c9edadf-26c9-4dd7-b3e2-03285810716e"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 2,
+      "jobOrdersMoved": 1,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: NHA , Mandurriao, Iloilo City"
+      }
+    },
+    {
+      "groupNo": 14,
+      "displayName": "Augusto De los Santos",
+      "keepCustomerId": "1361bcf9-4d61-4d7f-b07f-18f4147fefe0",
+      "mergeCustomerIds": [
+        "b7a43382-1c46-45b7-8d27-0d70ae864309"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 6,
+      "jobOrdersMoved": 2,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: Mandurriao, Iloilo Cuty"
+      }
+    },
+    {
+      "groupNo": 15,
+      "displayName": "Bernardino Valera",
+      "keepCustomerId": "db5b66da-9718-4e24-b427-21866319f546",
+      "mergeCustomerIds": [
+        "3d20c10a-97b6-4f74-9f96-0cdcd94c0621"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 0,
+      "quotationsMoved": 0,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: Monterosa Mandurriao, Iloilo City"
+      }
+    },
+    {
+      "groupNo": 20,
+      "displayName": "Dante Infante",
+      "keepCustomerId": "5ee94453-06d3-47da-94a2-3e1629e4e8b7",
+      "mergeCustomerIds": [
+        "fda7eb9b-3655-43ab-ba1f-ae37c13485b1"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 4,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: Jaro,Iloilo City"
+      }
+    },
+    {
+      "groupNo": 21,
+      "displayName": "Eddie Quimba",
+      "keepCustomerId": "6a7db713-1ea9-4254-b58c-9998d13d34cc",
+      "mergeCustomerIds": [
+        "58ac30f9-89e5-4cb6-9bf9-2eda1dd61eae"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 5,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: Jaro, Iloilo City"
+      }
+    },
+    {
+      "groupNo": 23,
+      "displayName": "Gerardo Espares",
+      "keepCustomerId": "96b847d8-300f-4983-b417-5a05e88ef085",
+      "mergeCustomerIds": [
+        "da4e8a8e-2863-471e-ac3e-15d2e63af450"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 4,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": true,
+      "enrichmentPatch": {
+        "contact_number_secondary": "09286920477",
+        "notes": "Alternate address preserved from merge: San Jose, Antique"
+      }
+    },
+    {
+      "groupNo": 24,
+      "displayName": "Girlie Mabunay Teruel",
+      "keepCustomerId": "5ebb810d-b610-404d-ab1e-dc88a195afa9",
+      "mergeCustomerIds": [
+        "88e92227-3193-451a-997a-ccc4307fc614"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 2,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: Mandurriao, Iloilo City"
+      }
+    },
+    {
+      "groupNo": 26,
+      "displayName": "Herminio Gonzaga",
+      "keepCustomerId": "c61b42bb-87db-4c1b-a2d2-dd45b27e6fb4",
+      "mergeCustomerIds": [
+        "a3f459a7-2678-4d54-b4b7-44ec148b56e7"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 4,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: Mandurriao,Iloilo City"
+      }
+    },
+    {
+      "groupNo": 31,
+      "displayName": "Jorge Debuque",
+      "keepCustomerId": "211d7ac8-14cf-4552-bb2c-0d22faf00e1a",
+      "mergeCustomerIds": [
+        "30a4283c-2a2d-4d2b-8e16-279815aa32dd"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 2,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: Navais, Manduraio, Iloilo City"
+      }
+    },
+    {
+      "groupNo": 34,
+      "displayName": "Joy Vee",
+      "keepCustomerId": "8a1f14c4-6299-4f62-8735-470f6db584fc",
+      "mergeCustomerIds": [
+        "ab6d0855-7eaf-4d62-a6c5-52602b8699ca"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 0,
+      "quotationsMoved": 0,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: Monterosa, Subd., Mandurriao, Iloilo City"
+      }
+    },
+    {
+      "groupNo": 35,
+      "displayName": "Kieth Bugna",
+      "keepCustomerId": "dad1358c-8492-4937-a21b-bb3999cafb07",
+      "mergeCustomerIds": [
+        "86474ebe-1583-46ce-8d2c-567302b606ae"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 2,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: Pavia, Ililo City"
+      }
+    },
+    {
+      "groupNo": 38,
+      "displayName": "Louie Ebrada",
+      "keepCustomerId": "fcad673b-1bba-495f-a583-43d4069a3df3",
+      "mergeCustomerIds": [
+        "b7e2f0bd-b43e-4ca5-938c-4f1c5a34fb30"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 2,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: Mandurriao,Iloilo City"
+      }
+    },
+    {
+      "groupNo": 41,
+      "displayName": "Mark Paul Ganzon",
+      "keepCustomerId": "8b798dbd-1f65-42f9-913c-7873f6b73580",
+      "mergeCustomerIds": [
+        "d1481c79-a782-43dd-964c-5b41af600849"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 6,
+      "jobOrdersMoved": 2,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: Mandurriao, Iloilo City"
+      }
+    },
+    {
+      "groupNo": 42,
+      "displayName": "Michael Penafiel",
+      "keepCustomerId": "18a79ed0-bab8-4d5e-aa1a-490cbca4e47e",
+      "mergeCustomerIds": [
+        "18150a5d-d8ff-469e-9089-63456a623b8e"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 0,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: Mandurriao,Iloilo City"
+      }
+    },
+    {
+      "groupNo": 44,
+      "displayName": "Norman Sinfuego Sr.",
+      "keepCustomerId": "cef5423c-b4c6-47f8-976f-fb91abb57075",
+      "mergeCustomerIds": [
+        "b61b5f8e-7b98-4e11-880f-fdd8dbfcc1ba"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 2,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: Mandurriao, Iloilo City"
+      }
+    },
+    {
+      "groupNo": 45,
+      "displayName": "Orville Ariete",
+      "keepCustomerId": "6a9d4eb8-b75a-47ff-8b38-ad91ca5eb27c",
+      "mergeCustomerIds": [
+        "ea79b37d-38ef-4234-aa87-5c81d2e4f1bb"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 2,
+      "jobOrdersMoved": 1,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: Mandurriao, Iloilo City"
+      }
+    },
+    {
+      "groupNo": 46,
+      "displayName": "Robeeh Galan Ramos",
+      "keepCustomerId": "f34e1c54-0014-419f-90df-65dcb0eafdfe",
+      "mergeCustomerIds": [
+        "3f5a2307-ab59-44ae-bb9c-2e0262f0e537"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 0,
+      "quotationsMoved": 0,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: Bacolod City"
+      }
+    },
+    {
+      "groupNo": 47,
+      "displayName": "Rolando Salvilla",
+      "keepCustomerId": "e82860d5-0c5d-4ce1-82f3-45a0c6f4eef5",
+      "mergeCustomerIds": [
+        "6a5916a4-8310-4788-bbd9-d5090a532a74"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 0,
+      "quotationsMoved": 0,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: San Jose ,San Miguel ,Iloilo"
+      }
+    },
+    {
+      "groupNo": 48,
+      "displayName": "Rommel Pendon",
+      "keepCustomerId": "d2c08e8d-d796-43c0-b5d1-06fb00281203",
+      "mergeCustomerIds": [
+        "d137390a-c85b-47a2-8e98-02a13dc4ca9e"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 0,
+      "quotationsMoved": 0,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: Mandurriao"
+      }
+    },
+    {
+      "groupNo": 50,
+      "displayName": "Rowena Reyes Otero",
+      "keepCustomerId": "11180bb1-1cae-4afc-b767-bcbe7cc60226",
+      "mergeCustomerIds": [
+        "b2ebb38f-6c17-4a86-977b-7c869ee40609"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 0,
+      "quotationsMoved": 0,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: JEM Subd, Mandurriao, Iloilo City"
+      }
+    },
+    {
+      "groupNo": 51,
+      "displayName": "Shock and Awe Industrial Corporation/ Denise Alvaracin",
+      "keepCustomerId": "9f68e11b-5599-497a-b7e7-53baef435f88",
+      "mergeCustomerIds": [
+        "7b8eaa43-4504-4c6d-872b-0a851d5d8e9b"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 1,
+      "quotationsMoved": 2,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: Iloilo City"
+      }
+    },
+    {
+      "groupNo": 54,
+      "displayName": "Zoetis Philippines, Inc.",
+      "keepCustomerId": "f86646d6-b141-40a8-88ff-5b058012f845",
+      "mergeCustomerIds": [
+        "44bf054c-fc0c-49ab-8507-4a2a9c43b0b2"
+      ],
+      "ok": true,
+      "error": null,
+      "vehiclesMoved": 0,
+      "quotationsMoved": 0,
+      "jobOrdersMoved": 0,
+      "invoicesMoved": 0,
+      "salesMoved": 0,
+      "customersDeactivated": 1,
+      "keepEnriched": true,
+      "secondaryPhoneSet": false,
+      "enrichmentPatch": {
+        "notes": "Alternate address preserved from merge: BGC,Taguig City, Philippines"
+      }
+    }
+  ],
+  "finishedAt": "2026-07-14T01:46:38.500Z"
+}

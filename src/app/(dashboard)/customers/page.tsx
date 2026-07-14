@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CustomerRowActions } from "@/features/customers/components/customer-row-actions";
 import { listCustomers } from "@/features/customers/queries/customer-queries";
+import type { CustomerListItem } from "@/features/customers/types";
 import { requireAuthenticatedStaff } from "@/lib/auth/session";
 import { formatDate } from "@/lib/dates";
 import { paginateItems } from "@/lib/pagination";
@@ -22,14 +23,18 @@ export const dynamic = "force-dynamic";
 type CustomersPageProps = {
   searchParams: Promise<{
     search?: string;
+    status?: "active" | "inactive" | "";
     page?: string;
     error?: string;
   }>;
 };
 
 export default async function CustomersPage({ searchParams }: CustomersPageProps) {
-  const { search = "", page, error } = await searchParams;
-  const [customers, session] = await Promise.all([listCustomers(search), requireAuthenticatedStaff()]);
+  const { search = "", status = "active", page, error } = await searchParams;
+  const [customers, session] = await Promise.all([
+    listCustomers(search, { status }),
+    requireAuthenticatedStaff(),
+  ]);
   const pagination = paginateItems(customers, page);
   const canManageCustomers = session.capabilities.includes("customers:write");
 
@@ -49,15 +54,27 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
 
       <DataTableCard
         title="Customer directory"
-        description={`${pagination.totalItems} record${pagination.totalItems === 1 ? "" : "s"} in the workshop database.`}
+        description={`${pagination.totalItems} ${formatCustomerDirectoryLabel(status, pagination.totalItems)} in the workshop database.`}
         toolbar={
           <DataTableFilters
-            key={search}
-            className="md:grid md:grid-cols-[minmax(0,1fr)]"
+            key={`${search}:${status}`}
+            className="lg:grid lg:grid-cols-[minmax(0,1fr)_200px]"
             search={{
               value: search,
               placeholder: "Search customer, mobile number, or email",
             }}
+            filters={[
+              {
+                type: "select",
+                name: "status",
+                value: status,
+                options: [
+                  { value: "active", label: "Active" },
+                  { value: "inactive", label: "Inactive / merged" },
+                  { value: "", label: "All statuses" },
+                ],
+              },
+            ]}
           />
         }
         footer={
@@ -82,16 +99,16 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
             ) : null}
           />
         ) : (
-          <DataTableScroll>
-            <Table>
+          <DataTableScroll minWidthClassName="min-w-[52rem]">
+            <Table className="table-fixed">
               <TableHeader>
                 <TableRow>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  {canManageCustomers ? <TableHead className="text-right">Actions</TableHead> : null}
+                  <TableHead className="w-[34%]">Customer</TableHead>
+                  <TableHead className="w-[12%]">Type</TableHead>
+                  <TableHead className="w-[24%]">Contact</TableHead>
+                  <TableHead className="w-[12%]">Status</TableHead>
+                  <TableHead className="w-[12%]">Created</TableHead>
+                  {canManageCustomers ? <TableHead className="w-14 text-right">Actions</TableHead> : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -99,11 +116,13 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
                   <TableRow key={customer.id}>
                     <TableCell>
                       <TableCellLink href={`/customers/${customer.id}`}>
-                        <div className="space-y-1">
-                          <p className="font-medium text-foreground transition-colors group-hover:text-primary">
+                        <div className="min-w-0 space-y-1">
+                          <p className="truncate font-medium text-foreground transition-colors group-hover:text-primary">
                             {customer.displayName}
                           </p>
-                          <p className="text-xs text-muted-foreground">{customer.email ?? "No email"}</p>
+                          {customer.email ? (
+                            <p className="truncate text-xs text-muted-foreground">{customer.email}</p>
+                          ) : null}
                         </div>
                       </TableCellLink>
                     </TableCell>
@@ -117,7 +136,9 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
                     </TableCell>
                     <TableCell>
                       <TableCellLink href={`/customers/${customer.id}`} className="text-foreground">
-                        {customer.contactNumber ?? "No contact number"}
+                        <span className="block truncate">
+                          {formatCustomerContactNumbers(customer)}
+                        </span>
                       </TableCellLink>
                     </TableCell>
                     <TableCell>
@@ -128,7 +149,7 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
                       </TableCellLink>
                     </TableCell>
                     <TableCell>
-                      <TableCellLink href={`/customers/${customer.id}`} className="text-foreground">
+                      <TableCellLink href={`/customers/${customer.id}`} className="whitespace-nowrap text-foreground">
                         {formatDate(customer.createdAt)}
                       </TableCellLink>
                     </TableCell>
@@ -149,4 +170,33 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
       </DataTableCard>
     </div>
   );
+}
+
+function formatCustomerContactNumbers(customer: CustomerListItem) {
+  if (!customer.contactNumber && !customer.contactNumberSecondary) {
+    return "—";
+  }
+
+  if (customer.contactNumber && customer.contactNumberSecondary) {
+    return `${customer.contactNumber} · ${customer.contactNumberSecondary}`;
+  }
+
+  return customer.contactNumber ?? customer.contactNumberSecondary ?? "—";
+}
+
+function formatCustomerDirectoryLabel(
+  status: "active" | "inactive" | "",
+  totalItems: number,
+) {
+  const noun = totalItems === 1 ? "record" : "records";
+
+  if (status === "inactive") {
+    return `inactive ${noun}`;
+  }
+
+  if (status === "") {
+    return noun;
+  }
+
+  return `active ${noun}`;
 }

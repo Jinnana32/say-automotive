@@ -82,6 +82,7 @@ async function saveCustomer(formData: FormData): Promise<FormActionState> {
     last_name: values.lastName || null,
     company_name: values.companyName || null,
     contact_number: values.contactNumber || null,
+    contact_number_secondary: values.contactNumberSecondary || null,
     email: values.email || null,
     address: values.address || null,
     notes: values.notes || null,

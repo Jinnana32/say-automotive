@@ -70,6 +70,11 @@ export default async function CustomerDetailPage({ params }: CustomerDetailPageP
           hint={customer.email ?? "No email on file"}
         />
         <DetailSummaryItem
+          label="Secondary contact"
+          value={customer.contactNumberSecondary ?? "No secondary contact number"}
+          hint="Optional backup number for this customer."
+        />
+        <DetailSummaryItem
           label="Fleet / company"
           value={customer.companyName ?? "No company or fleet"}
           hint={`${customer.vehicles.length} linked vehicle${customer.vehicles.length === 1 ? "" : "s"}`}

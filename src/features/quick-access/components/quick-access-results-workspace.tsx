@@ -183,7 +183,7 @@ function QuickAccessRecordPanel({
               <DetailSummaryItem
                 label="Linked customer"
                 value={record.customer.displayName}
-                hint={`${record.customer.contactNumber ?? "No contact number"} · ${record.customer.email ?? "No email on file"}`}
+                hint={`${formatQuickAccessContact(record.customer)} · ${record.customer.email ?? "No email on file"}`}
               />
               <DetailSummaryItem
                 label="Plate number"
@@ -243,6 +243,11 @@ function QuickAccessRecordPanel({
                 label="Primary contact"
                 value={record.customer.contactNumber ?? "No contact number"}
                 hint={record.customer.email ?? "No email on file"}
+              />
+              <DetailSummaryItem
+                label="Secondary contact"
+                value={record.customer.contactNumberSecondary ?? "No secondary contact number"}
+                hint="Optional backup number for this customer."
               />
               <DetailSummaryItem
                 label="Address"
@@ -315,6 +320,11 @@ function QuickAccessRecordPanel({
                 label="Primary contact"
                 value={record.customer.contactNumber ?? "No contact number"}
                 hint={record.customer.email ?? "No email on file"}
+              />
+              <DetailSummaryItem
+                label="Secondary contact"
+                value={record.customer.contactNumberSecondary ?? "No secondary contact number"}
+                hint="Optional backup number for this customer."
               />
               <DetailSummaryItem
                 label="Address"
@@ -592,6 +602,21 @@ function getQuickAccessQuotationHref(customerId: string, vehicleId?: string) {
 
 function formatMileage(value: number | null) {
   return value !== null ? `${value.toLocaleString()} km` : "Mileage not set";
+}
+
+function formatQuickAccessContact(customer: {
+  contactNumber: string | null;
+  contactNumberSecondary: string | null;
+}) {
+  if (!customer.contactNumber && !customer.contactNumberSecondary) {
+    return "No contact number";
+  }
+
+  if (customer.contactNumber && customer.contactNumberSecondary) {
+    return `${customer.contactNumber} · ${customer.contactNumberSecondary}`;
+  }
+
+  return customer.contactNumber ?? customer.contactNumberSecondary ?? "No contact number";
 }
 
 function toTitleCase(value: string) {

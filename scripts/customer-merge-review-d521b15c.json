@@ -1,0 +1,2644 @@
+{
+  "summary": {
+    "branchId": "d521b15c-c639-4c61-a1ee-6e700bb14f18",
+    "generatedAt": "2026-07-14T01:10:51.995Z",
+    "groupCount": 54,
+    "likelySame": 27,
+    "reviewNeeded": 27,
+    "customersInvolved": 119,
+    "vehiclesInvolved": 119
+  },
+  "groups": [
+    {
+      "groupNo": 1,
+      "displayName": "Philippine Ports Authority",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "7938527e-ffad-484f-bb8f-12fbd5631933",
+      "mergeCustomerIds": [
+        "22468ecb-754a-43ff-aec8-2b73e76c43b1",
+        "63353913-d1da-4c0b-89a6-95353d884e6d",
+        "d3727dc1-f73d-40cb-b0bb-b0f17a0bde7c",
+        "0b2d8615-8dc4-4583-bf37-9f921f93c264",
+        "6468e4e5-5ce1-4f94-b664-44708b1743c4",
+        "178f9706-9341-4353-b056-b2c5db700de5"
+      ],
+      "customers": [
+        {
+          "id": "7938527e-ffad-484f-bb8f-12fbd5631933",
+          "role": "KEEP",
+          "score": 118,
+          "phone": null,
+          "address": "Brgy. Loboc, Lapuz, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Toyota Pick -up (2003) · SGF 511",
+            "Toyota Hilux (2020) · SNJ 2941",
+            "Toyota Hilux (2022) · SND 7260",
+            "Toyota Revo (2013) · SGF 248",
+            "Isuzu Manlift (2021) · 131205"
+          ],
+          "vehicleCount": 5,
+          "quotationCount": 9,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "22468ecb-754a-43ff-aec8-2b73e76c43b1",
+          "role": "MERGE",
+          "score": 96,
+          "phone": null,
+          "address": "Lapuz, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Toyota Revo (2000) · SGF 844",
+            "Toyota Hilux (2018) · SAB 4358"
+          ],
+          "vehicleCount": 2,
+          "quotationCount": 11,
+          "jobOrderCount": 3
+        },
+        {
+          "id": "63353913-d1da-4c0b-89a6-95353d884e6d",
+          "role": "MERGE",
+          "score": 94,
+          "phone": null,
+          "address": "Lapaz, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Mitsubishi Adventure (2014) · SHZ 189",
+            "Toyota Avanza (2010) · NQX749"
+          ],
+          "vehicleCount": 2,
+          "quotationCount": 17,
+          "jobOrderCount": 2
+        },
+        {
+          "id": "d3727dc1-f73d-40cb-b0bb-b0f17a0bde7c",
+          "role": "MERGE",
+          "score": 86,
+          "phone": null,
+          "address": "Brgy. Loboc, Lapaz, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Toyota Revo (2003) · SGF 298",
+            "Toyota Avanza (2010) · PEQ 166"
+          ],
+          "vehicleCount": 2,
+          "quotationCount": 7,
+          "jobOrderCount": 1
+        },
+        {
+          "id": "0b2d8615-8dc4-4583-bf37-9f921f93c264",
+          "role": "MERGE",
+          "score": 80,
+          "phone": null,
+          "address": "Loboc, Lapaz, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Toyota Grandia (2017) · SAB 4376"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 7,
+          "jobOrderCount": 3
+        },
+        {
+          "id": "6468e4e5-5ce1-4f94-b664-44708b1743c4",
+          "role": "MERGE",
+          "score": 64,
+          "phone": null,
+          "address": "Brgy. Loboc Lapuz, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Toyota Revo (2011) · SGF 2011"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "178f9706-9341-4353-b056-b2c5db700de5",
+          "role": "MERGE",
+          "score": 64,
+          "phone": null,
+          "address": "Brgy.Loboc,Lapuz, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Isuzu DMax (2021) · SNI 4414"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 7,
+        "vehicles": 14,
+        "quotations": 55,
+        "jobOrders": 9
+      }
+    },
+    {
+      "groupNo": 2,
+      "displayName": "Bebbs Nellas",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "20fa3276-0dfe-413c-9244-4d8c9301f00a",
+      "mergeCustomerIds": [
+        "57974bf0-a87d-45e0-97ca-71a253c22fa6",
+        "b2503e2b-311c-43f3-80f3-fa9611c758c8"
+      ],
+      "customers": [
+        {
+          "id": "20fa3276-0dfe-413c-9244-4d8c9301f00a",
+          "role": "KEEP",
+          "score": 76,
+          "phone": null,
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Honda Civic (1997) · XMV 778"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 7,
+          "jobOrderCount": 1
+        },
+        {
+          "id": "57974bf0-a87d-45e0-97ca-71a253c22fa6",
+          "role": "MERGE",
+          "score": 70,
+          "phone": null,
+          "address": "Mandurriao,Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Toyota Corolla (2009) · ZRA221"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 3,
+          "jobOrderCount": 2
+        },
+        {
+          "id": "b2503e2b-311c-43f3-80f3-fa9611c758c8",
+          "role": "MERGE",
+          "score": 10,
+          "phone": null,
+          "address": null,
+          "status": "active",
+          "vehicles": [],
+          "vehicleCount": 0,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 3,
+        "vehicles": 2,
+        "quotations": 10,
+        "jobOrders": 3
+      }
+    },
+    {
+      "groupNo": 3,
+      "displayName": "Civil Service Commission",
+      "confidence": "review-needed",
+      "reason": "Same name but different phone numbers — confirm before merge",
+      "keepCustomerId": "c60ec7af-dde3-49a0-a1ca-44e925a05daf",
+      "mergeCustomerIds": [
+        "9ec647c5-b4a3-426c-b14f-e1c3d7118cce",
+        "57fd96dd-4f99-439c-8532-e62b7d12e054"
+      ],
+      "customers": [
+        {
+          "id": "c60ec7af-dde3-49a0-a1ca-44e925a05daf",
+          "role": "KEEP",
+          "score": 220,
+          "phone": "09705116712",
+          "address": "Iloilo city",
+          "status": "active",
+          "vehicles": [
+            "Isuzu Crosswind (2009) · SJP 286",
+            "Toyota Vios (2020) · 060101",
+            "Mitsubishi Adventure (2017) · 060102",
+            "Toyota Hi-ace (2018) · SAA 7189"
+          ],
+          "vehicleCount": 4,
+          "quotationCount": 28,
+          "jobOrderCount": 5
+        },
+        {
+          "id": "9ec647c5-b4a3-426c-b14f-e1c3d7118cce",
+          "role": "MERGE",
+          "score": 150,
+          "phone": "09173141067",
+          "address": "Mandurriao,Iloilo City",
+          "status": "active",
+          "vehicles": [],
+          "vehicleCount": 0,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "57fd96dd-4f99-439c-8532-e62b7d12e054",
+          "role": "MERGE",
+          "score": 50,
+          "phone": null,
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [],
+          "vehicleCount": 0,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 3,
+        "vehicles": 4,
+        "quotations": 28,
+        "jobOrders": 5
+      }
+    },
+    {
+      "groupNo": 4,
+      "displayName": "Dennis Legarde",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "8102dd2d-c31d-4b4f-ae14-33126eebfd49",
+      "mergeCustomerIds": [
+        "164405b1-adb5-4514-bed9-ab06a47c9a1a",
+        "4f52c7c3-65ca-48c0-9893-6a8db0aadc77"
+      ],
+      "customers": [
+        {
+          "id": "8102dd2d-c31d-4b4f-ae14-33126eebfd49",
+          "role": "KEEP",
+          "score": 166,
+          "phone": "09183685259",
+          "address": "anaros",
+          "status": "active",
+          "vehicles": [
+            "Ford Everest (2018) · FAA-5899"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 1
+        },
+        {
+          "id": "164405b1-adb5-4514-bed9-ab06a47c9a1a",
+          "role": "MERGE",
+          "score": 64,
+          "phone": null,
+          "address": "Anaros Subd., Mandurriao,Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Ford Everest (2017) · CBA 123"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "4f52c7c3-65ca-48c0-9893-6a8db0aadc77",
+          "role": "MERGE",
+          "score": 64,
+          "phone": null,
+          "address": "Mandurriao,Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Ford Everest (2016) · FAA 5899"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 3,
+        "vehicles": 3,
+        "quotations": 6,
+        "jobOrders": 1
+      }
+    },
+    {
+      "groupNo": 5,
+      "displayName": "Gwyn Sorongon",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "df6fa5cf-9dca-4b9f-8c35-6135b1631d5f",
+      "mergeCustomerIds": [
+        "5ac7ad51-627c-4518-86f1-3817c3636a41",
+        "280d1048-f742-4ff9-a810-02af3a057ac0"
+      ],
+      "customers": [
+        {
+          "id": "df6fa5cf-9dca-4b9f-8c35-6135b1631d5f",
+          "role": "KEEP",
+          "score": 172,
+          "phone": "09988635258",
+          "address": "Jaro,Iloilo",
+          "status": "active",
+          "vehicles": [
+            "Toyota Avanza (2019) · GAL 4886"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 4,
+          "jobOrderCount": 2
+        },
+        {
+          "id": "5ac7ad51-627c-4518-86f1-3817c3636a41",
+          "role": "MERGE",
+          "score": 72,
+          "phone": null,
+          "address": "Jaro, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Toyota Fortuner (2021) · NFQ 4119"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 4,
+          "jobOrderCount": 2
+        },
+        {
+          "id": "280d1048-f742-4ff9-a810-02af3a057ac0",
+          "role": "MERGE",
+          "score": 68,
+          "phone": null,
+          "address": "Tabuc Suba, Jaro, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Toyota Rush (2018) · NCR 9982"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 3,
+          "jobOrderCount": 1
+        }
+      ],
+      "totals": {
+        "customers": 3,
+        "vehicles": 3,
+        "quotations": 11,
+        "jobOrders": 5
+      }
+    },
+    {
+      "groupNo": 6,
+      "displayName": "Levantare Laboratory",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "fa64eb5c-e24d-4765-9406-5c173c31c362",
+      "mergeCustomerIds": [
+        "9d182c04-1734-4769-97b3-175564d82017",
+        "028b3648-0b28-4c66-94dc-7629fe2d6d08"
+      ],
+      "customers": [
+        {
+          "id": "fa64eb5c-e24d-4765-9406-5c173c31c362",
+          "role": "KEEP",
+          "score": 220,
+          "phone": "09988505581",
+          "address": "Jaro, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Hyundai Reina (2020) · FAJ 9359",
+            "Hyundai EON (2017) · FAA 6665",
+            "Nissan Navarra (2020) · FAJ 9267"
+          ],
+          "vehicleCount": 3,
+          "quotationCount": 44,
+          "jobOrderCount": 14
+        },
+        {
+          "id": "9d182c04-1734-4769-97b3-175564d82017",
+          "role": "MERGE",
+          "score": 144,
+          "phone": "09988505581",
+          "address": null,
+          "status": "active",
+          "vehicles": [
+            "Honda Brio (2024) · FAR 7203"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 15,
+          "jobOrderCount": 2
+        },
+        {
+          "id": "028b3648-0b28-4c66-94dc-7629fe2d6d08",
+          "role": "MERGE",
+          "score": 102,
+          "phone": null,
+          "address": "Jaro, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Hyundai Creta (2023) · FAO 4254",
+            "Hyundai Accent (2017) · FAB 8640"
+          ],
+          "vehicleCount": 2,
+          "quotationCount": 12,
+          "jobOrderCount": 6
+        }
+      ],
+      "totals": {
+        "customers": 3,
+        "vehicles": 6,
+        "quotations": 71,
+        "jobOrders": 22
+      }
+    },
+    {
+      "groupNo": 7,
+      "displayName": "Noel Adricula",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "3c70a9da-064c-4972-9d05-1da990440584",
+      "mergeCustomerIds": [
+        "da44592b-8bd3-4a50-a9ff-31c083ddce36",
+        "7d30d96f-1f6f-489d-ba51-79c69f2bd3e9"
+      ],
+      "customers": [
+        {
+          "id": "3c70a9da-064c-4972-9d05-1da990440584",
+          "role": "KEEP",
+          "score": 172,
+          "phone": "09128823323",
+          "address": "Mandurriao,Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Honda Civic (2002) · FFA 178"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 6,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "da44592b-8bd3-4a50-a9ff-31c083ddce36",
+          "role": "MERGE",
+          "score": 70,
+          "phone": null,
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Mitsubishi Expander (2018) · NFT 3587"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 4,
+          "jobOrderCount": 1
+        },
+        {
+          "id": "7d30d96f-1f6f-489d-ba51-79c69f2bd3e9",
+          "role": "MERGE",
+          "score": 68,
+          "phone": null,
+          "address": "Mandurriao,Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Isuzu MUX (2015) · FAL 9065"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 3,
+          "jobOrderCount": 1
+        }
+      ],
+      "totals": {
+        "customers": 3,
+        "vehicles": 3,
+        "quotations": 13,
+        "jobOrders": 2
+      }
+    },
+    {
+      "groupNo": 8,
+      "displayName": "Althea Capalla",
+      "confidence": "review-needed",
+      "reason": "Same name but different phone numbers — confirm before merge",
+      "keepCustomerId": "25443603-6ce0-40cf-ae88-251d459d4fcb",
+      "mergeCustomerIds": [
+        "5ec94d8c-06c1-4451-a1cf-2b93aa2a80cc"
+      ],
+      "customers": [
+        {
+          "id": "25443603-6ce0-40cf-ae88-251d459d4fcb",
+          "role": "KEEP",
+          "score": 172,
+          "phone": "09256789420",
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Mazda CX-7 (2007) · FAG 406"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 5,
+          "jobOrderCount": 1
+        },
+        {
+          "id": "5ec94d8c-06c1-4451-a1cf-2b93aa2a80cc",
+          "role": "MERGE",
+          "score": 164,
+          "phone": "09955836622",
+          "address": "Mandurriao,Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Subaru Forester (2018) · GAW 9038"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 7,
+        "jobOrders": 1
+      }
+    },
+    {
+      "groupNo": 9,
+      "displayName": "Annabelle Tabares",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "d4951bc5-44b4-474a-83fd-eee26a98326e",
+      "mergeCustomerIds": [
+        "ffa9dbcf-712e-4d81-9b1f-355f8e353cc2"
+      ],
+      "customers": [
+        {
+          "id": "d4951bc5-44b4-474a-83fd-eee26a98326e",
+          "role": "KEEP",
+          "score": 80,
+          "phone": null,
+          "address": "San Jose, San Miguel, Iloilo",
+          "status": "active",
+          "vehicles": [
+            "Chevrolet Spin (2015) · ABM 3100"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 17,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "ffa9dbcf-712e-4d81-9b1f-355f8e353cc2",
+          "role": "MERGE",
+          "score": 50,
+          "phone": null,
+          "address": "San Jose ,San Miguel ,Iloilo",
+          "status": "active",
+          "vehicles": [],
+          "vehicleCount": 0,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 1,
+        "quotations": 17,
+        "jobOrders": 0
+      }
+    },
+    {
+      "groupNo": 10,
+      "displayName": "Anne Oquias",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "a83ab43e-2a02-427c-a6d2-17c3b4912713",
+      "mergeCustomerIds": [
+        "aae838fd-3f13-4cd4-a4e0-01fe34364b1d"
+      ],
+      "customers": [
+        {
+          "id": "a83ab43e-2a02-427c-a6d2-17c3b4912713",
+          "role": "KEEP",
+          "score": 150,
+          "phone": "09081940839",
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [],
+          "vehicleCount": 0,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "aae838fd-3f13-4cd4-a4e0-01fe34364b1d",
+          "role": "MERGE",
+          "score": 48,
+          "phone": null,
+          "address": null,
+          "status": "active",
+          "vehicles": [
+            "Nissan Almera (2018) · FAD 3632"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 10,
+          "jobOrderCount": 4
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 1,
+        "quotations": 10,
+        "jobOrders": 4
+      }
+    },
+    {
+      "groupNo": 11,
+      "displayName": "Ariel Longanes",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "903fa8b8-dc0d-4a64-a73e-206b05992775",
+      "mergeCustomerIds": [
+        "0f0a335e-09c5-4ac3-8048-543326d0eff3"
+      ],
+      "customers": [
+        {
+          "id": "903fa8b8-dc0d-4a64-a73e-206b05992775",
+          "role": "KEEP",
+          "score": 176,
+          "phone": "FAI 8180",
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Toyota Rush (2022) · FAI 8180"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 5,
+          "jobOrderCount": 3
+        },
+        {
+          "id": "0f0a335e-09c5-4ac3-8048-543326d0eff3",
+          "role": "MERGE",
+          "score": 50,
+          "phone": null,
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [],
+          "vehicleCount": 0,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 1,
+        "quotations": 5,
+        "jobOrders": 3
+      }
+    },
+    {
+      "groupNo": 12,
+      "displayName": "Arthur Zambrano",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "d2967db5-d05c-4369-9399-d9b6b7958c77",
+      "mergeCustomerIds": [
+        "65ae6ece-dba6-4110-b168-1d9f3df6797b"
+      ],
+      "customers": [
+        {
+          "id": "d2967db5-d05c-4369-9399-d9b6b7958c77",
+          "role": "KEEP",
+          "score": 180,
+          "phone": "09626884330",
+          "address": "Lumina Pavia, Iloilo",
+          "status": "active",
+          "vehicles": [
+            "Hyundai Eon (2014) · AAD 7523"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 12,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "65ae6ece-dba6-4110-b168-1d9f3df6797b",
+          "role": "MERGE",
+          "score": 64,
+          "phone": null,
+          "address": "Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Honda Brio (2017) · NAP 1171"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 14,
+        "jobOrders": 0
+      }
+    },
+    {
+      "groupNo": 13,
+      "displayName": "Atty. Bernard Dofitas",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "688f04ea-a92c-49fd-b92c-6948707563a1",
+      "mergeCustomerIds": [
+        "5c9edadf-26c9-4dd7-b3e2-03285810716e"
+      ],
+      "customers": [
+        {
+          "id": "688f04ea-a92c-49fd-b92c-6948707563a1",
+          "role": "KEEP",
+          "score": 74,
+          "phone": null,
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Isuzu Dmax (2012) · FHS 226"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 6,
+          "jobOrderCount": 1
+        },
+        {
+          "id": "5c9edadf-26c9-4dd7-b3e2-03285810716e",
+          "role": "MERGE",
+          "score": 66,
+          "phone": null,
+          "address": "NHA , Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Toyota Fortuner (2016) · FAI 1967"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 1
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 8,
+        "jobOrders": 2
+      }
+    },
+    {
+      "groupNo": 14,
+      "displayName": "Augusto De los Santos",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "1361bcf9-4d61-4d7f-b07f-18f4147fefe0",
+      "mergeCustomerIds": [
+        "b7a43382-1c46-45b7-8d27-0d70ae864309"
+      ],
+      "customers": [
+        {
+          "id": "1361bcf9-4d61-4d7f-b07f-18f4147fefe0",
+          "role": "KEEP",
+          "score": 98,
+          "phone": null,
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Mitsubishi Lancer (1998) · FDZ 745",
+            "Honda Civic (2005) · FED 148",
+            "Toyota Yaris (2008) · ZJM 159"
+          ],
+          "vehicleCount": 3,
+          "quotationCount": 7,
+          "jobOrderCount": 2
+        },
+        {
+          "id": "b7a43382-1c46-45b7-8d27-0d70ae864309",
+          "role": "MERGE",
+          "score": 76,
+          "phone": null,
+          "address": "Mandurriao, Iloilo Cuty",
+          "status": "active",
+          "vehicles": [
+            "Ford Everest (2004) · FFL 156"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 6,
+          "jobOrderCount": 2
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 4,
+        "quotations": 13,
+        "jobOrders": 4
+      }
+    },
+    {
+      "groupNo": 15,
+      "displayName": "Bernardino Valera",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "db5b66da-9718-4e24-b427-21866319f546",
+      "mergeCustomerIds": [
+        "3d20c10a-97b6-4f74-9f96-0cdcd94c0621"
+      ],
+      "customers": [
+        {
+          "id": "db5b66da-9718-4e24-b427-21866319f546",
+          "role": "KEEP",
+          "score": 78,
+          "phone": null,
+          "address": "Negros Occidental",
+          "status": "active",
+          "vehicles": [
+            "Mitsubishi Space Gear (2004) · FES805"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 9,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "3d20c10a-97b6-4f74-9f96-0cdcd94c0621",
+          "role": "MERGE",
+          "score": 50,
+          "phone": null,
+          "address": "Monterosa Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [],
+          "vehicleCount": 0,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 1,
+        "quotations": 9,
+        "jobOrders": 0
+      }
+    },
+    {
+      "groupNo": 16,
+      "displayName": "Buenaventura Montalban",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "0e6c36cb-55c5-480a-90cc-6950643649e3",
+      "mergeCustomerIds": [
+        "73a2c43a-b96f-4bef-a4ab-5e0f6d3acde1"
+      ],
+      "customers": [
+        {
+          "id": "0e6c36cb-55c5-480a-90cc-6950643649e3",
+          "role": "KEEP",
+          "score": 164,
+          "phone": "09694576179",
+          "address": "Deca homes, Pavia ,Iloilo",
+          "status": "active",
+          "vehicles": [
+            "NIssan Frontier Navarra (2013) · FAU 293"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 1,
+          "jobOrderCount": 1
+        },
+        {
+          "id": "73a2c43a-b96f-4bef-a4ab-5e0f6d3acde1",
+          "role": "MERGE",
+          "score": 82,
+          "phone": null,
+          "address": "Deca homes, Pavia ,Iloilo",
+          "status": "active",
+          "vehicles": [
+            "BMW GT (2018) · NBV 3332",
+            "Isuzu MUX (2015) · ABM 4308"
+          ],
+          "vehicleCount": 2,
+          "quotationCount": 4,
+          "jobOrderCount": 2
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 3,
+        "quotations": 5,
+        "jobOrders": 3
+      }
+    },
+    {
+      "groupNo": 17,
+      "displayName": "CC Car Rental",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "5492db67-dd81-470a-9eaa-e938d2eb9956",
+      "mergeCustomerIds": [
+        "2ee997b0-d949-4da5-a4f6-536ccd5db442"
+      ],
+      "customers": [
+        {
+          "id": "5492db67-dd81-470a-9eaa-e938d2eb9956",
+          "role": "KEEP",
+          "score": 170,
+          "phone": "09397925015",
+          "address": "Jaro, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "MG ( Blue) ZS (2019) · MAK 8863"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 3,
+          "jobOrderCount": 2
+        },
+        {
+          "id": "2ee997b0-d949-4da5-a4f6-536ccd5db442",
+          "role": "MERGE",
+          "score": 86,
+          "phone": null,
+          "address": "Jaro, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Mitsubishi Mirage (2023) · FAO 4341",
+            "Mitsubishi Strada (2020) · FAF 3222"
+          ],
+          "vehicleCount": 2,
+          "quotationCount": 6,
+          "jobOrderCount": 2
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 3,
+        "quotations": 9,
+        "jobOrders": 4
+      }
+    },
+    {
+      "groupNo": 18,
+      "displayName": "Dandy Jano",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "737bb324-1f44-4c2b-a307-929d281d53c1",
+      "mergeCustomerIds": [
+        "b4b88e08-91d3-4eb5-9bff-cd810defade0"
+      ],
+      "customers": [
+        {
+          "id": "737bb324-1f44-4c2b-a307-929d281d53c1",
+          "role": "KEEP",
+          "score": 170,
+          "phone": "09946773655",
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Nissan Terra (2015) · NEJ 8690"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 4,
+          "jobOrderCount": 1
+        },
+        {
+          "id": "b4b88e08-91d3-4eb5-9bff-cd810defade0",
+          "role": "MERGE",
+          "score": 66,
+          "phone": null,
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Ford Ranger (2020) · FAN 4156"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 1
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 6,
+        "jobOrders": 2
+      }
+    },
+    {
+      "groupNo": 19,
+      "displayName": "Danny Locsin",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "f43b0c81-ab9e-4266-bbe3-2d2b383a92cc",
+      "mergeCustomerIds": [
+        "b0437384-8fd6-489a-b69f-6f982a4eee13"
+      ],
+      "customers": [
+        {
+          "id": "f43b0c81-ab9e-4266-bbe3-2d2b383a92cc",
+          "role": "KEEP",
+          "score": 50,
+          "phone": null,
+          "address": "Imperial 4 Subd., Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [],
+          "vehicleCount": 0,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "b0437384-8fd6-489a-b69f-6f982a4eee13",
+          "role": "MERGE",
+          "score": 24,
+          "phone": null,
+          "address": null,
+          "status": "active",
+          "vehicles": [
+            "Hyundai Reina (2019) · FAE 9857"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 1,
+        "quotations": 2,
+        "jobOrders": 0
+      }
+    },
+    {
+      "groupNo": 20,
+      "displayName": "Dante Infante",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "5ee94453-06d3-47da-94a2-3e1629e4e8b7",
+      "mergeCustomerIds": [
+        "fda7eb9b-3655-43ab-ba1f-ae37c13485b1"
+      ],
+      "customers": [
+        {
+          "id": "5ee94453-06d3-47da-94a2-3e1629e4e8b7",
+          "role": "KEEP",
+          "score": 70,
+          "phone": null,
+          "address": "Jaro, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Nissan Livina (2025) · FAP 8010"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 4,
+          "jobOrderCount": 1
+        },
+        {
+          "id": "fda7eb9b-3655-43ab-ba1f-ae37c13485b1",
+          "role": "MERGE",
+          "score": 68,
+          "phone": null,
+          "address": "Jaro,Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Nissan Navarra (2019) · FAH 5353"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 4,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 8,
+        "jobOrders": 1
+      }
+    },
+    {
+      "groupNo": 21,
+      "displayName": "Eddie Quimba",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "6a7db713-1ea9-4254-b58c-9998d13d34cc",
+      "mergeCustomerIds": [
+        "58ac30f9-89e5-4cb6-9bf9-2eda1dd61eae"
+      ],
+      "customers": [
+        {
+          "id": "6a7db713-1ea9-4254-b58c-9998d13d34cc",
+          "role": "KEEP",
+          "score": 82,
+          "phone": null,
+          "address": "Banker\\'s Village, Jaro, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Toyota Fortuner (2019) · FAE 9732",
+            "Ford Ranger (2020) · FAG 3481"
+          ],
+          "vehicleCount": 2,
+          "quotationCount": 4,
+          "jobOrderCount": 2
+        },
+        {
+          "id": "58ac30f9-89e5-4cb6-9bf9-2eda1dd61eae",
+          "role": "MERGE",
+          "score": 70,
+          "phone": null,
+          "address": "Jaro, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Toyota Hi Ace Grandia (2010) · UOA 619"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 5,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 3,
+        "quotations": 9,
+        "jobOrders": 2
+      }
+    },
+    {
+      "groupNo": 22,
+      "displayName": "Francisco Fajarillo",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "1fc2d790-b471-4e2f-aee0-624e6e812229",
+      "mergeCustomerIds": [
+        "4f3396fb-fed3-4347-87ee-b405ba158465"
+      ],
+      "customers": [
+        {
+          "id": "1fc2d790-b471-4e2f-aee0-624e6e812229",
+          "role": "KEEP",
+          "score": 172,
+          "phone": "09693046956",
+          "address": "Miag-ao, Iloilo",
+          "status": "active",
+          "vehicles": [
+            "Toyota Lucida (1991) · RBT 832"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 4,
+          "jobOrderCount": 2
+        },
+        {
+          "id": "4f3396fb-fed3-4347-87ee-b405ba158465",
+          "role": "MERGE",
+          "score": 64,
+          "phone": null,
+          "address": "Miag-ao, Iloilo",
+          "status": "active",
+          "vehicles": [
+            "Toyota Wigo (2021) · FAI7842"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 6,
+        "jobOrders": 2
+      }
+    },
+    {
+      "groupNo": 23,
+      "displayName": "Gerardo Espares",
+      "confidence": "review-needed",
+      "reason": "Same name but different phone numbers — confirm before merge",
+      "keepCustomerId": "96b847d8-300f-4983-b417-5a05e88ef085",
+      "mergeCustomerIds": [
+        "da4e8a8e-2863-471e-ac3e-15d2e63af450"
+      ],
+      "customers": [
+        {
+          "id": "96b847d8-300f-4983-b417-5a05e88ef085",
+          "role": "KEEP",
+          "score": 174,
+          "phone": "09773354398",
+          "address": "San Jose Antique",
+          "status": "active",
+          "vehicles": [
+            "Toyota Avanza (2017) · NAD 2089"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 6,
+          "jobOrderCount": 1
+        },
+        {
+          "id": "da4e8a8e-2863-471e-ac3e-15d2e63af450",
+          "role": "MERGE",
+          "score": 168,
+          "phone": "09286920477",
+          "address": "San Jose, Antique",
+          "status": "active",
+          "vehicles": [
+            "Toyota Innova (2012) · UQL960"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 4,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 10,
+        "jobOrders": 1
+      }
+    },
+    {
+      "groupNo": 24,
+      "displayName": "Girlie Mabunay Teruel",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "5ebb810d-b610-404d-ab1e-dc88a195afa9",
+      "mergeCustomerIds": [
+        "88e92227-3193-451a-997a-ccc4307fc614"
+      ],
+      "customers": [
+        {
+          "id": "5ebb810d-b610-404d-ab1e-dc88a195afa9",
+          "role": "KEEP",
+          "score": 64,
+          "phone": null,
+          "address": "Mandurriao,Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Nissan Sentra (2006) · FFY275"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "88e92227-3193-451a-997a-ccc4307fc614",
+          "role": "MERGE",
+          "score": 64,
+          "phone": null,
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "NIssan Sentra (2006) · FFY 275"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 4,
+        "jobOrders": 0
+      }
+    },
+    {
+      "groupNo": 25,
+      "displayName": "Gry 88",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "6b762786-902c-49ec-b96f-36bb6a8ea2cc",
+      "mergeCustomerIds": [
+        "e68ed82b-10b7-473a-bc8c-6dac58988be0"
+      ],
+      "customers": [
+        {
+          "id": "6b762786-902c-49ec-b96f-36bb6a8ea2cc",
+          "role": "KEEP",
+          "score": 172,
+          "phone": "09285069570",
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Toyota Hi-Ace Commuter (2011) · FHD 727"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 6,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "e68ed82b-10b7-473a-bc8c-6dac58988be0",
+          "role": "MERGE",
+          "score": 70,
+          "phone": null,
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Mitsubishi L300 (1996) · UNA 179"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 4,
+          "jobOrderCount": 1
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 10,
+        "jobOrders": 1
+      }
+    },
+    {
+      "groupNo": 26,
+      "displayName": "Herminio Gonzaga",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "c61b42bb-87db-4c1b-a2d2-dd45b27e6fb4",
+      "mergeCustomerIds": [
+        "a3f459a7-2678-4d54-b4b7-44ec148b56e7"
+      ],
+      "customers": [
+        {
+          "id": "c61b42bb-87db-4c1b-a2d2-dd45b27e6fb4",
+          "role": "KEEP",
+          "score": 70,
+          "phone": null,
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Honda City (2023) · FAH 1074"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 4,
+          "jobOrderCount": 1
+        },
+        {
+          "id": "a3f459a7-2678-4d54-b4b7-44ec148b56e7",
+          "role": "MERGE",
+          "score": 68,
+          "phone": null,
+          "address": "Mandurriao,Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Hyundai H-100 (2020) · NFW 3625"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 4,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 8,
+        "jobOrders": 1
+      }
+    },
+    {
+      "groupNo": 27,
+      "displayName": "Jed Mendoza",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "97113014-5b08-4f55-a683-be92df852cfa",
+      "mergeCustomerIds": [
+        "355fb771-7bc9-4e35-b2af-09df7881fa4b"
+      ],
+      "customers": [
+        {
+          "id": "97113014-5b08-4f55-a683-be92df852cfa",
+          "role": "KEEP",
+          "score": 50,
+          "phone": null,
+          "address": "Ana Ros Subd., Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [],
+          "vehicleCount": 0,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "355fb771-7bc9-4e35-b2af-09df7881fa4b",
+          "role": "MERGE",
+          "score": 30,
+          "phone": null,
+          "address": null,
+          "status": "active",
+          "vehicles": [
+            "Honda Brio (2019) · FAF 1098"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 5,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 1,
+        "quotations": 5,
+        "jobOrders": 0
+      }
+    },
+    {
+      "groupNo": 28,
+      "displayName": "Jed Rosbero",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "5742e7b3-c232-4eb3-9e93-3f64bbef553d",
+      "mergeCustomerIds": [
+        "6585e560-a0d3-4507-a8f5-6092d398fe91"
+      ],
+      "customers": [
+        {
+          "id": "5742e7b3-c232-4eb3-9e93-3f64bbef553d",
+          "role": "KEEP",
+          "score": 164,
+          "phone": "09289646795",
+          "address": "Arevalo, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Toyota Revo (1999) · WEF 483"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "6585e560-a0d3-4507-a8f5-6092d398fe91",
+          "role": "MERGE",
+          "score": 68,
+          "phone": null,
+          "address": "Arevalo , Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Kia Rio (2018) · FAB 9298"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 4,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 6,
+        "jobOrders": 0
+      }
+    },
+    {
+      "groupNo": 29,
+      "displayName": "Jerry Unica",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "6dd92dab-64c3-4707-9507-2cfca55bd61e",
+      "mergeCustomerIds": [
+        "ad2a67a3-a241-4f61-b718-02b4cc4bece1"
+      ],
+      "customers": [
+        {
+          "id": "6dd92dab-64c3-4707-9507-2cfca55bd61e",
+          "role": "KEEP",
+          "score": 150,
+          "phone": "09517373926",
+          "address": "Oton, Iloilo",
+          "status": "active",
+          "vehicles": [],
+          "vehicleCount": 0,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "ad2a67a3-a241-4f61-b718-02b4cc4bece1",
+          "role": "MERGE",
+          "score": 30,
+          "phone": null,
+          "address": null,
+          "status": "active",
+          "vehicles": [
+            "Ford Fiesta (2012) · FHS 635"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 5,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 1,
+        "quotations": 5,
+        "jobOrders": 0
+      }
+    },
+    {
+      "groupNo": 30,
+      "displayName": "Joey Toralballa",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "14292a3c-97dd-4401-a2ba-d1ef8963acae",
+      "mergeCustomerIds": [
+        "b9fe3e39-b612-444d-982e-4ec1fec9c62a"
+      ],
+      "customers": [
+        {
+          "id": "14292a3c-97dd-4401-a2ba-d1ef8963acae",
+          "role": "KEEP",
+          "score": 164,
+          "phone": "09088799323",
+          "address": "Mandurriao,Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Honda City (2010) · POW 778"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "b9fe3e39-b612-444d-982e-4ec1fec9c62a",
+          "role": "MERGE",
+          "score": 68,
+          "phone": null,
+          "address": "Mandurriao,Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Toyota Vios (2004) · XTL 829"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 4,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 6,
+        "jobOrders": 0
+      }
+    },
+    {
+      "groupNo": 31,
+      "displayName": "Jorge Debuque",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "211d7ac8-14cf-4552-bb2c-0d22faf00e1a",
+      "mergeCustomerIds": [
+        "30a4283c-2a2d-4d2b-8e16-279815aa32dd"
+      ],
+      "customers": [
+        {
+          "id": "211d7ac8-14cf-4552-bb2c-0d22faf00e1a",
+          "role": "KEEP",
+          "score": 68,
+          "phone": null,
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Hyundai Starex Gold (2013) · FGX 778"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 4,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "30a4283c-2a2d-4d2b-8e16-279815aa32dd",
+          "role": "MERGE",
+          "score": 64,
+          "phone": null,
+          "address": "Navais, Manduraio, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Mitsubishi Adventure (2000) · FFH832"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 6,
+        "jobOrders": 0
+      }
+    },
+    {
+      "groupNo": 32,
+      "displayName": "Josh Altis",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "0fd080c6-7a7e-4c1b-95f2-ef017faf2be8",
+      "mergeCustomerIds": [
+        "62d2cd74-6baa-4094-99b6-f374c0e99ab0"
+      ],
+      "customers": [
+        {
+          "id": "0fd080c6-7a7e-4c1b-95f2-ef017faf2be8",
+          "role": "KEEP",
+          "score": 50,
+          "phone": null,
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [],
+          "vehicleCount": 0,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "62d2cd74-6baa-4094-99b6-f374c0e99ab0",
+          "role": "MERGE",
+          "score": 20,
+          "phone": null,
+          "address": null,
+          "status": "active",
+          "vehicles": [
+            "Toyota Avanza (2013) · ADD7837"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 1,
+        "quotations": 0,
+        "jobOrders": 0
+      }
+    },
+    {
+      "groupNo": 33,
+      "displayName": "Joy Ariete",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "9e7489f1-5f27-446a-b7ac-2f0a0162c680",
+      "mergeCustomerIds": [
+        "d99625ef-ad58-43c6-aa6c-0ebee656e5b5"
+      ],
+      "customers": [
+        {
+          "id": "9e7489f1-5f27-446a-b7ac-2f0a0162c680",
+          "role": "KEEP",
+          "score": 170,
+          "phone": "09101156255",
+          "address": "Savannah, Pavia, Iloilo",
+          "status": "active",
+          "vehicles": [
+            "Ford Everest (2008) · PINK COOLANT"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 3,
+          "jobOrderCount": 2
+        },
+        {
+          "id": "d99625ef-ad58-43c6-aa6c-0ebee656e5b5",
+          "role": "MERGE",
+          "score": 66,
+          "phone": null,
+          "address": "Savannah, Pavia, Iloilo",
+          "status": "active",
+          "vehicles": [
+            "Ford Everest (2008) · FGC 6530"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 1
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 5,
+        "jobOrders": 3
+      }
+    },
+    {
+      "groupNo": 34,
+      "displayName": "Joy Vee",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "8a1f14c4-6299-4f62-8735-470f6db584fc",
+      "mergeCustomerIds": [
+        "ab6d0855-7eaf-4d62-a6c5-52602b8699ca"
+      ],
+      "customers": [
+        {
+          "id": "8a1f14c4-6299-4f62-8735-470f6db584fc",
+          "role": "KEEP",
+          "score": 68,
+          "phone": null,
+          "address": "Monterosa Subd., Mandurriao,Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Toyota Avanza (2018) · NDA 4759"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 3,
+          "jobOrderCount": 1
+        },
+        {
+          "id": "ab6d0855-7eaf-4d62-a6c5-52602b8699ca",
+          "role": "MERGE",
+          "score": 50,
+          "phone": null,
+          "address": "Monterosa, Subd., Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [],
+          "vehicleCount": 0,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 1,
+        "quotations": 3,
+        "jobOrders": 1
+      }
+    },
+    {
+      "groupNo": 35,
+      "displayName": "Kieth Bugna",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "dad1358c-8492-4937-a21b-bb3999cafb07",
+      "mergeCustomerIds": [
+        "86474ebe-1583-46ce-8d2c-567302b606ae"
+      ],
+      "customers": [
+        {
+          "id": "dad1358c-8492-4937-a21b-bb3999cafb07",
+          "role": "KEEP",
+          "score": 88,
+          "phone": null,
+          "address": "Pavia, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Honda Civic (2010) · 000000"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 10,
+          "jobOrderCount": 4
+        },
+        {
+          "id": "86474ebe-1583-46ce-8d2c-567302b606ae",
+          "role": "MERGE",
+          "score": 64,
+          "phone": null,
+          "address": "Pavia, Ililo City",
+          "status": "active",
+          "vehicles": [
+            "Nissan Navarra (2010) · ZTJ 156"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 12,
+        "jobOrders": 4
+      }
+    },
+    {
+      "groupNo": 36,
+      "displayName": "Leo Gaviette",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "2f84a2ad-2066-43b8-aaa4-a221191f95e8",
+      "mergeCustomerIds": [
+        "7b627809-7cf6-4f99-999a-06840f6e9680"
+      ],
+      "customers": [
+        {
+          "id": "2f84a2ad-2066-43b8-aaa4-a221191f95e8",
+          "role": "KEEP",
+          "score": 50,
+          "phone": null,
+          "address": "Guimbal,Iloilo",
+          "status": "active",
+          "vehicles": [],
+          "vehicleCount": 0,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "7b627809-7cf6-4f99-999a-06840f6e9680",
+          "role": "MERGE",
+          "score": 26,
+          "phone": null,
+          "address": null,
+          "status": "active",
+          "vehicles": [
+            "Isuzu Crosswind (2010) · FGS 577"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 3,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 1,
+        "quotations": 3,
+        "jobOrders": 0
+      }
+    },
+    {
+      "groupNo": 37,
+      "displayName": "Leonard Asong",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "cadb838f-4115-4a4e-a087-978a9aec1515",
+      "mergeCustomerIds": [
+        "75d317ff-e2ee-41d8-978d-8e6c7f194ee0"
+      ],
+      "customers": [
+        {
+          "id": "cadb838f-4115-4a4e-a087-978a9aec1515",
+          "role": "KEEP",
+          "score": 168,
+          "phone": "09108262667",
+          "address": "San Miguel, Iloilo",
+          "status": "active",
+          "vehicles": [
+            "Ford Ranger XLT Trekker (2012) · FHS 780"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 4,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "75d317ff-e2ee-41d8-978d-8e6c7f194ee0",
+          "role": "MERGE",
+          "score": 76,
+          "phone": null,
+          "address": "San Miguel, Iloilo",
+          "status": "active",
+          "vehicles": [
+            "Ford Ranger (2021) · NGL 9469"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 8,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 12,
+        "jobOrders": 0
+      }
+    },
+    {
+      "groupNo": 38,
+      "displayName": "Louie Ebrada",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "fcad673b-1bba-495f-a583-43d4069a3df3",
+      "mergeCustomerIds": [
+        "b7e2f0bd-b43e-4ca5-938c-4f1c5a34fb30"
+      ],
+      "customers": [
+        {
+          "id": "fcad673b-1bba-495f-a583-43d4069a3df3",
+          "role": "KEEP",
+          "score": 68,
+          "phone": null,
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Suzuki Grand Vitara (2014) · ABA 4875"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 4,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "b7e2f0bd-b43e-4ca5-938c-4f1c5a34fb30",
+          "role": "MERGE",
+          "score": 64,
+          "phone": null,
+          "address": "Mandurriao,Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Ford Ranger (2020) · FAL 6616"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 6,
+        "jobOrders": 0
+      }
+    },
+    {
+      "groupNo": 39,
+      "displayName": "Mark Delmo",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "123411ea-1438-4b7f-bff4-88790bb426de",
+      "mergeCustomerIds": [
+        "eaed8561-68e4-44b2-8804-06e6c36d78bb"
+      ],
+      "customers": [
+        {
+          "id": "123411ea-1438-4b7f-bff4-88790bb426de",
+          "role": "KEEP",
+          "score": 180,
+          "phone": "09175670153",
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Nissan Terra (2018) · FAH 2845"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 7,
+          "jobOrderCount": 3
+        },
+        {
+          "id": "eaed8561-68e4-44b2-8804-06e6c36d78bb",
+          "role": "MERGE",
+          "score": 70,
+          "phone": null,
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Toyota Wigo (2014) · AGA 1620"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 4,
+          "jobOrderCount": 1
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 11,
+        "jobOrders": 4
+      }
+    },
+    {
+      "groupNo": 40,
+      "displayName": "Mark Espares",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "8a0a8abe-3b84-4842-953f-1f81d0a1a394",
+      "mergeCustomerIds": [
+        "41799105-0dba-4ba1-9992-24cf37d19d99"
+      ],
+      "customers": [
+        {
+          "id": "8a0a8abe-3b84-4842-953f-1f81d0a1a394",
+          "role": "KEEP",
+          "score": 170,
+          "phone": "09771954871",
+          "address": "San Jose, Antique",
+          "status": "active",
+          "vehicles": [
+            "Nissan Roox (2023) · MBH 1364"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 3,
+          "jobOrderCount": 2
+        },
+        {
+          "id": "41799105-0dba-4ba1-9992-24cf37d19d99",
+          "role": "MERGE",
+          "score": 62,
+          "phone": null,
+          "address": "San Jose, Antique",
+          "status": "active",
+          "vehicles": [
+            "Toyota Innova (2025) · FBC 2217"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 1,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 4,
+        "jobOrders": 2
+      }
+    },
+    {
+      "groupNo": 41,
+      "displayName": "Mark Paul Ganzon",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "8b798dbd-1f65-42f9-913c-7873f6b73580",
+      "mergeCustomerIds": [
+        "d1481c79-a782-43dd-964c-5b41af600849"
+      ],
+      "customers": [
+        {
+          "id": "8b798dbd-1f65-42f9-913c-7873f6b73580",
+          "role": "KEEP",
+          "score": 100,
+          "phone": null,
+          "address": "JMF Subd., Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "MG One (2023) · GAM 5041"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 13,
+          "jobOrderCount": 12
+        },
+        {
+          "id": "d1481c79-a782-43dd-964c-5b41af600849",
+          "role": "MERGE",
+          "score": 76,
+          "phone": null,
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Honda Civic (2007) · FGT 107"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 6,
+          "jobOrderCount": 2
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 19,
+        "jobOrders": 14
+      }
+    },
+    {
+      "groupNo": 42,
+      "displayName": "Michael Penafiel",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "18a79ed0-bab8-4d5e-aa1a-490cbca4e47e",
+      "mergeCustomerIds": [
+        "18150a5d-d8ff-469e-9089-63456a623b8e"
+      ],
+      "customers": [
+        {
+          "id": "18a79ed0-bab8-4d5e-aa1a-490cbca4e47e",
+          "role": "KEEP",
+          "score": 66,
+          "phone": null,
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Mitsubishi Lancer (2014) · AAZ 5125"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 3,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "18150a5d-d8ff-469e-9089-63456a623b8e",
+          "role": "MERGE",
+          "score": 60,
+          "phone": null,
+          "address": "Mandurriao,Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Honda City (2021) · NGR 6284"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 3,
+        "jobOrders": 0
+      }
+    },
+    {
+      "groupNo": 43,
+      "displayName": "Mike Alegado",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "2f067ad9-a210-4e92-98c7-51486d67b9c2",
+      "mergeCustomerIds": [
+        "25509328-5655-40b9-b32b-f0f5111d564d"
+      ],
+      "customers": [
+        {
+          "id": "2f067ad9-a210-4e92-98c7-51486d67b9c2",
+          "role": "KEEP",
+          "score": 174,
+          "phone": "09504548026",
+          "address": "San Miguel, Iloilo",
+          "status": "active",
+          "vehicles": [
+            "Unknown Unknown · FDM8217"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 4,
+          "jobOrderCount": 3
+        },
+        {
+          "id": "25509328-5655-40b9-b32b-f0f5111d564d",
+          "role": "MERGE",
+          "score": 60,
+          "phone": null,
+          "address": "San Miguel, Iloilo",
+          "status": "active",
+          "vehicles": [
+            "Suzuki Multicab (2020) · KAM 4924"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 4,
+        "jobOrders": 3
+      }
+    },
+    {
+      "groupNo": 44,
+      "displayName": "Norman Sinfuego Sr.",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "cef5423c-b4c6-47f8-976f-fb91abb57075",
+      "mergeCustomerIds": [
+        "b61b5f8e-7b98-4e11-880f-fdd8dbfcc1ba"
+      ],
+      "customers": [
+        {
+          "id": "cef5423c-b4c6-47f8-976f-fb91abb57075",
+          "role": "KEEP",
+          "score": 70,
+          "phone": null,
+          "address": "Sta. Barbara, Iloilo",
+          "status": "active",
+          "vehicles": [
+            "Toyota Innova (2023) · FAO 1859"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 4,
+          "jobOrderCount": 1
+        },
+        {
+          "id": "b61b5f8e-7b98-4e11-880f-fdd8dbfcc1ba",
+          "role": "MERGE",
+          "score": 64,
+          "phone": null,
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Ford Everest (2013) · FHN 614"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 6,
+        "jobOrders": 1
+      }
+    },
+    {
+      "groupNo": 45,
+      "displayName": "Orville Ariete",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "6a9d4eb8-b75a-47ff-8b38-ad91ca5eb27c",
+      "mergeCustomerIds": [
+        "ea79b37d-38ef-4234-aa87-5c81d2e4f1bb"
+      ],
+      "customers": [
+        {
+          "id": "6a9d4eb8-b75a-47ff-8b38-ad91ca5eb27c",
+          "role": "KEEP",
+          "score": 70,
+          "phone": null,
+          "address": "Mandurriao,Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Ford Territory (2024) · FAP 6447"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 4,
+          "jobOrderCount": 1
+        },
+        {
+          "id": "ea79b37d-38ef-4234-aa87-5c81d2e4f1bb",
+          "role": "MERGE",
+          "score": 66,
+          "phone": null,
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Honda Accord (2012) · PQT 121"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 1
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 6,
+        "jobOrders": 2
+      }
+    },
+    {
+      "groupNo": 46,
+      "displayName": "Robeeh Galan Ramos",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "f34e1c54-0014-419f-90df-65dcb0eafdfe",
+      "mergeCustomerIds": [
+        "3f5a2307-ab59-44ae-bb9c-2e0262f0e537"
+      ],
+      "customers": [
+        {
+          "id": "f34e1c54-0014-419f-90df-65dcb0eafdfe",
+          "role": "KEEP",
+          "score": 72,
+          "phone": null,
+          "address": "Bacolod",
+          "status": "active",
+          "vehicles": [
+            "Toyota Vios (2018) · NBK7735"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 6,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "3f5a2307-ab59-44ae-bb9c-2e0262f0e537",
+          "role": "MERGE",
+          "score": 50,
+          "phone": null,
+          "address": "Bacolod City",
+          "status": "active",
+          "vehicles": [],
+          "vehicleCount": 0,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 1,
+        "quotations": 6,
+        "jobOrders": 0
+      }
+    },
+    {
+      "groupNo": 47,
+      "displayName": "Rolando Salvilla",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "e82860d5-0c5d-4ce1-82f3-45a0c6f4eef5",
+      "mergeCustomerIds": [
+        "6a5916a4-8310-4788-bbd9-d5090a532a74"
+      ],
+      "customers": [
+        {
+          "id": "e82860d5-0c5d-4ce1-82f3-45a0c6f4eef5",
+          "role": "KEEP",
+          "score": 78,
+          "phone": null,
+          "address": "San Jose, San Miguel Iloilo",
+          "status": "active",
+          "vehicles": [
+            "Nissan Terra (2022) · FAI 8481"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 9,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "6a5916a4-8310-4788-bbd9-d5090a532a74",
+          "role": "MERGE",
+          "score": 50,
+          "phone": null,
+          "address": "San Jose ,San Miguel ,Iloilo",
+          "status": "active",
+          "vehicles": [],
+          "vehicleCount": 0,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 1,
+        "quotations": 9,
+        "jobOrders": 0
+      }
+    },
+    {
+      "groupNo": 48,
+      "displayName": "Rommel Pendon",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "d2c08e8d-d796-43c0-b5d1-06fb00281203",
+      "mergeCustomerIds": [
+        "d137390a-c85b-47a2-8e98-02a13dc4ca9e"
+      ],
+      "customers": [
+        {
+          "id": "d2c08e8d-d796-43c0-b5d1-06fb00281203",
+          "role": "KEEP",
+          "score": 78,
+          "phone": null,
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Mitsubishi Adventure (2000) · WJT 779"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 8,
+          "jobOrderCount": 1
+        },
+        {
+          "id": "d137390a-c85b-47a2-8e98-02a13dc4ca9e",
+          "role": "MERGE",
+          "score": 50,
+          "phone": null,
+          "address": "Mandurriao",
+          "status": "active",
+          "vehicles": [],
+          "vehicleCount": 0,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 1,
+        "quotations": 8,
+        "jobOrders": 1
+      }
+    },
+    {
+      "groupNo": 49,
+      "displayName": "Rothel Monteclaro",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "e6d4b1fe-4254-4714-a3f4-f2ee401c5acc",
+      "mergeCustomerIds": [
+        "c01096b2-fb1d-4ec8-8878-6aee5fce6c1a"
+      ],
+      "customers": [
+        {
+          "id": "e6d4b1fe-4254-4714-a3f4-f2ee401c5acc",
+          "role": "KEEP",
+          "score": 164,
+          "phone": "09778027353",
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Toyota Wigo (2022) · FAN 5960"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "c01096b2-fb1d-4ec8-8878-6aee5fce6c1a",
+          "role": "MERGE",
+          "score": 76,
+          "phone": null,
+          "address": "Green Meadows, Pavia, Iloilo",
+          "status": "active",
+          "vehicles": [
+            "Ford Everest (2017) · FAB 6372"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 8,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 10,
+        "jobOrders": 0
+      }
+    },
+    {
+      "groupNo": 50,
+      "displayName": "Rowena Reyes Otero",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "11180bb1-1cae-4afc-b767-bcbe7cc60226",
+      "mergeCustomerIds": [
+        "b2ebb38f-6c17-4a86-977b-7c869ee40609"
+      ],
+      "customers": [
+        {
+          "id": "11180bb1-1cae-4afc-b767-bcbe7cc60226",
+          "role": "KEEP",
+          "score": 74,
+          "phone": null,
+          "address": "JEM Subd. Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Mitsubishi Strada (2015) · ABC 5005"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 7,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "b2ebb38f-6c17-4a86-977b-7c869ee40609",
+          "role": "MERGE",
+          "score": 50,
+          "phone": null,
+          "address": "JEM Subd, Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [],
+          "vehicleCount": 0,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 1,
+        "quotations": 7,
+        "jobOrders": 0
+      }
+    },
+    {
+      "groupNo": 51,
+      "displayName": "Shock and Awe Industrial Corporation/ Denise Alvaracin",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "9f68e11b-5599-497a-b7e7-53baef435f88",
+      "mergeCustomerIds": [
+        "7b8eaa43-4504-4c6d-872b-0a851d5d8e9b"
+      ],
+      "customers": [
+        {
+          "id": "9f68e11b-5599-497a-b7e7-53baef435f88",
+          "role": "KEEP",
+          "score": 64,
+          "phone": null,
+          "address": "Pavia, Iloilo",
+          "status": "active",
+          "vehicles": [
+            "Ford Ranger (2012) · KA 6413"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 0
+        },
+        {
+          "id": "7b8eaa43-4504-4c6d-872b-0a851d5d8e9b",
+          "role": "MERGE",
+          "score": 64,
+          "phone": null,
+          "address": "Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Ford Ranger (2012) · AKA 6413"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 4,
+        "jobOrders": 0
+      }
+    },
+    {
+      "groupNo": 52,
+      "displayName": "Villar Land Holding Corporation",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "9987b174-b0e5-4551-9f74-4273176ccb55",
+      "mergeCustomerIds": [
+        "affebbea-ca8d-489d-8f9d-b843d7bbf73b"
+      ],
+      "customers": [
+        {
+          "id": "9987b174-b0e5-4551-9f74-4273176ccb55",
+          "role": "KEEP",
+          "score": 192,
+          "phone": "09504424895",
+          "address": "San Miguel, Iloilo",
+          "status": "active",
+          "vehicles": [
+            "Toyota Hi-Ace (2012) · UQL 319"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 26,
+          "jobOrderCount": 6
+        },
+        {
+          "id": "affebbea-ca8d-489d-8f9d-b843d7bbf73b",
+          "role": "MERGE",
+          "score": 80,
+          "phone": null,
+          "address": "San Miguel, Iloilo",
+          "status": "active",
+          "vehicles": [
+            "Mitsubishi L300 (2014) · AAN 2088"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 12,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 38,
+        "jobOrders": 6
+      }
+    },
+    {
+      "groupNo": 53,
+      "displayName": "Vincent Palacio",
+      "confidence": "likely-same",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "262965c2-ed73-4157-9fb7-34ee1f19dde7",
+      "mergeCustomerIds": [
+        "54f1c405-dc5d-4114-a23d-01f4f81e5819"
+      ],
+      "customers": [
+        {
+          "id": "262965c2-ed73-4157-9fb7-34ee1f19dde7",
+          "role": "KEEP",
+          "score": 76,
+          "phone": null,
+          "address": "Mandurriao, Iloilo City",
+          "status": "active",
+          "vehicles": [
+            "Peugeot 3008 (2018) · FAL 2303"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 6,
+          "jobOrderCount": 2
+        },
+        {
+          "id": "54f1c405-dc5d-4114-a23d-01f4f81e5819",
+          "role": "MERGE",
+          "score": 24,
+          "phone": null,
+          "address": null,
+          "status": "active",
+          "vehicles": [
+            "Isuzu MU-X (2017) · FAB 4219"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 2,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 2,
+        "quotations": 8,
+        "jobOrders": 2
+      }
+    },
+    {
+      "groupNo": 54,
+      "displayName": "Zoetis Philippines, Inc.",
+      "confidence": "review-needed",
+      "reason": "Same name; phones match or are blank — likely same person/company",
+      "keepCustomerId": "f86646d6-b141-40a8-88ff-5b058012f845",
+      "mergeCustomerIds": [
+        "44bf054c-fc0c-49ab-8507-4a2a9c43b0b2"
+      ],
+      "customers": [
+        {
+          "id": "f86646d6-b141-40a8-88ff-5b058012f845",
+          "role": "KEEP",
+          "score": 68,
+          "phone": null,
+          "address": "15F W Fifth Building,5th Ave.,BGC, Taguig City, Philippines",
+          "status": "active",
+          "vehicles": [
+            "Nissan Kicks (2024) · NOV 1295"
+          ],
+          "vehicleCount": 1,
+          "quotationCount": 3,
+          "jobOrderCount": 1
+        },
+        {
+          "id": "44bf054c-fc0c-49ab-8507-4a2a9c43b0b2",
+          "role": "MERGE",
+          "score": 50,
+          "phone": null,
+          "address": "BGC,Taguig City, Philippines",
+          "status": "active",
+          "vehicles": [],
+          "vehicleCount": 0,
+          "quotationCount": 0,
+          "jobOrderCount": 0
+        }
+      ],
+      "totals": {
+        "customers": 2,
+        "vehicles": 1,
+        "quotations": 3,
+        "jobOrders": 1
+      }
+    }
+  ]
+}

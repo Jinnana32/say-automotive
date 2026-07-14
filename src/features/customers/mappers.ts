@@ -18,6 +18,7 @@ type CustomerListRow = Pick<
   | "customer_type"
   | "display_name"
   | "contact_number"
+  | "contact_number_secondary"
   | "email"
   | "status"
   | "created_at"
@@ -32,6 +33,7 @@ export function mapCustomerRowToListItem(row: CustomerListRow): CustomerListItem
     customerType: row.customer_type,
     displayName: row.display_name,
     contactNumber: row.contact_number,
+    contactNumberSecondary: row.contact_number_secondary,
     email: row.email,
     status: row.status,
     createdAt: row.created_at,
@@ -83,6 +85,7 @@ export function mapCustomerDetailToFormValues(customer: CustomerDetail): Custome
     lastName: customer.lastName ?? "",
     companyName: customer.companyName ?? "",
     contactNumber: customer.contactNumber ?? "",
+    contactNumberSecondary: customer.contactNumberSecondary ?? "",
     email: customer.email ?? "",
     address: customer.address ?? "",
     notes: customer.notes ?? "",

@@ -431,6 +431,7 @@ export type Database = {
           last_name: string | null;
           company_name: string | null;
           contact_number: string | null;
+          contact_number_secondary: string | null;
           email: string | null;
           address: string | null;
           notes: string | null;
@@ -448,6 +449,7 @@ export type Database = {
           last_name?: string | null;
           company_name?: string | null;
           contact_number?: string | null;
+          contact_number_secondary?: string | null;
           email?: string | null;
           address?: string | null;
           notes?: string | null;

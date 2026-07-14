@@ -39,6 +39,7 @@ type CustomerListRow = Pick<
   | "customer_type"
   | "display_name"
   | "contact_number"
+  | "contact_number_secondary"
   | "email"
   | "status"
   | "created_at"
@@ -46,22 +47,36 @@ type CustomerListRow = Pick<
 >;
 type CustomerOptionRow = Pick<CustomerRow, "id" | "display_name">;
 
-export async function listCustomers(search?: string): Promise<CustomerListItem[]> {
+export async function listCustomers(
+  search?: string,
+  options?: {
+    /**
+     * Defaults to active-only so merged/deactivated duplicate customers stay out of the directory.
+     * Pass "" to include every status, or "inactive" to browse deactivated records.
+     */
+    status?: CustomerListItem["status"] | "";
+  },
+): Promise<CustomerListItem[]> {
   const { branchScope, supabase } = await getBranchScopedServerClient("customers:read");
+  const statusFilter = options?.status === undefined ? "active" : options.status;
   let query = applyBranchFilter(
     supabase
     .from("customers")
     .select(
-      "id, customer_code, customer_type, display_name, contact_number, email, status, created_at, updated_at",
+      "id, customer_code, customer_type, display_name, contact_number, contact_number_secondary, email, status, created_at, updated_at",
     )
     .order("display_name", { ascending: true }),
     branchScope.selectedBranchId,
   );
 
+  if (statusFilter) {
+    query = query.eq("status", statusFilter);
+  }
+
   if (search) {
     const escapedSearch = escapeSearchTerm(search);
     query = query.or(
-      `display_name.ilike.%${escapedSearch}%,contact_number.ilike.%${escapedSearch}%,email.ilike.%${escapedSearch}%`,
+      `display_name.ilike.%${escapedSearch}%,contact_number.ilike.%${escapedSearch}%,contact_number_secondary.ilike.%${escapedSearch}%,email.ilike.%${escapedSearch}%`,
     );
   }
 

@@ -177,12 +177,32 @@ export function CustomerForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" optional>
-                Email
+              <Label htmlFor="contactNumberSecondary" optional>
+                Secondary contact number
               </Label>
-              <Input id="email" name="email" type="email" value={values.email} onChange={(event) => updateFormValue("email", event.target.value)} />
-              <FieldError errors={state.fieldErrors} name="email" />
+              <Input
+                id="contactNumberSecondary"
+                name="contactNumberSecondary"
+                value={values.contactNumberSecondary}
+                placeholder="Optional backup number"
+                onChange={(event) => updateFormValue("contactNumberSecondary", event.target.value)}
+              />
+              <FieldError errors={state.fieldErrors} name="contactNumberSecondary" />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email" optional>
+              Email
+            </Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              value={values.email}
+              onChange={(event) => updateFormValue("email", event.target.value)}
+            />
+            <FieldError errors={state.fieldErrors} name="email" />
           </div>
 
           <div className="space-y-2">

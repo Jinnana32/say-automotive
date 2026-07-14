@@ -1303,6 +1303,7 @@ function QuickCustomerCreateForm({
       lastName: initialLastName,
       companyName: '',
       contactNumber: '',
+      contactNumberSecondary: '',
       email: '',
       address: '',
       notes: '',
@@ -1318,6 +1319,7 @@ function QuickCustomerCreateForm({
         lastName: '',
         companyName: '',
         contactNumber: '',
+        contactNumberSecondary: '',
         email: '',
         address: '',
         notes: '',
@@ -1382,6 +1384,22 @@ function QuickCustomerCreateForm({
             />
             <FieldError errors={state.fieldErrors} name="contactNumber" />
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="quickCustomerContactSecondary" optional>
+            Secondary contact number
+          </Label>
+          <Input
+            id="quickCustomerContactSecondary"
+            name="contactNumberSecondary"
+            value={values.contactNumberSecondary}
+            onChange={(event) =>
+              updateFormValue('contactNumberSecondary', event.target.value)
+            }
+            placeholder="Optional backup number"
+          />
+          <FieldError errors={state.fieldErrors} name="contactNumberSecondary" />
         </div>
 
         {values.customerType === 'individual' ? (

@@ -1,7 +1,6 @@
 import { cache } from "react";
 
 import { applyBranchFilter, getBranchScopedServerClient } from "@/lib/branches";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type { TableRow } from "@/types/database";
 import { mapVehicleDetail, mapVehicleRowToListItem } from "@/features/vehicles/mappers";
 import type { VehicleDetail, VehicleListItem } from "@/features/vehicles/types";
@@ -9,13 +8,20 @@ import type { VehicleDetail, VehicleListItem } from "@/features/vehicles/types";
 type VehicleRow = TableRow<"vehicles">;
 type CustomerRow = TableRow<"customers">;
 
+type VehicleWithCustomerRow = VehicleRow & {
+  customers: Pick<CustomerRow, "display_name"> | Pick<CustomerRow, "display_name">[] | null;
+};
+
 export async function listVehicles(filters?: {
   search?: string;
   customerId?: string;
 }): Promise<VehicleListItem[]> {
   const { branchScope, supabase } = await getBranchScopedServerClient("vehicles:read");
   let query = applyBranchFilter(
-    supabase.from("vehicles").select("*").order("created_at", { ascending: false }),
+    supabase
+      .from("vehicles")
+      .select("*, customers!vehicles_customer_id_fkey(display_name)")
+      .order("created_at", { ascending: false }),
     branchScope.selectedBranchId,
   );
 
@@ -33,62 +39,64 @@ export async function listVehicles(filters?: {
   const { data, error } = await query;
 
   if (error) {
-    throw new Error(error.message);
+    throw new Error(toReadableQueryError(error.message));
   }
 
-  const vehicles = (data ?? []) satisfies VehicleRow[];
-  const customerIds = [...new Set(vehicles.map((vehicle) => vehicle.customer_id))];
-  const customerNames = await getCustomerNameMap(customerIds);
-
-  return vehicles.map((vehicle) =>
-    mapVehicleRowToListItem(vehicle, customerNames.get(vehicle.customer_id) ?? "Unknown customer"),
+  return ((data ?? []) as VehicleWithCustomerRow[]).map((vehicle) =>
+    mapVehicleRowToListItem(vehicle, resolveCustomerName(vehicle.customers)),
   );
 }
 
 export const getVehicleById = cache(async (vehicleId: string): Promise<VehicleDetail | null> => {
   const { branchScope, supabase } = await getBranchScopedServerClient("vehicles:read");
   const { data, error } = await applyBranchFilter(
-    supabase.from("vehicles").select("*"),
+    supabase.from("vehicles").select("*, customers!vehicles_customer_id_fkey(display_name)"),
     branchScope.selectedBranchId,
   )
     .eq("id", vehicleId)
     .maybeSingle();
 
   if (error) {
-    throw new Error(error.message);
+    throw new Error(toReadableQueryError(error.message));
   }
 
   if (!data) {
     return null;
   }
 
-  const vehicle = data satisfies VehicleRow;
-  const customerNames = await getCustomerNameMap([vehicle.customer_id]);
+  const vehicle = data as VehicleWithCustomerRow;
 
-  return mapVehicleDetail(vehicle, customerNames.get(vehicle.customer_id) ?? "Unknown customer");
+  return mapVehicleDetail(vehicle, resolveCustomerName(vehicle.customers));
 });
 
-async function getCustomerNameMap(customerIds: string[]) {
-  if (customerIds.length === 0) {
-    return new Map<string, string>();
+function resolveCustomerName(
+  customers: VehicleWithCustomerRow["customers"],
+) {
+  if (!customers) {
+    return "Unknown customer";
   }
 
-  const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("customers")
-    .select("id, display_name")
-    .in("id", customerIds);
-
-  if (error) {
-    throw new Error(error.message);
+  if (Array.isArray(customers)) {
+    return customers[0]?.display_name ?? "Unknown customer";
   }
 
-  return new Map(
-    ((data ?? []) as Pick<CustomerRow, "id" | "display_name">[]).map((customer) => [
-      customer.id,
-      customer.display_name,
-    ]),
-  );
+  return customers.display_name || "Unknown customer";
+}
+
+function toReadableQueryError(message: string) {
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("fetch failed") ||
+    normalized.includes("failed to fetch") ||
+    normalized.includes("network") ||
+    normalized.includes("enotfound") ||
+    normalized.includes("econn")
+  ) {
+    return "Could not reach the database. Check your internet connection and try again.";
+  }
+
+  return message;
 }
 
 function escapeSearchTerm(value: string) {

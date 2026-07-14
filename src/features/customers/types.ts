@@ -11,6 +11,7 @@ export type CustomerListItem = {
   customerType: CustomerType;
   displayName: string;
   contactNumber: string | null;
+  contactNumberSecondary: string | null;
   email: string | null;
   status: CustomerStatus;
   createdAt: string;
@@ -100,6 +101,7 @@ export type CustomerFormValues = {
   lastName: string;
   companyName: string;
   contactNumber: string;
+  contactNumberSecondary: string;
   email: string;
   address: string;
   notes: string;
