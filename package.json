@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "import:say-catalog": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/import-say-products-services.ts",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "test": "vitest run --passWithNoTests",

@@ -35,6 +35,7 @@ describe("BlankPrintDocument", () => {
     expect(container.querySelector(".print-document-footer")).not.toBeNull();
 
     expect(screen.getByText("Printable body content")).toBeInTheDocument();
-    expect(screen.getByText("VAT Reg. No.: 123-456-789-000")).toBeInTheDocument();
+    expect(screen.getByText("VAT Reg. No.: 244-205-707")).toBeInTheDocument();
+    expect(screen.getByText("SAY Auto Care Center / Mags & Tires")).toBeInTheDocument();
   });
 });

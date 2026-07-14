@@ -137,6 +137,10 @@
   margin-top: 5mm;
 }
 
+.quotation-print-page .print-document-footer {
+  margin-top: 3mm;
+}
+
 .print-page-inner {
   width: 100%;
   height: 100%;
@@ -214,6 +218,10 @@
 
   .job-order-print-page .print-document-footer {
     margin-top: 4mm;
+  }
+
+  .quotation-print-page .print-document-footer {
+    margin-top: 3mm;
   }
 
   tr {

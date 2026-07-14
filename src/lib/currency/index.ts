@@ -1,6 +1,7 @@
 export const APP_MONEY_DECIMAL_PLACES = 4;
 export const PRINT_MONEY_DECIMAL_PLACES = 4;
 export const DOCUMENT_PRINT_MONEY_DECIMAL_PLACES = 2;
+export const PAYSLIP_MONEY_DECIMAL_PLACES = 2;
 export const UI_MONEY_DISPLAY_DECIMAL_PLACES = 2;
 export const MONEY_INPUT_STEP = "0.01";
 
@@ -38,6 +39,13 @@ const phpDocumentPrintFormatter = new Intl.NumberFormat("en-PH", {
 const phpDocumentPrintNumberFormatter = new Intl.NumberFormat("en-PH", {
   minimumFractionDigits: 0,
   maximumFractionDigits: DOCUMENT_PRINT_MONEY_DECIMAL_PLACES,
+});
+
+const phpPayslipFormatter = new Intl.NumberFormat("en-PH", {
+  style: "currency",
+  currency: "PHP",
+  minimumFractionDigits: PAYSLIP_MONEY_DECIMAL_PLACES,
+  maximumFractionDigits: PAYSLIP_MONEY_DECIMAL_PLACES,
 });
 
 export function roundCurrency(value: number) {
@@ -202,4 +210,10 @@ export function formatDocumentPrintCurrencyNumber(value: number) {
     minimumFractionDigits: DOCUMENT_PRINT_MONEY_DECIMAL_PLACES,
     maximumFractionDigits: DOCUMENT_PRINT_MONEY_DECIMAL_PLACES,
   }).format(rounded);
+}
+
+export function formatCurrencyForPayslip(value: number) {
+  return phpPayslipFormatter.format(
+    Number(roundCurrency(value).toFixed(PAYSLIP_MONEY_DECIMAL_PLACES)),
+  );
 }

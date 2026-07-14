@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   APP_MONEY_DECIMAL_PLACES,
   formatCurrency,
+  formatCurrencyForPayslip,
   formatCurrencyForPrint,
   formatCurrencyForUI,
   formatCurrencyNumber,
@@ -26,6 +27,13 @@ describe("currency helpers", () => {
     expect(formatCurrency(180.25)).toBe("₱180.25");
     expect(formatCurrencyNumber(1250)).toBe("1,250");
     expect(formatCurrencyNumber(1250.5)).toBe("1,250.50");
+  });
+
+  it("formats payslip money with exactly two decimals", () => {
+    expect(formatCurrencyForPayslip(6120)).toBe("₱6,120.00");
+    expect(formatCurrencyForPayslip(0)).toBe("₱0.00");
+    expect(formatCurrencyForPayslip(153)).toBe("₱153.00");
+    expect(formatCurrencyForPayslip(10636.6875)).toBe("₱10,636.69");
   });
 
   it("formats print money with four decimals", () => {
