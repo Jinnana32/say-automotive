@@ -393,7 +393,7 @@ async function getJobOrderItemsMap(jobOrderIds: string[]) {
       supabase
         .from("job_order_items")
         .select(
-          "id, job_order_id, source_quotation_item_id, line_number, item_type, product_id, service_id, description, quantity, unit_price, total, is_additional, approval_status, usage_status, checklist_completed, checklist_checked_at, checklist_checked_by_staff_id, approved_at, rejected_at",
+          "id, job_order_id, source_quotation_item_id, line_number, item_type, product_id, service_id, description, quantity, unit_price, total, is_additional, approval_status, usage_status, checklist_completed, checklist_checked_at, checklist_checked_by_staff_id, approved_at, rejected_at, created_at, updated_at",
         )
         .in("job_order_id", chunk)
         .order("line_number", { ascending: true }),
