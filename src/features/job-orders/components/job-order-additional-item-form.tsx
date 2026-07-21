@@ -11,6 +11,7 @@ import {
   fieldControlClassName,
   fieldErrorId,
 } from "@/components/shared/form-status";
+import { CatalogCombobox } from "@/components/shared/catalog-combobox";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,7 @@ import { addJobOrderItemAction } from "@/features/job-orders/actions/job-order-a
 import { QuickCreateProductDialog } from "@/features/products/components/quick-create-product-dialog";
 import { QuickCreateServiceDialog } from "@/features/services/components/quick-create-service-dialog";
 import { formatMoneyInputValue, MONEY_INPUT_STEP } from "@/lib/currency";
+import { mapProductOptionsToCatalog, mapServiceOptionsToCatalog } from "@/lib/catalog/combobox-options";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 
 type CatalogOptions = {
@@ -181,172 +183,160 @@ export function JobOrderAdditionalItemForm({
 
       {isProductType ? (
         <div className="space-y-2">
-          <div className="flex items-center justify-between gap-3">
-            <Label htmlFor="productId" required>
-              Product
-            </Label>
-            {catalogOptions?.permissions.canCreateProducts ? (
-              <QuickCreateProductDialog
-                triggerLabel="Add new product"
-                onCreated={(product) => {
-                  setCatalogState((current) =>
-                    current.status === "ready"
-                      ? {
-                          status: "ready",
-                          error: null,
-                          options: {
-                            ...current.options,
-                            products: current.options.products.some(
-                              (entry) => entry.id === product.id,
-                            )
-                              ? current.options.products.map((entry) =>
-                                  entry.id === product.id
-                                    ? {
-                                        id: product.id,
-                                        label: product.label,
-                                        sku: product.sku,
-                                        unitPrice: product.unitPrice,
-                                      }
-                                    : entry,
-                                )
-                              : [
-                                  ...current.options.products,
-                                  {
-                                    id: product.id,
-                                    label: product.label,
-                                    sku: product.sku,
-                                    unitPrice: product.unitPrice,
-                                  },
-                                ],
-                          },
-                        }
-                      : current,
-                  );
-                  setProductId(product.id);
-                  setDescription(product.label);
-                  setUnitPrice(formatMoneyInputValue(product.unitPrice));
-                }}
-              />
-            ) : null}
-          </div>
-          {catalogOptions ? (
-            <NativeSelect
-              id="productId"
-              name="productId"
-              value={productId}
-              className={fieldControlClassName(state.fieldErrors, "productId")}
-              {...fieldAriaProps({
-                errors: state.fieldErrors,
-                name: "productId",
-                required: true,
-                errorId: fieldErrorId("productId"),
-              })}
-              onChange={(event) => {
-                const nextProductId = event.target.value;
-                const selected = catalogOptions.products.find((product) => product.id === nextProductId);
-                setProductId(nextProductId);
-                setDescription(selected?.label ?? "");
-                setUnitPrice(selected ? formatMoneyInputValue(selected.unitPrice) : "");
-              }}
-            >
-              <option value="">Select product</option>
-              {catalogOptions.products.map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.label}
-                  {product.sku ? ` (${product.sku})` : ""}
-                </option>
-              ))}
-            </NativeSelect>
-          ) : (
-            <NativeSelect id="productId" disabled value="">
-              <option value="">Loading products...</option>
-            </NativeSelect>
-          )}
+          <Label htmlFor="productId" required>
+            Product
+          </Label>
+          <CatalogCombobox
+            id="productId"
+            name="productId"
+            value={productId}
+            loading={!catalogOptions}
+            options={catalogOptions ? mapProductOptionsToCatalog(catalogOptions.products) : []}
+            placeholder="Search products"
+            emptyMessage="No matching products found."
+            inputClassName={fieldControlClassName(state.fieldErrors, "productId")}
+            inputProps={fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "productId",
+              required: true,
+              errorId: fieldErrorId("productId"),
+            })}
+            onValueChange={(nextProductId) => {
+              const selected = catalogOptions?.products.find((product) => product.id === nextProductId);
+              setProductId(nextProductId);
+              setDescription(selected?.label ?? "");
+              setUnitPrice(selected ? formatMoneyInputValue(selected.unitPrice) : "");
+            }}
+            onSelect={(selected) => {
+              setProductId(selected.id);
+              setDescription(selected.label);
+              setUnitPrice(formatMoneyInputValue(selected.price ?? 0));
+            }}
+            createAction={
+              catalogOptions?.permissions.canCreateProducts ? (
+                <QuickCreateProductDialog
+                  triggerLabel="Create New Product"
+                  onCreated={(product) => {
+                    setCatalogState((current) =>
+                      current.status === "ready"
+                        ? {
+                            status: "ready",
+                            error: null,
+                            options: {
+                              ...current.options,
+                              products: current.options.products.some(
+                                (entry) => entry.id === product.id,
+                              )
+                                ? current.options.products.map((entry) =>
+                                    entry.id === product.id
+                                      ? {
+                                          id: product.id,
+                                          label: product.label,
+                                          sku: product.sku,
+                                          unitPrice: product.unitPrice,
+                                        }
+                                      : entry,
+                                  )
+                                : [
+                                    ...current.options.products,
+                                    {
+                                      id: product.id,
+                                      label: product.label,
+                                      sku: product.sku,
+                                      unitPrice: product.unitPrice,
+                                    },
+                                  ],
+                            },
+                          }
+                        : current,
+                    );
+                    setProductId(product.id);
+                    setDescription(product.label);
+                    setUnitPrice(formatMoneyInputValue(product.unitPrice));
+                  }}
+                />
+              ) : null
+            }
+          />
           <FieldError errors={state.fieldErrors} name="productId" id={fieldErrorId("productId")} />
         </div>
       ) : isServiceType ? (
         <div className="space-y-2">
-          <div className="flex items-center justify-between gap-3">
-            <Label htmlFor="serviceId" required>
-              Service
-            </Label>
-            {catalogOptions?.permissions.canCreateServices ? (
-              <QuickCreateServiceDialog
-                triggerLabel="Add new service"
-                onCreated={(service) => {
-                  setCatalogState((current) =>
-                    current.status === "ready"
-                      ? {
-                          status: "ready",
-                          error: null,
-                          options: {
-                            ...current.options,
-                            services: current.options.services.some(
-                              (entry) => entry.id === service.id,
-                            )
-                              ? current.options.services.map((entry) =>
-                                  entry.id === service.id
-                                    ? {
-                                        id: service.id,
-                                        label: service.label,
-                                        category: service.category,
-                                        unitPrice: service.unitPrice,
-                                      }
-                                    : entry,
-                                )
-                              : [
-                                  ...current.options.services,
-                                  {
-                                    id: service.id,
-                                    label: service.label,
-                                    category: service.category,
-                                    unitPrice: service.unitPrice,
-                                  },
-                                ],
-                          },
-                        }
-                      : current,
-                  );
-                  setServiceId(service.id);
-                  setDescription(service.label);
-                  setUnitPrice(formatMoneyInputValue(service.unitPrice));
-                }}
-              />
-            ) : null}
-          </div>
-          {catalogOptions ? (
-            <NativeSelect
-              id="serviceId"
-              name="serviceId"
-              value={serviceId}
-              className={fieldControlClassName(state.fieldErrors, "serviceId")}
-              {...fieldAriaProps({
-                errors: state.fieldErrors,
-                name: "serviceId",
-                required: true,
-                errorId: fieldErrorId("serviceId"),
-              })}
-              onChange={(event) => {
-                const nextServiceId = event.target.value;
-                const selected = catalogOptions.services.find((service) => service.id === nextServiceId);
-                setServiceId(nextServiceId);
-                setDescription(selected?.label ?? "");
-                setUnitPrice(selected ? formatMoneyInputValue(selected.unitPrice) : "");
-              }}
-            >
-              <option value="">Select service</option>
-              {catalogOptions.services.map((service) => (
-                <option key={service.id} value={service.id}>
-                  {service.label}
-                  {service.category ? ` (${service.category})` : ""}
-                </option>
-              ))}
-            </NativeSelect>
-          ) : (
-            <NativeSelect id="serviceId" disabled value="">
-              <option value="">Loading services...</option>
-            </NativeSelect>
-          )}
+          <Label htmlFor="serviceId" required>
+            Service
+          </Label>
+          <CatalogCombobox
+            id="serviceId"
+            name="serviceId"
+            value={serviceId}
+            loading={!catalogOptions}
+            options={catalogOptions ? mapServiceOptionsToCatalog(catalogOptions.services) : []}
+            placeholder="Search services"
+            emptyMessage="No matching services found."
+            inputClassName={fieldControlClassName(state.fieldErrors, "serviceId")}
+            inputProps={fieldAriaProps({
+              errors: state.fieldErrors,
+              name: "serviceId",
+              required: true,
+              errorId: fieldErrorId("serviceId"),
+            })}
+            onValueChange={(nextServiceId) => {
+              const selected = catalogOptions?.services.find((service) => service.id === nextServiceId);
+              setServiceId(nextServiceId);
+              setDescription(selected?.label ?? "");
+              setUnitPrice(selected ? formatMoneyInputValue(selected.unitPrice) : "");
+            }}
+            onSelect={(selected) => {
+              setServiceId(selected.id);
+              setDescription(selected.label);
+              setUnitPrice(formatMoneyInputValue(selected.price ?? 0));
+            }}
+            createAction={
+              catalogOptions?.permissions.canCreateServices ? (
+                <QuickCreateServiceDialog
+                  triggerLabel="Create New Service"
+                  onCreated={(service) => {
+                    setCatalogState((current) =>
+                      current.status === "ready"
+                        ? {
+                            status: "ready",
+                            error: null,
+                            options: {
+                              ...current.options,
+                              services: current.options.services.some(
+                                (entry) => entry.id === service.id,
+                              )
+                                ? current.options.services.map((entry) =>
+                                    entry.id === service.id
+                                      ? {
+                                          id: service.id,
+                                          label: service.label,
+                                          category: service.category,
+                                          unitPrice: service.unitPrice,
+                                        }
+                                      : entry,
+                                  )
+                                : [
+                                    ...current.options.services,
+                                    {
+                                      id: service.id,
+                                      label: service.label,
+                                      category: service.category,
+                                      unitPrice: service.unitPrice,
+                                    },
+                                  ],
+                            },
+                          }
+                        : current,
+                    );
+                    setServiceId(service.id);
+                    setDescription(service.label);
+                    setUnitPrice(formatMoneyInputValue(service.unitPrice));
+                  }}
+                />
+              ) : null
+            }
+          />
           <FieldError errors={state.fieldErrors} name="serviceId" id={fieldErrorId("serviceId")} />
         </div>
       ) : isLaborType ? (

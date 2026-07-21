@@ -15,9 +15,9 @@ import {
 
 const SIDEBAR_COLLAPSE_STORAGE_KEY = "say-admin-sidebar-collapsed";
 const TABLET_SIDEBAR_MEDIA_QUERY = "(min-width: 768px) and (max-width: 1023px)";
-const DESKTOP_SIDEBAR_EXPANDED_CLASS = "md:w-[15.5rem]";
+const DESKTOP_SIDEBAR_EXPANDED_CLASS = "md:w-[15rem]";
 const DESKTOP_SIDEBAR_COLLAPSED_CLASS = "md:w-[5.75rem]";
-const DESKTOP_CONTENT_EXPANDED_CLASS = "md:pl-[15.5rem]";
+const DESKTOP_CONTENT_EXPANDED_CLASS = "md:pl-[15rem]";
 const DESKTOP_CONTENT_COLLAPSED_CLASS = "md:pl-[5.75rem]";
 
 export function AppShell({
@@ -107,7 +107,7 @@ export function AppShell({
           businessName={businessName}
           businessLogoUrl={businessLogoUrl}
           showBusinessName={showSidebarBusinessName}
-          className="no-print fixed inset-y-0 left-0 z-50 flex w-[17rem] max-w-[calc(100vw-2rem)] flex-col shadow-2xl md:hidden"
+          className="no-print fixed inset-y-0 left-0 z-50 flex w-[15rem] max-w-[calc(100vw-2rem)] flex-col shadow-2xl md:hidden"
           onNavigate={() => setIsMobileSidebarOpen(false)}
           onClose={() => setIsMobileSidebarOpen(false)}
           showCloseButton

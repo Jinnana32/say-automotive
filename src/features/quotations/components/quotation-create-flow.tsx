@@ -4,6 +4,7 @@ import { useActionState, useEffect, useMemo, useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 
 import { AddEntryButton } from '@/components/shared/add-entry-button';
+import { CatalogCombobox } from '@/components/shared/catalog-combobox';
 
 import { EmptyState } from '@/components/shared/empty-state';
 import { FieldError, FormRequiredFieldsNote, FormStatusMessage, fieldAriaProps } from '@/components/shared/form-status';
@@ -37,19 +38,20 @@ import type {
 } from '@/features/quotations/types';
 import { QuickCreateProductDialog } from '@/features/products/components/quick-create-product-dialog';
 import { QuickCreateServiceDialog } from '@/features/services/components/quick-create-service-dialog';
+import { QuotationTotalsFields } from '@/features/quotations/components/quotation-totals-fields';
 import {
-  calculateQuotationGrandTotal,
   calculateQuotationLineTotal,
-  calculateQuotationSubtotal,
+  calculateQuotationTotals,
   createQuotationItem,
   dedupeOptionsById,
-  toNumeric,
+  type QuotationDiscountMode,
 } from '@/features/quotations/utils';
 import {
   formatCurrencyNumber,
   formatMoneyInputValue,
   MONEY_INPUT_STEP,
 } from '@/lib/currency';
+import { mapProductOptionsToCatalog, mapServiceOptionsToCatalog } from '@/lib/catalog/combobox-options';
 import type {
   CustomerFormValues,
   CustomerOption,
@@ -112,6 +114,8 @@ export function QuotationCreateFlow({
   );
   const [vehicleMode, setVehicleMode] = useState<IntakeSelectionMode>('choose');
   const { values, setValues, updateFormValue } = useFormValues(initialValues);
+  const [discountMode, setDiscountMode] = useState<QuotationDiscountMode>('fixed');
+  const [taxRate, setTaxRate] = useState(String(options.defaultTaxRate));
   const [currentStep, setCurrentStep] = useState<QuotationCreateStep>(
     deriveCreateStep(initialValues),
   );
@@ -142,11 +146,11 @@ export function QuotationCreateFlow({
     );
   }, [customerOptions, customerSearch]);
 
-  const subtotal = calculateQuotationSubtotal(values.items);
-  const grandTotal = calculateQuotationGrandTotal({
+  const { subtotal, discountAmount, taxAmount, grandTotal } = calculateQuotationTotals({
     items: values.items,
     discount: values.discount,
-    tax: values.tax,
+    discountMode,
+    taxRate,
   });
   const canReview = isQuotationDraftReady(values);
 
@@ -566,8 +570,12 @@ export function QuotationCreateFlow({
             name="inspectionNotes"
             value={values.inspectionNotes}
           />
-          <input type="hidden" name="discount" value={values.discount} />
-          <input type="hidden" name="tax" value={values.tax} />
+          <input
+            type="hidden"
+            name="discount"
+            value={formatMoneyInputValue(discountAmount)}
+          />
+          <input type="hidden" name="tax" value={formatMoneyInputValue(taxAmount)} />
           <input
             type="hidden"
             name="itemsJson"
@@ -646,23 +654,11 @@ export function QuotationCreateFlow({
                   </div>
 
                   <div className="space-y-4">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-semibold text-foreground">Line items</p>
-                        <p className="text-xs text-muted-foreground">
-                          Add a product, service, or manual labor line for each quoted item.
-                        </p>
-                      </div>
-                      <AddEntryButton
-                        onClick={() =>
-                          setValues((current) => ({
-                            ...current,
-                            items: [...current.items, createQuotationItem()],
-                          }))
-                        }
-                      >
-                        Add line item
-                      </AddEntryButton>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">Line items</p>
+                      <p className="text-xs text-muted-foreground">
+                        Add a product, service, or manual labor line for each quoted item.
+                      </p>
                     </div>
 
                     {values.items.map((item, index) => {
@@ -729,16 +725,29 @@ export function QuotationCreateFlow({
                             {item.itemType === 'product' ? (
                               <div className="space-y-2 xl:col-span-2">
                                 <Label required>Product</Label>
-                                <NativeSelect
+                                <CatalogCombobox
+                                  id={`product-${item.key}`}
                                   value={item.productId}
-                                  onChange={(event) => {
+                                  options={mapProductOptionsToCatalog(productOptions)}
+                                  placeholder="Search products"
+                                  emptyMessage="No matching products found."
+                                  onValueChange={(nextProductId) => {
+                                    if (!nextProductId) {
+                                      updateQuotationItem(setValues, item.key, {
+                                        productId: '',
+                                        serviceId: '',
+                                        description: '',
+                                        unitPrice: formatMoneyInputValue(0),
+                                      });
+                                      return;
+                                    }
+
                                     const selected = productOptions.find(
-                                      (product) =>
-                                        product.id === event.target.value,
+                                      (product) => product.id === nextProductId,
                                     );
 
                                     updateQuotationItem(setValues, item.key, {
-                                      productId: event.target.value,
+                                      productId: nextProductId,
                                       serviceId: '',
                                       description: selected?.label ?? '',
                                       unitPrice: selected
@@ -746,63 +755,76 @@ export function QuotationCreateFlow({
                                         : formatMoneyInputValue(0),
                                     });
                                   }}
-                                >
-                                  <option value="">Select product</option>
-                                  {productOptions.map((product) => (
-                                    <option key={product.id} value={product.id}>
-                                      {product.label}
-                                      {product.sku ? ` (${product.sku})` : ''}
-                                    </option>
-                                  ))}
-                                </NativeSelect>
-                                {options.permissions.canCreateProducts ? (
-                                  <div className="pt-1">
-                                    <QuickCreateProductDialog
-                                      triggerLabel="Add new product"
-                                      initialOptions={
-                                        options.productFormOptions ?? undefined
-                                      }
-                                      onCreated={(product) => {
-                                        setProductOptions((current) => {
-                                          const nextProduct = {
-                                            id: product.id,
-                                            label: product.label,
-                                            sku: product.sku,
-                                            unitPrice: product.unitPrice,
-                                          };
+                                  onSelect={(selected) => {
+                                    updateQuotationItem(setValues, item.key, {
+                                      productId: selected.id,
+                                      serviceId: '',
+                                      description: selected.label,
+                                      unitPrice: formatMoneyInputValue(selected.price ?? 0),
+                                    });
+                                  }}
+                                  createAction={
+                                    options.permissions.canCreateProducts ? (
+                                      <QuickCreateProductDialog
+                                        triggerLabel="Create New Product"
+                                        initialOptions={
+                                          options.productFormOptions ?? undefined
+                                        }
+                                        onCreated={(product) => {
+                                          setProductOptions((current) => {
+                                            const nextProduct = {
+                                              id: product.id,
+                                              label: product.label,
+                                              sku: product.sku,
+                                              unitPrice: product.unitPrice,
+                                            };
 
-                                          return dedupeOptionsById([
-                                            ...current,
-                                            nextProduct,
-                                          ]);
-                                        });
-                                        updateQuotationItem(setValues, item.key, {
-                                          itemType: 'product',
-                                          productId: product.id,
-                                          serviceId: '',
-                                          description: product.label,
-                                          unitPrice: formatMoneyInputValue(
-                                            product.unitPrice,
-                                          ),
-                                        });
-                                      }}
-                                    />
-                                  </div>
-                                ) : null}
+                                            return dedupeOptionsById([
+                                              ...current,
+                                              nextProduct,
+                                            ]);
+                                          });
+                                          updateQuotationItem(setValues, item.key, {
+                                            itemType: 'product',
+                                            productId: product.id,
+                                            serviceId: '',
+                                            description: product.label,
+                                            unitPrice: formatMoneyInputValue(
+                                              product.unitPrice,
+                                            ),
+                                          });
+                                        }}
+                                      />
+                                    ) : null
+                                  }
+                                />
                               </div>
                             ) : item.itemType === 'service' ? (
                               <div className="space-y-2 xl:col-span-2">
                                 <Label required>Service</Label>
-                                <NativeSelect
+                                <CatalogCombobox
+                                  id={`service-${item.key}`}
                                   value={item.serviceId}
-                                  onChange={(event) => {
+                                  options={mapServiceOptionsToCatalog(serviceOptions)}
+                                  placeholder="Search services"
+                                  emptyMessage="No matching services found."
+                                  onValueChange={(nextServiceId) => {
+                                    if (!nextServiceId) {
+                                      updateQuotationItem(setValues, item.key, {
+                                        productId: '',
+                                        serviceId: '',
+                                        description: '',
+                                        unitPrice: formatMoneyInputValue(0),
+                                      });
+                                      return;
+                                    }
+
                                     const selected = serviceOptions.find(
-                                      (service) =>
-                                        service.id === event.target.value,
+                                      (service) => service.id === nextServiceId,
                                     );
 
                                     updateQuotationItem(setValues, item.key, {
-                                      serviceId: event.target.value,
+                                      serviceId: nextServiceId,
                                       productId: '',
                                       description: selected?.label ?? '',
                                       unitPrice: selected
@@ -810,48 +832,46 @@ export function QuotationCreateFlow({
                                         : formatMoneyInputValue(0),
                                     });
                                   }}
-                                >
-                                  <option value="">Select service</option>
-                                  {serviceOptions.map((service) => (
-                                    <option key={service.id} value={service.id}>
-                                      {service.label}
-                                      {service.category
-                                        ? ` (${service.category})`
-                                        : ''}
-                                    </option>
-                                  ))}
-                                </NativeSelect>
-                                {options.permissions.canCreateServices ? (
-                                  <div className="pt-1">
-                                    <QuickCreateServiceDialog
-                                      triggerLabel="Add new service"
-                                      onCreated={(service) => {
-                                        setServiceOptions((current) => {
-                                          const nextService = {
-                                            id: service.id,
-                                            label: service.label,
-                                            category: service.category,
-                                            unitPrice: service.unitPrice,
-                                          };
+                                  onSelect={(selected) => {
+                                    updateQuotationItem(setValues, item.key, {
+                                      serviceId: selected.id,
+                                      productId: '',
+                                      description: selected.label,
+                                      unitPrice: formatMoneyInputValue(selected.price ?? 0),
+                                    });
+                                  }}
+                                  createAction={
+                                    options.permissions.canCreateServices ? (
+                                      <QuickCreateServiceDialog
+                                        triggerLabel="Create New Service"
+                                        onCreated={(service) => {
+                                          setServiceOptions((current) => {
+                                            const nextService = {
+                                              id: service.id,
+                                              label: service.label,
+                                              category: service.category,
+                                              unitPrice: service.unitPrice,
+                                            };
 
-                                          return dedupeOptionsById([
-                                            ...current,
-                                            nextService,
-                                          ]);
-                                        });
-                                        updateQuotationItem(setValues, item.key, {
-                                          itemType: 'service',
-                                          serviceId: service.id,
-                                          productId: '',
-                                          description: service.label,
-                                          unitPrice: formatMoneyInputValue(
-                                            service.unitPrice,
-                                          ),
-                                        });
-                                      }}
-                                    />
-                                  </div>
-                                ) : null}
+                                            return dedupeOptionsById([
+                                              ...current,
+                                              nextService,
+                                            ]);
+                                          });
+                                          updateQuotationItem(setValues, item.key, {
+                                            itemType: 'service',
+                                            serviceId: service.id,
+                                            productId: '',
+                                            description: service.label,
+                                            unitPrice: formatMoneyInputValue(
+                                              service.unitPrice,
+                                            ),
+                                          });
+                                        }}
+                                      />
+                                    ) : null
+                                  }
+                                />
                               </div>
                             ) : (
                               <div className="space-y-2 xl:col-span-2">
@@ -941,52 +961,6 @@ export function QuotationCreateFlow({
                 </div>
               </SectionCard>
 
-              <SectionCard
-                title="Totals setup"
-                description="Discount and tax remain editable until you finalize the quotation."
-              >
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="discount" required>
-                      Discount
-                    </Label>
-                    <Input
-                      id="discount"
-                      inputMode="decimal"
-                      type="number"
-                      step={MONEY_INPUT_STEP}
-                      value={values.discount}
-                      onChange={(event) =>
-                        updateFormValue('discount', event.target.value)
-                      }
-                    />
-                    <FieldError
-                      errors={quotationState.fieldErrors}
-                      name="discount"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="tax" required>
-                      Tax
-                    </Label>
-                    <Input
-                      id="tax"
-                      inputMode="decimal"
-                      type="number"
-                      step={MONEY_INPUT_STEP}
-                      value={values.tax}
-                      onChange={(event) =>
-                        updateFormValue('tax', event.target.value)
-                      }
-                    />
-                    <FieldError
-                      errors={quotationState.fieldErrors}
-                      name="tax"
-                    />
-                  </div>
-                </div>
-              </SectionCard>
-
               <div className="flex flex-wrap justify-between gap-3">
                 <Button
                   type="button"
@@ -1071,7 +1045,7 @@ export function QuotationCreateFlow({
                     </div>
                   </div>
 
-                  <div className="grid gap-4 md:grid-cols-3">
+                  <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="reviewStatus" required>
                         Quotation status
@@ -1096,42 +1070,41 @@ export function QuotationCreateFlow({
                         name="status"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="reviewDiscount" required>
-                        Discount
-                      </Label>
-                      <Input
-                        id="reviewDiscount"
-                        inputMode="decimal"
-                        type="number"
-                        step={MONEY_INPUT_STEP}
-                        value={values.discount}
-                        onChange={(event) =>
-                          updateFormValue('discount', event.target.value)
-                        }
+                  </div>
+
+                  <QuotationTotalsFields
+                    subtotal={subtotal}
+                    discount={values.discount}
+                    discountMode={discountMode}
+                    taxRate={taxRate}
+                    defaultTaxRate={options.defaultTaxRate}
+                    fieldErrors={quotationState.fieldErrors}
+                    discountFieldId="reviewDiscount"
+                    taxRateFieldId="reviewTaxRate"
+                    onDiscountChange={(value) => updateFormValue('discount', value)}
+                    onDiscountModeChange={setDiscountMode}
+                    onTaxRateChange={setTaxRate}
+                  />
+
+                  <div className="rounded-2xl border border-border/70 bg-muted/20 px-4 py-4 text-sm">
+                    <p className="font-semibold text-foreground">Estimate totals</p>
+                    <div className="mt-3 space-y-2">
+                      <SummaryRow
+                        label="Subtotal"
+                        value={formatCurrencyNumber(subtotal)}
                       />
-                      <FieldError
-                        errors={quotationState.fieldErrors}
-                        name="discount"
+                      <SummaryRow
+                        label="Discount"
+                        value={formatCurrencyNumber(discountAmount)}
                       />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="reviewTax" required>
-                        Tax
-                      </Label>
-                      <Input
-                        id="reviewTax"
-                        inputMode="decimal"
-                        type="number"
-                        step={MONEY_INPUT_STEP}
-                        value={values.tax}
-                        onChange={(event) =>
-                          updateFormValue('tax', event.target.value)
-                        }
+                      <SummaryRow
+                        label={`Tax (${taxRate || '0'}%)`}
+                        value={formatCurrencyNumber(taxAmount)}
                       />
-                      <FieldError
-                        errors={quotationState.fieldErrors}
-                        name="tax"
+                      <SummaryRow
+                        label="Grand total"
+                        value={formatCurrencyNumber(grandTotal)}
+                        emphasized
                       />
                     </div>
                   </div>
@@ -1241,11 +1214,11 @@ export function QuotationCreateFlow({
                       />
                       <SummaryRow
                         label="Discount"
-                        value={formatCurrencyNumber(toNumeric(values.discount))}
+                        value={formatCurrencyNumber(discountAmount)}
                       />
                       <SummaryRow
-                        label="Tax"
-                        value={formatCurrencyNumber(toNumeric(values.tax))}
+                        label={`Tax (${taxRate || '0'}%)`}
+                        value={formatCurrencyNumber(taxAmount)}
                       />
                       <SummaryRow
                         label="Final total"

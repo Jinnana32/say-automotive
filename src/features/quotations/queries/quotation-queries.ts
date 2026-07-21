@@ -35,6 +35,7 @@ type VehicleRow = TableRow<"vehicles">;
 type ProductRow = TableRow<"products">;
 type ServiceRow = TableRow<"services">;
 type JobOrderRow = TableRow<"job_orders">;
+type BusinessSettingsRow = Pick<TableRow<"business_settings">, "default_tax_rate">;
 
 export async function listQuotations(filters?: {
   search?: string;
@@ -141,6 +142,7 @@ export const getQuotationById = cache(async (quotationId: string): Promise<Quota
 
 export async function getQuotationFormOptions(): Promise<QuotationFormOptions> {
   const { branchScope, context, supabase } = await getBranchScopedServerClient("quotations:write");
+  const branchId = branchScope.selectedBranch?.id ?? branchScope.writeBranchId;
   const sharingSettings = await getCatalogSharingSettings(supabase, branchScope.selectedBranchId);
   const canCreateProducts = context.capabilities.includes("products:write");
   const canCreateServices = context.capabilities.includes("services:write");
@@ -150,6 +152,7 @@ export async function getQuotationFormOptions(): Promise<QuotationFormOptions> {
     { data: products, error: productsError },
     { data: services, error: servicesError },
     productFormOptions,
+    { data: settings, error: settingsError },
   ] = await Promise.all([
     listCustomerOptions(),
     applyBranchFilter(
@@ -183,6 +186,11 @@ export async function getQuotationFormOptions(): Promise<QuotationFormOptions> {
       },
     ),
     canCreateProducts ? getProductFormOptions() : Promise.resolve(null),
+    supabase
+      .from("business_settings")
+      .select("default_tax_rate")
+      .eq("branch_id", branchId)
+      .maybeSingle(),
   ]);
 
   if (vehiclesError) {
@@ -197,6 +205,10 @@ export async function getQuotationFormOptions(): Promise<QuotationFormOptions> {
     throw new Error(servicesError.message);
   }
 
+  if (settingsError) {
+    throw new Error(settingsError.message);
+  }
+
   return {
     customers: dedupeOptionsById(customers),
     vehicles: dedupeOptionsById(
@@ -209,6 +221,7 @@ export async function getQuotationFormOptions(): Promise<QuotationFormOptions> {
       ((services ?? []) as ServiceRow[]).map(mapServiceRowToQuotationOption),
     ),
     productFormOptions,
+    defaultTaxRate: ((settings as BusinessSettingsRow | null)?.default_tax_rate ?? 0),
     permissions: {
       canCreateProducts,
       canCreateServices,

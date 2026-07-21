@@ -14,6 +14,7 @@ import {
   formSelectClassName,
 } from "@/components/shared/form-status";
 import { AddEntryButton } from "@/components/shared/add-entry-button";
+import { CatalogCombobox } from "@/components/shared/catalog-combobox";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,23 +25,27 @@ import { createQuotationAction, reviseQuotationAction, updateQuotationAction } f
 import { QuickCreateProductDialog } from "@/features/products/components/quick-create-product-dialog";
 import { serializeQuotationItems } from "@/features/quotations/schemas/quotation-form-schema";
 import { QuickCreateServiceDialog } from "@/features/services/components/quick-create-service-dialog";
+import { QuotationTotalsFields } from "@/features/quotations/components/quotation-totals-fields";
 import type {
   QuotationFormItem,
   QuotationFormOptions,
   QuotationFormValues,
 } from "@/features/quotations/types";
 import {
-  calculateQuotationGrandTotal,
   calculateQuotationLineTotal,
   calculateQuotationSubtotal,
+  calculateQuotationTotals,
   createQuotationItem,
   dedupeOptionsById,
+  inferQuotationTaxRate,
+  type QuotationDiscountMode,
 } from "@/features/quotations/utils";
 import {
   formatCurrencyNumber,
   formatMoneyInputValue,
   MONEY_INPUT_STEP,
 } from "@/lib/currency";
+import { mapProductOptionsToCatalog, mapServiceOptionsToCatalog } from "@/lib/catalog/combobox-options";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 
 export function QuotationForm({
@@ -66,7 +71,17 @@ export function QuotationForm({
   const [natureOfRepair, setNatureOfRepair] = useState(initialValues.natureOfRepair);
   const [inspectionNotes, setInspectionNotes] = useState(initialValues.inspectionNotes);
   const [discount, setDiscount] = useState(initialValues.discount);
-  const [tax, setTax] = useState(initialValues.tax);
+  const [discountMode, setDiscountMode] = useState<QuotationDiscountMode>("fixed");
+  const [taxRate, setTaxRate] = useState(() =>
+    String(
+      inferQuotationTaxRate({
+        subtotal: calculateQuotationSubtotal(initialValues.items),
+        discountAmount: Number(initialValues.discount || 0),
+        taxAmount: Number(initialValues.tax || 0),
+        defaultTaxRate: options.defaultTaxRate,
+      }),
+    ),
+  );
   const customerOptions = dedupeOptionsById(options.customers);
   const vehicleOptions = dedupeOptionsById(options.vehicles);
   const [items, setItems] = useState<QuotationFormItem[]>(
@@ -80,8 +95,12 @@ export function QuotationForm({
   );
 
   const availableVehicles = vehicleOptions.filter((vehicle) => vehicle.customerId === customerId);
-  const subtotal = calculateQuotationSubtotal(items);
-  const grandTotal = calculateQuotationGrandTotal({ items, discount, tax });
+  const { subtotal, discountAmount, taxAmount, grandTotal } = calculateQuotationTotals({
+    items,
+    discount,
+    discountMode,
+    taxRate,
+  });
 
   return (
     <form action={formActionState} className="space-y-6">
@@ -259,16 +278,11 @@ export function QuotationForm({
           </Card>
 
           <Card className="border-border/70 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0">
-              <div>
-                <CardTitle>Quotation items</CardTitle>
-                <CardDescription>
-                  Products and services can be catalog-driven. Labor can stay manual when needed.
-                </CardDescription>
-              </div>
-              <AddEntryButton onClick={() => setItems((current) => [...current, createQuotationItem()])}>
-                Add line item
-              </AddEntryButton>
+            <CardHeader>
+              <CardTitle>Quotation items</CardTitle>
+              <CardDescription>
+                Products and services can be catalog-driven. Labor can stay manual when needed.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {items.map((item, index) => {
@@ -323,124 +337,150 @@ export function QuotationForm({
 
                       {item.itemType === "product" ? (
                         <div className="space-y-2 xl:col-span-2">
-                          <div className="flex items-center justify-between gap-3">
-                            <Label required>Product</Label>
-                            {options.permissions.canCreateProducts ? (
-                              <QuickCreateProductDialog
-                                triggerLabel="Add new product"
-                                initialOptions={options.productFormOptions ?? undefined}
-                                onCreated={(product) => {
-                                  setProductOptions((current) => {
-                                    const nextProduct = {
-                                      id: product.id,
-                                      label: product.label,
-                                      sku: product.sku,
-                                      unitPrice: product.unitPrice,
-                                    };
-
-                                    return dedupeOptionsById([
-                                      ...current,
-                                      nextProduct,
-                                    ]);
-                                  });
-                                  updateItem(setItems, item.key, {
-                                    itemType: "product",
-                                    productId: product.id,
-                                    serviceId: "",
-                                    description: product.label,
-                                    unitPrice: formatMoneyInputValue(product.unitPrice),
-                                  });
-                                }}
-                              />
-                            ) : null}
-                          </div>
-                          <select
+                          <Label required>Product</Label>
+                          <CatalogCombobox
+                            id={`product-${item.key}`}
                             value={item.productId}
-                            onChange={(event) => {
-                              const selected = filteredProducts.find((product) => product.id === event.target.value);
-                              updateItem(setItems, item.key, {
-                                productId: event.target.value,
-                                serviceId: "",
-                                description: selected?.label ?? "",
-                                unitPrice: selected ? formatMoneyInputValue(selected.unitPrice) : formatMoneyInputValue(0),
-                              });
-                            }}
-                            className={formSelectClassName(state.fieldErrors, "items")}
-                            {...fieldAriaProps({
+                            options={mapProductOptionsToCatalog(filteredProducts)}
+                            placeholder="Search products"
+                            emptyMessage="No matching products found."
+                            inputClassName={fieldControlClassName(state.fieldErrors, "items")}
+                            inputProps={fieldAriaProps({
                               errors: state.fieldErrors,
                               name: "items",
                               required: true,
                               errorId: fieldErrorId("items"),
                             })}
-                          >
-                            <option value="">Select product</option>
-                            {filteredProducts.map((product) => (
-                              <option key={product.id} value={product.id}>
-                                {product.label}
-                                {product.sku ? ` (${product.sku})` : ""}
-                              </option>
-                            ))}
-                          </select>
+                            onValueChange={(nextProductId) => {
+                              if (!nextProductId) {
+                                updateItem(setItems, item.key, {
+                                  productId: "",
+                                  serviceId: "",
+                                  description: "",
+                                  unitPrice: formatMoneyInputValue(0),
+                                });
+                                return;
+                              }
+
+                              const selected = filteredProducts.find((product) => product.id === nextProductId);
+                              updateItem(setItems, item.key, {
+                                productId: nextProductId,
+                                serviceId: "",
+                                description: selected?.label ?? "",
+                                unitPrice: selected
+                                  ? formatMoneyInputValue(selected.unitPrice)
+                                  : formatMoneyInputValue(0),
+                              });
+                            }}
+                            onSelect={(selected) => {
+                              updateItem(setItems, item.key, {
+                                productId: selected.id,
+                                serviceId: "",
+                                description: selected.label,
+                                unitPrice: formatMoneyInputValue(selected.price ?? 0),
+                              });
+                            }}
+                            createAction={
+                              options.permissions.canCreateProducts ? (
+                                <QuickCreateProductDialog
+                                  triggerLabel="Create New Product"
+                                  initialOptions={options.productFormOptions ?? undefined}
+                                  onCreated={(product) => {
+                                    setProductOptions((current) => {
+                                      const nextProduct = {
+                                        id: product.id,
+                                        label: product.label,
+                                        sku: product.sku,
+                                        unitPrice: product.unitPrice,
+                                      };
+
+                                      return dedupeOptionsById([...current, nextProduct]);
+                                    });
+                                    updateItem(setItems, item.key, {
+                                      itemType: "product",
+                                      productId: product.id,
+                                      serviceId: "",
+                                      description: product.label,
+                                      unitPrice: formatMoneyInputValue(product.unitPrice),
+                                    });
+                                  }}
+                                />
+                              ) : null
+                            }
+                          />
                         </div>
                       ) : item.itemType === "service" ? (
                         <div className="space-y-2 xl:col-span-2">
-                          <div className="flex items-center justify-between gap-3">
-                            <Label required>Service</Label>
-                            {options.permissions.canCreateServices ? (
-                              <QuickCreateServiceDialog
-                                triggerLabel="Add new service"
-                                onCreated={(service) => {
-                                  setServiceOptions((current) => {
-                                    const nextService = {
-                                      id: service.id,
-                                      label: service.label,
-                                      category: service.category,
-                                      unitPrice: service.unitPrice,
-                                    };
-
-                                    return dedupeOptionsById([
-                                      ...current,
-                                      nextService,
-                                    ]);
-                                  });
-                                  updateItem(setItems, item.key, {
-                                    itemType: "service",
-                                    serviceId: service.id,
-                                    productId: "",
-                                    description: service.label,
-                                    unitPrice: formatMoneyInputValue(service.unitPrice),
-                                  });
-                                }}
-                              />
-                            ) : null}
-                          </div>
-                          <select
+                          <Label required>Service</Label>
+                          <CatalogCombobox
+                            id={`service-${item.key}`}
                             value={item.serviceId}
-                            onChange={(event) => {
-                              const selected = filteredServices.find((service) => service.id === event.target.value);
-                              updateItem(setItems, item.key, {
-                                serviceId: event.target.value,
-                                productId: "",
-                                description: selected?.label ?? "",
-                                unitPrice: selected ? formatMoneyInputValue(selected.unitPrice) : formatMoneyInputValue(0),
-                              });
-                            }}
-                            className={formSelectClassName(state.fieldErrors, "items")}
-                            {...fieldAriaProps({
+                            options={mapServiceOptionsToCatalog(filteredServices)}
+                            placeholder="Search services"
+                            emptyMessage="No matching services found."
+                            inputClassName={fieldControlClassName(state.fieldErrors, "items")}
+                            inputProps={fieldAriaProps({
                               errors: state.fieldErrors,
                               name: "items",
                               required: true,
                               errorId: fieldErrorId("items"),
                             })}
-                          >
-                            <option value="">Select service</option>
-                            {filteredServices.map((service) => (
-                              <option key={service.id} value={service.id}>
-                                {service.label}
-                                {service.category ? ` (${service.category})` : ""}
-                              </option>
-                            ))}
-                          </select>
+                            onValueChange={(nextServiceId) => {
+                              if (!nextServiceId) {
+                                updateItem(setItems, item.key, {
+                                  productId: "",
+                                  serviceId: "",
+                                  description: "",
+                                  unitPrice: formatMoneyInputValue(0),
+                                });
+                                return;
+                              }
+
+                              const selected = filteredServices.find((service) => service.id === nextServiceId);
+                              updateItem(setItems, item.key, {
+                                serviceId: nextServiceId,
+                                productId: "",
+                                description: selected?.label ?? "",
+                                unitPrice: selected
+                                  ? formatMoneyInputValue(selected.unitPrice)
+                                  : formatMoneyInputValue(0),
+                              });
+                            }}
+                            onSelect={(selected) => {
+                              updateItem(setItems, item.key, {
+                                serviceId: selected.id,
+                                productId: "",
+                                description: selected.label,
+                                unitPrice: formatMoneyInputValue(selected.price ?? 0),
+                              });
+                            }}
+                            createAction={
+                              options.permissions.canCreateServices ? (
+                                <QuickCreateServiceDialog
+                                  triggerLabel="Create New Service"
+                                  onCreated={(service) => {
+                                    setServiceOptions((current) => {
+                                      const nextService = {
+                                        id: service.id,
+                                        label: service.label,
+                                        category: service.category,
+                                        unitPrice: service.unitPrice,
+                                      };
+
+                                      return dedupeOptionsById([...current, nextService]);
+                                    });
+                                    updateItem(setItems, item.key, {
+                                      itemType: "service",
+                                      serviceId: service.id,
+                                      productId: "",
+                                      description: service.label,
+                                      unitPrice: formatMoneyInputValue(service.unitPrice),
+                                    });
+                                  }}
+                                />
+                              ) : null
+                            }
+                          />
                         </div>
                       ) : (
                         <div className="space-y-2 xl:col-span-2">
@@ -550,50 +590,20 @@ export function QuotationForm({
               <CardDescription>Totals are estimates only until work is approved and executed.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="discount" required>
-                  Discount
-                </Label>
-                <Input
-                  id="discount"
-                  name="discount"
-                  inputMode="decimal"
-                  type="number"
-                  step={MONEY_INPUT_STEP}
-                  value={discount}
-                  onChange={(event) => setDiscount(event.target.value)}
-                  className={fieldControlClassName(state.fieldErrors, "discount")}
-                  {...fieldAriaProps({
-                    errors: state.fieldErrors,
-                    name: "discount",
-                    required: true,
-                    errorId: fieldErrorId("discount"),
-                  })}
-                />
-                <FieldError errors={state.fieldErrors} name="discount" id={fieldErrorId("discount")} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="tax" required>
-                  Tax
-                </Label>
-                <Input
-                  id="tax"
-                  name="tax"
-                  inputMode="decimal"
-                  type="number"
-                  step={MONEY_INPUT_STEP}
-                  value={tax}
-                  onChange={(event) => setTax(event.target.value)}
-                  className={fieldControlClassName(state.fieldErrors, "tax")}
-                  {...fieldAriaProps({
-                    errors: state.fieldErrors,
-                    name: "tax",
-                    required: true,
-                    errorId: fieldErrorId("tax"),
-                  })}
-                />
-                <FieldError errors={state.fieldErrors} name="tax" id={fieldErrorId("tax")} />
-              </div>
+              <input type="hidden" name="discount" value={formatMoneyInputValue(discountAmount)} />
+              <input type="hidden" name="tax" value={formatMoneyInputValue(taxAmount)} />
+
+              <QuotationTotalsFields
+                subtotal={subtotal}
+                discount={discount}
+                discountMode={discountMode}
+                taxRate={taxRate}
+                defaultTaxRate={options.defaultTaxRate}
+                fieldErrors={state.fieldErrors}
+                onDiscountChange={setDiscount}
+                onDiscountModeChange={setDiscountMode}
+                onTaxRateChange={setTaxRate}
+              />
 
               <div className="rounded-[1.25rem] border border-border/70 bg-muted/30 p-4 text-sm">
                 <div className="flex items-center justify-between py-2">
@@ -602,11 +612,11 @@ export function QuotationForm({
                 </div>
                 <div className="flex items-center justify-between py-2">
                   <span>Discount</span>
-                  <span>{formatCurrencyNumber(Number(discount || 0))}</span>
+                  <span>{formatCurrencyNumber(discountAmount)}</span>
                 </div>
                 <div className="flex items-center justify-between py-2">
-                  <span>Tax</span>
-                  <span>{formatCurrencyNumber(Number(tax || 0))}</span>
+                  <span>Tax ({taxRate || "0"}%)</span>
+                  <span>{formatCurrencyNumber(taxAmount)}</span>
                 </div>
                 <div className="mt-2 flex items-center justify-between border-t border-border/70 pt-3 text-base font-semibold">
                   <span>Total estimate</span>

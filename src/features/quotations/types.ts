@@ -110,6 +110,7 @@ export type QuotationFormOptions = {
   products: QuotationProductOption[];
   services: QuotationServiceOption[];
   productFormOptions: ProductFormOptionsData | null;
+  defaultTaxRate: number;
   permissions: {
     canCreateProducts: boolean;
     canCreateServices: boolean;

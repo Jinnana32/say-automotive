@@ -30,13 +30,82 @@ export function calculateQuotationSubtotal(items: QuotationFormItem[]) {
   return roundCurrency(items.reduce((sum, item) => sum + calculateQuotationLineTotal(item), 0));
 }
 
+export type QuotationDiscountMode = "fixed" | "percent";
+
+export function calculateQuotationDiscountAmount(params: {
+  subtotal: number;
+  discount: string;
+  discountMode: QuotationDiscountMode;
+}) {
+  const input = toNumeric(params.discount);
+
+  if (params.discountMode === "percent") {
+    return roundCurrency(params.subtotal * (input / 100));
+  }
+
+  return roundCurrency(input);
+}
+
+export function calculateQuotationTaxAmount(params: {
+  subtotal: number;
+  discountAmount: number;
+  taxRate: string;
+}) {
+  const taxableAmount = Math.max(params.subtotal - params.discountAmount, 0);
+  return roundCurrency(taxableAmount * (toNumeric(params.taxRate) / 100));
+}
+
+export function calculateQuotationTotals(params: {
+  items: QuotationFormItem[];
+  discount: string;
+  discountMode: QuotationDiscountMode;
+  taxRate: string;
+}) {
+  const subtotal = calculateQuotationSubtotal(params.items);
+  const discountAmount = calculateQuotationDiscountAmount({
+    subtotal,
+    discount: params.discount,
+    discountMode: params.discountMode,
+  });
+  const taxAmount = calculateQuotationTaxAmount({
+    subtotal,
+    discountAmount,
+    taxRate: params.taxRate,
+  });
+  const grandTotal = roundCurrency(Math.max(subtotal - discountAmount, 0) + taxAmount);
+
+  return {
+    subtotal,
+    discountAmount,
+    taxAmount,
+    grandTotal,
+  };
+}
+
 export function calculateQuotationGrandTotal(params: {
   items: QuotationFormItem[];
   discount: string;
   tax: string;
 }) {
   const subtotal = calculateQuotationSubtotal(params.items);
-  return roundCurrency(subtotal - toNumeric(params.discount) + toNumeric(params.tax));
+  const discountAmount = toNumeric(params.discount);
+  const taxAmount = toNumeric(params.tax);
+  return roundCurrency(Math.max(subtotal - discountAmount, 0) + taxAmount);
+}
+
+export function inferQuotationTaxRate(params: {
+  subtotal: number;
+  discountAmount: number;
+  taxAmount: number;
+  defaultTaxRate: number;
+}) {
+  const taxableAmount = Math.max(params.subtotal - params.discountAmount, 0);
+
+  if (taxableAmount > 0 && params.taxAmount > 0) {
+    return roundCurrency((params.taxAmount / taxableAmount) * 100);
+  }
+
+  return params.defaultTaxRate;
 }
 
 export function toNumeric(value: string) {

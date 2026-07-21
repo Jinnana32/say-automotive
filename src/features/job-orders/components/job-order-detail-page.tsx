@@ -418,11 +418,6 @@ export function JobOrderDetailPage({
             <SectionCard
               title="Job order items"
               description="Quoted lines and additional charges are easier to review here before billing."
-              action={
-                jobOrder.canAddAdditionalItems ? (
-                  <JobOrderAdditionalItemDialog jobOrderId={jobOrder.id} redirectTab={activeTab} />
-                ) : null
-              }
               contentClassName="p-0"
             >
               <div className="overflow-x-auto">
