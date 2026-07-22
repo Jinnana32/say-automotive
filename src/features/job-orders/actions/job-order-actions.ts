@@ -22,6 +22,7 @@ import {
   parseOptionalNumeric,
 } from "@/features/job-orders/schemas/job-order-forms";
 import { resolveJobOrderDetailTab, toNumeric } from "@/features/job-orders/utils";
+import { resolveCatalogLineItemDescription } from "@/lib/catalog/line-item-descriptions";
 import { writeAuditLog } from "@/lib/audit";
 import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
 import { INITIAL_FORM_ACTION_STATE, toFormActionState, type FormActionState } from "@/lib/forms";
@@ -174,12 +175,29 @@ export async function addJobOrderItemAction(
   const values = parsed.data;
   const redirectTab = resolveJobOrderDetailTab(readOptionalValue(formData, "redirectTab"));
   const { supabase } = await getAuthorizedSupabaseServerClient("job_orders:write");
+  const description = await resolveCatalogLineItemDescription(supabase, {
+    itemType: values.itemType,
+    description: values.description,
+    productId: values.productId,
+    serviceId: values.serviceId,
+  });
+
+  if (!description.trim()) {
+    return {
+      status: "error",
+      message: "Each line item needs a catalog selection or description.",
+      fieldErrors: {
+        description: ["Each line item needs a catalog selection or description."],
+      },
+    };
+  }
+
   const { error } = await supabase.rpc("add_job_order_item", {
     p_job_order_id: values.jobOrderId,
     p_item_type: values.itemType,
     p_product_id: values.productId || null,
     p_service_id: values.serviceId || null,
-    p_description: values.description,
+    p_description: description,
     p_quantity: toNumeric(values.quantity),
     p_unit_price: toNumeric(values.unitPrice),
   });
@@ -237,7 +255,7 @@ export async function updateJobOrderItemAction(
 
   const { error } = await supabase.rpc("update_job_order_item", {
     p_job_order_item_id: values.jobOrderItemId,
-    p_description: values.description,
+    p_description: values.description.trim() || beforeItem.description,
     p_quantity: toNumeric(values.quantity),
     p_unit_price: toNumeric(values.unitPrice),
   });

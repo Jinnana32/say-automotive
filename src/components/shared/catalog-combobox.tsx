@@ -9,8 +9,9 @@ import {
   type ComponentProps,
   type ReactNode,
 } from "react";
-import { Check, ChevronDown, Search } from "lucide-react";
+import { Check, ChevronDown, Plus, Search } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   filterCatalogOptions,
@@ -19,6 +20,14 @@ import {
   type CatalogComboboxOption,
 } from "@/lib/catalog/combobox-options";
 import { cn } from "@/lib/utils";
+
+export type CatalogComboboxCreateAction = {
+  label: string;
+  renderDialog: (controls: {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+  }) => ReactNode;
+};
 
 export function CatalogCombobox({
   id,
@@ -56,13 +65,14 @@ export function CatalogCombobox({
     ComponentProps<typeof Input>,
     "id" | "value" | "disabled" | "placeholder" | "autoComplete" | "className" | "onChange" | "onFocus" | "onBlur" | "onKeyDown"
   >;
-  createAction?: ReactNode;
+  createAction?: CatalogComboboxCreateAction;
 }) {
   const listboxId = useId();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const selectedOption = findCatalogOption(options, value);
   const [query, setQuery] = useState(selectedOption?.label ?? "");
   const [isOpen, setIsOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const deferredQuery = useDeferredValue(query);
   const visibleOptions = loading ? [] : filterCatalogOptions(deferredQuery, options);
@@ -75,6 +85,10 @@ export function CatalogCombobox({
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
+      if (isCreateDialogOpen) {
+        return;
+      }
+
       if (!containerRef.current?.contains(event.target as Node)) {
         setIsOpen(false);
       }
@@ -82,7 +96,20 @@ export function CatalogCombobox({
 
     document.addEventListener("mousedown", handlePointerDown);
     return () => document.removeEventListener("mousedown", handlePointerDown);
-  }, []);
+  }, [isCreateDialogOpen]);
+
+  function openCreateDialog() {
+    setIsOpen(false);
+    setIsCreateDialogOpen(true);
+  }
+
+  function handleCreateDialogOpenChange(nextOpen: boolean) {
+    setIsCreateDialogOpen(nextOpen);
+
+    if (!nextOpen) {
+      setActiveIndex(-1);
+    }
+  }
 
   function handleSelect(option: CatalogComboboxOption) {
     onValueChange(option.id);
@@ -107,6 +134,10 @@ export function CatalogCombobox({
       ref={containerRef}
       className={cn("space-y-2", className)}
       onBlurCapture={(event) => {
+        if (isCreateDialogOpen) {
+          return;
+        }
+
         if (!containerRef.current?.contains(event.relatedTarget as Node | null)) {
           setIsOpen(false);
 
@@ -257,10 +288,33 @@ export function CatalogCombobox({
           )}
 
           {createAction ? (
-            <div className="border-t border-border/70 bg-muted/20 px-2 py-2">{createAction}</div>
+            <div className="border-t border-border/70 bg-muted/20 px-2 py-2">
+              <Button
+                type="button"
+                variant="addSubtle"
+                size="sm"
+                className="w-full"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  openCreateDialog();
+                }}
+              >
+                <Plus className="size-4" />
+                {createAction.label}
+              </Button>
+            </div>
           ) : null}
         </div>
       ) : null}
+
+      {createAction
+        ? createAction.renderDialog({
+            open: isCreateDialogOpen,
+            onOpenChange: handleCreateDialogOpenChange,
+          })
+        : null}
     </div>
   );
 }

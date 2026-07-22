@@ -41,8 +41,6 @@ export default async function StaffPage({ searchParams }: StaffPageProps) {
       />
 
       <DataTableCard
-        title="Staff roster"
-        description={`${pagination.totalItems} staff record${pagination.totalItems === 1 ? "" : "s"} in the current view.`}
         toolbar={
           <DataTableFilters
             key={`${search}:${role}`}

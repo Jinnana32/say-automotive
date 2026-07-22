@@ -104,10 +104,6 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
       </MetricGrid>
 
       <DataTableCard
-        title="Stock balances"
-        description={`${stockPagination.totalItems} product${
-          stockPagination.totalItems === 1 ? "" : "s"
-        } in the current stock view.`}
         contentClassName="p-0"
         toolbar={
           <DataTableFilters
@@ -232,10 +228,6 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
       </DataTableCard>
 
       <DataTableCard
-        title="Recent stock movements"
-        description={`${movementPagination.totalItems} movement${
-          movementPagination.totalItems === 1 ? "" : "s"
-        } matched the current search and movement filters.`}
         contentClassName="p-0"
         footer={
           <DataTablePagination

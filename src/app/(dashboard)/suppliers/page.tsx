@@ -40,8 +40,6 @@ export default async function SuppliersPage({ searchParams }: SuppliersPageProps
       />
 
       <DataTableCard
-        title="Supplier directory"
-        description={`${pagination.totalItems} supplier${pagination.totalItems === 1 ? "" : "s"} matched.`}
         toolbar={
           <DataTableFilters
             key={search}

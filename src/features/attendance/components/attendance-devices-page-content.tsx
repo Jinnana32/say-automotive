@@ -100,8 +100,6 @@ export function AttendanceDevicesPageContent({
       </MetricGrid>
 
       <DataTableCard
-        title="Registered devices"
-        description={`${pagination.totalItems} device${pagination.totalItems === 1 ? "" : "s"} in the current view.`}
         contentClassName="p-0"
         toolbar={
           <DataTableFilters

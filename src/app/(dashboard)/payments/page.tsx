@@ -44,8 +44,6 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
       />
 
       <DataTableCard
-        title="Payment ledger"
-        description={`${pagination.totalItems} payment${pagination.totalItems === 1 ? "" : "s"} in the current view.`}
         toolbar={
           <DataTableFilters
             key={`${search}:${paymentMethod}`}

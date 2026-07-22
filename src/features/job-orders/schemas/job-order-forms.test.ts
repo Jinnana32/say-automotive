@@ -50,6 +50,34 @@ describe("job order forms", () => {
     expect(parsed.success).toBe(false);
   });
 
+  it("accepts product additional items without an explicit description", () => {
+    const parsed = additionalJobOrderItemSchema.safeParse({
+      jobOrderId: "34c25057-b0f8-4da0-9a27-c1792efa2ebd",
+      itemType: "product",
+      productId: "9868e516-a49f-4fe2-86d4-c5f84cd6f18a",
+      serviceId: "",
+      description: "",
+      quantity: "1",
+      unitPrice: "1200",
+    });
+
+    expect(parsed.success).toBe(true);
+  });
+
+  it("rejects labor additional items without a description", () => {
+    const parsed = additionalJobOrderItemSchema.safeParse({
+      jobOrderId: "34c25057-b0f8-4da0-9a27-c1792efa2ebd",
+      itemType: "labor",
+      productId: "",
+      serviceId: "",
+      description: "",
+      quantity: "1",
+      unitPrice: "1200",
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+
   it("rejects additional item unit prices beyond four decimal places", () => {
     const parsed = additionalJobOrderItemSchema.safeParse({
       jobOrderId: "34c25057-b0f8-4da0-9a27-c1792efa2ebd",

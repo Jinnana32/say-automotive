@@ -381,31 +381,38 @@ export function QuotationForm({
                               });
                             }}
                             createAction={
-                              options.permissions.canCreateProducts ? (
-                                <QuickCreateProductDialog
-                                  triggerLabel="Create New Product"
-                                  initialOptions={options.productFormOptions ?? undefined}
-                                  onCreated={(product) => {
-                                    setProductOptions((current) => {
-                                      const nextProduct = {
-                                        id: product.id,
-                                        label: product.label,
-                                        sku: product.sku,
-                                        unitPrice: product.unitPrice,
-                                      };
+                              options.permissions.canCreateProducts
+                                ? {
+                                    label: "Create New Product",
+                                    renderDialog: ({ open, onOpenChange }) => (
+                                      <QuickCreateProductDialog
+                                        open={open}
+                                        onOpenChange={onOpenChange}
+                                        showTrigger={false}
+                                        initialOptions={options.productFormOptions ?? undefined}
+                                        onCreated={(product) => {
+                                          setProductOptions((current) => {
+                                            const nextProduct = {
+                                              id: product.id,
+                                              label: product.label,
+                                              sku: product.sku,
+                                              unitPrice: product.unitPrice,
+                                            };
 
-                                      return dedupeOptionsById([...current, nextProduct]);
-                                    });
-                                    updateItem(setItems, item.key, {
-                                      itemType: "product",
-                                      productId: product.id,
-                                      serviceId: "",
-                                      description: product.label,
-                                      unitPrice: formatMoneyInputValue(product.unitPrice),
-                                    });
-                                  }}
-                                />
-                              ) : null
+                                            return dedupeOptionsById([...current, nextProduct]);
+                                          });
+                                          updateItem(setItems, item.key, {
+                                            itemType: "product",
+                                            productId: product.id,
+                                            serviceId: "",
+                                            description: product.label,
+                                            unitPrice: formatMoneyInputValue(product.unitPrice),
+                                          });
+                                        }}
+                                      />
+                                    ),
+                                  }
+                                : undefined
                             }
                           />
                         </div>
@@ -455,30 +462,37 @@ export function QuotationForm({
                               });
                             }}
                             createAction={
-                              options.permissions.canCreateServices ? (
-                                <QuickCreateServiceDialog
-                                  triggerLabel="Create New Service"
-                                  onCreated={(service) => {
-                                    setServiceOptions((current) => {
-                                      const nextService = {
-                                        id: service.id,
-                                        label: service.label,
-                                        category: service.category,
-                                        unitPrice: service.unitPrice,
-                                      };
+                              options.permissions.canCreateServices
+                                ? {
+                                    label: "Create New Service",
+                                    renderDialog: ({ open, onOpenChange }) => (
+                                      <QuickCreateServiceDialog
+                                        open={open}
+                                        onOpenChange={onOpenChange}
+                                        showTrigger={false}
+                                        onCreated={(service) => {
+                                          setServiceOptions((current) => {
+                                            const nextService = {
+                                              id: service.id,
+                                              label: service.label,
+                                              category: service.category,
+                                              unitPrice: service.unitPrice,
+                                            };
 
-                                      return dedupeOptionsById([...current, nextService]);
-                                    });
-                                    updateItem(setItems, item.key, {
-                                      itemType: "service",
-                                      serviceId: service.id,
-                                      productId: "",
-                                      description: service.label,
-                                      unitPrice: formatMoneyInputValue(service.unitPrice),
-                                    });
-                                  }}
-                                />
-                              ) : null
+                                            return dedupeOptionsById([...current, nextService]);
+                                          });
+                                          updateItem(setItems, item.key, {
+                                            itemType: "service",
+                                            serviceId: service.id,
+                                            productId: "",
+                                            description: service.label,
+                                            unitPrice: formatMoneyInputValue(service.unitPrice),
+                                          });
+                                        }}
+                                      />
+                                    ),
+                                  }
+                                : undefined
                             }
                           />
                         </div>
@@ -504,18 +518,17 @@ export function QuotationForm({
 
                       {item.itemType !== "labor" ? (
                         <div className="space-y-2 xl:col-span-2">
-                          <Label required>Description</Label>
+                          <Label optional>Description</Label>
                           <Input
                             value={item.description}
                             onChange={(event) =>
                               updateItem(setItems, item.key, { description: event.target.value })
                             }
-                            placeholder="Description"
+                            placeholder="Optional override for the catalog item name"
                             className={fieldControlClassName(state.fieldErrors, "items")}
                             {...fieldAriaProps({
                               errors: state.fieldErrors,
                               name: "items",
-                              required: true,
                               errorId: fieldErrorId("items"),
                             })}
                           />

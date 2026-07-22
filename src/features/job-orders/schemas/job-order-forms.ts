@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { isNonNegativeMoneyInput } from "@/lib/currency";
+import { refineCatalogLineItemDescription } from "@/lib/catalog/line-item-descriptions";
 
 export const jobOrderDetailsSchema = z
   .object({
@@ -71,7 +72,7 @@ export const additionalJobOrderItemSchema = z
     itemType: z.enum(["product", "service", "labor"]),
     productId: z.string(),
     serviceId: z.string(),
-    description: z.string().trim().min(1, "Description is required.").max(500, "Description is too long."),
+    description: z.string().trim().max(500, "Description is too long."),
     quantity: z.string(),
     unitPrice: z.string(),
   })
@@ -110,6 +111,16 @@ export const additionalJobOrderItemSchema = z
         path: ["serviceId"],
       });
     }
+
+    refineCatalogLineItemDescription(
+      {
+        itemType: value.itemType,
+        description: value.description,
+        productId: value.productId,
+        serviceId: value.serviceId,
+      },
+      ctx,
+    );
   });
 
 export const jobOrderItemEditSchema = z
@@ -119,7 +130,6 @@ export const jobOrderItemEditSchema = z
     description: z
       .string()
       .trim()
-      .min(1, "Description is required.")
       .max(500, "Description is too long."),
     quantity: z.string(),
     unitPrice: z.string(),

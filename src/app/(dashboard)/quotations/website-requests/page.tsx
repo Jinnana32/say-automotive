@@ -45,8 +45,6 @@ export default async function WebsiteQuoteRequestsPage({
       />
 
       <DataTableCard
-        title="Lead queue"
-        description={`${pagination.totalItems} request${pagination.totalItems === 1 ? "" : "s"} in the current view.`}
         toolbar={
           <DataTableFilters
             key={`${search}:${status}`}

@@ -57,10 +57,7 @@ export default async function PosPage() {
 
       <PosTerminal terminal={terminal} />
 
-      <DataTableCard
-        title="Recent completed sales"
-        description="Latest POS transactions and their invoice/payment state."
-      >
+      <DataTableCard>
           {recentSales.length === 0 ? (
             <EmptyState
               title="No POS sales yet"

@@ -92,10 +92,6 @@ export function PayrollPageContent({
       </MetricGrid>
 
       <DataTableCard
-        title="Payroll periods"
-        description={`${periodPagination.totalItems} payroll period${
-          periodPagination.totalItems === 1 ? "" : "s"
-        } in the current view.`}
         action={<PayrollPeriodDialog />}
         toolbar={
           <DataTableFilters
@@ -198,8 +194,6 @@ export function PayrollPageContent({
       </DataTableCard>
 
       <DataTableCard
-        title="Compensation setup"
-        description={`Showing ${compensationPagination.totalItems} of ${totalCompensationRosterCount} payroll-eligible staff records.`}
         toolbar={
           <DataTableFilters
             key={filters.staffSearch}
@@ -221,6 +215,7 @@ export function PayrollPageContent({
             startItem={compensationPagination.startItem}
             endItem={compensationPagination.endItem}
             pageParamName="staffPage"
+            summaryNote={`${totalCompensationRosterCount} payroll-eligible staff total`}
           />
         }
       >
@@ -296,10 +291,7 @@ export function PayrollPageContent({
       </DataTableCard>
 
       {excludedPayrollStaff.length > 0 ? (
-        <DataTableCard
-          title="Not included in payroll yet"
-          description="Owner and admin staff are excluded by default. Open their staff record, turn on Include in payroll, then return here to set compensation."
-        >
+        <DataTableCard>
           <DataTableScroll>
             <Table>
               <TableHeader>

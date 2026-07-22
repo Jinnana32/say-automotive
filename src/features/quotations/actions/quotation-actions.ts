@@ -20,6 +20,11 @@ import {
   calculateQuotationSubtotal,
   toNumeric,
 } from "@/features/quotations/utils";
+import type { QuotationFormItem } from "@/features/quotations/types";
+import {
+  fetchCatalogLineItemLabelMaps,
+  resolveLineItemDescriptionFromMaps,
+} from "@/lib/catalog/line-item-descriptions";
 
 export async function createQuotationAction(
   _prevState: FormActionState = INITIAL_FORM_ACTION_STATE,
@@ -47,11 +52,18 @@ export async function reviseQuotationAction(
 
   const values = parsed.data;
   const { branchScope, context, supabase } = await getBranchScopedServerClient("quotations:write");
-  const subtotal = calculateQuotationSubtotal(values.items);
+  const enrichedItems = await enrichQuotationItemsWithDescriptions(supabase, values.items);
+
+  if (!enrichedItems.success) {
+    return enrichedItems.state;
+  }
+
+  const items = enrichedItems.items;
+  const subtotal = calculateQuotationSubtotal(items);
   const discount = toNumeric(values.discount);
   const tax = toNumeric(values.tax);
   const totalAmount = calculateQuotationGrandTotal({
-    items: values.items,
+    items,
     discount: values.discount,
     tax: values.tax,
   });
@@ -84,7 +96,7 @@ export async function reviseQuotationAction(
     };
   }
 
-  const rpcItems = values.items.map((item, index) => ({
+  const rpcItems = items.map((item, index) => ({
     line_number: index + 1,
     item_type: item.itemType,
     product_id: item.productId || null,
@@ -131,7 +143,7 @@ export async function reviseQuotationAction(
       discount,
       tax,
       totalAmount,
-      lineCount: values.items.length,
+      lineCount: items.length,
     },
   });
 
@@ -255,16 +267,23 @@ async function saveQuotation(formData: FormData): Promise<FormActionState> {
   const branchId = values.quotationId
     ? await getExistingQuotationBranchId(supabase, branchScope.selectedBranchId, values.quotationId)
     : branchScope.writeBranchId;
-  const subtotal = calculateQuotationSubtotal(values.items);
+  const enrichedItems = await enrichQuotationItemsWithDescriptions(supabase, values.items);
+
+  if (!enrichedItems.success) {
+    return enrichedItems.state;
+  }
+
+  const items = enrichedItems.items;
+  const subtotal = calculateQuotationSubtotal(items);
   const discount = toNumeric(values.discount);
   const tax = toNumeric(values.tax);
   const totalAmount = calculateQuotationGrandTotal({
-    items: values.items,
+    items,
     discount: values.discount,
     tax: values.tax,
   });
 
-  const rpcItems = values.items.map((item) => ({
+  const rpcItems = items.map((item) => ({
     item_type: item.itemType,
     product_id: item.productId || null,
     service_id: item.serviceId || null,
@@ -341,4 +360,70 @@ async function getExistingQuotationBranchId(
   }
 
   return data.branch_id;
+}
+
+async function enrichQuotationItemsWithDescriptions(
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
+  items: QuotationFormItem[],
+): Promise<
+  | { success: true; items: QuotationFormItem[] }
+  | { success: false; state: FormActionState }
+> {
+  const productIds = [
+    ...new Set(
+      items
+        .filter((item) => item.itemType === "product" && item.productId && !item.description.trim())
+        .map((item) => item.productId),
+    ),
+  ];
+  const serviceIds = [
+    ...new Set(
+      items
+        .filter((item) => item.itemType === "service" && item.serviceId && !item.description.trim())
+        .map((item) => item.serviceId),
+    ),
+  ];
+
+  try {
+    const { productLabels, serviceLabels } = await fetchCatalogLineItemLabelMaps(
+      supabase,
+      productIds,
+      serviceIds,
+    );
+
+    const enrichedItems = items.map((item) => ({
+      ...item,
+      description: resolveLineItemDescriptionFromMaps(item, productLabels, serviceLabels),
+    }));
+
+    const unresolvedItem = enrichedItems.find(
+      (item) => item.itemType !== "labor" && !item.description.trim(),
+    );
+
+    if (unresolvedItem) {
+      return {
+        success: false,
+        state: {
+          status: "error",
+          message: "Each line item needs a catalog selection or description.",
+          fieldErrors: {
+            items: ["Each line item needs a catalog selection or description."],
+          },
+        },
+      };
+    }
+
+    return {
+      success: true,
+      items: enrichedItems,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      state: {
+        status: "error",
+        message: error instanceof Error ? error.message : "Unable to resolve line item descriptions.",
+      },
+    };
+  }
 }

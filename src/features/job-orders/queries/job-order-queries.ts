@@ -28,6 +28,8 @@ import type {
   JobOrderMechanicOption,
 } from "@/features/job-orders/types";
 import { expandJobOrderStatusFilter } from "@/features/job-orders/utils";
+import { getProductFormOptions } from "@/features/products/queries/product-queries";
+import type { ProductFormOptionsData } from "@/features/products/types";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 /** Keep `.in(...)` URL payloads safely under PostgREST/gateway limits. */
@@ -311,8 +313,10 @@ export const getJobOrderItemCatalogOptions = cache(async (): Promise<{
   products: JobOrderFormOptions["products"];
   services: JobOrderFormOptions["services"];
   permissions: JobOrderFormOptions["permissions"];
+  productFormOptions: ProductFormOptionsData | null;
 }> => {
   const { branchScope, context, supabase } = await getBranchScopedServerClient("job_orders:write");
+  const canCreateProducts = context.capabilities.includes("products:write");
   const { data: catalogSettings, error: catalogSettingsError } = await (supabase as any)
     .from("business_settings")
     .select("allow_global_product_catalog, allow_global_service_catalog")
@@ -327,7 +331,7 @@ export const getJobOrderItemCatalogOptions = cache(async (): Promise<{
     allowGlobalProductCatalog: catalogSettings?.allow_global_product_catalog ?? false,
     allowGlobalServiceCatalog: catalogSettings?.allow_global_service_catalog ?? false,
   };
-  const [{ data: products, error: productsError }, { data: services, error: servicesError }] =
+  const [{ data: products, error: productsError }, { data: services, error: servicesError }, productFormOptions] =
     await Promise.all([
       applyCatalogVisibilityFilter(
         supabase
@@ -351,6 +355,7 @@ export const getJobOrderItemCatalogOptions = cache(async (): Promise<{
           includeGlobal: sharingSettings.allowGlobalServiceCatalog,
         },
       ),
+      canCreateProducts ? getProductFormOptions() : Promise.resolve(null),
     ]);
 
   if (productsError) {
@@ -365,9 +370,10 @@ export const getJobOrderItemCatalogOptions = cache(async (): Promise<{
     products: ((products ?? []) as ProductRow[]).map(mapProductRowToJobOrderOption),
     services: ((services ?? []) as ServiceRow[]).map(mapServiceRowToJobOrderOption),
     permissions: {
-      canCreateProducts: context.capabilities.includes("products:write"),
+      canCreateProducts,
       canCreateServices: context.capabilities.includes("services:write"),
     },
+    productFormOptions,
   };
 });
 

@@ -56,8 +56,6 @@ export default async function JobOrdersPage({ searchParams }: JobOrdersPageProps
       <FormStatusMessage message={error} />
 
       <DataTableCard
-        title="Job order board"
-        description={`${pagination.totalItems} job order${pagination.totalItems === 1 ? "" : "s"} in the current queue.`}
         toolbar={
           <DataTableFilters
             key={`${search}:${status}`}

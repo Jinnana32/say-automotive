@@ -94,10 +94,6 @@ export function ApprovedLeaveManagementSection({
       </MetricGrid>
 
       <DataTableCard
-        title="Approved leave"
-        description={`${leavePagination.totalItems} approved leave entr${
-          leavePagination.totalItems === 1 ? "y" : "ies"
-        } in the current view.`}
         className="min-w-0"
         action={<StaffLeaveDialog activeStaff={data.activeStaff} />}
         toolbar={

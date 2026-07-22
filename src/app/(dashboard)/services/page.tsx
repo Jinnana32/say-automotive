@@ -51,8 +51,6 @@ export default async function ServicesPage({
       />
 
       <DataTableCard
-        title="Service catalog"
-        description={`${pagination.totalItems} service${pagination.totalItems === 1 ? '' : 's'} matched.`}
         toolbar={
           <DataTableFilters
             key={search}

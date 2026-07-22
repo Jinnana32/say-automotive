@@ -55,6 +55,51 @@ describe("quotationFormSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("accepts product items without an explicit description", () => {
+    const result = quotationFormSchema.safeParse({
+      customerId: crypto.randomUUID(),
+      vehicleId: crypto.randomUUID(),
+      natureOfRepair: "",
+      inspectionNotes: "",
+      status: "draft",
+      discount: "0",
+      tax: "0",
+      items: [
+        createQuotationItem({
+          itemType: "product",
+          productId: crypto.randomUUID(),
+          description: "",
+          quantity: "1",
+          unitPrice: "1000.0000",
+        }),
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects labor items without a description", () => {
+    const result = quotationFormSchema.safeParse({
+      customerId: crypto.randomUUID(),
+      vehicleId: crypto.randomUUID(),
+      natureOfRepair: "",
+      inspectionNotes: "",
+      status: "draft",
+      discount: "0",
+      tax: "0",
+      items: [
+        createQuotationItem({
+          itemType: "labor",
+          description: "",
+          quantity: "1",
+          unitPrice: "500.0000",
+        }),
+      ],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
   it("rejects discounts larger than the computed subtotal", () => {
     const result = quotationFormSchema.safeParse({
       customerId: crypto.randomUUID(),

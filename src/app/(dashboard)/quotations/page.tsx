@@ -49,8 +49,6 @@ export default async function QuotationsPage({ searchParams }: QuotationsPagePro
       />
 
       <DataTableCard
-        title="Quotation queue"
-        description={`${pagination.totalItems} quotation${pagination.totalItems === 1 ? "" : "s"} in the current view.`}
         toolbar={
           <DataTableFilters
             key={`${search}:${status}`}

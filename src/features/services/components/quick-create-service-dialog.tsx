@@ -31,14 +31,29 @@ export function QuickCreateServiceDialog({
   triggerLabel = "Add new service",
   triggerVariant = "addSubtle",
   triggerSize = "sm",
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+  showTrigger = true,
 }: {
   onCreated: (service: ServiceInlineCreateResult) => void;
   triggerLabel?: string;
   triggerVariant?: ButtonProps["variant"];
   triggerSize?: ButtonProps["size"];
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  showTrigger?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [instanceKey, setInstanceKey] = useState(0);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+
+  const setOpen = (nextOpen: boolean) => {
+    if (!isControlled) {
+      setInternalOpen(nextOpen);
+    }
+    controlledOnOpenChange?.(nextOpen);
+  };
 
   useEffect(() => {
     if (!open) {
@@ -55,6 +70,7 @@ export function QuickCreateServiceDialog({
       triggerLabel={triggerLabel}
       triggerVariant={triggerVariant}
       triggerSize={triggerSize}
+      showTrigger={showTrigger}
     />
   );
 }
@@ -66,6 +82,7 @@ function QuickCreateServiceDialogForm({
   triggerLabel,
   triggerVariant,
   triggerSize,
+  showTrigger,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -73,6 +90,7 @@ function QuickCreateServiceDialogForm({
   triggerLabel: string;
   triggerVariant: ButtonProps["variant"];
   triggerSize: ButtonProps["size"];
+  showTrigger: boolean;
 }) {
   const [state, formAction] = useActionState(
     createInlineServiceAction,
@@ -108,17 +126,21 @@ function QuickCreateServiceDialogForm({
       size="md"
       open={open}
       onOpenChange={onOpenChange}
-      trigger={({ openDialog }) => (
-        <Button
-          type="button"
-          variant={triggerVariant}
-          size={triggerSize}
-          onClick={openDialog}
-        >
-          <Plus className="size-4" />
-          {triggerLabel}
-        </Button>
-      )}
+      trigger={
+        showTrigger
+          ? ({ openDialog }) => (
+              <Button
+                type="button"
+                variant={triggerVariant}
+                size={triggerSize}
+                onClick={openDialog}
+              >
+                <Plus className="size-4" />
+                {triggerLabel}
+              </Button>
+            )
+          : undefined
+      }
     >
       {({ closeDialog }) => (
         <form action={formAction} className="space-y-5">

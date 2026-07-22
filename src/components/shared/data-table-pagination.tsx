@@ -15,6 +15,7 @@ export function DataTablePagination({
   startItem,
   endItem,
   pageParamName = "page",
+  summaryNote,
   className,
 }: {
   page: number;
@@ -24,15 +25,11 @@ export function DataTablePagination({
   startItem: number;
   endItem: number;
   pageParamName?: string;
+  summaryNote?: string;
   className?: string;
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  if (totalItems === 0) {
-    return null;
-  }
-
   const pageItems = getVisiblePages(page, totalPages);
 
   function buildHref(nextPage: number) {
@@ -56,7 +53,10 @@ export function DataTablePagination({
       )}
     >
       <p className="text-sm text-muted-foreground">
-        Showing {startItem}-{endItem} of {totalItems} records
+        {totalItems === 0
+          ? "Showing 0 records"
+          : `Showing ${startItem}-${endItem} of ${totalItems} records`}
+        {summaryNote ? ` · ${summaryNote}` : ""}
         {totalItems > pageSize ? ` · Page ${page} of ${totalPages}` : ""}
       </p>
       {totalPages > 1 ? (

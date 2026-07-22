@@ -256,8 +256,6 @@ export function TimekeepingCalendarPageContent({
 
         <TabsContent value="holidays" className="space-y-6">
           <DataTableCard
-            title="Branch calendar dates"
-            description="These dates remove expected attendance for the whole branch and record how payroll should treat the day."
             action={
               <div className="flex flex-wrap items-center gap-2">
                 <PhilippineHolidayImportDialog existingHolidays={data.holidays} />

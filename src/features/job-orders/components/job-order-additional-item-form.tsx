@@ -21,6 +21,7 @@ import type { JobOrderDetailTab, JobOrderItemType } from "@/features/job-orders/
 import { addJobOrderItemAction } from "@/features/job-orders/actions/job-order-actions";
 import { QuickCreateProductDialog } from "@/features/products/components/quick-create-product-dialog";
 import { QuickCreateServiceDialog } from "@/features/services/components/quick-create-service-dialog";
+import type { ProductFormOptionsData } from "@/features/products/types";
 import { formatMoneyInputValue, MONEY_INPUT_STEP } from "@/lib/currency";
 import { mapProductOptionsToCatalog, mapServiceOptionsToCatalog } from "@/lib/catalog/combobox-options";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
@@ -28,6 +29,7 @@ import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
 type CatalogOptions = {
   products: Array<{ id: string; label: string; sku: string | null; unitPrice: number }>;
   services: Array<{ id: string; label: string; category: string | null; unitPrice: number }>;
+  productFormOptions: ProductFormOptionsData | null;
   permissions: {
     canCreateProducts: boolean;
     canCreateServices: boolean;
@@ -118,7 +120,7 @@ export function JobOrderAdditionalItemForm({
       return false;
     }
 
-    if (!description.trim()) {
+    if (isLaborType && !description.trim()) {
       return false;
     }
 
@@ -133,7 +135,7 @@ export function JobOrderAdditionalItemForm({
     }
 
     return true;
-  }, [description, isProductType, isServiceType, itemType, productId, quantity, serviceId, unitPrice]);
+  }, [description, isLaborType, isProductType, isServiceType, itemType, productId, quantity, serviceId, unitPrice]);
 
   return (
     <form action={formAction} className="space-y-5">
@@ -213,49 +215,57 @@ export function JobOrderAdditionalItemForm({
               setUnitPrice(formatMoneyInputValue(selected.price ?? 0));
             }}
             createAction={
-              catalogOptions?.permissions.canCreateProducts ? (
-                <QuickCreateProductDialog
-                  triggerLabel="Create New Product"
-                  onCreated={(product) => {
-                    setCatalogState((current) =>
-                      current.status === "ready"
-                        ? {
-                            status: "ready",
-                            error: null,
-                            options: {
-                              ...current.options,
-                              products: current.options.products.some(
-                                (entry) => entry.id === product.id,
-                              )
-                                ? current.options.products.map((entry) =>
-                                    entry.id === product.id
-                                      ? {
-                                          id: product.id,
-                                          label: product.label,
-                                          sku: product.sku,
-                                          unitPrice: product.unitPrice,
-                                        }
-                                      : entry,
-                                  )
-                                : [
-                                    ...current.options.products,
-                                    {
-                                      id: product.id,
-                                      label: product.label,
-                                      sku: product.sku,
-                                      unitPrice: product.unitPrice,
-                                    },
-                                  ],
-                            },
-                          }
-                        : current,
-                    );
-                    setProductId(product.id);
-                    setDescription(product.label);
-                    setUnitPrice(formatMoneyInputValue(product.unitPrice));
-                  }}
-                />
-              ) : null
+              catalogOptions?.permissions.canCreateProducts
+                ? {
+                    label: "Create New Product",
+                    renderDialog: ({ open, onOpenChange }) => (
+                      <QuickCreateProductDialog
+                        open={open}
+                        onOpenChange={onOpenChange}
+                        showTrigger={false}
+                        initialOptions={catalogOptions.productFormOptions ?? undefined}
+                        onCreated={(product) => {
+                          setCatalogState((current) =>
+                            current.status === "ready"
+                              ? {
+                                  status: "ready",
+                                  error: null,
+                                  options: {
+                                    ...current.options,
+                                    products: current.options.products.some(
+                                      (entry) => entry.id === product.id,
+                                    )
+                                      ? current.options.products.map((entry) =>
+                                          entry.id === product.id
+                                            ? {
+                                                id: product.id,
+                                                label: product.label,
+                                                sku: product.sku,
+                                                unitPrice: product.unitPrice,
+                                              }
+                                            : entry,
+                                        )
+                                      : [
+                                          ...current.options.products,
+                                          {
+                                            id: product.id,
+                                            label: product.label,
+                                            sku: product.sku,
+                                            unitPrice: product.unitPrice,
+                                          },
+                                        ],
+                                  },
+                                }
+                              : current,
+                          );
+                          setProductId(product.id);
+                          setDescription(product.label);
+                          setUnitPrice(formatMoneyInputValue(product.unitPrice));
+                        }}
+                      />
+                    ),
+                  }
+                : undefined
             }
           />
           <FieldError errors={state.fieldErrors} name="productId" id={fieldErrorId("productId")} />
@@ -292,49 +302,56 @@ export function JobOrderAdditionalItemForm({
               setUnitPrice(formatMoneyInputValue(selected.price ?? 0));
             }}
             createAction={
-              catalogOptions?.permissions.canCreateServices ? (
-                <QuickCreateServiceDialog
-                  triggerLabel="Create New Service"
-                  onCreated={(service) => {
-                    setCatalogState((current) =>
-                      current.status === "ready"
-                        ? {
-                            status: "ready",
-                            error: null,
-                            options: {
-                              ...current.options,
-                              services: current.options.services.some(
-                                (entry) => entry.id === service.id,
-                              )
-                                ? current.options.services.map((entry) =>
-                                    entry.id === service.id
-                                      ? {
-                                          id: service.id,
-                                          label: service.label,
-                                          category: service.category,
-                                          unitPrice: service.unitPrice,
-                                        }
-                                      : entry,
-                                  )
-                                : [
-                                    ...current.options.services,
-                                    {
-                                      id: service.id,
-                                      label: service.label,
-                                      category: service.category,
-                                      unitPrice: service.unitPrice,
-                                    },
-                                  ],
-                            },
-                          }
-                        : current,
-                    );
-                    setServiceId(service.id);
-                    setDescription(service.label);
-                    setUnitPrice(formatMoneyInputValue(service.unitPrice));
-                  }}
-                />
-              ) : null
+              catalogOptions?.permissions.canCreateServices
+                ? {
+                    label: "Create New Service",
+                    renderDialog: ({ open, onOpenChange }) => (
+                      <QuickCreateServiceDialog
+                        open={open}
+                        onOpenChange={onOpenChange}
+                        showTrigger={false}
+                        onCreated={(service) => {
+                          setCatalogState((current) =>
+                            current.status === "ready"
+                              ? {
+                                  status: "ready",
+                                  error: null,
+                                  options: {
+                                    ...current.options,
+                                    services: current.options.services.some(
+                                      (entry) => entry.id === service.id,
+                                    )
+                                      ? current.options.services.map((entry) =>
+                                          entry.id === service.id
+                                            ? {
+                                                id: service.id,
+                                                label: service.label,
+                                                category: service.category,
+                                                unitPrice: service.unitPrice,
+                                              }
+                                            : entry,
+                                        )
+                                      : [
+                                          ...current.options.services,
+                                          {
+                                            id: service.id,
+                                            label: service.label,
+                                            category: service.category,
+                                            unitPrice: service.unitPrice,
+                                          },
+                                        ],
+                                  },
+                                }
+                              : current,
+                          );
+                          setServiceId(service.id);
+                          setDescription(service.label);
+                          setUnitPrice(formatMoneyInputValue(service.unitPrice));
+                        }}
+                      />
+                    ),
+                  }
+                : undefined
             }
           />
           <FieldError errors={state.fieldErrors} name="serviceId" id={fieldErrorId("serviceId")} />
@@ -358,7 +375,7 @@ export function JobOrderAdditionalItemForm({
       {!isServiceType ? <input type="hidden" name="serviceId" value="" /> : null}
 
       <div className="space-y-2">
-        <Label htmlFor="description" required>
+        <Label htmlFor="description" optional={!isLaborType} required={isLaborType}>
           Description
         </Label>
         <Input
@@ -366,12 +383,16 @@ export function JobOrderAdditionalItemForm({
           name="description"
           value={description}
           onChange={(event) => setDescription(event.target.value)}
-          placeholder="Describe the additional charge"
+          placeholder={
+            isLaborType
+              ? "Describe the manual labor charge"
+              : "Optional override for the catalog item name"
+          }
           className={fieldControlClassName(state.fieldErrors, "description")}
           {...fieldAriaProps({
             errors: state.fieldErrors,
             name: "description",
-            required: true,
+            required: isLaborType,
             errorId: fieldErrorId("description"),
           })}
         />

@@ -133,10 +133,7 @@ export function PayrollPeriodDetail({ data }: { data: PayrollPeriodDetailData })
         </div>
       </SectionCard>
 
-      <DataTableCard
-        title="Payroll summary"
-        description={`${items.length} payroll row${items.length === 1 ? "" : "s"} shown. Warnings stay visible for review, but the cut itself is the primary workflow now.`}
-      >
+      <DataTableCard>
         {items.length === 0 ? (
           <EmptyState
             title="No payroll cut generated yet"

@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import type { QuotationFormItem, QuotationFormValues } from "@/features/quotations/types";
 import { calculateQuotationSubtotal, toNumeric } from "@/features/quotations/utils";
+import { refineCatalogLineItemDescription } from "@/lib/catalog/line-item-descriptions";
 import { isNonNegativeMoneyInput } from "@/lib/currency";
 
 const quotationItemSchema = z
@@ -10,7 +11,7 @@ const quotationItemSchema = z
     itemType: z.enum(["product", "service", "labor"]),
     productId: z.string().trim(),
     serviceId: z.string().trim(),
-    description: z.string().trim().min(1, "Description is required."),
+    description: z.string().trim(),
     quantity: z
       .string()
       .trim()
@@ -36,6 +37,8 @@ const quotationItemSchema = z
         message: "Select a service for service line items.",
       });
     }
+
+    refineCatalogLineItemDescription(value, ctx);
   });
 
 export const quotationFormSchema = z

@@ -45,8 +45,6 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
       />
 
       <DataTableCard
-        title="Invoice register"
-        description={`${pagination.totalItems} invoice${pagination.totalItems === 1 ? "" : "s"} in the current view.`}
         toolbar={
           <DataTableFilters
             key={`${search}:${status}`}

@@ -53,8 +53,6 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
       <FormStatusMessage message={error} />
 
       <DataTableCard
-        title="Customer directory"
-        description={`${pagination.totalItems} ${formatCustomerDirectoryLabel(status, pagination.totalItems)} in the workshop database.`}
         toolbar={
           <DataTableFilters
             key={`${search}:${status}`}
@@ -182,21 +180,4 @@ function formatCustomerContactNumbers(customer: CustomerListItem) {
   }
 
   return customer.contactNumber ?? customer.contactNumberSecondary ?? "—";
-}
-
-function formatCustomerDirectoryLabel(
-  status: "active" | "inactive" | "",
-  totalItems: number,
-) {
-  const noun = totalItems === 1 ? "record" : "records";
-
-  if (status === "inactive") {
-    return `inactive ${noun}`;
-  }
-
-  if (status === "") {
-    return noun;
-  }
-
-  return `active ${noun}`;
 }

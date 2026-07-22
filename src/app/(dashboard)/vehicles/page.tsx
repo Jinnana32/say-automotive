@@ -53,8 +53,6 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
       <FormStatusMessage message={error} />
 
       <DataTableCard
-        title="Vehicle registry"
-        description={`${pagination.totalItems} vehicle record${pagination.totalItems === 1 ? "" : "s"} matched.`}
         toolbar={
           <DataTableFilters
             key={`${search}:${customerId ?? ""}`}

@@ -103,10 +103,6 @@ export function AttendanceAmendmentsPageContent({
       </MetricGrid>
 
       <DataTableCard
-        title="Amendment review queue"
-        description={`${pagination.totalItems} amendment request${
-          pagination.totalItems === 1 ? "" : "s"
-        } in the current view.`}
         className="min-w-0"
         contentClassName="p-0"
         toolbar={

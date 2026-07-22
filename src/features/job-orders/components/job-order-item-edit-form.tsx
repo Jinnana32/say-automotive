@@ -38,8 +38,10 @@ export function JobOrderItemEditForm({
     unitPrice: formatMoneyInputValue(item.unitPrice),
   });
 
+  const isLaborItem = item.itemType === "labor";
+
   const isFormValid = useMemo(() => {
-    if (!values.description.trim()) {
+    if (isLaborItem && !values.description.trim()) {
       return false;
     }
 
@@ -54,7 +56,7 @@ export function JobOrderItemEditForm({
     }
 
     return true;
-  }, [values.description, values.quantity, values.unitPrice]);
+  }, [isLaborItem, values.description, values.quantity, values.unitPrice]);
 
   const hasUsageHistory = item.inventoryTracking?.netUsedQuantity ? item.inventoryTracking.netUsedQuantity > 0 : false;
 
@@ -86,7 +88,7 @@ export function JobOrderItemEditForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description" required>
+        <Label htmlFor="description" optional={!isLaborItem} required={isLaborItem}>
           Description
         </Label>
         <Input
@@ -94,11 +96,16 @@ export function JobOrderItemEditForm({
           name="description"
           value={values.description}
           onChange={(event) => updateFormValue("description", event.target.value)}
+          placeholder={
+            isLaborItem
+              ? "Describe the manual labor charge"
+              : "Optional override for the line item description"
+          }
           className={fieldControlClassName(state.fieldErrors, "description")}
           {...fieldAriaProps({
             errors: state.fieldErrors,
             name: "description",
-            required: true,
+            required: isLaborItem,
             errorId: fieldErrorId("description"),
           })}
         />

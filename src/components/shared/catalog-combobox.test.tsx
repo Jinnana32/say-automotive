@@ -84,4 +84,49 @@ describe("CatalogCombobox", () => {
 
     expect(screen.getByRole("textbox")).toHaveValue("Engine Oil 5W-30");
   });
+
+  it("keeps the create dialog open after closing the dropdown", () => {
+    function TestHarness() {
+      const [value, setValue] = useState("");
+
+      return (
+        <CatalogCombobox
+          id="catalog-item"
+          value={value}
+          onValueChange={setValue}
+          options={OPTIONS}
+          createAction={{
+            label: "Create New Product",
+            renderDialog: ({ open, onOpenChange }) =>
+              open ? (
+                <div role="dialog" aria-label="Create product">
+                  <input aria-label="Product name" />
+                  <button type="button" onClick={() => onOpenChange(false)}>
+                    Close
+                  </button>
+                </div>
+              ) : null,
+          }}
+        />
+      );
+    }
+
+    render(<TestHarness />);
+
+    const input = screen.getByRole("textbox");
+    fireEvent.focus(input);
+    fireEvent.click(screen.getByRole("button", { name: /Create New Product/i }));
+
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+
+    const dialog = screen.getByRole("dialog", { name: /Create product/i });
+    const nameInput = screen.getByRole("textbox", { name: /Product name/i });
+
+    fireEvent.mouseDown(nameInput);
+    fireEvent.click(nameInput);
+    fireEvent.change(nameInput, { target: { value: "Brake Pads" } });
+
+    expect(dialog).toBeInTheDocument();
+    expect(nameInput).toHaveValue("Brake Pads");
+  });
 });
