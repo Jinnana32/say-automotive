@@ -218,11 +218,12 @@ export function JobOrderAdditionalItemForm({
               catalogOptions?.permissions.canCreateProducts
                 ? {
                     label: "Create New Product",
-                    renderDialog: ({ open, onOpenChange }) => (
+                    renderDialog: ({ open, onOpenChange, suggestedName }) => (
                       <QuickCreateProductDialog
                         open={open}
                         onOpenChange={onOpenChange}
                         showTrigger={false}
+                        initialName={suggestedName}
                         initialOptions={catalogOptions.productFormOptions ?? undefined}
                         onCreated={(product) => {
                           setCatalogState((current) =>
@@ -305,11 +306,12 @@ export function JobOrderAdditionalItemForm({
               catalogOptions?.permissions.canCreateServices
                 ? {
                     label: "Create New Service",
-                    renderDialog: ({ open, onOpenChange }) => (
+                    renderDialog: ({ open, onOpenChange, suggestedName }) => (
                       <QuickCreateServiceDialog
                         open={open}
                         onOpenChange={onOpenChange}
                         showTrigger={false}
+                        initialName={suggestedName}
                         onCreated={(service) => {
                           setCatalogState((current) =>
                             current.status === "ready"

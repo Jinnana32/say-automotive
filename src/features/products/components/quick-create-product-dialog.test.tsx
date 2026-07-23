@@ -5,7 +5,9 @@ import { QuickCreateProductDialog } from "@/features/products/components/quick-c
 import type { ProductFormOptionsData } from "@/features/products/types";
 
 vi.mock("@/features/products/actions/product-actions", () => ({
-  createInlineProductAction: vi.fn(),
+  createInlineProductAction: vi.fn(async () => ({
+    status: "idle",
+  })),
 }));
 
 const productFormOptions: ProductFormOptionsData = {
@@ -39,11 +41,11 @@ describe("QuickCreateProductDialog", () => {
     fireEvent.click(screen.getByRole("button", { name: /Add new product/i }));
 
     expect(fetchSpy).not.toHaveBeenCalled();
-    expect(screen.getByLabelText("Base unit")).not.toBeDisabled();
+    expect(screen.getByLabelText(/Base unit/i)).not.toBeDisabled();
     expect(screen.getByRole("option", { name: "Piece (pc)" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Category")).not.toBeDisabled();
-    expect(screen.getByLabelText("Brand")).not.toBeDisabled();
-    expect(screen.getByLabelText("Supplier")).not.toBeDisabled();
+    expect(screen.getByLabelText(/Category/i)).not.toBeDisabled();
+    expect(screen.getByLabelText(/Brand/i)).not.toBeDisabled();
+    expect(screen.getByLabelText(/Supplier/i)).not.toBeDisabled();
   });
 
   it("shows a no-units fallback without blocking optional selects", () => {
@@ -62,15 +64,29 @@ describe("QuickCreateProductDialog", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Add new product/i }));
 
-    expect(screen.getByLabelText("Base unit")).toBeDisabled();
+    expect(screen.getByLabelText(/Base unit/i)).toBeDisabled();
     expect(
       screen.getByRole("option", { name: "No units available" }),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText("Category")).not.toBeDisabled();
-    expect(screen.getByLabelText("Brand")).not.toBeDisabled();
-    expect(screen.getByLabelText("Supplier")).not.toBeDisabled();
+    expect(screen.getByLabelText(/Category/i)).not.toBeDisabled();
+    expect(screen.getByLabelText(/Brand/i)).not.toBeDisabled();
+    expect(screen.getByLabelText(/Supplier/i)).not.toBeDisabled();
     expect(
       screen.getByRole("button", { name: "Create product" }),
     ).toBeDisabled();
+  });
+
+  it("prefills the product name when initialName is provided", () => {
+    render(
+      <QuickCreateProductDialog
+        open
+        showTrigger={false}
+        initialName="Relay"
+        initialOptions={productFormOptions}
+        onCreated={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByLabelText(/Product name/i)).toHaveValue("Relay");
   });
 });

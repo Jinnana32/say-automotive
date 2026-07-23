@@ -97,10 +97,10 @@ describe("CatalogCombobox", () => {
           options={OPTIONS}
           createAction={{
             label: "Create New Product",
-            renderDialog: ({ open, onOpenChange }) =>
+            renderDialog: ({ open, onOpenChange, suggestedName }) =>
               open ? (
                 <div role="dialog" aria-label="Create product">
-                  <input aria-label="Product name" />
+                  <input aria-label="Product name" defaultValue={suggestedName} />
                   <button type="button" onClick={() => onOpenChange(false)}>
                     Close
                   </button>

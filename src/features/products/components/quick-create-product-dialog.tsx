@@ -54,6 +54,7 @@ export function QuickCreateProductDialog({
   triggerVariant = "addSubtle",
   triggerSize = "sm",
   initialOptions = null,
+  initialName = "",
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
   showTrigger = true,
@@ -63,6 +64,7 @@ export function QuickCreateProductDialog({
   triggerVariant?: ButtonProps["variant"];
   triggerSize?: ButtonProps["size"];
   initialOptions?: ProductFormOptionsData | null;
+  initialName?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   showTrigger?: boolean;
@@ -95,6 +97,7 @@ export function QuickCreateProductDialog({
       triggerVariant={triggerVariant}
       triggerSize={triggerSize}
       initialOptions={initialOptions}
+      initialName={initialName}
       showTrigger={showTrigger}
     />
   );
@@ -108,6 +111,7 @@ function QuickCreateProductDialogForm({
   triggerVariant,
   triggerSize,
   initialOptions,
+  initialName,
   showTrigger,
 }: {
   open: boolean;
@@ -117,6 +121,7 @@ function QuickCreateProductDialogForm({
   triggerVariant: ButtonProps["variant"];
   triggerSize: ButtonProps["size"];
   initialOptions: ProductFormOptionsData | null;
+  initialName: string;
   showTrigger: boolean;
 }) {
   const [state, formAction] = useActionState(
@@ -129,7 +134,18 @@ function QuickCreateProductDialogForm({
       ? { status: "ready", data: initialOptions, error: null }
       : INITIAL_OPTIONS_STATE,
   );
-  const { values, updateFormValue } = useFormValues(INITIAL_VALUES);
+  const { values, updateFormValue } = useFormValues({
+    ...INITIAL_VALUES,
+    name: initialName.trim(),
+  });
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    updateFormValue("name", initialName.trim());
+  }, [initialName, open, updateFormValue]);
 
   useEffect(() => {
     if (!initialOptions) {

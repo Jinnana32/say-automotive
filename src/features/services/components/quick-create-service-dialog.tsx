@@ -31,6 +31,7 @@ export function QuickCreateServiceDialog({
   triggerLabel = "Add new service",
   triggerVariant = "addSubtle",
   triggerSize = "sm",
+  initialName = "",
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
   showTrigger = true,
@@ -39,6 +40,7 @@ export function QuickCreateServiceDialog({
   triggerLabel?: string;
   triggerVariant?: ButtonProps["variant"];
   triggerSize?: ButtonProps["size"];
+  initialName?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   showTrigger?: boolean;
@@ -70,6 +72,7 @@ export function QuickCreateServiceDialog({
       triggerLabel={triggerLabel}
       triggerVariant={triggerVariant}
       triggerSize={triggerSize}
+      initialName={initialName}
       showTrigger={showTrigger}
     />
   );
@@ -82,6 +85,7 @@ function QuickCreateServiceDialogForm({
   triggerLabel,
   triggerVariant,
   triggerSize,
+  initialName,
   showTrigger,
 }: {
   open: boolean;
@@ -90,6 +94,7 @@ function QuickCreateServiceDialogForm({
   triggerLabel: string;
   triggerVariant: ButtonProps["variant"];
   triggerSize: ButtonProps["size"];
+  initialName: string;
   showTrigger: boolean;
 }) {
   const [state, formAction] = useActionState(
@@ -97,7 +102,18 @@ function QuickCreateServiceDialogForm({
     INITIAL_INLINE_SERVICE_ACTION_STATE,
   );
   const handledCreatedServiceId = useRef<string | null>(null);
-  const { values, updateFormValue } = useFormValues(INITIAL_VALUES);
+  const { values, updateFormValue } = useFormValues({
+    ...INITIAL_VALUES,
+    name: initialName.trim(),
+  });
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    updateFormValue("name", initialName.trim());
+  }, [initialName, open, updateFormValue]);
 
   useEffect(() => {
     if (!open) {

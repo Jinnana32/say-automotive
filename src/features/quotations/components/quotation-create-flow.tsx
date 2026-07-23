@@ -807,11 +807,12 @@ export function QuotationCreateFlow({
                                     options.permissions.canCreateProducts
                                       ? {
                                           label: 'Create New Product',
-                                          renderDialog: ({ open, onOpenChange }) => (
+                                          renderDialog: ({ open, onOpenChange, suggestedName }) => (
                                             <QuickCreateProductDialog
                                               open={open}
                                               onOpenChange={onOpenChange}
                                               showTrigger={false}
+                                              initialName={suggestedName}
                                               initialOptions={
                                                 options.productFormOptions ?? undefined
                                               }
@@ -897,11 +898,12 @@ export function QuotationCreateFlow({
                                     options.permissions.canCreateServices
                                       ? {
                                           label: 'Create New Service',
-                                          renderDialog: ({ open, onOpenChange }) => (
+                                          renderDialog: ({ open, onOpenChange, suggestedName }) => (
                                             <QuickCreateServiceDialog
                                               open={open}
                                               onOpenChange={onOpenChange}
                                               showTrigger={false}
+                                              initialName={suggestedName}
                                               onCreated={(service) => {
                                                 setServiceOptions((current) => {
                                                   const nextService = {
