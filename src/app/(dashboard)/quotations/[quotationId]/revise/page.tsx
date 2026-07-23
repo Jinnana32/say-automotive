@@ -23,7 +23,10 @@ export default async function ReviseQuotationPage({ params }: ReviseQuotationPag
     notFound();
   }
 
-  const options = await getQuotationFormOptionsForQuotation(reviseContext.quotation);
+  const options = await getQuotationFormOptionsForQuotation(
+    reviseContext.quotation,
+    reviseContext.initialValues.items,
+  );
 
   if (!reviseContext.canRevise) {
     return (

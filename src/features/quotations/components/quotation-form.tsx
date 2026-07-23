@@ -11,6 +11,7 @@ import {
   fieldAriaProps,
   fieldControlClassName,
   fieldErrorId,
+  fieldHasError,
   formSelectClassName,
 } from "@/components/shared/form-status";
 import { AddEntryButton } from "@/components/shared/add-entry-button";
@@ -26,6 +27,11 @@ import { QuickCreateProductDialog } from "@/features/products/components/quick-c
 import { serializeQuotationItems } from "@/features/quotations/schemas/quotation-form-schema";
 import { QuickCreateServiceDialog } from "@/features/services/components/quick-create-service-dialog";
 import { QuotationTotalsFields } from "@/features/quotations/components/quotation-totals-fields";
+import {
+  getQuotationLineCatalogDraftLabel,
+  getQuotationLineCatalogIssues,
+  isQuotationLineMissingCatalogLink,
+} from "@/features/quotations/line-item-catalog";
 import type {
   QuotationFormItem,
   QuotationFormOptions,
@@ -152,6 +158,18 @@ export function QuotationForm({
   const [serviceOptions, setServiceOptions] = useState(() =>
     dedupeOptionsById(options.services),
   );
+  const catalogIssueKeys = useMemo(
+    () => new Set(getQuotationLineCatalogIssues(items).map((issue) => issue.key)),
+    [items],
+  );
+  const hasLegacyUnlinkedLines = useMemo(
+    () =>
+      items.some(
+        (item) =>
+          isQuotationLineMissingCatalogLink(item) && Boolean(item.description.trim()),
+      ),
+    [items],
+  );
 
   const { subtotal, discountAmount, taxAmount, grandTotal } = calculateQuotationTotals({
     items,
@@ -161,7 +179,15 @@ export function QuotationForm({
   });
 
   return (
-    <form action={formActionState} className="space-y-6">
+    <form
+      action={formActionState}
+      className="space-y-6"
+      onSubmit={(event) => {
+        if (getQuotationLineCatalogIssues(items).length > 0) {
+          event.preventDefault();
+        }
+      }}
+    >
       {initialValues.quotationId ? (
         <input type="hidden" name="quotationId" value={initialValues.quotationId} />
       ) : null}
@@ -360,10 +386,21 @@ export function QuotationForm({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {hasLegacyUnlinkedLines ? (
+                <div className="rounded-2xl border border-amber-200/80 bg-amber-50/80 px-4 py-3 text-sm text-amber-950">
+                  Some lines show a name but are not linked to the product or service catalog yet.
+                  Select a matching catalog item for each highlighted line, or use Create New Product/Service.
+                </div>
+              ) : null}
               {items.map((item, index) => {
                 const lineTotal = calculateQuotationLineTotal(item);
                 const filteredProducts = productOptions;
                 const filteredServices = serviceOptions;
+                const lineHasCatalogIssue =
+                  catalogIssueKeys.has(item.key) ||
+                  (fieldHasError(state.fieldErrors, "items") &&
+                    isQuotationLineMissingCatalogLink(item));
+                const catalogDraftLabel = getQuotationLineCatalogDraftLabel(item);
 
                 return (
                   <div key={item.key} className="rounded-[1.25rem] border border-border/70 bg-muted/20 p-4">
@@ -419,6 +456,8 @@ export function QuotationForm({
                             options={mapProductOptionsToCatalog(filteredProducts)}
                             placeholder="Search products"
                             emptyMessage="No matching products found."
+                            draftLabel={catalogDraftLabel}
+                            invalid={lineHasCatalogIssue}
                             inputClassName={fieldControlClassName(state.fieldErrors, "items")}
                             inputProps={fieldAriaProps({
                               errors: state.fieldErrors,
@@ -431,8 +470,12 @@ export function QuotationForm({
                                 updateItem(setItems, item.key, {
                                   productId: "",
                                   serviceId: "",
-                                  description: "",
-                                  unitPrice: formatMoneyInputValue(0),
+                                  ...(item.productId
+                                    ? {
+                                        description: "",
+                                        unitPrice: formatMoneyInputValue(0),
+                                      }
+                                    : {}),
                                 });
                                 return;
                               }
@@ -500,6 +543,8 @@ export function QuotationForm({
                             options={mapServiceOptionsToCatalog(filteredServices)}
                             placeholder="Search services"
                             emptyMessage="No matching services found."
+                            draftLabel={catalogDraftLabel}
+                            invalid={lineHasCatalogIssue}
                             inputClassName={fieldControlClassName(state.fieldErrors, "items")}
                             inputProps={fieldAriaProps({
                               errors: state.fieldErrors,
@@ -512,8 +557,12 @@ export function QuotationForm({
                                 updateItem(setItems, item.key, {
                                   productId: "",
                                   serviceId: "",
-                                  description: "",
-                                  unitPrice: formatMoneyInputValue(0),
+                                  ...(item.serviceId
+                                    ? {
+                                        description: "",
+                                        unitPrice: formatMoneyInputValue(0),
+                                      }
+                                    : {}),
                                 });
                                 return;
                               }

@@ -129,4 +129,21 @@ describe("CatalogCombobox", () => {
     expect(dialog).toBeInTheDocument();
     expect(nameInput).toHaveValue("Brake Pads");
   });
+
+  it("shows an unlinked hint when draft text is present without a catalog id", () => {
+    render(
+      <CatalogCombobox
+        id="catalog-item"
+        value=""
+        onValueChange={() => undefined}
+        options={OPTIONS}
+        draftLabel="Relay"
+      />,
+    );
+
+    expect(screen.getByRole("textbox")).toHaveValue("Relay");
+    expect(
+      screen.getByText(/Typed text alone is not saved/i),
+    ).toBeInTheDocument();
+  });
 });

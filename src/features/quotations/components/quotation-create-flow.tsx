@@ -40,6 +40,11 @@ import { QuickCreateProductDialog } from '@/features/products/components/quick-c
 import { QuickCreateServiceDialog } from '@/features/services/components/quick-create-service-dialog';
 import { QuotationTotalsFields } from '@/features/quotations/components/quotation-totals-fields';
 import {
+  getQuotationLineCatalogDraftLabel,
+  getQuotationLineCatalogIssues,
+  isQuotationLineMissingCatalogLink,
+} from '@/features/quotations/line-item-catalog';
+import {
   calculateQuotationLineTotal,
   calculateQuotationTotals,
   createQuotationItem,
@@ -153,6 +158,18 @@ export function QuotationCreateFlow({
     taxRate,
   });
   const canReview = isQuotationDraftReady(values);
+  const catalogIssueKeys = useMemo(
+    () => new Set(getQuotationLineCatalogIssues(values.items).map((issue) => issue.key)),
+    [values.items],
+  );
+  const hasLegacyUnlinkedLines = useMemo(
+    () =>
+      values.items.some(
+        (item) =>
+          isQuotationLineMissingCatalogLink(item) && Boolean(item.description.trim()),
+      ),
+    [values.items],
+  );
 
   return (
     <div className="space-y-6">
@@ -556,7 +573,15 @@ export function QuotationCreateFlow({
       {currentStep === 'items' ||
       currentStep === 'review' ||
       currentStep === 'summary' ? (
-        <form action={quotationFormAction} className="space-y-6">
+        <form
+          action={quotationFormAction}
+          className="space-y-6"
+          onSubmit={(event) => {
+            if (getQuotationLineCatalogIssues(values.items).length > 0) {
+              event.preventDefault();
+            }
+          }}
+        >
           <input type="hidden" name="customerId" value={values.customerId} />
           <input type="hidden" name="vehicleId" value={values.vehicleId} />
           <input
@@ -661,8 +686,17 @@ export function QuotationCreateFlow({
                       </p>
                     </div>
 
+                    {hasLegacyUnlinkedLines ? (
+                      <div className="rounded-2xl border border-amber-200/80 bg-amber-50/80 px-4 py-3 text-sm text-amber-950">
+                        Some lines show a name but are not linked to the product or service catalog yet.
+                        Select a matching catalog item for each highlighted line, or use Create New Product/Service.
+                      </div>
+                    ) : null}
+
                     {values.items.map((item, index) => {
                       const lineTotal = calculateQuotationLineTotal(item);
+                      const lineHasCatalogIssue = catalogIssueKeys.has(item.key);
+                      const catalogDraftLabel = getQuotationLineCatalogDraftLabel(item);
 
                       return (
                         <div
@@ -731,13 +765,19 @@ export function QuotationCreateFlow({
                                   options={mapProductOptionsToCatalog(productOptions)}
                                   placeholder="Search products"
                                   emptyMessage="No matching products found."
+                                  draftLabel={catalogDraftLabel}
+                                  invalid={lineHasCatalogIssue}
                                   onValueChange={(nextProductId) => {
                                     if (!nextProductId) {
                                       updateQuotationItem(setValues, item.key, {
                                         productId: '',
                                         serviceId: '',
-                                        description: '',
-                                        unitPrice: formatMoneyInputValue(0),
+                                        ...(item.productId
+                                          ? {
+                                              description: '',
+                                              unitPrice: formatMoneyInputValue(0),
+                                            }
+                                          : {}),
                                       });
                                       return;
                                     }
@@ -815,13 +855,19 @@ export function QuotationCreateFlow({
                                   options={mapServiceOptionsToCatalog(serviceOptions)}
                                   placeholder="Search services"
                                   emptyMessage="No matching services found."
+                                  draftLabel={catalogDraftLabel}
+                                  invalid={lineHasCatalogIssue}
                                   onValueChange={(nextServiceId) => {
                                     if (!nextServiceId) {
                                       updateQuotationItem(setValues, item.key, {
                                         productId: '',
                                         serviceId: '',
-                                        description: '',
-                                        unitPrice: formatMoneyInputValue(0),
+                                        ...(item.serviceId
+                                          ? {
+                                              description: '',
+                                              unitPrice: formatMoneyInputValue(0),
+                                            }
+                                          : {}),
                                       });
                                       return;
                                     }

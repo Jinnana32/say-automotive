@@ -25,6 +25,8 @@ import type {
   QuotationListItem,
 } from "@/features/quotations/types";
 import { dedupeOptionsById, mergeQuotationPartiesIntoFormOptions } from "@/features/quotations/utils";
+import { mergeQuotationCatalogIntoFormOptions } from "@/features/quotations/line-item-catalog";
+import type { QuotationFormItem } from "@/features/quotations/types";
 import { buildQuotationSearchOrConditions } from "@/features/quotations/quotation-search";
 import type { TableRow } from "@/types/database";
 
@@ -238,18 +240,35 @@ export async function getQuotationFormOptions(): Promise<QuotationFormOptions> {
 
 export async function getQuotationFormOptionsForQuotation(
   quotation: Pick<QuotationDetail, "customerId" | "customerName" | "vehicleId" | "vehicleLabel">,
+  lineItems: Array<Pick<QuotationFormItem, "itemType" | "productId" | "serviceId" | "description" | "unitPrice">> = [],
 ): Promise<QuotationFormOptions> {
   const { supabase } = await getBranchScopedServerClient("quotations:write");
   const baseOptions = await getQuotationFormOptions();
-  const [{ data: customer, error: customerError }, { data: vehicle, error: vehicleError }] =
-    await Promise.all([
-      supabase
-        .from("customers")
-        .select("id, display_name")
-        .eq("id", quotation.customerId)
-        .maybeSingle(),
-      supabase.from("vehicles").select("*").eq("id", quotation.vehicleId).maybeSingle(),
-    ]);
+  const productIds = [
+    ...new Set(lineItems.map((item) => item.productId).filter((productId) => productId.trim())),
+  ];
+  const serviceIds = [
+    ...new Set(lineItems.map((item) => item.serviceId).filter((serviceId) => serviceId.trim())),
+  ];
+  const [
+    { data: customer, error: customerError },
+    { data: vehicle, error: vehicleError },
+    { data: lineProducts, error: lineProductsError },
+    { data: lineServices, error: lineServicesError },
+  ] = await Promise.all([
+    supabase
+      .from("customers")
+      .select("id, display_name")
+      .eq("id", quotation.customerId)
+      .maybeSingle(),
+    supabase.from("vehicles").select("*").eq("id", quotation.vehicleId).maybeSingle(),
+    productIds.length > 0
+      ? supabase.from("products").select("*").in("id", productIds)
+      : Promise.resolve({ data: [], error: null }),
+    serviceIds.length > 0
+      ? supabase.from("services").select("*").in("id", serviceIds)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
 
   if (customerError) {
     throw new Error(customerError.message);
@@ -257,6 +276,14 @@ export async function getQuotationFormOptionsForQuotation(
 
   if (vehicleError) {
     throw new Error(vehicleError.message);
+  }
+
+  if (lineProductsError) {
+    throw new Error(lineProductsError.message);
+  }
+
+  if (lineServicesError) {
+    throw new Error(lineServicesError.message);
   }
 
   const mergedParties = mergeQuotationPartiesIntoFormOptions(baseOptions, {
@@ -267,11 +294,21 @@ export async function getQuotationFormOptionsForQuotation(
       ? mapVehicleRowToQuotationOption(vehicle as VehicleRow).label
       : quotation.vehicleLabel,
   });
+  const mergedCatalog = mergeQuotationCatalogIntoFormOptions(
+    baseOptions,
+    lineItems,
+    {
+      products: ((lineProducts ?? []) as ProductRow[]).map(mapProductRowToQuotationOption),
+      services: ((lineServices ?? []) as ServiceRow[]).map(mapServiceRowToQuotationOption),
+    },
+  );
 
   return {
     ...baseOptions,
     customers: mergedParties.customers,
     vehicles: mergedParties.vehicles,
+    products: mergedCatalog.products,
+    services: mergedCatalog.services,
   };
 }
 

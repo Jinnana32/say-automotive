@@ -21,7 +21,10 @@ export default async function EditQuotationPage({ params }: EditQuotationPagePro
     notFound();
   }
 
-  const options = await getQuotationFormOptionsForQuotation(quotation);
+  const options = await getQuotationFormOptionsForQuotation(
+    quotation,
+    mapQuotationDetailToFormValues(quotation).items,
+  );
 
   return (
     <div className="space-y-6">

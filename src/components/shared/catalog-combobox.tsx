@@ -26,6 +26,7 @@ export type CatalogComboboxCreateAction = {
   renderDialog: (controls: {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    suggestedName: string;
   }) => ReactNode;
 };
 
@@ -46,6 +47,8 @@ export function CatalogCombobox({
   inputClassName,
   inputProps,
   createAction,
+  draftLabel,
+  invalid = false,
 }: {
   id: string;
   name?: string;
@@ -66,6 +69,8 @@ export function CatalogCombobox({
     "id" | "value" | "disabled" | "placeholder" | "autoComplete" | "className" | "onChange" | "onFocus" | "onBlur" | "onKeyDown"
   >;
   createAction?: CatalogComboboxCreateAction;
+  draftLabel?: string;
+  invalid?: boolean;
 }) {
   const listboxId = useId();
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -73,15 +78,27 @@ export function CatalogCombobox({
   const [query, setQuery] = useState(selectedOption?.label ?? "");
   const [isOpen, setIsOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [createDialogSuggestedName, setCreateDialogSuggestedName] = useState("");
   const [activeIndex, setActiveIndex] = useState(-1);
   const deferredQuery = useDeferredValue(query);
   const visibleOptions = loading ? [] : filterCatalogOptions(deferredQuery, options);
   const activeOption =
     activeIndex >= 0 && activeIndex < visibleOptions.length ? visibleOptions[activeIndex] : null;
+  const isUnlinked = !value && Boolean(draftLabel?.trim() || query.trim());
 
   useEffect(() => {
-    setQuery(selectedOption?.label ?? "");
-  }, [selectedOption?.label, value]);
+    if (value) {
+      setQuery(selectedOption?.label ?? "");
+      return;
+    }
+
+    if (draftLabel?.trim()) {
+      setQuery(draftLabel);
+      return;
+    }
+
+    setQuery("");
+  }, [draftLabel, selectedOption?.label, value]);
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -99,6 +116,7 @@ export function CatalogCombobox({
   }, [isCreateDialogOpen]);
 
   function openCreateDialog() {
+    setCreateDialogSuggestedName(query.trim());
     setIsOpen(false);
     setIsCreateDialogOpen(true);
   }
@@ -165,7 +183,13 @@ export function CatalogCombobox({
           aria-controls={listboxId}
           aria-expanded={isOpen}
           aria-activedescendant={activeOption ? `${listboxId}-${activeIndex}` : undefined}
-          className={cn("pr-10 pl-9", inputClassName)}
+          className={cn(
+            "pr-10 pl-9",
+            inputClassName,
+            invalid || isUnlinked
+              ? "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20"
+              : null,
+          )}
           {...inputProps}
           onFocus={() => {
             setIsOpen(true);
@@ -237,6 +261,11 @@ export function CatalogCombobox({
       </div>
 
       {helperText ? <p className="text-xs text-muted-foreground">{helperText}</p> : null}
+      {isUnlinked ? (
+        <p className="text-xs text-destructive">
+          Select a catalog item from the list or use Create New. Typed text alone is not saved.
+        </p>
+      ) : null}
 
       {isOpen ? (
         <div
@@ -313,6 +342,7 @@ export function CatalogCombobox({
         ? createAction.renderDialog({
             open: isCreateDialogOpen,
             onOpenChange: handleCreateDialogOpenChange,
+            suggestedName: createDialogSuggestedName,
           })
         : null}
     </div>
