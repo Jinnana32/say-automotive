@@ -31,15 +31,17 @@ export function mapQuotationRowToListItem(
     year: row.vehicle_year_snapshot,
     plateNumber: row.vehicle_plate_number_snapshot,
   });
+  const resolvedCustomerName = row.customer_name_snapshot?.trim() || customerName;
+  const resolvedVehicleLabel = snapshotVehicleLabel || vehicleLabel;
 
   return {
     id: row.id,
     quotationNumber: row.quotation_number,
     branchId: row.branch_id,
     customerId: row.customer_id,
-    customerName: row.customer_name_snapshot ?? customerName,
+    customerName: resolvedCustomerName,
     vehicleId: row.vehicle_id,
-    vehicleLabel: snapshotVehicleLabel ?? vehicleLabel,
+    vehicleLabel: resolvedVehicleLabel,
     status: row.status,
     subtotal: row.subtotal,
     discount: row.discount,

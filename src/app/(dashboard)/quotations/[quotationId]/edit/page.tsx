@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/shared/page-header";
 import { QuotationForm } from "@/features/quotations/components/quotation-form";
 import { mapQuotationDetailToFormValues } from "@/features/quotations/mappers";
-import { getQuotationById, getQuotationFormOptions } from "@/features/quotations/queries/quotation-queries";
+import { getQuotationById, getQuotationFormOptionsForQuotation } from "@/features/quotations/queries/quotation-queries";
 
 export const dynamic = "force-dynamic";
 
@@ -15,14 +15,13 @@ type EditQuotationPageProps = {
 
 export default async function EditQuotationPage({ params }: EditQuotationPageProps) {
   const { quotationId } = await params;
-  const [quotation, options] = await Promise.all([
-    getQuotationById(quotationId),
-    getQuotationFormOptions(),
-  ]);
+  const quotation = await getQuotationById(quotationId);
 
   if (!quotation || quotation.status === "approved") {
     notFound();
   }
+
+  const options = await getQuotationFormOptionsForQuotation(quotation);
 
   return (
     <div className="space-y-6">
@@ -34,6 +33,10 @@ export default async function EditQuotationPage({ params }: EditQuotationPagePro
         mode="edit"
         options={options}
         initialValues={mapQuotationDetailToFormValues(quotation)}
+        partyContext={{
+          customerName: quotation.customerName,
+          vehicleLabel: quotation.vehicleLabel,
+        }}
       />
     </div>
   );

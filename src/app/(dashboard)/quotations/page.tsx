@@ -55,7 +55,7 @@ export default async function QuotationsPage({ searchParams }: QuotationsPagePro
             className="lg:grid lg:grid-cols-[minmax(0,1fr)_220px]"
             search={{
               value: search,
-              placeholder: "Search quotation number",
+              placeholder: "Search quotation, customer, or plate number",
             }}
             filters={[
               {

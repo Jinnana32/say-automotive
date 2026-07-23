@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { canReviseQuotation, calculateQuotationTotals, createQuotationItem } from "@/features/quotations/utils";
+import {
+  canReviseQuotation,
+  calculateQuotationTotals,
+  createQuotationItem,
+  mergeQuotationPartiesIntoFormOptions,
+} from "@/features/quotations/utils";
 
 describe("calculateQuotationTotals", () => {
   it("applies percentage discount and tax on the discounted subtotal", () => {
@@ -47,6 +52,40 @@ describe("calculateQuotationTotals", () => {
     expect(totals.discountAmount).toBe(100);
     expect(totals.taxAmount).toBe(108);
     expect(totals.grandTotal).toBe(1008);
+  });
+});
+
+describe("mergeQuotationPartiesIntoFormOptions", () => {
+  it("keeps the quotation customer and vehicle selectable even when missing from active lists", () => {
+    const merged = mergeQuotationPartiesIntoFormOptions(
+      {
+        customers: [{ id: "other-customer", label: "Other Customer" }],
+        vehicles: [{ id: "other-vehicle", customerId: "other-customer", label: "Other Vehicle" }],
+      },
+      {
+        customerId: "legacy-customer",
+        customerName: "Charlie Mae Coyoca",
+        vehicleId: "legacy-vehicle",
+        vehicleLabel: "Toyota Wigo (2022) · FAO 9360",
+      },
+    );
+
+    expect(merged.customers).toEqual(
+      expect.arrayContaining([
+        { id: "other-customer", label: "Other Customer" },
+        { id: "legacy-customer", label: "Charlie Mae Coyoca" },
+      ]),
+    );
+    expect(merged.vehicles).toEqual(
+      expect.arrayContaining([
+        { id: "other-vehicle", customerId: "other-customer", label: "Other Vehicle" },
+        {
+          id: "legacy-vehicle",
+          customerId: "legacy-customer",
+          label: "Toyota Wigo (2022) · FAO 9360",
+        },
+      ]),
+    );
   });
 });
 

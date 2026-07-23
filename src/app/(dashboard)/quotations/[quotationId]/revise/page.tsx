@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { QuotationForm } from "@/features/quotations/components/quotation-form";
 import { getQuotationReviseContext } from "@/features/quotations/queries/quotation-revise-queries";
-import { getQuotationFormOptions } from "@/features/quotations/queries/quotation-queries";
+import { getQuotationFormOptionsForQuotation } from "@/features/quotations/queries/quotation-queries";
 
 export const dynamic = "force-dynamic";
 
@@ -17,14 +17,13 @@ type ReviseQuotationPageProps = {
 
 export default async function ReviseQuotationPage({ params }: ReviseQuotationPageProps) {
   const { quotationId } = await params;
-  const [reviseContext, options] = await Promise.all([
-    getQuotationReviseContext(quotationId),
-    getQuotationFormOptions(),
-  ]);
+  const reviseContext = await getQuotationReviseContext(quotationId);
 
   if (!reviseContext) {
     notFound();
   }
+
+  const options = await getQuotationFormOptionsForQuotation(reviseContext.quotation);
 
   if (!reviseContext.canRevise) {
     return (
@@ -49,7 +48,13 @@ export default async function ReviseQuotationPage({ params }: ReviseQuotationPag
         title={`Revise ${reviseContext.quotation.quotationNumber}`}
         description="Load the latest linked job order lines, update prices or items, then save to sync the customer quotation and shop work order."
       />
-      <QuotationForm mode="revise" options={options} initialValues={reviseContext.initialValues} />
+      <QuotationForm
+        mode="revise"
+        options={options}
+        initialValues={reviseContext.initialValues}
+        lockedCustomerLabel={reviseContext.quotation.customerName}
+        lockedVehicleLabel={reviseContext.quotation.vehicleLabel}
+      />
     </div>
   );
 }

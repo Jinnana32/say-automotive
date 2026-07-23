@@ -123,6 +123,40 @@ export function dedupeOptionsById<T extends OptionWithId>(options: T[]) {
   return Array.from(optionsById.values());
 }
 
+export function mergeQuotationPartiesIntoFormOptions(
+  options: {
+    customers: CustomerOption[];
+    vehicles: QuotationVehicleOption[];
+  },
+  parties: {
+    customerId: string;
+    customerName: string;
+    vehicleId: string;
+    vehicleLabel: string;
+  },
+) {
+  const customers = dedupeOptionsById([
+    ...options.customers,
+    {
+      id: parties.customerId,
+      label: parties.customerName,
+    },
+  ]);
+  const vehicles = dedupeOptionsById([
+    ...options.vehicles,
+    {
+      id: parties.vehicleId,
+      customerId: parties.customerId,
+      label: parties.vehicleLabel,
+    },
+  ]);
+
+  return {
+    customers,
+    vehicles,
+  };
+}
+
 export function resolveQuotationCreateFlowSelection(params: {
   requestedCustomerId?: string;
   requestedVehicleId?: string;

@@ -24,8 +24,8 @@ import type {
   QuotationFormOptions,
   QuotationListItem,
 } from "@/features/quotations/types";
-import { dedupeOptionsById } from "@/features/quotations/utils";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { dedupeOptionsById, mergeQuotationPartiesIntoFormOptions } from "@/features/quotations/utils";
+import { buildQuotationSearchOrConditions } from "@/features/quotations/quotation-search";
 import type { TableRow } from "@/types/database";
 
 type QuotationRow = TableRow<"quotations">;
@@ -55,8 +55,15 @@ export async function listQuotations(filters?: {
   }
 
   if (filters?.search) {
-    const escapedSearch = escapeSearchTerm(filters.search);
-    query = query.ilike("quotation_number", `%${escapedSearch}%`);
+    const orFilter = await buildQuotationSearchOrFilter(
+      supabase,
+      branchScope.selectedBranchId,
+      filters.search,
+    );
+
+    if (orFilter) {
+      query = query.or(orFilter);
+    }
   }
 
   const { data, error } = await query;
@@ -69,8 +76,8 @@ export async function listQuotations(filters?: {
   const customerIds = [...new Set(quotations.map((row) => row.customer_id))];
   const vehicleIds = [...new Set(quotations.map((row) => row.vehicle_id))];
   const [customerMap, vehicleMap] = await Promise.all([
-    getCustomerNameMap(customerIds),
-    getVehicleLabelMap(vehicleIds),
+    getCustomerNameMap(supabase, customerIds),
+    getVehicleLabelMap(supabase, vehicleIds),
   ]);
 
   return quotations.map((row) =>
@@ -127,8 +134,8 @@ export const getQuotationById = cache(async (quotationId: string): Promise<Quota
   }
 
   const [customerMap, vehicleMap] = await Promise.all([
-    getCustomerNameMap([quotation.customer_id]),
-    getVehicleLabelMap([quotation.vehicle_id]),
+    getCustomerNameMap(supabase, [quotation.customer_id]),
+    getVehicleLabelMap(supabase, [quotation.vehicle_id]),
   ]);
 
   return mapQuotationDetail(
@@ -229,6 +236,45 @@ export async function getQuotationFormOptions(): Promise<QuotationFormOptions> {
   };
 }
 
+export async function getQuotationFormOptionsForQuotation(
+  quotation: Pick<QuotationDetail, "customerId" | "customerName" | "vehicleId" | "vehicleLabel">,
+): Promise<QuotationFormOptions> {
+  const { supabase } = await getBranchScopedServerClient("quotations:write");
+  const baseOptions = await getQuotationFormOptions();
+  const [{ data: customer, error: customerError }, { data: vehicle, error: vehicleError }] =
+    await Promise.all([
+      supabase
+        .from("customers")
+        .select("id, display_name")
+        .eq("id", quotation.customerId)
+        .maybeSingle(),
+      supabase.from("vehicles").select("*").eq("id", quotation.vehicleId).maybeSingle(),
+    ]);
+
+  if (customerError) {
+    throw new Error(customerError.message);
+  }
+
+  if (vehicleError) {
+    throw new Error(vehicleError.message);
+  }
+
+  const mergedParties = mergeQuotationPartiesIntoFormOptions(baseOptions, {
+    customerId: quotation.customerId,
+    customerName: customer?.display_name?.trim() || quotation.customerName,
+    vehicleId: quotation.vehicleId,
+    vehicleLabel: vehicle
+      ? mapVehicleRowToQuotationOption(vehicle as VehicleRow).label
+      : quotation.vehicleLabel,
+  });
+
+  return {
+    ...baseOptions,
+    customers: mergedParties.customers,
+    vehicles: mergedParties.vehicles,
+  };
+}
+
 export async function getQuotationCreateFlowOptions(): Promise<QuotationCreateFlowOptions> {
   const [formOptions, vehicleLookups] = await Promise.all([
     getQuotationFormOptions(),
@@ -241,12 +287,14 @@ export async function getQuotationCreateFlowOptions(): Promise<QuotationCreateFl
   };
 }
 
-async function getCustomerNameMap(customerIds: string[]) {
+async function getCustomerNameMap(
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
+  customerIds: string[],
+) {
   if (customerIds.length === 0) {
     return new Map<string, string>();
   }
 
-  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("customers")
     .select("id, display_name")
@@ -264,12 +312,14 @@ async function getCustomerNameMap(customerIds: string[]) {
   );
 }
 
-async function getVehicleLabelMap(vehicleIds: string[]) {
+async function getVehicleLabelMap(
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
+  vehicleIds: string[],
+) {
   if (vehicleIds.length === 0) {
     return new Map<string, string>();
   }
 
-  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase.from("vehicles").select("*").in("id", vehicleIds);
 
   if (error) {
@@ -282,6 +332,48 @@ async function getVehicleLabelMap(vehicleIds: string[]) {
       return [option.id, option.label];
     }),
   );
+}
+
+async function buildQuotationSearchOrFilter(
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"],
+  selectedBranchId: string | null,
+  search: string,
+) {
+  const trimmedSearch = search.trim();
+
+  if (!trimmedSearch) {
+    return null;
+  }
+
+  const escapedSearch = escapeSearchTerm(trimmedSearch);
+  const pattern = `%${escapedSearch}%`;
+  const [customersResult, vehiclesResult] = await Promise.all([
+    applyBranchFilter(
+      supabase.from("customers").select("id").ilike("display_name", pattern),
+      selectedBranchId,
+    ),
+    applyBranchFilter(
+      supabase
+        .from("vehicles")
+        .select("id")
+        .or(`make.ilike.${pattern},model.ilike.${pattern},plate_number.ilike.${pattern}`),
+      selectedBranchId,
+    ),
+  ]);
+
+  if (customersResult.error) {
+    throw new Error(customersResult.error.message);
+  }
+
+  if (vehiclesResult.error) {
+    throw new Error(vehiclesResult.error.message);
+  }
+
+  return buildQuotationSearchOrConditions({
+    search: trimmedSearch,
+    customerIds: (customersResult.data ?? []).map((row) => row.id),
+    vehicleIds: (vehiclesResult.data ?? []).map((row) => row.id),
+  });
 }
 
 function escapeSearchTerm(value: string) {

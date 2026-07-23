@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useActionState } from "react";
 
 import {
@@ -38,6 +38,7 @@ import {
   createQuotationItem,
   dedupeOptionsById,
   inferQuotationTaxRate,
+  mergeQuotationPartiesIntoFormOptions,
   type QuotationDiscountMode,
 } from "@/features/quotations/utils";
 import {
@@ -52,10 +53,19 @@ export function QuotationForm({
   mode,
   initialValues,
   options,
+  lockedCustomerLabel,
+  lockedVehicleLabel,
+  partyContext,
 }: {
   mode: "create" | "edit" | "revise";
   initialValues: QuotationFormValues;
   options: QuotationFormOptions;
+  lockedCustomerLabel?: string;
+  lockedVehicleLabel?: string;
+  partyContext?: {
+    customerName: string;
+    vehicleLabel: string;
+  };
 }) {
   const formAction =
     mode === "create"
@@ -84,6 +94,55 @@ export function QuotationForm({
   );
   const customerOptions = dedupeOptionsById(options.customers);
   const vehicleOptions = dedupeOptionsById(options.vehicles);
+  const resolvedPartyLabels = {
+    customerName:
+      lockedCustomerLabel ??
+      partyContext?.customerName ??
+      (initialValues.customerId ? "Selected customer" : ""),
+    vehicleLabel:
+      lockedVehicleLabel ??
+      partyContext?.vehicleLabel ??
+      (initialValues.vehicleId ? "Selected vehicle" : ""),
+  };
+  const resolvedCustomerOptions = useMemo(
+    () =>
+      initialValues.customerId
+        ? mergeQuotationPartiesIntoFormOptions(
+            { customers: customerOptions, vehicles: [] },
+            {
+              customerId: initialValues.customerId,
+              customerName: resolvedPartyLabels.customerName,
+              vehicleId: initialValues.vehicleId,
+              vehicleLabel: resolvedPartyLabels.vehicleLabel,
+            },
+          ).customers
+        : customerOptions,
+    [customerOptions, initialValues.customerId, initialValues.vehicleId, resolvedPartyLabels.customerName, resolvedPartyLabels.vehicleLabel],
+  );
+  const availableVehicles = useMemo(
+    () =>
+      initialValues.vehicleId
+        ? mergeQuotationPartiesIntoFormOptions(
+            {
+              customers: [],
+              vehicles: vehicleOptions.filter((vehicle) => vehicle.customerId === customerId),
+            },
+            {
+              customerId,
+              customerName: resolvedPartyLabels.customerName,
+              vehicleId: initialValues.vehicleId,
+              vehicleLabel: resolvedPartyLabels.vehicleLabel,
+            },
+          ).vehicles
+        : vehicleOptions.filter((vehicle) => vehicle.customerId === customerId),
+    [
+      vehicleOptions,
+      customerId,
+      initialValues.vehicleId,
+      resolvedPartyLabels.customerName,
+      resolvedPartyLabels.vehicleLabel,
+    ],
+  );
   const [items, setItems] = useState<QuotationFormItem[]>(
     initialValues.items.length > 0 ? initialValues.items : [createQuotationItem()],
   );
@@ -94,7 +153,6 @@ export function QuotationForm({
     dedupeOptionsById(options.services),
   );
 
-  const availableVehicles = vehicleOptions.filter((vehicle) => vehicle.customerId === customerId);
   const { subtotal, discountAmount, taxAmount, grandTotal } = calculateQuotationTotals({
     items,
     discount,
@@ -110,8 +168,8 @@ export function QuotationForm({
 
       {isRevise ? (
         <>
-          <input type="hidden" name="customerId" value={customerId} />
-          <input type="hidden" name="vehicleId" value={vehicleId} />
+          <input type="hidden" name="customerId" value={initialValues.customerId} />
+          <input type="hidden" name="vehicleId" value={initialValues.vehicleId} />
         </>
       ) : null}
 
@@ -139,72 +197,89 @@ export function QuotationForm({
               <FormStatusMessage message={state.message} />
 
               <div className="grid gap-6 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="customerId" required>
-                    Customer
-                  </Label>
-                  <select
-                    id="customerId"
-                    name={isRevise ? undefined : "customerId"}
-                    value={customerId}
-                    disabled={isRevise}
-                    onChange={(event) => {
-                      const nextCustomerId = event.target.value;
-                      const nextAvailableVehicles = vehicleOptions.filter(
-                        (vehicle) => vehicle.customerId === nextCustomerId,
-                      );
+                {isRevise ? (
+                  <>
+                    <div className="space-y-2">
+                      <Label required>Customer</Label>
+                      <div className="rounded-xl border border-border/70 bg-muted/20 px-3 py-2.5 text-sm font-medium text-foreground">
+                        {lockedCustomerLabel ?? "Unknown customer"}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label required>Vehicle</Label>
+                      <div className="rounded-xl border border-border/70 bg-muted/20 px-3 py-2.5 text-sm font-medium text-foreground">
+                        {lockedVehicleLabel ?? "Unknown vehicle"}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="customerId" required>
+                        Customer
+                      </Label>
+                      <select
+                        id="customerId"
+                        name="customerId"
+                        value={customerId}
+                        onChange={(event) => {
+                          const nextCustomerId = event.target.value;
+                          const nextAvailableVehicles = vehicleOptions.filter(
+                            (vehicle) => vehicle.customerId === nextCustomerId,
+                          );
 
-                      setCustomerId(nextCustomerId);
+                          setCustomerId(nextCustomerId);
 
-                      if (!nextAvailableVehicles.some((vehicle) => vehicle.id === vehicleId)) {
-                        setVehicleId("");
-                      }
-                    }}
-                    className={formSelectClassName(state.fieldErrors, "customerId")}
-                    {...fieldAriaProps({
-                      errors: state.fieldErrors,
-                      name: "customerId",
-                      required: true,
-                      errorId: fieldErrorId("customerId"),
-                    })}
-                  >
-                    <option value="">Select customer</option>
-                    {customerOptions.map((customer) => (
-                      <option key={customer.id} value={customer.id}>
-                        {customer.label}
-                      </option>
-                    ))}
-                  </select>
-                  <FieldError errors={state.fieldErrors} name="customerId" id={fieldErrorId("customerId")} />
-                </div>
+                          if (!nextAvailableVehicles.some((vehicle) => vehicle.id === vehicleId)) {
+                            setVehicleId("");
+                          }
+                        }}
+                        className={formSelectClassName(state.fieldErrors, "customerId")}
+                        {...fieldAriaProps({
+                          errors: state.fieldErrors,
+                          name: "customerId",
+                          required: true,
+                          errorId: fieldErrorId("customerId"),
+                        })}
+                      >
+                        <option value="">Select customer</option>
+                        {resolvedCustomerOptions.map((customer) => (
+                          <option key={customer.id} value={customer.id}>
+                            {customer.label}
+                          </option>
+                        ))}
+                      </select>
+                      <FieldError errors={state.fieldErrors} name="customerId" id={fieldErrorId("customerId")} />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="vehicleId" required>
-                    Vehicle
-                  </Label>
-                  <select
-                    id="vehicleId"
-                    name={isRevise ? undefined : "vehicleId"}
-                    value={vehicleId}
-                    disabled={isRevise}
-                    onChange={(event) => setVehicleId(event.target.value)}
-                    className={formSelectClassName(state.fieldErrors, "vehicleId")}
-                    {...fieldAriaProps({
-                      errors: state.fieldErrors,
-                      name: "vehicleId",
-                      required: true,
-                      errorId: fieldErrorId("vehicleId"),
-                    })}
-                  >
-                    <option value="">Select vehicle</option>
-                    {availableVehicles.map((vehicle) => (
-                      <option key={vehicle.id} value={vehicle.id}>
-                        {vehicle.label}
-                      </option>
-                    ))}
-                  </select>
-                  <FieldError errors={state.fieldErrors} name="vehicleId" id={fieldErrorId("vehicleId")} />
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="vehicleId" required>
+                        Vehicle
+                      </Label>
+                      <select
+                        id="vehicleId"
+                        name="vehicleId"
+                        value={vehicleId}
+                        onChange={(event) => setVehicleId(event.target.value)}
+                        className={formSelectClassName(state.fieldErrors, "vehicleId")}
+                        {...fieldAriaProps({
+                          errors: state.fieldErrors,
+                          name: "vehicleId",
+                          required: true,
+                          errorId: fieldErrorId("vehicleId"),
+                        })}
+                      >
+                        <option value="">Select vehicle</option>
+                        {availableVehicles.map((vehicle) => (
+                          <option key={vehicle.id} value={vehicle.id}>
+                            {vehicle.label}
+                          </option>
+                        ))}
+                      </select>
+                      <FieldError errors={state.fieldErrors} name="vehicleId" id={fieldErrorId("vehicleId")} />
+                    </div>
+                  </>
+                )}
               </div>
 
               {!isRevise ? (
