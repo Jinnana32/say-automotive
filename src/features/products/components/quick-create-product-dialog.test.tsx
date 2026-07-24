@@ -74,6 +74,21 @@ describe("QuickCreateProductDialog", () => {
     expect(
       screen.getByRole("button", { name: "Create product" }),
     ).toBeDisabled();
+    expect(screen.getByRole("alert")).toHaveTextContent(/Product units are not set up yet/i);
+    expect(screen.getByRole("alert")).toHaveTextContent(/base unit/i);
+  });
+
+  it("selects a default base unit when options load", () => {
+    render(
+      <QuickCreateProductDialog
+        open
+        showTrigger={false}
+        initialOptions={productFormOptions}
+        onCreated={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByLabelText(/Base unit/i)).toHaveValue("unit-1");
   });
 
   it("prefills the product name when initialName is provided", () => {

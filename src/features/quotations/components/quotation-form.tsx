@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useActionState } from "react";
 
 import {
@@ -30,6 +30,7 @@ import { QuotationTotalsFields } from "@/features/quotations/components/quotatio
 import {
   getQuotationLineCatalogDraftLabel,
   getQuotationLineCatalogIssues,
+  buildQuotationLineCatalogIssuesMessage,
   isQuotationLineMissingCatalogLink,
 } from "@/features/quotations/line-item-catalog";
 import type {
@@ -158,10 +159,23 @@ export function QuotationForm({
   const [serviceOptions, setServiceOptions] = useState(() =>
     dedupeOptionsById(options.services),
   );
+  const catalogIssues = useMemo(() => getQuotationLineCatalogIssues(items), [items]);
   const catalogIssueKeys = useMemo(
-    () => new Set(getQuotationLineCatalogIssues(items).map((issue) => issue.key)),
-    [items],
+    () => new Set(catalogIssues.map((issue) => issue.key)),
+    [catalogIssues],
   );
+  const catalogBlockMessage = useMemo(
+    () => buildQuotationLineCatalogIssuesMessage(catalogIssues),
+    [catalogIssues],
+  );
+  const [clientSubmitMessage, setClientSubmitMessage] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (catalogIssues.length === 0) {
+      setClientSubmitMessage(undefined);
+    }
+  }, [catalogIssues.length]);
+
   const hasLegacyUnlinkedLines = useMemo(
     () =>
       items.some(
@@ -183,8 +197,12 @@ export function QuotationForm({
       action={formActionState}
       className="space-y-6"
       onSubmit={(event) => {
-        if (getQuotationLineCatalogIssues(items).length > 0) {
+        if (catalogIssues.length > 0) {
           event.preventDefault();
+          setClientSubmitMessage(
+            catalogBlockMessage ??
+              "Fix line items that are not linked to the catalog before saving.",
+          );
         }
       }}
     >
@@ -220,7 +238,7 @@ export function QuotationForm({
             </CardHeader>
             <CardContent className="space-y-6">
               <FormRequiredFieldsNote />
-              <FormStatusMessage message={state.message} />
+              <FormStatusMessage message={clientSubmitMessage ?? state.message} />
 
               <div className="grid gap-6 md:grid-cols-2">
                 {isRevise ? (
@@ -763,11 +781,14 @@ export function QuotationForm({
                 </div>
               </div>
 
+              <FormStatusMessage message={clientSubmitMessage ?? state.message} />
+
               <div className="flex flex-wrap gap-3">
                 <SubmitButton
                   pendingLabel={
                     mode === "create" ? "Saving..." : mode === "revise" ? "Revising..." : "Updating..."
                   }
+                  disabled={catalogIssues.length > 0}
                 >
                   {mode === "create"
                     ? "Save quotation"

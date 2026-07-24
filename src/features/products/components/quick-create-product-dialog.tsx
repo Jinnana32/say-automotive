@@ -212,8 +212,19 @@ function QuickCreateProductDialogForm({
   useEffect(() => {
     if (!open) {
       handledCreatedProductId.current = null;
+      return;
     }
-  }, [open]);
+
+    if (optionsState.status !== "ready" || !optionsState.data.units.length) {
+      return;
+    }
+
+    if (values.unitId.trim()) {
+      return;
+    }
+
+    updateFormValue("unitId", pickDefaultUnitId(optionsState.data.units));
+  }, [open, optionsState, updateFormValue, values.unitId]);
 
   useEffect(() => {
     if (state.status !== "success" || !state.product) {
@@ -238,7 +249,11 @@ function QuickCreateProductDialogForm({
     : units.length > 0
       ? "Select unit"
       : "No units available";
-  const isCreateDisabled = isOptionsLoading || optionsState.status === "error" || units.length === 0;
+  const hasNoUnits =
+    !isOptionsLoading && optionsState.status === "ready" && units.length === 0;
+  const isCreateDisabled =
+    isOptionsLoading || optionsState.status === "error" || units.length === 0;
+  const createButtonLabel = isOptionsLoading ? "Loading options..." : "Create product";
 
   return (
     <ModalDialog
@@ -264,7 +279,31 @@ function QuickCreateProductDialogForm({
       }
     >
       {({ closeDialog }) => (
-        <form action={formAction} className="space-y-5">
+        <form
+          action={formAction}
+          className="-mx-6 -my-5 flex max-h-[min(72dvh,720px)] flex-col"
+          onSubmit={(event) => {
+            if (isCreateDisabled) {
+              event.preventDefault();
+              return;
+            }
+
+            if (!values.name.trim()) {
+              event.preventDefault();
+              return;
+            }
+
+            if (!values.unitId.trim()) {
+              event.preventDefault();
+              return;
+            }
+
+            if (!options?.defaultBranchId) {
+              event.preventDefault();
+              return;
+            }
+          }}
+        >
           <input type="hidden" name="partNumber" value="" />
           <input type="hidden" name="oemNumber" value="" />
           <input type="hidden" name="description" value="" />
@@ -285,12 +324,29 @@ function QuickCreateProductDialogForm({
           <input type="hidden" name="websiteBadge" value="" />
           <input type="hidden" name="status" value="active" />
 
+          <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-6 py-5">
           <FormStatusMessage message={state.message} />
           <FormRequiredFieldsNote />
 
           {optionsState.status === "error" ? (
             <div className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
               {optionsState.error}
+            </div>
+          ) : null}
+
+          {hasNoUnits ? (
+            <div
+              className="rounded-2xl border border-amber-200/80 bg-amber-50/80 px-4 py-3 text-sm text-amber-950"
+              role="alert"
+            >
+              <p className="font-medium">Product units are not set up yet</p>
+              <p className="mt-1 leading-6">
+                Every product needs a <strong>base unit</strong> (how it is sold or counted), such as
+                Piece (pc), Liter (L), or Set (set). This list comes from the system{" "}
+                <code className="rounded bg-amber-100/80 px-1 py-0.5 text-xs">units</code> catalog,
+                not from your branch. Ask an owner or admin to run database migrations or seed units
+                before creating products here.
+              </p>
             </div>
           ) : null}
 
@@ -365,6 +421,11 @@ function QuickCreateProductDialogForm({
                   </option>
                 ))}
               </NativeSelect>
+              {hasNoUnits ? (
+                <p className="text-xs text-muted-foreground">
+                  Base unit is required. Once units exist (e.g. Piece, Liter), select one here.
+                </p>
+              ) : null}
               <FieldError errors={state.fieldErrors} name="unitId" />
             </div>
           </div>
@@ -463,19 +524,25 @@ function QuickCreateProductDialogForm({
             />
             <FieldError errors={state.fieldErrors} name="shelfLocation" />
           </div>
+          </div>
 
-          <div className="flex justify-end gap-3 border-t border-border/70 pt-5">
+          <div className="sticky bottom-0 z-10 flex shrink-0 justify-end gap-3 border-t border-border/70 bg-background px-6 py-4 shadow-[0_-10px_30px_rgba(15,23,42,0.06)]">
             <Button type="button" variant="outline" onClick={closeDialog}>
               Cancel
             </Button>
             <SubmitButton pendingLabel="Creating..." disabled={isCreateDisabled}>
-              Create product
+              {createButtonLabel}
             </SubmitButton>
           </div>
         </form>
       )}
     </ModalDialog>
   );
+}
+
+function pickDefaultUnitId(units: ProductFormOptionsData["units"]) {
+  const pieceUnit = units.find((unit) => unit.label.toLowerCase().includes("piece"));
+  return pieceUnit?.id ?? units[0]?.id ?? "";
 }
 
 function SelectField({

@@ -42,6 +42,7 @@ import { QuotationTotalsFields } from '@/features/quotations/components/quotatio
 import {
   getQuotationLineCatalogDraftLabel,
   getQuotationLineCatalogIssues,
+  buildQuotationLineCatalogIssuesMessage,
   isQuotationLineMissingCatalogLink,
 } from '@/features/quotations/line-item-catalog';
 import {
@@ -158,10 +159,26 @@ export function QuotationCreateFlow({
     taxRate,
   });
   const canReview = isQuotationDraftReady(values);
-  const catalogIssueKeys = useMemo(
-    () => new Set(getQuotationLineCatalogIssues(values.items).map((issue) => issue.key)),
+  const catalogIssues = useMemo(
+    () => getQuotationLineCatalogIssues(values.items),
     [values.items],
   );
+  const catalogIssueKeys = useMemo(
+    () => new Set(catalogIssues.map((issue) => issue.key)),
+    [catalogIssues],
+  );
+  const catalogBlockMessage = useMemo(
+    () => buildQuotationLineCatalogIssuesMessage(catalogIssues),
+    [catalogIssues],
+  );
+  const [clientSubmitMessage, setClientSubmitMessage] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (catalogIssues.length === 0) {
+      setClientSubmitMessage(undefined);
+    }
+  }, [catalogIssues.length]);
+
   const hasLegacyUnlinkedLines = useMemo(
     () =>
       values.items.some(
@@ -577,8 +594,12 @@ export function QuotationCreateFlow({
           action={quotationFormAction}
           className="space-y-6"
           onSubmit={(event) => {
-            if (getQuotationLineCatalogIssues(values.items).length > 0) {
+            if (catalogIssues.length > 0) {
               event.preventDefault();
+              setClientSubmitMessage(
+                catalogBlockMessage ??
+                  'Fix line items that are not linked to the catalog before saving.',
+              );
             }
           }}
         >
@@ -1293,6 +1314,8 @@ export function QuotationCreateFlow({
                 </div>
               </SectionCard>
 
+              <FormStatusMessage message={clientSubmitMessage ?? quotationState.message} />
+
               <div className="flex flex-wrap justify-between gap-3">
                 <Button
                   type="button"
@@ -1303,7 +1326,7 @@ export function QuotationCreateFlow({
                 </Button>
                 <SubmitButton
                   pendingLabel="Creating quotation..."
-                  disabled={!canReview}
+                  disabled={!canReview || catalogIssues.length > 0}
                 >
                   Save quotation
                 </SubmitButton>

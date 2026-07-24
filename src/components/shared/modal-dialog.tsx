@@ -71,7 +71,11 @@ export function ModalDialog({
         ? createPortal(
             <div
               className="fixed inset-0 z-[120] flex items-start justify-center overflow-y-auto bg-slate-950/45 px-4 py-4 backdrop-blur-[2px] sm:items-center sm:py-6"
-              onMouseDown={() => setDialogOpen(false)}
+              onClick={(event) => {
+                if (event.target === event.currentTarget) {
+                  setDialogOpen(false);
+                }
+              }}
             >
               <div
                 role="dialog"
@@ -87,6 +91,7 @@ export function ModalDialog({
                       : "max-w-5xl",
                 )}
                 onMouseDown={(event) => event.stopPropagation()}
+                onClick={(event) => event.stopPropagation()}
               >
                 <div className="flex items-start justify-between gap-4 border-b border-border/70 px-6 py-5">
                   <div className="space-y-1">
