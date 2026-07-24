@@ -18,6 +18,7 @@ export const staffFormSchema = z.object({
   emergencyContactName: z.string().trim(),
   emergencyContactNumber: z.string().trim(),
   status: z.enum(["active", "inactive"]),
+  portalLoginEmail: z.string().trim(),
 });
 
 export function parseStaffFormData(formData: FormData): StaffFormValues {
@@ -37,6 +38,7 @@ export function parseStaffFormData(formData: FormData): StaffFormValues {
     emergencyContactName: readString(formData, "emergencyContactName"),
     emergencyContactNumber: readString(formData, "emergencyContactNumber"),
     status: readString(formData, "status") as StaffFormValues["status"],
+    portalLoginEmail: readString(formData, "portalLoginEmail"),
   };
 }
 

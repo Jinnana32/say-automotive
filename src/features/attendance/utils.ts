@@ -425,6 +425,70 @@ export function isMechanicPremiseVerificationPassed({
   return ipOk && locationOk;
 }
 
+export type MechanicPortalVerificationInput = {
+  settings: AttendanceAccessSettings;
+  ipStatus: MechanicPortalIpStatus;
+  locationStatus: MechanicPortalLocationStatus;
+  deviceApproved: boolean;
+};
+
+export function getMechanicPortalVerificationSummary({
+  settings,
+  ipStatus,
+  locationStatus,
+  deviceApproved,
+}: MechanicPortalVerificationInput) {
+  const checks: Array<{ key: "ip" | "location" | "device"; passed: boolean }> = [];
+
+  if (settings.requireShopIpForMechanicAttendance) {
+    checks.push({ key: "ip", passed: ipStatus.isAllowed });
+  }
+
+  if (settings.requireShopLocationForMechanicAttendance) {
+    checks.push({ key: "location", passed: locationStatus.isAllowed });
+  }
+
+  checks.push({ key: "device", passed: deviceApproved });
+
+  const required = checks.length;
+  const passed = checks.filter((check) => check.passed).length;
+  const minimumRequired = Math.min(2, required);
+
+  return {
+    checks,
+    required,
+    passed,
+    minimumRequired,
+    isAllowed: passed >= minimumRequired,
+  };
+}
+
+export function isMechanicPortalPunchAllowed(input: MechanicPortalVerificationInput) {
+  return getMechanicPortalVerificationSummary(input).isAllowed;
+}
+
+export function formatMechanicPortalVerificationBlockMessage(
+  input: MechanicPortalVerificationInput,
+) {
+  const summary = getMechanicPortalVerificationSummary(input);
+
+  if (summary.isAllowed) {
+    return null;
+  }
+
+  const remaining = summary.minimumRequired - summary.passed;
+
+  if (summary.required <= 1) {
+    return "Complete the remaining attendance verification check before punching in or out.";
+  }
+
+  if (summary.minimumRequired === summary.required) {
+    return "Time-in and time-out stay blocked until all verification checks pass, or file a DTR amendment.";
+  }
+
+  return `Time-in and time-out need at least ${summary.minimumRequired} of ${summary.required} verification checks. ${remaining} more check(s) must pass, or file a DTR amendment.`;
+}
+
 export function buildAttendanceAccessSettingsFormValues(
   settings: AttendanceAccessSettings,
 ): AttendanceAccessSettingsFormValues {

@@ -36,10 +36,11 @@ import {
   formatMechanicIpStatusMessage,
   formatMechanicLocationStatusMessage,
   getDtrAmendmentStatusTone,
+  isMechanicPortalPunchAllowed,
+  formatMechanicPortalVerificationBlockMessage,
   getMechanicPortalPrimaryActionLabel,
   getMechanicPortalPrimaryLogType,
   INITIAL_ATTENDANCE_ENTRY_ACTION_STATE,
-  isMechanicPremiseVerificationPassed,
 } from "@/features/attendance/utils";
 import { formatDate, formatDateTime } from "@/lib/dates";
 import { cn } from "@/lib/utils";
@@ -68,13 +69,16 @@ export function MechanicPortalAttendancePage({
     distanceMeters: locationState.distanceMeters,
     errorMessage: locationState.errorMessage,
   };
-  const premiseAllowed = isMechanicPremiseVerificationPassed({
+  const verificationInput = {
     settings: data.settings,
     ipStatus: data.ipStatus,
     locationStatus,
-  });
+    deviceApproved: data.deviceStatus.isApproved,
+  };
   const canPunch =
-    Boolean(nextLogType) && data.deviceStatus.isApproved && premiseAllowed;
+    Boolean(nextLogType) && isMechanicPortalPunchAllowed(verificationInput);
+  const verificationBlockMessage =
+    formatMechanicPortalVerificationBlockMessage(verificationInput);
   const statusCopy = getAttendanceStatusCopy(data.attendance, data.todayAmendments);
   const networkSubtitle = getMechanicNetworkSummary(data);
   const locationSubtitle = formatMechanicLocationStatusMessage(
@@ -194,9 +198,9 @@ export function MechanicPortalAttendancePage({
               {actionLabel}
             </MechanicPortalSlideAction>
 
-            {!premiseAllowed || !data.deviceStatus.isApproved ? (
+            {verificationBlockMessage ? (
               <p className="px-1 text-sm leading-6 text-slate-500">
-                Time-in and time-out stay blocked until all required on-site checks and your approved device are verified.
+                {verificationBlockMessage}
               </p>
             ) : null}
 

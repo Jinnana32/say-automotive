@@ -5,6 +5,7 @@ import {
   buildBranchHolidayFormValues,
   buildStaffScheduleFormValues,
   computeExpectedWorkdaySummary,
+  isMechanicPortalPunchAllowed,
   matchesAttendanceStatusFilter,
 } from "@/features/attendance/utils";
 
@@ -171,5 +172,84 @@ describe("attendance holiday handling", () => {
     expect(
       matchesAttendanceStatusFilter(openShiftItem, "missing_timeout", { branchHoliday }),
     ).toBe(false);
+  });
+});
+
+describe("mechanic portal punch verification", () => {
+  const baseSettings = {
+    requireShopIpForMechanicAttendance: true,
+    requireShopLocationForMechanicAttendance: true,
+    allowDtrAmendments: true,
+    allowAttendanceAdminOverride: false,
+    geofence: {
+      latitude: 14.5995,
+      longitude: 120.9842,
+      radiusMeters: 100,
+    },
+  };
+
+  const baseIpStatus = {
+    requestIp: "::1",
+    isShopIpRequired: true,
+    isAllowed: false,
+    matchedAllowedIp: null,
+  };
+
+  const baseLocationStatus = {
+    isLocationRequired: true,
+    isAllowed: true,
+    latitude: 14.5995,
+    longitude: 120.9842,
+    accuracyMeters: 5,
+    distanceMeters: 3,
+    errorMessage: null,
+  };
+
+  it("allows punch when two of three checks pass", () => {
+    expect(
+      isMechanicPortalPunchAllowed({
+        settings: baseSettings,
+        ipStatus: baseIpStatus,
+        locationStatus: baseLocationStatus,
+        deviceApproved: true,
+      }),
+    ).toBe(true);
+  });
+
+  it("blocks punch when only one of three checks passes", () => {
+    expect(
+      isMechanicPortalPunchAllowed({
+        settings: baseSettings,
+        ipStatus: baseIpStatus,
+        locationStatus: { ...baseLocationStatus, isAllowed: false },
+        deviceApproved: true,
+      }),
+    ).toBe(false);
+  });
+
+  it("requires all checks when only two are enabled", () => {
+    expect(
+      isMechanicPortalPunchAllowed({
+        settings: {
+          ...baseSettings,
+          requireShopLocationForMechanicAttendance: false,
+        },
+        ipStatus: { ...baseIpStatus, isAllowed: false },
+        locationStatus: { ...baseLocationStatus, isAllowed: false },
+        deviceApproved: true,
+      }),
+    ).toBe(false);
+
+    expect(
+      isMechanicPortalPunchAllowed({
+        settings: {
+          ...baseSettings,
+          requireShopLocationForMechanicAttendance: false,
+        },
+        ipStatus: { ...baseIpStatus, isAllowed: true },
+        locationStatus: { ...baseLocationStatus, isAllowed: false },
+        deviceApproved: true,
+      }),
+    ).toBe(true);
   });
 });

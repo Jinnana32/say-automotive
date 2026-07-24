@@ -100,17 +100,39 @@ export async function getCurrentUserBranch() {
 }
 
 export async function getBranchScope(): Promise<BranchScope> {
-  const [{ accessibleBranches, canAccessAllBranches: hasGlobalAccess, currentUserBranchId }, mainBranch] =
-    await Promise.all([listAccessibleBranchesCached(), getMainBranch()]);
-  const selectedBranchId = currentUserBranchId ?? mainBranch.id;
+  const {
+    accessibleBranches,
+    canAccessAllBranches: hasGlobalAccess,
+    currentUserBranchId,
+  } = await listAccessibleBranchesCached();
+
+  const mainBranch = hasGlobalAccess
+    ? await getMainBranch()
+    : accessibleBranches.find((branch) => branch.is_main) ?? null;
+
+  const fallbackBranch =
+    mainBranch ??
+    accessibleBranches.find((branch) => branch.id === currentUserBranchId) ??
+    accessibleBranches[0] ??
+    null;
+
+  if (!fallbackBranch) {
+    throw new Error(
+      hasGlobalAccess
+        ? "Main branch is not configured."
+        : "This staff account is not assigned to a branch.",
+    );
+  }
+
+  const selectedBranchId = currentUserBranchId ?? fallbackBranch.id;
   const resolvedSelectedBranch =
     accessibleBranches.find((branch) => branch.id === selectedBranchId) ??
-    (selectedBranchId === mainBranch.id ? mainBranch : null);
+    (selectedBranchId === fallbackBranch.id ? fallbackBranch : null);
   const writeBranchId =
     selectedBranchId ??
     currentUserBranchId ??
     resolvedSelectedBranch?.id ??
-    mainBranch.id;
+    fallbackBranch.id;
 
   return {
     accessibleBranches,

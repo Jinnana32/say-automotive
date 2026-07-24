@@ -28,7 +28,10 @@ import {
 } from "@/features/attendance/server-utils";
 import { getAttendanceAccessContext } from "@/features/attendance/queries/attendance-amendment-queries";
 import { resolveMechanicLocationSubmission } from "@/features/attendance/server-location-utils";
-import { isMechanicPremiseVerificationPassed } from "@/features/attendance/utils";
+import {
+  formatMechanicPortalVerificationBlockMessage,
+  isMechanicPortalPunchAllowed,
+} from "@/features/attendance/utils";
 import type {
   AttendanceEntryActionState,
   AttendanceLogType,
@@ -105,21 +108,48 @@ export async function recordMechanicAttendanceLogAction(
     settings: accessContext.settings,
     formData,
   });
-  const premiseAllowed = isMechanicPremiseVerificationPassed({
+  const locationStatus = {
+    isLocationRequired: locationSubmission.isRequired,
+    isAllowed: locationSubmission.isAllowed,
+    latitude: locationSubmission.latitude,
+    longitude: locationSubmission.longitude,
+    accuracyMeters: locationSubmission.accuracyMeters,
+    distanceMeters: locationSubmission.distanceMeters,
+    errorMessage: locationSubmission.errorMessage,
+  };
+
+  if (accessContext.deviceStatus.status === "registered_to_other_staff") {
+    await writeAuditLog(admin, {
+      action: "Blocked mechanic portal attendance attempt due to unapproved device",
+      entityType: "attendance_time_log",
+      userId: context.userId,
+      afterData: {
+        staff_id: context.staffId,
+        attendance_date: attendanceDate,
+        attempted_log_type: nextExpectedLogType,
+        request_ip: accessContext.ipStatus.requestIp,
+        is_shop_ip_valid: accessContext.ipStatus.isAllowed,
+        staff_device_id: accessContext.deviceStatus.currentDevice?.id ?? null,
+        device_status: accessContext.deviceStatus.status,
+      },
+    });
+
+    return {
+      status: "error",
+      message:
+        "This device is already bound to another mechanic account and cannot be used for your attendance.",
+    };
+  }
+
+  const verificationInput = {
     settings: accessContext.settings,
     ipStatus: accessContext.ipStatus,
-    locationStatus: {
-      isLocationRequired: locationSubmission.isRequired,
-      isAllowed: locationSubmission.isAllowed,
-      latitude: locationSubmission.latitude,
-      longitude: locationSubmission.longitude,
-      accuracyMeters: locationSubmission.accuracyMeters,
-      distanceMeters: locationSubmission.distanceMeters,
-      errorMessage: locationSubmission.errorMessage,
-    },
-  });
+    locationStatus,
+    deviceApproved: accessContext.deviceStatus.isApproved,
+  };
+  const punchAllowed = isMechanicPortalPunchAllowed(verificationInput);
 
-  if (!premiseAllowed) {
+  if (!punchAllowed) {
     await writeAuditLog(admin, {
       action: "Blocked mechanic portal attendance attempt",
       entityType: "attendance_time_log",
@@ -142,36 +172,8 @@ export async function recordMechanicAttendanceLogAction(
     return {
       status: "error",
       message:
-        !accessContext.ipStatus.isAllowed &&
-        accessContext.settings.requireShopIpForMechanicAttendance
-          ? "You are not connected to the approved shop network. File a DTR amendment if this attendance needs admin review."
-          : locationSubmission.errorMessage ??
-            "On-site verification failed. File a DTR amendment if this attendance needs admin review.",
-    };
-  }
-
-  if (!accessContext.deviceStatus.isApproved) {
-    await writeAuditLog(admin, {
-      action: "Blocked mechanic portal attendance attempt due to unapproved device",
-      entityType: "attendance_time_log",
-      userId: context.userId,
-      afterData: {
-        staff_id: context.staffId,
-        attendance_date: attendanceDate,
-        attempted_log_type: nextExpectedLogType,
-        request_ip: accessContext.ipStatus.requestIp,
-        is_shop_ip_valid: accessContext.ipStatus.isAllowed,
-        staff_device_id: accessContext.deviceStatus.currentDevice?.id ?? null,
-        device_status: accessContext.deviceStatus.status,
-      },
-    });
-
-    return {
-      status: "error",
-      message:
-        accessContext.deviceStatus.status === "registered_to_other_staff"
-          ? "This device is already bound to another mechanic account and cannot be used for your attendance."
-          : "This device is not approved for time-in/time-out yet. Ask the owner or admin to approve it, or file a DTR amendment.",
+        formatMechanicPortalVerificationBlockMessage(verificationInput) ??
+        "On-site verification failed. File a DTR amendment if this attendance needs admin review.",
     };
   }
 

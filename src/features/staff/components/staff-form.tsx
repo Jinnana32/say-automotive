@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useActionState, useState } from "react";
 
 import {
@@ -18,24 +18,102 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
-import { useFormValues } from "@/lib/use-form-values";
 import { createStaffAction, updateStaffAction } from "@/features/staff/actions/staff-actions";
-import { getDefaultPayrollEligibilityForRole, type StaffFormValues } from "@/features/staff/types";
+import { StaffPortalLoginSuccess } from "@/features/staff/components/staff-portal-login-success";
+import {
+  getDefaultPayrollEligibilityForRole,
+  type StaffCreateActionState,
+  type StaffFormValues,
+} from "@/features/staff/types";
+import { INITIAL_FORM_ACTION_STATE, type FormActionState } from "@/lib/forms";
+import { useFormValues } from "@/lib/use-form-values";
+
+const INITIAL_STAFF_CREATE_ACTION_STATE: StaffCreateActionState = {
+  status: "idle",
+};
 
 export function StaffForm({
   mode,
   initialValues,
+  linkedPortalLoginEmail = null,
 }: {
   mode: "create" | "edit";
   initialValues: StaffFormValues;
+  linkedPortalLoginEmail?: string | null;
 }) {
-  const [state, formAction] = useActionState(
-    mode === "create" ? createStaffAction : updateStaffAction,
-    INITIAL_FORM_ACTION_STATE,
+  if (mode === "create") {
+    return <StaffCreateForm initialValues={initialValues} />;
+  }
+
+  return (
+    <StaffEditForm
+      initialValues={initialValues}
+      linkedPortalLoginEmail={linkedPortalLoginEmail}
+    />
   );
+}
+
+function StaffCreateForm({ initialValues }: { initialValues: StaffFormValues }) {
+  const [state, formAction] = useActionState(createStaffAction, INITIAL_STAFF_CREATE_ACTION_STATE);
+
+  if (state.status === "success" && state.portalLogin && state.staffId) {
+    return (
+      <StaffPortalLoginSuccess
+        staffId={state.staffId}
+        email={state.portalLogin.email}
+        temporaryPassword={state.portalLogin.temporaryPassword}
+      />
+    );
+  }
+
+  return (
+    <StaffFormShell
+      mode="create"
+      initialValues={initialValues}
+      formAction={formAction}
+      state={state}
+    />
+  );
+}
+
+function StaffEditForm({
+  initialValues,
+  linkedPortalLoginEmail = null,
+}: {
+  initialValues: StaffFormValues;
+  linkedPortalLoginEmail?: string | null;
+}) {
+  const [state, formAction] = useActionState(updateStaffAction, INITIAL_FORM_ACTION_STATE);
+
+  return (
+    <StaffFormShell
+      mode="edit"
+      initialValues={initialValues}
+      linkedPortalLoginEmail={linkedPortalLoginEmail}
+      formAction={formAction}
+      state={state}
+    />
+  );
+}
+
+function StaffFormShell({
+  mode,
+  initialValues,
+  linkedPortalLoginEmail = null,
+  formAction,
+  state,
+}: {
+  mode: "create" | "edit";
+  initialValues: StaffFormValues;
+  linkedPortalLoginEmail?: string | null;
+  formAction: (formData: FormData) => void;
+  state: FormActionState | StaffCreateActionState;
+}) {
+  const router = useRouter();
   const { values, updateFormValue } = useFormValues(initialValues);
   const [payrollEligibilityTouched, setPayrollEligibilityTouched] = useState(false);
+  const showMechanicPortalSection = values.role === "mechanic";
+  const hasLinkedPortalLogin = Boolean(linkedPortalLoginEmail?.trim());
 
   function handleRoleChange(nextRole: StaffFormValues["role"]) {
     updateFormValue("role", nextRole);
@@ -53,7 +131,9 @@ export function StaffForm({
         <CardHeader>
           <CardTitle>{mode === "create" ? "Staff record" : "Edit staff"}</CardTitle>
           <CardDescription>
-            Staff records support mechanic assignment, attendance, and later productivity reporting.
+            {mode === "create"
+              ? "Creating a mechanic also provisions an attendance portal login automatically."
+              : "Staff records support mechanic assignment, attendance, and later productivity reporting."}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -163,6 +243,66 @@ export function StaffForm({
               <FieldError errors={state.fieldErrors} name="status" id={fieldErrorId("status")} />
             </div>
           </div>
+
+          {showMechanicPortalSection ? (
+            <div className="rounded-2xl border border-border/70 bg-muted/15 px-4 py-4">
+              <div className="space-y-1">
+                <p className="font-medium text-foreground">Attendance portal login</p>
+                <p className="text-sm text-muted-foreground">
+                  Mechanics use this username to sign in to the attendance portal.
+                </p>
+              </div>
+
+              {mode === "create" ? (
+                <p className="mt-4 text-sm text-muted-foreground">
+                  A portal username and temporary password will be generated automatically after
+                  you create this mechanic. Example username:{" "}
+                  <span className="font-mono text-foreground">lastname@sayautocare.com</span>
+                </p>
+              ) : hasLinkedPortalLogin ? (
+                <div className="mt-4 space-y-2">
+                  <Label htmlFor="portalLoginEmail" optional>Portal username</Label>
+                  <Input
+                    id="portalLoginEmail"
+                    name="portalLoginEmail"
+                    value={linkedPortalLoginEmail ?? ""}
+                    readOnly
+                    className="bg-muted/40 font-mono text-sm text-foreground"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    This staff record is already linked to an attendance portal account.
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-4 space-y-2">
+                  <Label htmlFor="portalLoginEmail" optional>Link existing portal username</Label>
+                  <Input
+                    id="portalLoginEmail"
+                    name="portalLoginEmail"
+                    value={values.portalLoginEmail}
+                    placeholder="lastname@sayautocare.com"
+                    className={fieldControlClassName(state.fieldErrors, "portalLoginEmail")}
+                    {...fieldAriaProps({
+                      errors: state.fieldErrors,
+                      name: "portalLoginEmail",
+                      required: false,
+                      errorId: fieldErrorId("portalLoginEmail"),
+                    })}
+                    onChange={(event) => updateFormValue("portalLoginEmail", event.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Optional. Use this only when the mechanic already has a portal login and you
+                    need to attach it to this staff record.
+                  </p>
+                  <FieldError
+                    errors={state.fieldErrors}
+                    name="portalLoginEmail"
+                    id={fieldErrorId("portalLoginEmail")}
+                  />
+                </div>
+              )}
+            </div>
+          ) : null}
 
           <div className="rounded-2xl border border-border/70 bg-muted/15 px-4 py-4">
             <div className="flex items-start justify-between gap-4">
@@ -325,8 +465,8 @@ export function StaffForm({
             <SubmitButton pendingLabel={mode === "create" ? "Creating..." : "Saving..."}>
               {mode === "create" ? "Create staff record" : "Save changes"}
             </SubmitButton>
-            <Button asChild variant="outline" type="button">
-              <Link href="/staff">Cancel</Link>
+            <Button type="button" variant="outline" onClick={() => router.push("/staff")}>
+              Cancel
             </Button>
           </div>
         </CardContent>
