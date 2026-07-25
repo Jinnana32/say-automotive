@@ -153,6 +153,14 @@ export function QuotationForm({
   const [items, setItems] = useState<QuotationFormItem[]>(
     initialValues.items.length > 0 ? initialValues.items : [createQuotationItem()],
   );
+  const [quickCreateProductTarget, setQuickCreateProductTarget] = useState<{
+    lineKey: string;
+    suggestedName: string;
+  } | null>(null);
+  const [quickCreateServiceTarget, setQuickCreateServiceTarget] = useState<{
+    lineKey: string;
+    suggestedName: string;
+  } | null>(null);
   const [productOptions, setProductOptions] = useState(() =>
     dedupeOptionsById(options.products),
   );
@@ -193,6 +201,7 @@ export function QuotationForm({
   });
 
   return (
+    <>
     <form
       action={formActionState}
       className="space-y-6"
@@ -520,34 +529,13 @@ export function QuotationForm({
                               options.permissions.canCreateProducts
                                 ? {
                                     label: "Create New Product",
-                                    renderDialog: ({ open, onOpenChange, suggestedName }) => (
-                                      <QuickCreateProductDialog
-                                        open={open}
-                                        onOpenChange={onOpenChange}
-                                        showTrigger={false}
-                                        initialName={suggestedName}
-                                        initialOptions={options.productFormOptions ?? undefined}
-                                        onCreated={(product) => {
-                                          setProductOptions((current) => {
-                                            const nextProduct = {
-                                              id: product.id,
-                                              label: product.label,
-                                              sku: product.sku,
-                                              unitPrice: product.unitPrice,
-                                            };
-
-                                            return dedupeOptionsById([...current, nextProduct]);
-                                          });
-                                          updateItem(setItems, item.key, {
-                                            itemType: "product",
-                                            productId: product.id,
-                                            serviceId: "",
-                                            description: product.label,
-                                            unitPrice: formatMoneyInputValue(product.unitPrice),
-                                          });
-                                        }}
-                                      />
-                                    ),
+                                    onRequestOpen: ({ suggestedName }) => {
+                                      setQuickCreateServiceTarget(null);
+                                      setQuickCreateProductTarget({
+                                        lineKey: item.key,
+                                        suggestedName,
+                                      });
+                                    },
                                   }
                                 : undefined
                             }
@@ -608,33 +596,13 @@ export function QuotationForm({
                               options.permissions.canCreateServices
                                 ? {
                                     label: "Create New Service",
-                                    renderDialog: ({ open, onOpenChange, suggestedName }) => (
-                                      <QuickCreateServiceDialog
-                                        open={open}
-                                        onOpenChange={onOpenChange}
-                                        showTrigger={false}
-                                        initialName={suggestedName}
-                                        onCreated={(service) => {
-                                          setServiceOptions((current) => {
-                                            const nextService = {
-                                              id: service.id,
-                                              label: service.label,
-                                              category: service.category,
-                                              unitPrice: service.unitPrice,
-                                            };
-
-                                            return dedupeOptionsById([...current, nextService]);
-                                          });
-                                          updateItem(setItems, item.key, {
-                                            itemType: "service",
-                                            serviceId: service.id,
-                                            productId: "",
-                                            description: service.label,
-                                            unitPrice: formatMoneyInputValue(service.unitPrice),
-                                          });
-                                        }}
-                                      />
-                                    ),
+                                    onRequestOpen: ({ suggestedName }) => {
+                                      setQuickCreateProductTarget(null);
+                                      setQuickCreateServiceTarget({
+                                        lineKey: item.key,
+                                        suggestedName,
+                                      });
+                                    },
                                   }
                                 : undefined
                             }
@@ -807,6 +775,76 @@ export function QuotationForm({
         </div>
       </div>
     </form>
+
+    {quickCreateProductTarget ? (
+      <QuickCreateProductDialog
+        open
+        showTrigger={false}
+        initialName={quickCreateProductTarget.suggestedName}
+        initialOptions={options.productFormOptions ?? undefined}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            setQuickCreateProductTarget(null);
+          }
+        }}
+        onCreated={(product) => {
+          const lineKey = quickCreateProductTarget.lineKey;
+          setProductOptions((current) => {
+            const nextProduct = {
+              id: product.id,
+              label: product.label,
+              sku: product.sku,
+              unitPrice: product.unitPrice,
+            };
+
+            return dedupeOptionsById([...current, nextProduct]);
+          });
+          updateItem(setItems, lineKey, {
+            itemType: "product",
+            productId: product.id,
+            serviceId: "",
+            description: product.label,
+            unitPrice: formatMoneyInputValue(product.unitPrice),
+          });
+          setQuickCreateProductTarget(null);
+        }}
+      />
+    ) : null}
+
+    {quickCreateServiceTarget ? (
+      <QuickCreateServiceDialog
+        open
+        showTrigger={false}
+        initialName={quickCreateServiceTarget.suggestedName}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            setQuickCreateServiceTarget(null);
+          }
+        }}
+        onCreated={(service) => {
+          const lineKey = quickCreateServiceTarget.lineKey;
+          setServiceOptions((current) => {
+            const nextService = {
+              id: service.id,
+              label: service.label,
+              category: service.category,
+              unitPrice: service.unitPrice,
+            };
+
+            return dedupeOptionsById([...current, nextService]);
+          });
+          updateItem(setItems, lineKey, {
+            itemType: "service",
+            serviceId: service.id,
+            productId: "",
+            description: service.label,
+            unitPrice: formatMoneyInputValue(service.unitPrice),
+          });
+          setQuickCreateServiceTarget(null);
+        }}
+      />
+    ) : null}
+    </>
   );
 }
 

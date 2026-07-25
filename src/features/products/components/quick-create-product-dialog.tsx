@@ -5,7 +5,6 @@ import { Plus } from "lucide-react";
 
 import { FieldError, FormRequiredFieldsNote, FormStatusMessage } from "@/components/shared/form-status";
 import { ModalDialog } from "@/components/shared/modal-dialog";
-import { SubmitButton } from "@/components/shared/submit-button";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -128,6 +127,8 @@ function QuickCreateProductDialogForm({
     createInlineProductAction,
     INITIAL_INLINE_PRODUCT_ACTION_STATE,
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [clientError, setClientError] = useState<string | null>(null);
   const handledCreatedProductId = useRef<string | null>(null);
   const [optionsState, setOptionsState] = useState<ProductOptionsState>(
     initialOptions
@@ -227,6 +228,12 @@ function QuickCreateProductDialogForm({
   }, [open, optionsState, updateFormValue, values.unitId]);
 
   useEffect(() => {
+    if (state.status === "success" || state.status === "error") {
+      setIsSubmitting(false);
+    }
+  }, [state.status]);
+
+  useEffect(() => {
     if (state.status !== "success" || !state.product) {
       return;
     }
@@ -239,6 +246,13 @@ function QuickCreateProductDialogForm({
     onCreated(state.product);
     onOpenChange(false);
   }, [onCreated, onOpenChange, state]);
+
+  useEffect(() => {
+    if (!open) {
+      setClientError(null);
+      setIsSubmitting(false);
+    }
+  }, [open]);
 
   const options = optionsState.status === "ready" ? optionsState.data : null;
   const units = options?.units ?? [];
@@ -283,25 +297,33 @@ function QuickCreateProductDialogForm({
           action={formAction}
           className="-mx-6 -my-5 flex max-h-[min(72dvh,720px)] flex-col"
           onSubmit={(event) => {
+            setClientError(null);
+
             if (isCreateDisabled) {
               event.preventDefault();
+              setClientError(
+                optionsState.status === "error"
+                  ? optionsState.error
+                  : isOptionsLoading
+                    ? "Product options are still loading. Wait a moment and try again."
+                    : "Set up product units before creating products.",
+              );
               return;
             }
 
             if (!values.name.trim()) {
               event.preventDefault();
+              setClientError("Enter a product name.");
               return;
             }
 
             if (!values.unitId.trim()) {
               event.preventDefault();
+              setClientError("Select a base unit (for example Piece).");
               return;
             }
 
-            if (!options?.defaultBranchId) {
-              event.preventDefault();
-              return;
-            }
+            setIsSubmitting(true);
           }}
         >
           <input type="hidden" name="partNumber" value="" />
@@ -325,7 +347,7 @@ function QuickCreateProductDialogForm({
           <input type="hidden" name="status" value="active" />
 
           <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-6 py-5">
-          <FormStatusMessage message={state.message} />
+          <FormStatusMessage message={clientError ?? state.message} />
           <FormRequiredFieldsNote />
 
           {optionsState.status === "error" ? (
@@ -530,9 +552,13 @@ function QuickCreateProductDialogForm({
             <Button type="button" variant="outline" onClick={closeDialog}>
               Cancel
             </Button>
-            <SubmitButton pendingLabel="Creating..." disabled={isCreateDisabled}>
-              {createButtonLabel}
-            </SubmitButton>
+            <Button
+              type="submit"
+              variant="navyPrimary"
+              disabled={isCreateDisabled || isSubmitting}
+            >
+              {isSubmitting ? "Creating..." : createButtonLabel}
+            </Button>
           </div>
         </form>
       )}

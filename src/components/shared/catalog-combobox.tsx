@@ -23,7 +23,9 @@ import { cn } from "@/lib/utils";
 
 export type CatalogComboboxCreateAction = {
   label: string;
-  renderDialog: (controls: {
+  /** Prefer this from inside another <form> so the create dialog is not a React child of that form. */
+  onRequestOpen?: (params: { suggestedName: string }) => void;
+  renderDialog?: (controls: {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     suggestedName: string;
@@ -116,8 +118,16 @@ export function CatalogCombobox({
   }, [isCreateDialogOpen]);
 
   function openCreateDialog() {
-    setCreateDialogSuggestedName(query.trim());
+    const suggestedName = query.trim();
     setIsOpen(false);
+    setActiveIndex(-1);
+
+    if (createAction?.onRequestOpen) {
+      createAction.onRequestOpen({ suggestedName });
+      return;
+    }
+
+    setCreateDialogSuggestedName(suggestedName);
     setIsCreateDialogOpen(true);
   }
 
@@ -338,7 +348,7 @@ export function CatalogCombobox({
         </div>
       ) : null}
 
-      {createAction
+      {createAction?.renderDialog && !createAction.onRequestOpen
         ? createAction.renderDialog({
             open: isCreateDialogOpen,
             onOpenChange: handleCreateDialogOpenChange,

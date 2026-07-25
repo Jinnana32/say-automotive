@@ -130,6 +130,31 @@ describe("CatalogCombobox", () => {
     expect(nameInput).toHaveValue("Brake Pads");
   });
 
+  it("delegates create to onRequestOpen when provided", () => {
+    const onRequestOpen = vi.fn();
+
+    render(
+      <CatalogCombobox
+        id="catalog-item"
+        value=""
+        onValueChange={() => undefined}
+        options={OPTIONS}
+        createAction={{
+          label: "Create New Product",
+          onRequestOpen,
+        }}
+      />,
+    );
+
+    const input = screen.getByRole("textbox");
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "clutch disc" } });
+    fireEvent.click(screen.getByRole("button", { name: /Create New Product/i }));
+
+    expect(onRequestOpen).toHaveBeenCalledWith({ suggestedName: "clutch disc" });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
   it("shows an unlinked hint when draft text is present without a catalog id", () => {
     render(
       <CatalogCombobox

@@ -70,7 +70,7 @@ export function ModalDialog({
       {isOpen
         ? createPortal(
             <div
-              className="fixed inset-0 z-[120] flex items-start justify-center overflow-y-auto bg-slate-950/45 px-4 py-4 backdrop-blur-[2px] sm:items-center sm:py-6"
+              className="fixed inset-0 z-[150] flex items-start justify-center overflow-y-auto bg-slate-950/45 px-4 py-4 backdrop-blur-[2px] sm:items-center sm:py-6"
               onClick={(event) => {
                 if (event.target === event.currentTarget) {
                   setDialogOpen(false);
