@@ -116,6 +116,36 @@ describe("QuotationPrintLayout", () => {
     expect(preparedByContent.getByText("Admin")).toBeInTheDocument();
   });
 
+  it("hides the inspection notes section when notes are empty", () => {
+    render(<QuotationPrintLayout document={documentFixture} mode="full" />);
+
+    expect(screen.queryByText("INSPECTION NOTES")).not.toBeInTheDocument();
+  });
+
+  it("renders multiline inspection notes after nature of repair with preserved newlines", () => {
+    const notesDocument: QuotationPrintDocument = {
+      ...documentFixture,
+      quotation: {
+        ...documentFixture.quotation,
+        inspectionNotes:
+          "12 Volts Battery Rec to Replace\nATF Rec to Flush\nBrake Fluid Flush",
+      },
+    };
+
+    const { container } = render(
+      <QuotationPrintLayout document={notesDocument} mode="full" />,
+    );
+
+    expect(screen.getByText("NATURE OF REPAIR")).toBeInTheDocument();
+    expect(screen.getByText("INSPECTION NOTES")).toBeInTheDocument();
+
+    const notesBody = container.querySelector(".whitespace-pre-wrap");
+    expect(notesBody).not.toBeNull();
+    expect(notesBody?.textContent).toContain("12 Volts Battery Rec to Replace");
+    expect(notesBody?.textContent).toContain("ATF Rec to Flush");
+    expect(notesBody?.textContent).toContain("Brake Fluid Flush");
+  });
+
   it("keeps the closing sections on page 1 for medium quotations when they still fit", () => {
     const mediumDocument: QuotationPrintDocument = {
       ...documentFixture,

@@ -29,6 +29,7 @@ export function QuotationPrintLayout({
   const breakdown = buildQuotationPrintBreakdown(quotation, mode);
   const lineItems = buildQuotationLineRows(quotation.items, mode);
   const natureOfRepair = getPrintableText(quotation.natureOfRepair);
+  const inspectionNotes = getPrintableText(quotation.inspectionNotes);
   const serviceAdviserName =
     quotation.preparedByName?.trim() || "Prepared by current user";
   const serviceAdviserTitle = getPrintableText(quotation.preparedByTitle);
@@ -36,6 +37,7 @@ export function QuotationPrintLayout({
     lineItems,
     mode,
     hasNatureOfRepair: Boolean(natureOfRepair),
+    hasInspectionNotes: Boolean(inspectionNotes),
   });
 
   return (
@@ -95,6 +97,19 @@ export function QuotationPrintLayout({
                     </div>
                     <div className="px-4 py-3 text-[10.75px] leading-[1.42] text-slate-800">
                       {natureOfRepair}
+                    </div>
+                  </div>
+                </section>
+              ) : null}
+
+              {page.includeInspectionNotes && inspectionNotes ? (
+                <section className="report-section-keep mt-3.5">
+                  <div className="border border-brand-border">
+                    <div className="bg-brand-navy px-4 py-2 text-[10.25px] font-semibold tracking-[0.22em] text-white">
+                      INSPECTION NOTES
+                    </div>
+                    <div className="whitespace-pre-wrap px-4 py-3 text-[10.75px] leading-[1.42] text-slate-800">
+                      {inspectionNotes}
                     </div>
                   </div>
                 </section>
@@ -436,6 +451,7 @@ type QuotationPrintPageModel = {
   lineRows: QuotationLineRow[];
   includeIntro: boolean;
   includeNatureOfRepair: boolean;
+  includeInspectionNotes: boolean;
   includeClosing: boolean;
 };
 
@@ -443,10 +459,14 @@ function buildQuotationPrintPages(params: {
   lineItems: QuotationLineRow[];
   mode: QuotationPrintMode;
   hasNatureOfRepair: boolean;
+  hasInspectionNotes: boolean;
 }): QuotationPrintPageModel[] {
-  const { lineItems, mode, hasNatureOfRepair } = params;
+  const { lineItems, mode, hasNatureOfRepair, hasInspectionNotes } = params;
   const pageCapacity = getQuotationPageCapacity(mode);
-  const introUnits = getQuotationIntroUnits(hasNatureOfRepair);
+  const introUnits = getQuotationIntroUnits({
+    hasNatureOfRepair,
+    hasInspectionNotes,
+  });
   const closingUnits = getQuotationClosingUnits(mode);
   const totalUnits = estimateLineRowsUnits(lineItems);
 
@@ -457,6 +477,7 @@ function buildQuotationPrintPages(params: {
         lineRows: lineItems,
         includeIntro: true,
         includeNatureOfRepair: hasNatureOfRepair,
+        includeInspectionNotes: hasInspectionNotes,
         includeClosing: true,
       },
     ];
@@ -474,6 +495,7 @@ function buildQuotationPrintPages(params: {
     lineRows: firstPage.rows,
     includeIntro: true,
     includeNatureOfRepair: hasNatureOfRepair,
+    includeInspectionNotes: hasInspectionNotes,
     includeClosing: false,
   });
 
@@ -498,6 +520,7 @@ function buildQuotationPrintPages(params: {
       lineRows: nextPage.rows,
       includeIntro: false,
       includeNatureOfRepair: false,
+      includeInspectionNotes: false,
       includeClosing: false,
     });
     index = nextPage.nextIndex;
@@ -509,6 +532,7 @@ function buildQuotationPrintPages(params: {
     lineRows: buildRemainingRowsForFinalPage(lineItems, index, activeGroup),
     includeIntro: false,
     includeNatureOfRepair: false,
+    includeInspectionNotes: false,
     includeClosing: true,
   });
 
@@ -673,8 +697,21 @@ function getQuotationPageCapacity(mode: QuotationPrintMode) {
   }
 }
 
-function getQuotationIntroUnits(hasNatureOfRepair: boolean) {
-  return hasNatureOfRepair ? 5.1 : 4.25;
+function getQuotationIntroUnits(params: {
+  hasNatureOfRepair: boolean;
+  hasInspectionNotes: boolean;
+}) {
+  let units = 4.25;
+
+  if (params.hasNatureOfRepair) {
+    units += 0.85;
+  }
+
+  if (params.hasInspectionNotes) {
+    units += 0.85;
+  }
+
+  return units;
 }
 
 function getQuotationClosingUnits(mode: QuotationPrintMode) {
