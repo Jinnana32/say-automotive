@@ -134,6 +134,28 @@ export function PayrollPeriodForm({
         </div>
       </div>
 
+      <div className="rounded-2xl border border-border/70 bg-muted/20 px-4 py-4">
+        <label className="flex items-start gap-3">
+          <input
+            type="checkbox"
+            name="applyGovernmentDeductions"
+            value="true"
+            checked={values.applyGovernmentDeductions}
+            onChange={(event) => updateFormValue("applyGovernmentDeductions", event.target.checked)}
+            className="mt-1 size-4 rounded border-border text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+          <span className="space-y-1">
+            <span className="block text-sm font-medium text-foreground">
+              Apply government deductions
+            </span>
+            <span className="block text-sm text-muted-foreground">
+              When generating this payroll cut, deduct SSS, PhilHealth, and Pag-IBIG using shop
+              defaults (or each staff member&apos;s custom override).
+            </span>
+          </span>
+        </label>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="payrollNotes" optional>Notes</Label>
         <Textarea

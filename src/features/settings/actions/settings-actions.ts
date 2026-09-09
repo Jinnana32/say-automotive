@@ -157,6 +157,9 @@ export async function updateOperationalRulesSettingsAction(
     enable_shelf_location: parsed.data.enableShelfLocation,
     payroll_standard_daily_hours: Number(parsed.data.payrollStandardDailyHours),
     payroll_holiday_premium_rate: Number(parsed.data.payrollHolidayPremiumRate) / 100,
+    payroll_default_sss_ee_amount: Number(parsed.data.payrollDefaultSssEeAmount),
+    payroll_default_philhealth_ee_amount: Number(parsed.data.payrollDefaultPhilhealthEeAmount),
+    payroll_default_pagibig_ee_amount: Number(parsed.data.payrollDefaultPagibigEeAmount),
   };
 
   const { error } = await supabase
@@ -190,6 +193,9 @@ export async function updateOperationalRulesSettingsAction(
       enable_shelf_location: currentSettings.enable_shelf_location,
       payroll_standard_daily_hours: currentSettings.payroll_standard_daily_hours,
       payroll_holiday_premium_rate: currentSettings.payroll_holiday_premium_rate,
+      payroll_default_sss_ee_amount: currentSettings.payroll_default_sss_ee_amount,
+      payroll_default_philhealth_ee_amount: currentSettings.payroll_default_philhealth_ee_amount,
+      payroll_default_pagibig_ee_amount: currentSettings.payroll_default_pagibig_ee_amount,
     },
     afterData: payload,
   });

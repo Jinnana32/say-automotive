@@ -16,6 +16,7 @@ describe("staffFormSchema", () => {
       sssNumber: "",
       philhealthNumber: "",
       tinNumber: "",
+      pagibigNumber: "",
       emergencyContactName: "",
       emergencyContactNumber: "",
       status: "active",
@@ -37,9 +38,11 @@ describe("staffFormSchema", () => {
       sssNumber: "",
       philhealthNumber: "",
       tinNumber: "",
+      pagibigNumber: "",
       emergencyContactName: "",
       emergencyContactNumber: "",
       status: "active",
+      portalLoginEmail: "",
     });
 
     expect(result.success).toBe(true);
@@ -57,6 +60,7 @@ describe("staffFormSchema", () => {
       sssNumber: "",
       philhealthNumber: "",
       tinNumber: "",
+      pagibigNumber: "",
       emergencyContactName: "",
       emergencyContactNumber: "",
       status: "active",

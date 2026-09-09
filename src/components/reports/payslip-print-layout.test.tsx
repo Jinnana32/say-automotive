@@ -22,6 +22,7 @@ const documentFixture: PayslipPrintDocument = {
     payoutDate: "2026-06-20",
     status: "draft",
     notes: null,
+    applyGovernmentDeductions: true,
     createdByStaffId: null,
     generatedByStaffId: null,
     generatedAt: null,
@@ -73,7 +74,7 @@ const documentFixture: PayslipPrintDocument = {
     allowancePay: 153,
     computedPay: 6498.25,
     manualAdditionsTotal: 400,
-    manualDeductionsTotal: 250,
+    manualDeductionsTotal: 235,
     grossPay: 6898.25,
     netPay: 10636.6875,
     readinessStatus: "ready",
@@ -89,7 +90,33 @@ const documentFixture: PayslipPrintDocument = {
         createdAt: "2026-06-16T00:00:00.000Z",
         updatedAt: "2026-06-16T00:00:00.000Z",
       },
+      {
+        id: "adjustment-2",
+        payrollPeriodItemId: "item-1",
+        adjustmentType: "deduction",
+        label: "SSS contribution",
+        amount: 135,
+        notes: "Applied from compensation profile",
+        createdAt: "2026-06-16T00:00:00.000Z",
+        updatedAt: "2026-06-16T00:00:00.000Z",
+      },
+      {
+        id: "adjustment-3",
+        payrollPeriodItemId: "item-1",
+        adjustmentType: "deduction",
+        label: "PhilHealth contribution",
+        amount: 100,
+        notes: "Applied from compensation profile",
+        createdAt: "2026-06-16T00:00:00.000Z",
+        updatedAt: "2026-06-16T00:00:00.000Z",
+      },
     ],
+  },
+  employeeIds: {
+    sssNumber: "34-1234567-8",
+    philhealthNumber: "12-345678901-2",
+    tinNumber: "123-456-789-000",
+    pagibigNumber: "1212-3456-7890",
   },
   businessProfile: {
     businessName: "SAY Auto Care Center",
@@ -116,5 +143,22 @@ describe("PayslipPrintLayout", () => {
     expect(screen.getByText("₱153.00")).toBeInTheDocument();
     expect(screen.getByText("₱10,636.69")).toBeInTheDocument();
     expect(screen.queryByText("₱6,120.0000")).not.toBeInTheDocument();
+  });
+
+  it("renders government IDs and statutory contribution lines", () => {
+    render(<PayslipPrintLayout document={documentFixture} />);
+
+    expect(screen.getByText("SSS No.")).toBeInTheDocument();
+    expect(screen.getByText("34-1234567-8")).toBeInTheDocument();
+    expect(screen.getByText("PhilHealth No.")).toBeInTheDocument();
+    expect(screen.getByText("12-345678901-2")).toBeInTheDocument();
+    expect(screen.getByText("Pag-IBIG No.")).toBeInTheDocument();
+    expect(screen.getByText("1212-3456-7890")).toBeInTheDocument();
+    expect(screen.getByText("TIN")).toBeInTheDocument();
+    expect(screen.getByText("123-456-789-000")).toBeInTheDocument();
+    expect(screen.getByText("SSS contribution")).toBeInTheDocument();
+    expect(screen.getAllByText("₱135.00").length).toBeGreaterThan(0);
+    expect(screen.getByText("PhilHealth contribution")).toBeInTheDocument();
+    expect(screen.getAllByText("₱100.00").length).toBeGreaterThan(0);
   });
 });

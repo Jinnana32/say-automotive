@@ -31,6 +31,7 @@ export type StaffFormValues = {
   sssNumber: string;
   philhealthNumber: string;
   tinNumber: string;
+  pagibigNumber: string;
   emergencyContactName: string;
   emergencyContactNumber: string;
   status: StaffStatus;

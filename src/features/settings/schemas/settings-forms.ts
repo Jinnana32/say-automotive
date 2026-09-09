@@ -1,6 +1,15 @@
 import { z } from "zod";
 
 import type { SettingsDocumentSequenceKey } from "@/features/settings/types";
+import { isNonNegativeMoneyInput } from "@/lib/currency";
+
+const moneyField = z
+  .string()
+  .trim()
+  .min(1, "This amount is required.")
+  .refine(isNonNegativeMoneyInput, {
+    message: "Enter a valid amount with up to 4 decimal places.",
+  });
 
 export const businessProfileSettingsSchema = z.object({
   businessName: z.string().trim().min(1, "Business name is required."),
@@ -47,6 +56,9 @@ export const operationalRulesSettingsSchema = z.object({
       (value) => Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= 1000,
       "Holiday premium rate must be between 0 and 1000 percent.",
     ),
+  payrollDefaultSssEeAmount: moneyField,
+  payrollDefaultPhilhealthEeAmount: moneyField,
+  payrollDefaultPagibigEeAmount: moneyField,
 });
 
 export const documentSequenceSettingsSchema = z.object({
@@ -97,6 +109,9 @@ export function parseOperationalRulesSettingsFormData(formData: FormData) {
     enableShelfLocation: readCheckbox(formData, "enableShelfLocation"),
     payrollStandardDailyHours: readString(formData, "payrollStandardDailyHours"),
     payrollHolidayPremiumRate: readString(formData, "payrollHolidayPremiumRate"),
+    payrollDefaultSssEeAmount: readString(formData, "payrollDefaultSssEeAmount"),
+    payrollDefaultPhilhealthEeAmount: readString(formData, "payrollDefaultPhilhealthEeAmount"),
+    payrollDefaultPagibigEeAmount: readString(formData, "payrollDefaultPagibigEeAmount"),
   };
 }
 

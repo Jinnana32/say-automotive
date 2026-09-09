@@ -10,6 +10,10 @@ describe("compensationProfileSchema", () => {
       baseRate: "",
       overtimeRate: "-1",
       allowancePerPeriod: "0",
+      useBranchGovernmentDefaults: true,
+      sssEeAmount: "0",
+      philhealthEeAmount: "0",
+      pagibigEeAmount: "0",
       effectiveStartDate: "",
       exemptFromAttendance: false,
       notes: "",
@@ -25,6 +29,10 @@ describe("compensationProfileSchema", () => {
       baseRate: "1500.12345",
       overtimeRate: "10.00",
       allowancePerPeriod: "0.00",
+      useBranchGovernmentDefaults: false,
+      sssEeAmount: "0.00",
+      philhealthEeAmount: "0.00",
+      pagibigEeAmount: "0.00",
       effectiveStartDate: "2026-05-01",
       exemptFromAttendance: false,
       notes: "",
@@ -42,6 +50,7 @@ describe("payrollPeriodSchema", () => {
       periodEndDate: "2026-05-15",
       payoutDate: "2026-05-10",
       notes: "",
+      applyGovernmentDeductions: true,
     });
 
     expect(result.success).toBe(false);

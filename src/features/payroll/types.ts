@@ -24,6 +24,10 @@ export type CompensationProfileSummary = {
   baseRate: number;
   overtimeRate: number | null;
   allowancePerPeriod: number;
+  sssEeAmount: number;
+  philhealthEeAmount: number;
+  pagibigEeAmount: number;
+  useBranchGovernmentDefaults: boolean;
   effectiveStartDate: string;
   exemptFromAttendance: boolean;
   notes: string | null;
@@ -66,6 +70,7 @@ export type PayrollPeriodSummary = {
   payoutDate: string;
   status: PayrollPeriodStatus;
   notes: string | null;
+  applyGovernmentDeductions: boolean;
   createdByStaffId: string | null;
   generatedByStaffId: string | null;
   generatedAt: string | null;
@@ -91,6 +96,10 @@ export type CompensationProfileFormValues = {
   baseRate: string;
   overtimeRate: string;
   allowancePerPeriod: string;
+  useBranchGovernmentDefaults: boolean;
+  sssEeAmount: string;
+  philhealthEeAmount: string;
+  pagibigEeAmount: string;
   effectiveStartDate: string;
   exemptFromAttendance: boolean;
   notes: string;
@@ -102,6 +111,7 @@ export type PayrollPeriodFormValues = {
   periodEndDate: string;
   payoutDate: string;
   notes: string;
+  applyGovernmentDeductions: boolean;
 };
 
 export type PayrollPeriodStatusFormValues = {
@@ -312,6 +322,12 @@ export type PayslipPrintDocument = {
   period: PayrollPeriodSummary;
   settings: PayrollSettingsSummary;
   item: PayrollPeriodItemSummary;
+  employeeIds: {
+    sssNumber: string | null;
+    philhealthNumber: string | null;
+    tinNumber: string | null;
+    pagibigNumber: string | null;
+  };
   businessProfile: PrintDocumentBusinessProfile;
   generatedAt: string;
 };

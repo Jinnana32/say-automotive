@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { updateOperationalRulesSettingsAction } from "@/features/settings/actions/settings-actions";
 import type { BusinessSettingsValues } from "@/features/settings/types";
 import { INITIAL_FORM_ACTION_STATE } from "@/lib/forms";
+import { MONEY_INPUT_STEP } from "@/lib/currency";
 import { useFormValues } from "@/lib/use-form-values";
 
 export function OperationalRulesForm({
@@ -44,6 +45,9 @@ export function OperationalRulesForm({
     enableShelfLocation: initialValues.enableShelfLocation,
     payrollStandardDailyHours: initialValues.payrollStandardDailyHours,
     payrollHolidayPremiumRate: initialValues.payrollHolidayPremiumRate,
+    payrollDefaultSssEeAmount: initialValues.payrollDefaultSssEeAmount,
+    payrollDefaultPhilhealthEeAmount: initialValues.payrollDefaultPhilhealthEeAmount,
+    payrollDefaultPagibigEeAmount: initialValues.payrollDefaultPagibigEeAmount,
   });
 
   return (
@@ -181,6 +185,106 @@ export function OperationalRulesForm({
               Extra percentage paid only when a staff member actually works on a holiday date.
             </p>
             <FieldError errors={state.fieldErrors} name="payrollHolidayPremiumRate" id={fieldErrorId("payrollHolidayPremiumRate")} />
+          </div>
+        </div>
+
+        <div className="space-y-3 rounded-2xl border border-border/70 bg-muted/15 px-4 py-4">
+          <div>
+            <p className="font-medium text-foreground">Default government contributions</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Set once for the shop. Staff using shop defaults get these amounts when a payroll
+              period has government deductions enabled. Override only for staff with different
+              amounts.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="space-y-2">
+              <Label htmlFor="payrollDefaultSssEeAmount" required>
+                Default SSS per period
+              </Label>
+              <Input
+                id="payrollDefaultSssEeAmount"
+                name="payrollDefaultSssEeAmount"
+                inputMode="decimal"
+                type="number"
+                step={MONEY_INPUT_STEP}
+                value={values.payrollDefaultSssEeAmount}
+                onChange={(event) =>
+                  updateFormValue("payrollDefaultSssEeAmount", event.target.value)
+                }
+                className={fieldControlClassName(state.fieldErrors, "payrollDefaultSssEeAmount")}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "payrollDefaultSssEeAmount",
+                  required: true,
+                  errorId: fieldErrorId("payrollDefaultSssEeAmount"),
+                })}
+              />
+              <FieldError
+                errors={state.fieldErrors}
+                name="payrollDefaultSssEeAmount"
+                id={fieldErrorId("payrollDefaultSssEeAmount")}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="payrollDefaultPhilhealthEeAmount" required>
+                Default PhilHealth per period
+              </Label>
+              <Input
+                id="payrollDefaultPhilhealthEeAmount"
+                name="payrollDefaultPhilhealthEeAmount"
+                inputMode="decimal"
+                type="number"
+                step={MONEY_INPUT_STEP}
+                value={values.payrollDefaultPhilhealthEeAmount}
+                onChange={(event) =>
+                  updateFormValue("payrollDefaultPhilhealthEeAmount", event.target.value)
+                }
+                className={fieldControlClassName(
+                  state.fieldErrors,
+                  "payrollDefaultPhilhealthEeAmount",
+                )}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "payrollDefaultPhilhealthEeAmount",
+                  required: true,
+                  errorId: fieldErrorId("payrollDefaultPhilhealthEeAmount"),
+                })}
+              />
+              <FieldError
+                errors={state.fieldErrors}
+                name="payrollDefaultPhilhealthEeAmount"
+                id={fieldErrorId("payrollDefaultPhilhealthEeAmount")}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="payrollDefaultPagibigEeAmount" required>
+                Default Pag-IBIG per period
+              </Label>
+              <Input
+                id="payrollDefaultPagibigEeAmount"
+                name="payrollDefaultPagibigEeAmount"
+                inputMode="decimal"
+                type="number"
+                step={MONEY_INPUT_STEP}
+                value={values.payrollDefaultPagibigEeAmount}
+                onChange={(event) =>
+                  updateFormValue("payrollDefaultPagibigEeAmount", event.target.value)
+                }
+                className={fieldControlClassName(state.fieldErrors, "payrollDefaultPagibigEeAmount")}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "payrollDefaultPagibigEeAmount",
+                  required: true,
+                  errorId: fieldErrorId("payrollDefaultPagibigEeAmount"),
+                })}
+              />
+              <FieldError
+                errors={state.fieldErrors}
+                name="payrollDefaultPagibigEeAmount"
+                id={fieldErrorId("payrollDefaultPagibigEeAmount")}
+              />
+            </div>
           </div>
         </div>
 

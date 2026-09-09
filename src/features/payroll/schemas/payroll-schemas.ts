@@ -7,6 +7,7 @@ import type {
   PayrollPeriodFormValues,
   PayrollPeriodStatusFormValues,
 } from "@/features/payroll/types";
+import { isStatutoryDeductionLabel } from "@/features/payroll/statutory-deductions";
 import { isNonNegativeMoneyInput } from "@/lib/currency";
 
 const BUSINESS_TIMEZONE = "Asia/Manila";
@@ -26,18 +27,23 @@ const optionalMoneyField = z
     message: "Enter a valid amount with up to 4 decimal places.",
   });
 
-export const compensationProfileSchema = z.object({
-  staffId: z.string().uuid("Select a staff member."),
-  payBasis: z.enum(["monthly", "daily", "hourly"]),
-  baseRate: moneyField,
-  overtimeRate: optionalMoneyField,
-  allowancePerPeriod: moneyField,
-  effectiveStartDate: z.string().trim().refine(isValidDate, {
-    message: "Enter a valid effective date.",
-  }),
-  exemptFromAttendance: z.boolean(),
-  notes: z.string().trim().max(500, "Notes must be 500 characters or fewer."),
-});
+export const compensationProfileSchema = z
+  .object({
+    staffId: z.string().uuid("Select a staff member."),
+    payBasis: z.enum(["monthly", "daily", "hourly"]),
+    baseRate: moneyField,
+    overtimeRate: optionalMoneyField,
+    allowancePerPeriod: moneyField,
+    useBranchGovernmentDefaults: z.boolean(),
+    sssEeAmount: moneyField,
+    philhealthEeAmount: moneyField,
+    pagibigEeAmount: moneyField,
+    effectiveStartDate: z.string().trim().refine(isValidDate, {
+      message: "Enter a valid effective date.",
+    }),
+    exemptFromAttendance: z.boolean(),
+    notes: z.string().trim().max(500, "Notes must be 500 characters or fewer."),
+  });
 
 export const payrollPeriodSchema = z
   .object({
@@ -52,6 +58,7 @@ export const payrollPeriodSchema = z
       message: "Enter a valid payout date.",
     }),
     notes: z.string().trim().max(500, "Notes must be 500 characters or fewer."),
+    applyGovernmentDeductions: z.boolean(),
   })
   .superRefine((values, context) => {
     const startDate = parseDate(values.periodStartDate);
@@ -80,14 +87,25 @@ export const payrollPeriodStatusSchema = z.object({
   status: z.enum(["draft", "processing", "finalized"]),
 });
 
-export const payrollAdjustmentSchema = z.object({
-  payrollPeriodId: z.string().uuid("Select a payroll period."),
-  payrollPeriodItemId: z.string().uuid("Select a payroll staff row."),
-  adjustmentType: z.enum(["addition", "deduction"]),
-  label: z.string().trim().min(1, "Adjustment label is required.").max(120, "Adjustment label is too long."),
-  amount: moneyField,
-  notes: z.string().trim().max(500, "Notes must be 500 characters or fewer."),
-});
+export const payrollAdjustmentSchema = z
+  .object({
+    payrollPeriodId: z.string().uuid("Select a payroll period."),
+    payrollPeriodItemId: z.string().uuid("Select a payroll staff row."),
+    adjustmentType: z.enum(["addition", "deduction"]),
+    label: z.string().trim().min(1, "Adjustment label is required.").max(120, "Adjustment label is too long."),
+    amount: moneyField,
+    notes: z.string().trim().max(500, "Notes must be 500 characters or fewer."),
+  })
+  .superRefine((values, context) => {
+    if (isStatutoryDeductionLabel(values.label)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["label"],
+        message:
+          "SSS, PhilHealth, and Pag-IBIG contributions are managed from the compensation profile. Update those amounts there instead.",
+      });
+    }
+  });
 
 export function parseCompensationProfileFormData(formData: FormData): CompensationProfileFormValues {
   return {
@@ -96,6 +114,10 @@ export function parseCompensationProfileFormData(formData: FormData): Compensati
     baseRate: readString(formData, "baseRate"),
     overtimeRate: readString(formData, "overtimeRate"),
     allowancePerPeriod: readString(formData, "allowancePerPeriod"),
+    useBranchGovernmentDefaults: formData.get("useBranchGovernmentDefaults") === "true",
+    sssEeAmount: readString(formData, "sssEeAmount"),
+    philhealthEeAmount: readString(formData, "philhealthEeAmount"),
+    pagibigEeAmount: readString(formData, "pagibigEeAmount"),
     effectiveStartDate: readString(formData, "effectiveStartDate"),
     exemptFromAttendance: formData.get("exemptFromAttendance") === "true",
     notes: readString(formData, "notes"),
@@ -109,6 +131,7 @@ export function parsePayrollPeriodFormData(formData: FormData): PayrollPeriodFor
     periodEndDate: readString(formData, "periodEndDate"),
     payoutDate: readString(formData, "payoutDate"),
     notes: readString(formData, "notes"),
+    applyGovernmentDeductions: formData.get("applyGovernmentDeductions") === "true",
   };
 }
 

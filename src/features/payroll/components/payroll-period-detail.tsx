@@ -38,7 +38,11 @@ export function PayrollPeriodDetail({ data }: { data: PayrollPeriodDetailData })
     <div className="space-y-6">
       <PageHeader
         title={period.label}
-        description={`Coverage ${formatPayrollCoverage(period.periodStartDate, period.periodEndDate)} · payout ${formatDate(period.payoutDate)}.`}
+        description={`Coverage ${formatPayrollCoverage(period.periodStartDate, period.periodEndDate)} · payout ${formatDate(period.payoutDate)}${
+          period.applyGovernmentDeductions
+            ? " · government deductions on"
+            : " · government deductions off"
+        }.`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <Button asChild variant="outline">

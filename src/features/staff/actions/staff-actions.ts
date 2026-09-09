@@ -28,6 +28,7 @@ type StaffSavePayload = Pick<
   | "sss_number"
   | "philhealth_number"
   | "tin_number"
+  | "pagibig_number"
   | "emergency_contact_name"
   | "emergency_contact_number"
   | "status"
@@ -100,6 +101,7 @@ async function saveStaff(
     sss_number: normalizeNullable(values.sssNumber),
     philhealth_number: normalizeNullable(values.philhealthNumber),
     tin_number: normalizeNullable(values.tinNumber),
+    pagibig_number: normalizeNullable(values.pagibigNumber),
     emergency_contact_name: normalizeNullable(values.emergencyContactName),
     emergency_contact_number: normalizeNullable(values.emergencyContactNumber),
     status: values.status,

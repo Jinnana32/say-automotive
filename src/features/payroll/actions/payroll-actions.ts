@@ -22,6 +22,12 @@ import {
   payrollPeriodSchema,
   payrollPeriodStatusSchema,
 } from "@/features/payroll/schemas/payroll-schemas";
+import {
+  buildStatutoryDeductionLines,
+  isStatutoryDeductionLabel,
+  resolveEffectiveStatutoryAmounts,
+  STATUTORY_DEDUCTION_LABEL_LIST,
+} from "@/features/payroll/statutory-deductions";
 import type { PayrollFormActionState } from "@/features/payroll/types";
 import { INITIAL_PAYROLL_FORM_ACTION_STATE } from "@/features/payroll/utils";
 import type { TableInsert, TableRow } from "@/types/database";
@@ -50,6 +56,10 @@ type StaffSavePayload = Pick<
   | "base_rate"
   | "overtime_rate"
   | "allowance_per_period"
+  | "sss_ee_amount"
+  | "philhealth_ee_amount"
+  | "pagibig_ee_amount"
+  | "use_branch_government_defaults"
   | "effective_start_date"
   | "exempt_from_attendance"
   | "notes"
@@ -76,6 +86,10 @@ export async function upsertCompensationProfileAction(
     base_rate: Number(values.baseRate),
     overtime_rate: values.overtimeRate.trim() ? Number(values.overtimeRate) : null,
     allowance_per_period: Number(values.allowancePerPeriod),
+    sss_ee_amount: Number(values.sssEeAmount),
+    philhealth_ee_amount: Number(values.philhealthEeAmount),
+    pagibig_ee_amount: Number(values.pagibigEeAmount),
+    use_branch_government_defaults: values.useBranchGovernmentDefaults,
     effective_start_date: values.effectiveStartDate,
     exempt_from_attendance: values.exemptFromAttendance,
     notes: normalizeNullable(values.notes),
@@ -123,6 +137,7 @@ export async function createPayrollPeriodAction(
     payout_date: values.payoutDate,
     status: "draft",
     notes: normalizeNullable(values.notes),
+    apply_government_deductions: values.applyGovernmentDeductions,
     created_by_staff_id: context.staffId,
   });
 
@@ -160,7 +175,9 @@ export async function generatePayrollCutAction(
   const { context, supabase } = await getBranchScopedServerClient("payroll:write");
   const { data: periodData, error: periodError } = await supabase
     .from("payroll_periods")
-    .select("id, branch_id, label, period_start_date, period_end_date, status")
+    .select(
+      "id, branch_id, label, period_start_date, period_end_date, status, apply_government_deductions",
+    )
     .eq("id", periodId)
     .maybeSingle();
 
@@ -189,7 +206,9 @@ export async function generatePayrollCutAction(
   ] = await Promise.all([
     supabase
       .from("business_settings")
-      .select("payroll_standard_daily_hours, payroll_holiday_premium_rate")
+      .select(
+        "payroll_standard_daily_hours, payroll_holiday_premium_rate, payroll_default_sss_ee_amount, payroll_default_philhealth_ee_amount, payroll_default_pagibig_ee_amount",
+      )
       .eq("branch_id", periodData.branch_id)
       .single(),
     supabase
@@ -287,6 +306,10 @@ export async function generatePayrollCutAction(
         baseRate: row.base_rate,
         overtimeRate: row.overtime_rate,
         allowancePerPeriod: row.allowance_per_period,
+        sssEeAmount: row.sss_ee_amount,
+        philhealthEeAmount: row.philhealth_ee_amount,
+        pagibigEeAmount: row.pagibig_ee_amount,
+        useBranchGovernmentDefaults: row.use_branch_government_defaults,
         effectiveStartDate: row.effective_start_date,
         exemptFromAttendance: row.exempt_from_attendance,
         notes: row.notes,
@@ -397,8 +420,11 @@ export async function generatePayrollCutAction(
 
   const payrollItemsPayload: Array<TableInsert<"payroll_period_items">> = staffRows.map((staffMember) => {
     const existingItemId = existingItemByStaffId.get(staffMember.id);
+    const preservedAdjustments = (adjustmentsByItemId.get(existingItemId ?? "") ?? []).filter(
+      (adjustment) => !isStatutoryDeductionLabel(adjustment.label),
+    );
     const adjustmentTotals = summarizeAdjustmentTotals(
-      (adjustmentsByItemId.get(existingItemId ?? "") ?? []).map((adjustment) => ({
+      preservedAdjustments.map((adjustment) => ({
         id: existingItemId ?? "",
         payrollPeriodItemId: existingItemId ?? "",
         adjustmentType: adjustment.adjustmentType,
@@ -409,12 +435,32 @@ export async function generatePayrollCutAction(
         updatedAt: adjustment.updatedAt,
       })),
     );
+    const compensationProfile = compensationByStaffId.get(staffMember.id) ?? null;
+    const statutoryAmounts = resolveEffectiveStatutoryAmounts({
+      useBranchDefaults: compensationProfile?.useBranchGovernmentDefaults ?? true,
+      profileAmounts: compensationProfile
+        ? {
+            sssEeAmount: compensationProfile.sssEeAmount,
+            philhealthEeAmount: compensationProfile.philhealthEeAmount,
+            pagibigEeAmount: compensationProfile.pagibigEeAmount,
+          }
+        : null,
+      branchDefaults: {
+        sssEeAmount: settingsData.payroll_default_sss_ee_amount ?? 0,
+        philhealthEeAmount: settingsData.payroll_default_philhealth_ee_amount ?? 0,
+        pagibigEeAmount: settingsData.payroll_default_pagibig_ee_amount ?? 0,
+      },
+    });
+    const statutoryLines = periodData.apply_government_deductions
+      ? buildStatutoryDeductionLines(statutoryAmounts)
+      : [];
+    const statutoryDeductionsTotal = statutoryLines.reduce((sum, line) => sum + line.amount, 0);
     const computedItem = computePayrollItem({
       staffId: staffMember.id,
       fullName: `${staffMember.first_name} ${staffMember.last_name}`.trim(),
       role: staffMember.role,
       schedule: scheduleByStaffId.get(staffMember.id) ?? null,
-      compensationProfile: compensationByStaffId.get(staffMember.id) ?? null,
+      compensationProfile,
       attendanceRecords: attendanceByStaffId.get(staffMember.id) ?? [],
       holidays,
       leaveEntries: leaveEntriesByStaffId.get(staffMember.id) ?? [],
@@ -425,7 +471,7 @@ export async function generatePayrollCutAction(
         holidayPremiumRate: settingsData.payroll_holiday_premium_rate ?? 0.3,
       },
       manualAdditionsTotal: adjustmentTotals.manualAdditionsTotal,
-      manualDeductionsTotal: adjustmentTotals.manualDeductionsTotal,
+      manualDeductionsTotal: adjustmentTotals.manualDeductionsTotal + statutoryDeductionsTotal,
     });
 
     return {
@@ -483,6 +529,76 @@ export async function generatePayrollCutAction(
 
   if (upsertError) {
     return { status: "error", message: upsertError.message };
+  }
+
+  const { data: syncedItemsData, error: syncedItemsError } = await supabase
+    .from("payroll_period_items")
+    .select("id, staff_id")
+    .eq("payroll_period_id", periodData.id)
+    .in("staff_id", staffIds);
+
+  if (syncedItemsError) {
+    return { status: "error", message: syncedItemsError.message };
+  }
+
+  const syncedItems = syncedItemsData ?? [];
+  const syncedItemIds = syncedItems.map((row) => row.id);
+
+  if (syncedItemIds.length > 0) {
+    const { error: deleteStatutoryError } = await supabase
+      .from("payroll_period_item_adjustments")
+      .delete()
+      .in("payroll_period_item_id", syncedItemIds)
+      .in("label", [...STATUTORY_DEDUCTION_LABEL_LIST]);
+
+    if (deleteStatutoryError) {
+      return { status: "error", message: deleteStatutoryError.message };
+    }
+  }
+
+  if (periodData.apply_government_deductions && syncedItems.length > 0) {
+    const statutoryAdjustmentPayload: Array<TableInsert<"payroll_period_item_adjustments">> = [];
+
+    for (const itemRow of syncedItems) {
+      const compensationProfile = compensationByStaffId.get(itemRow.staff_id) ?? null;
+      const statutoryAmounts = resolveEffectiveStatutoryAmounts({
+        useBranchDefaults: compensationProfile?.useBranchGovernmentDefaults ?? true,
+        profileAmounts: compensationProfile
+          ? {
+              sssEeAmount: compensationProfile.sssEeAmount,
+              philhealthEeAmount: compensationProfile.philhealthEeAmount,
+              pagibigEeAmount: compensationProfile.pagibigEeAmount,
+            }
+          : null,
+        branchDefaults: {
+          sssEeAmount: settingsData.payroll_default_sss_ee_amount ?? 0,
+          philhealthEeAmount: settingsData.payroll_default_philhealth_ee_amount ?? 0,
+          pagibigEeAmount: settingsData.payroll_default_pagibig_ee_amount ?? 0,
+        },
+      });
+
+      for (const line of buildStatutoryDeductionLines(statutoryAmounts)) {
+        statutoryAdjustmentPayload.push({
+          payroll_period_item_id: itemRow.id,
+          adjustment_type: "deduction",
+          label: line.label,
+          amount: line.amount,
+          notes: compensationProfile?.useBranchGovernmentDefaults === false
+            ? "Applied from compensation profile"
+            : "Applied from shop defaults",
+        });
+      }
+    }
+
+    if (statutoryAdjustmentPayload.length > 0) {
+      const { error: insertStatutoryError } = await supabase
+        .from("payroll_period_item_adjustments")
+        .insert(statutoryAdjustmentPayload);
+
+      if (insertStatutoryError) {
+        return { status: "error", message: insertStatutoryError.message };
+      }
+    }
   }
 
   const removableItemIds = existingItems

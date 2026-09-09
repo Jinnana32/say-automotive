@@ -61,22 +61,42 @@ export const getPayslipPrintDocument = cache(
     }
 
     const { supabase } = await getBranchScopedServerClient("payroll:read");
-    const { data: settingsRow, error } = await supabase
-      .from("business_settings")
-      .select(
-        "business_name, business_logo_path, business_vat_registration_no, business_contact, business_email, business_address, updated_at",
-      )
-      .eq("branch_id", detail.period.branchId)
-      .maybeSingle();
+    const [
+      { data: settingsRow, error },
+      { data: staffRow, error: staffError },
+    ] = await Promise.all([
+      supabase
+        .from("business_settings")
+        .select(
+          "business_name, business_logo_path, business_vat_registration_no, business_contact, business_email, business_address, updated_at",
+        )
+        .eq("branch_id", detail.period.branchId)
+        .maybeSingle(),
+      supabase
+        .from("staff")
+        .select("sss_number, philhealth_number, tin_number, pagibig_number")
+        .eq("id", item.staffId)
+        .maybeSingle(),
+    ]);
 
     if (error) {
       throw new Error(error.message);
+    }
+
+    if (staffError) {
+      throw new Error(staffError.message);
     }
 
     return {
       period: detail.period,
       settings: detail.settings,
       item,
+      employeeIds: {
+        sssNumber: staffRow?.sss_number ?? null,
+        philhealthNumber: staffRow?.philhealth_number ?? null,
+        tinNumber: staffRow?.tin_number ?? null,
+        pagibigNumber: staffRow?.pagibig_number ?? null,
+      },
       businessProfile: {
         businessName: settingsRow?.business_name ?? "SAY Auto Care Center",
         businessLogoUrl: buildBusinessLogoUrl(

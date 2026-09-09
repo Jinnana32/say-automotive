@@ -33,6 +33,9 @@ export type BusinessSettingsValues = {
   enableShelfLocation: boolean;
   payrollStandardDailyHours: string;
   payrollHolidayPremiumRate: string;
+  payrollDefaultSssEeAmount: string;
+  payrollDefaultPhilhealthEeAmount: string;
+  payrollDefaultPagibigEeAmount: string;
 };
 
 export type BusinessBranding = {

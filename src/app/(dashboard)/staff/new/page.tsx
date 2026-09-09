@@ -27,6 +27,7 @@ export default async function NewStaffPage() {
           sssNumber: "",
           philhealthNumber: "",
           tinNumber: "",
+          pagibigNumber: "",
           emergencyContactName: "",
           emergencyContactNumber: "",
           status: "active",

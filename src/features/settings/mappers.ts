@@ -41,6 +41,9 @@ export function mapBusinessSettingsRowToValues(
     enableShelfLocation: row.enable_shelf_location,
     payrollStandardDailyHours: String(row.payroll_standard_daily_hours ?? 8),
     payrollHolidayPremiumRate: String((row.payroll_holiday_premium_rate ?? 0.3) * 100),
+    payrollDefaultSssEeAmount: String(row.payroll_default_sss_ee_amount ?? 0),
+    payrollDefaultPhilhealthEeAmount: String(row.payroll_default_philhealth_ee_amount ?? 0),
+    payrollDefaultPagibigEeAmount: String(row.payroll_default_pagibig_ee_amount ?? 0),
   };
 }
 

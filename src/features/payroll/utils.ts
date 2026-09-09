@@ -355,6 +355,12 @@ export function buildCompensationProfileFormValues(
     baseRate: profile ? formatMoneyInputValue(profile.baseRate) : "",
     overtimeRate: profile?.overtimeRate ? formatMoneyInputValue(profile.overtimeRate) : "",
     allowancePerPeriod: profile ? formatMoneyInputValue(profile.allowancePerPeriod) : formatMoneyInputValue(0),
+    useBranchGovernmentDefaults: profile?.useBranchGovernmentDefaults ?? true,
+    sssEeAmount: profile ? formatMoneyInputValue(profile.sssEeAmount) : formatMoneyInputValue(0),
+    philhealthEeAmount: profile
+      ? formatMoneyInputValue(profile.philhealthEeAmount)
+      : formatMoneyInputValue(0),
+    pagibigEeAmount: profile ? formatMoneyInputValue(profile.pagibigEeAmount) : formatMoneyInputValue(0),
     effectiveStartDate: profile?.effectiveStartDate ?? getBusinessNow().toFormat("yyyy-LL-dd"),
     exemptFromAttendance: profile?.exemptFromAttendance ?? false,
     notes: profile?.notes ?? "",
@@ -373,6 +379,7 @@ export function buildDefaultPayrollPeriodFormValues(): PayrollPeriodFormValues {
     periodEndDate: endOfMonth,
     payoutDate: endOfMonth,
     notes: "",
+    applyGovernmentDeductions: true,
   };
 }
 

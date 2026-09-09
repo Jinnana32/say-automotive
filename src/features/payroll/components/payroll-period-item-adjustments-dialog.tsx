@@ -104,7 +104,9 @@ export function PayrollPeriodItemAdjustmentsDialog({
               <div>
                 <h3 className="font-semibold text-foreground">Manual adjustments</h3>
                 <p className="text-sm text-muted-foreground">
-                  Add SSS, Pag-IBIG, bonuses, cash advances, or one-off corrections here.
+                  For bonuses, cash advances, or one-off corrections only. Save one adjustment, then
+                  add another if needed. SSS, PhilHealth, and Pag-IBIG come from shop defaults when
+                  you generate the payroll cut.
                 </p>
               </div>
             </div>

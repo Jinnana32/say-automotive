@@ -181,6 +181,121 @@ export function CompensationProfileForm({
         </div>
       </div>
 
+      <div className="space-y-3 rounded-2xl border border-border/70 bg-muted/20 px-4 py-4">
+        <div>
+          <p className="text-sm font-medium text-foreground">Government contributions (employee share)</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Prefer shop defaults so you do not retype SSS, PhilHealth, and Pag-IBIG for every staff
+            member. Turn off the toggle below only when this person needs different amounts.
+          </p>
+        </div>
+
+        <label className="flex items-start gap-3 rounded-xl border border-border/60 bg-background/60 px-3 py-3">
+          <input
+            type="checkbox"
+            name="useBranchGovernmentDefaults"
+            value="true"
+            checked={values.useBranchGovernmentDefaults}
+            onChange={(event) =>
+              updateFormValue("useBranchGovernmentDefaults", event.target.checked)
+            }
+            className="mt-1 size-4 rounded border-border text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+          <span className="space-y-1">
+            <span className="block text-sm font-medium text-foreground">
+              Use shop default contribution amounts
+            </span>
+            <span className="block text-sm text-muted-foreground">
+              Uses the defaults from Settings → Operational rules. Uncheck to enter custom amounts
+              for this staff member only.
+            </span>
+          </span>
+        </label>
+
+        {!values.useBranchGovernmentDefaults ? (
+          <div className="grid gap-5 md:grid-cols-3">
+            <div className="space-y-2">
+              <Label htmlFor="compensationSssEeAmount" required>
+                SSS per period
+              </Label>
+              <Input
+                id="compensationSssEeAmount"
+                name="sssEeAmount"
+                inputMode="decimal"
+                type="number"
+                step={MONEY_INPUT_STEP}
+                value={values.sssEeAmount}
+                onChange={(event) => updateFormValue("sssEeAmount", event.target.value)}
+                className={fieldControlClassName(state.fieldErrors, "sssEeAmount")}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "sssEeAmount",
+                  required: true,
+                  errorId: fieldErrorId("sssEeAmount"),
+                })}
+              />
+              <FieldError errors={state.fieldErrors} name="sssEeAmount" id={fieldErrorId("sssEeAmount")} />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="compensationPhilhealthEeAmount" required>
+                PhilHealth per period
+              </Label>
+              <Input
+                id="compensationPhilhealthEeAmount"
+                name="philhealthEeAmount"
+                inputMode="decimal"
+                type="number"
+                step={MONEY_INPUT_STEP}
+                value={values.philhealthEeAmount}
+                onChange={(event) => updateFormValue("philhealthEeAmount", event.target.value)}
+                className={fieldControlClassName(state.fieldErrors, "philhealthEeAmount")}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "philhealthEeAmount",
+                  required: true,
+                  errorId: fieldErrorId("philhealthEeAmount"),
+                })}
+              />
+              <FieldError
+                errors={state.fieldErrors}
+                name="philhealthEeAmount"
+                id={fieldErrorId("philhealthEeAmount")}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="compensationPagibigEeAmount" required>
+                Pag-IBIG per period
+              </Label>
+              <Input
+                id="compensationPagibigEeAmount"
+                name="pagibigEeAmount"
+                inputMode="decimal"
+                type="number"
+                step={MONEY_INPUT_STEP}
+                value={values.pagibigEeAmount}
+                onChange={(event) => updateFormValue("pagibigEeAmount", event.target.value)}
+                className={fieldControlClassName(state.fieldErrors, "pagibigEeAmount")}
+                {...fieldAriaProps({
+                  errors: state.fieldErrors,
+                  name: "pagibigEeAmount",
+                  required: true,
+                  errorId: fieldErrorId("pagibigEeAmount"),
+                })}
+              />
+              <FieldError errors={state.fieldErrors} name="pagibigEeAmount" id={fieldErrorId("pagibigEeAmount")} />
+            </div>
+          </div>
+        ) : (
+          <>
+            <input type="hidden" name="sssEeAmount" value={values.sssEeAmount || "0"} />
+            <input type="hidden" name="philhealthEeAmount" value={values.philhealthEeAmount || "0"} />
+            <input type="hidden" name="pagibigEeAmount" value={values.pagibigEeAmount || "0"} />
+          </>
+        )}
+      </div>
+
       <div className="rounded-2xl border border-border/70 bg-muted/20 px-4 py-4">
         <label className="flex items-start gap-3">
           <input

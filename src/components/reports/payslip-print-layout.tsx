@@ -1,6 +1,7 @@
 import { PrintDocumentPage } from "@/components/reports/print-document-page";
 import { PrintPageStack } from "@/components/reports/print-document-layout";
 import { ReportSectionHeading } from "@/components/reports/report-section-heading";
+import { STATUTORY_DEDUCTION_LABEL_LIST } from "@/features/payroll/statutory-deductions";
 import type { PayslipPrintDocument } from "@/features/payroll/types";
 import {
   formatPayBasisLabel,
@@ -16,7 +17,7 @@ export function PayslipPrintLayout({
 }: {
   document: PayslipPrintDocument;
 }) {
-  const { period, item, businessProfile, generatedAt } = document;
+  const { period, item, employeeIds, businessProfile, generatedAt } = document;
 
   return (
     <PrintPageStack className="leading-[1.35]">
@@ -39,6 +40,13 @@ export function PayslipPrintLayout({
                   value={item.payBasis ? formatPayBasisLabel(item.payBasis) : "Not configured"}
                 />
                 <MetadataRow label="Generated" value={formatDateTime(generatedAt)} />
+                <MetadataRow label="SSS No." value={employeeIds.sssNumber?.trim() || "—"} />
+                <MetadataRow
+                  label="PhilHealth No."
+                  value={employeeIds.philhealthNumber?.trim() || "—"}
+                />
+                <MetadataRow label="Pag-IBIG No." value={employeeIds.pagibigNumber?.trim() || "—"} />
+                <MetadataRow label="TIN" value={employeeIds.tinNumber?.trim() || "—"} />
               </div>
             </div>
 
@@ -112,6 +120,20 @@ function PayslipSummary({
 }: {
   item: PayslipPrintDocument["item"];
 }) {
+  const statutoryDeductions = item.adjustments
+    .filter(
+      (adjustment) =>
+        adjustment.adjustmentType === "deduction" &&
+        STATUTORY_DEDUCTION_LABEL_LIST.includes(
+          adjustment.label as (typeof STATUTORY_DEDUCTION_LABEL_LIST)[number],
+        ),
+    )
+    .map((adjustment) => ({
+      label: adjustment.label,
+      value: adjustment.amount,
+    }));
+  const statutoryTotal = statutoryDeductions.reduce((sum, line) => sum + line.value, 0);
+  const otherManualDeductions = Math.max(item.manualDeductionsTotal - statutoryTotal, 0);
   const earnings = [
     { label: "Base pay", value: item.basePay },
     { label: "Allowance", value: item.allowancePay },
@@ -122,17 +144,18 @@ function PayslipSummary({
     item.manualAdditionsTotal > 0
       ? [{ label: "Manual additions", value: item.manualAdditionsTotal }]
       : [];
+  const deductionLines = [
+    { label: "Late deductions", value: item.lateDeductionAmount },
+    ...statutoryDeductions,
+    ...(otherManualDeductions > 0
+      ? [{ label: "Manual deductions", value: otherManualDeductions }]
+      : []),
+  ];
 
   return (
     <div className="w-full max-w-[250px] text-[12px]">
       <PayslipSummaryGroup title="Earnings" lines={[...earnings, ...additions]} />
-      <PayslipSummaryGroup
-        title="Deductions"
-        lines={[
-          { label: "Late deductions", value: item.lateDeductionAmount },
-          { label: "Manual deductions", value: item.manualDeductionsTotal },
-        ]}
-      />
+      <PayslipSummaryGroup title="Deductions" lines={deductionLines} />
       <div className="mt-1 border-t border-brand-border pt-1">
         <PayslipSummaryLine label="Net pay" value={item.netPay} emphasized />
       </div>

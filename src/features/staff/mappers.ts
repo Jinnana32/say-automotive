@@ -31,6 +31,7 @@ export function mapStaffRowToFormValues(row: StaffRow): StaffFormValues {
     sssNumber: row.sss_number ?? "",
     philhealthNumber: row.philhealth_number ?? "",
     tinNumber: row.tin_number ?? "",
+    pagibigNumber: row.pagibig_number ?? "",
     emergencyContactName: row.emergency_contact_name ?? "",
     emergencyContactNumber: row.emergency_contact_number ?? "",
     status: row.status,
