@@ -43,6 +43,7 @@ describe("staffFormSchema", () => {
       emergencyContactNumber: "",
       status: "active",
       portalLoginEmail: "",
+      copyScheduleFromStaffId: "",
     });
 
     expect(result.success).toBe(true);
@@ -64,6 +65,7 @@ describe("staffFormSchema", () => {
       emergencyContactName: "",
       emergencyContactNumber: "",
       status: "active",
+      copyScheduleFromStaffId: "",
     });
 
     expect(result.success).toBe(false);

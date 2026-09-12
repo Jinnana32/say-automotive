@@ -36,5 +36,6 @@ export function mapStaffRowToFormValues(row: StaffRow): StaffFormValues {
     emergencyContactNumber: row.emergency_contact_number ?? "",
     status: row.status,
     portalLoginEmail: "",
+    copyScheduleFromStaffId: "",
   };
 }

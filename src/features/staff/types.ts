@@ -36,6 +36,13 @@ export type StaffFormValues = {
   emergencyContactNumber: string;
   status: StaffStatus;
   portalLoginEmail: string;
+  copyScheduleFromStaffId: string;
+};
+
+export type StaffScheduleCopyOption = {
+  staffId: string;
+  fullName: string;
+  summary: string;
 };
 
 export type StaffPortalLoginDetails = {

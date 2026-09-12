@@ -24,6 +24,7 @@ import {
   getDefaultPayrollEligibilityForRole,
   type StaffCreateActionState,
   type StaffFormValues,
+  type StaffScheduleCopyOption,
 } from "@/features/staff/types";
 import { INITIAL_FORM_ACTION_STATE, type FormActionState } from "@/lib/forms";
 import { useFormValues } from "@/lib/use-form-values";
@@ -36,13 +37,20 @@ export function StaffForm({
   mode,
   initialValues,
   linkedPortalLoginEmail = null,
+  scheduleCopyOptions = [],
 }: {
   mode: "create" | "edit";
   initialValues: StaffFormValues;
   linkedPortalLoginEmail?: string | null;
+  scheduleCopyOptions?: StaffScheduleCopyOption[];
 }) {
   if (mode === "create") {
-    return <StaffCreateForm initialValues={initialValues} />;
+    return (
+      <StaffCreateForm
+        initialValues={initialValues}
+        scheduleCopyOptions={scheduleCopyOptions}
+      />
+    );
   }
 
   return (
@@ -53,7 +61,13 @@ export function StaffForm({
   );
 }
 
-function StaffCreateForm({ initialValues }: { initialValues: StaffFormValues }) {
+function StaffCreateForm({
+  initialValues,
+  scheduleCopyOptions,
+}: {
+  initialValues: StaffFormValues;
+  scheduleCopyOptions: StaffScheduleCopyOption[];
+}) {
   const [state, formAction] = useActionState(createStaffAction, INITIAL_STAFF_CREATE_ACTION_STATE);
 
   if (state.status === "success" && state.portalLogin && state.staffId) {
@@ -70,6 +84,7 @@ function StaffCreateForm({ initialValues }: { initialValues: StaffFormValues }) 
     <StaffFormShell
       mode="create"
       initialValues={initialValues}
+      scheduleCopyOptions={scheduleCopyOptions}
       formAction={formAction}
       state={state}
     />
@@ -100,12 +115,14 @@ function StaffFormShell({
   mode,
   initialValues,
   linkedPortalLoginEmail = null,
+  scheduleCopyOptions = [],
   formAction,
   state,
 }: {
   mode: "create" | "edit";
   initialValues: StaffFormValues;
   linkedPortalLoginEmail?: string | null;
+  scheduleCopyOptions?: StaffScheduleCopyOption[];
   formAction: (formData: FormData) => void;
   state: FormActionState | StaffCreateActionState;
 }) {
@@ -132,7 +149,7 @@ function StaffFormShell({
           <CardTitle>{mode === "create" ? "Staff record" : "Edit staff"}</CardTitle>
           <CardDescription>
             {mode === "create"
-              ? "Creating a mechanic also provisions an attendance portal login automatically."
+              ? "Creating a mechanic also provisions an attendance portal login automatically. A work schedule is created from another staff member and can be edited later in Attendance or Payroll."
               : "Staff records support mechanic assignment, attendance, and later productivity reporting."}
           </CardDescription>
         </CardHeader>
@@ -243,6 +260,62 @@ function StaffFormShell({
               <FieldError errors={state.fieldErrors} name="status" id={fieldErrorId("status")} />
             </div>
           </div>
+
+          {mode === "create" ? (
+            <div className="rounded-2xl border border-border/70 bg-muted/15 px-4 py-4">
+              <div className="space-y-1">
+                <p className="font-medium text-foreground">Default work schedule</p>
+                <p className="text-sm text-muted-foreground">
+                  New staff get a copied schedule so attendance and payroll are ready. You can edit
+                  the schedule anytime from Attendance or Payroll.
+                </p>
+              </div>
+
+              {scheduleCopyOptions.length > 0 ? (
+                <div className="mt-4 space-y-2">
+                  <Label htmlFor="copyScheduleFromStaffId" optional>
+                    Copy schedule from
+                  </Label>
+                  <select
+                    id="copyScheduleFromStaffId"
+                    name="copyScheduleFromStaffId"
+                    value={values.copyScheduleFromStaffId}
+                    className={formSelectClassName(state.fieldErrors, "copyScheduleFromStaffId")}
+                    {...fieldAriaProps({
+                      errors: state.fieldErrors,
+                      name: "copyScheduleFromStaffId",
+                      required: false,
+                      errorId: fieldErrorId("copyScheduleFromStaffId"),
+                    })}
+                    onChange={(event) =>
+                      updateFormValue("copyScheduleFromStaffId", event.target.value)
+                    }
+                  >
+                    {scheduleCopyOptions.map((option) => (
+                      <option key={option.staffId} value={option.staffId}>
+                        {option.fullName} · {option.summary}
+                      </option>
+                    ))}
+                  </select>
+                  <FieldError
+                    errors={state.fieldErrors}
+                    name="copyScheduleFromStaffId"
+                    id={fieldErrorId("copyScheduleFromStaffId")}
+                  />
+                </div>
+              ) : (
+                <>
+                  <input type="hidden" name="copyScheduleFromStaffId" value="" />
+                  <p className="mt-4 text-sm text-muted-foreground">
+                    No existing schedules found yet. This staff member will get the shop default
+                    (Mon–Sat, 8:00 AM–5:00 PM), which you can edit after create.
+                  </p>
+                </>
+              )}
+            </div>
+          ) : (
+            <input type="hidden" name="copyScheduleFromStaffId" value="" />
+          )}
 
           {showMechanicPortalSection ? (
             <div className="rounded-2xl border border-border/70 bg-muted/15 px-4 py-4">

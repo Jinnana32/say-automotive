@@ -20,6 +20,12 @@ export const staffFormSchema = z.object({
   emergencyContactNumber: z.string().trim(),
   status: z.enum(["active", "inactive"]),
   portalLoginEmail: z.string().trim(),
+  copyScheduleFromStaffId: z
+    .string()
+    .trim()
+    .refine((value) => value.length === 0 || z.string().uuid().safeParse(value).success, {
+      message: "Select a valid staff schedule to copy.",
+    }),
 });
 
 export function parseStaffFormData(formData: FormData): StaffFormValues {
@@ -41,6 +47,7 @@ export function parseStaffFormData(formData: FormData): StaffFormValues {
     emergencyContactNumber: readString(formData, "emergencyContactNumber"),
     status: readString(formData, "status") as StaffFormValues["status"],
     portalLoginEmail: readString(formData, "portalLoginEmail"),
+    copyScheduleFromStaffId: readString(formData, "copyScheduleFromStaffId"),
   };
 }
 

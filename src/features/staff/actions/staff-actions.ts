@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { applyBranchFilter, getBranchScopedServerClient } from "@/lib/branches";
 import { INITIAL_FORM_ACTION_STATE, toFormActionState, type FormActionState } from "@/lib/forms";
 import { isMissingStaffDocumentTitleColumnError } from "@/features/staff/document-title-compat";
+import { buildStaffScheduleInsertFromSource } from "@/features/staff/default-staff-schedule";
 import { parseStaffFormData, staffFormSchema } from "@/features/staff/schemas/staff-form-schema";
 import {
   deleteAuthUser,
@@ -13,7 +14,9 @@ import {
   provisionMechanicPortalLogin,
 } from "@/features/staff/services/mechanic-portal-login";
 import type { StaffCreateActionState } from "@/features/staff/types";
-import type { TableInsert } from "@/types/database";
+import type { TableInsert, TableRow } from "@/types/database";
+
+type StaffScheduleRow = TableRow<"staff_schedules">;
 
 type StaffSavePayload = Pick<
   TableInsert<"staff">,
@@ -131,6 +134,20 @@ async function saveStaff(
 
   const staffId = data.id;
 
+  if (options.mode === "create") {
+    const scheduleResult = await assignDefaultScheduleForNewStaff({
+      supabase,
+      branchId,
+      staffId,
+      copyScheduleFromStaffId: values.copyScheduleFromStaffId,
+    });
+
+    if (!scheduleResult.success) {
+      await supabase.from("staff").delete().eq("id", staffId);
+      return { status: "error", message: scheduleResult.message };
+    }
+  }
+
   if (
     options.mode === "update" &&
     values.role === "mechanic" &&
@@ -175,6 +192,8 @@ async function saveStaff(
     }
 
     revalidatePath("/staff");
+    revalidatePath("/attendance");
+    revalidatePath("/payroll");
     return {
       status: "success",
       staffId,
@@ -186,7 +205,101 @@ async function saveStaff(
   }
 
   revalidatePath("/staff");
+  revalidatePath("/attendance");
+  revalidatePath("/payroll");
   redirect("/staff");
+}
+
+async function assignDefaultScheduleForNewStaff({
+  supabase,
+  branchId,
+  staffId,
+  copyScheduleFromStaffId,
+}: {
+  supabase: Awaited<ReturnType<typeof getBranchScopedServerClient>>["supabase"];
+  branchId: string;
+  staffId: string;
+  copyScheduleFromStaffId: string;
+}): Promise<{ success: true } | { success: false; message: string }> {
+  let sourceSchedule: StaffScheduleRow | null = null;
+
+  if (copyScheduleFromStaffId) {
+    const { data: sourceStaff, error: sourceStaffError } = await supabase
+      .from("staff")
+      .select("id, branch_id")
+      .eq("id", copyScheduleFromStaffId)
+      .maybeSingle();
+
+    if (sourceStaffError) {
+      return { success: false, message: sourceStaffError.message };
+    }
+
+    if (!sourceStaff || sourceStaff.branch_id !== branchId) {
+      return {
+        success: false,
+        message: "Selected schedule source staff was not found in this branch.",
+      };
+    }
+
+    const { data: scheduleData, error: scheduleError } = await supabase
+      .from("staff_schedules")
+      .select("*")
+      .eq("staff_id", copyScheduleFromStaffId)
+      .maybeSingle();
+
+    if (scheduleError) {
+      return { success: false, message: scheduleError.message };
+    }
+
+    if (!scheduleData) {
+      return {
+        success: false,
+        message: "Selected staff does not have a work schedule to copy.",
+      };
+    }
+
+    sourceSchedule = scheduleData as StaffScheduleRow;
+  } else {
+    const { data: branchStaffData, error: branchStaffError } = await supabase
+      .from("staff")
+      .select("id")
+      .eq("branch_id", branchId)
+      .eq("status", "active");
+
+    if (branchStaffError) {
+      return { success: false, message: branchStaffError.message };
+    }
+
+    const branchStaffIds = (branchStaffData ?? [])
+      .map((row) => row.id)
+      .filter((id) => id !== staffId);
+
+    if (branchStaffIds.length > 0) {
+      const { data: scheduleData, error: scheduleError } = await supabase
+        .from("staff_schedules")
+        .select("*")
+        .in("staff_id", branchStaffIds)
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (scheduleError) {
+        return { success: false, message: scheduleError.message };
+      }
+
+      sourceSchedule = (scheduleData as StaffScheduleRow | null) ?? null;
+    }
+  }
+
+  const { error } = await supabase
+    .from("staff_schedules")
+    .insert(buildStaffScheduleInsertFromSource(staffId, sourceSchedule));
+
+  if (error) {
+    return { success: false, message: error.message };
+  }
+
+  return { success: true };
 }
 
 function normalizeNullable(value: string) {
