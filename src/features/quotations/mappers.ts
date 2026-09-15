@@ -74,8 +74,13 @@ export function mapQuotationDetail(
   items: QuotationItemRow[],
   jobOrder: Pick<TableRow<"job_orders">, "id" | "job_order_number"> | null,
 ): QuotationDetail {
+  const customerNameSnapshot = row.customer_name_snapshot?.trim() || null;
+  const linkedCustomerName = customerName.trim() || null;
+
   return {
     ...mapQuotationRowToListItem(row, customerName, vehicleLabel),
+    customerNameSnapshot,
+    linkedCustomerName,
     customerContactNumber: row.customer_contact_snapshot,
     customerAddress: row.customer_address_snapshot,
     vehicleMake: row.vehicle_make_snapshot,

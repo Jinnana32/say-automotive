@@ -19,6 +19,8 @@ const documentFixture: QuotationPrintDocument = {
     branchId: "branch-main",
     customerId: "customer-1",
     customerName: "Louise Suresca",
+    customerNameSnapshot: "Louise Suresca",
+    linkedCustomerName: "Louise Suresca",
     vehicleId: "vehicle-1",
     vehicleLabel: "Toyota Vios",
     status: "draft",

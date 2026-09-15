@@ -4,6 +4,7 @@ import {
   canReviseQuotation,
   calculateQuotationTotals,
   createQuotationItem,
+  hasQuotationCustomerNameMismatch,
   mergeQuotationPartiesIntoFormOptions,
 } from "@/features/quotations/utils";
 
@@ -128,6 +129,35 @@ describe("canReviseQuotation", () => {
         status: "approved",
         jobOrderId: "job-order-1",
         jobOrderStatus: "completed",
+      }),
+    ).toBe(false);
+  });
+});
+
+describe("hasQuotationCustomerNameMismatch", () => {
+  it("detects when the quotation snapshot name differs from the linked customer", () => {
+    expect(
+      hasQuotationCustomerNameMismatch({
+        customerNameSnapshot: "Jermaine Joyce Jinco",
+        linkedCustomerName: "Ryan Tumambing",
+      }),
+    ).toBe(true);
+  });
+
+  it("ignores case and spacing differences", () => {
+    expect(
+      hasQuotationCustomerNameMismatch({
+        customerNameSnapshot: "Ryan  Tumambing",
+        linkedCustomerName: "ryan tumambing",
+      }),
+    ).toBe(false);
+  });
+
+  it("does not warn when either name is missing", () => {
+    expect(
+      hasQuotationCustomerNameMismatch({
+        customerNameSnapshot: null,
+        linkedCustomerName: "Ryan Tumambing",
       }),
     ).toBe(false);
   });

@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   getQuotationLineCatalogDraftLabel,
   getQuotationLineCatalogIssues,
+  buildQuotationLineCatalogIssuesMessage,
+  formatQuotationLineCatalogIssueSummary,
   mergeQuotationCatalogIntoFormOptions,
 } from "@/features/quotations/line-item-catalog";
 import { createQuotationItem } from "@/features/quotations/utils";
@@ -34,6 +36,58 @@ describe("getQuotationLineCatalogIssues", () => {
     ]);
 
     expect(issues).toHaveLength(0);
+  });
+});
+
+describe("formatQuotationLineCatalogIssueSummary", () => {
+  it("names the exact line and item for the warning banner", () => {
+    const issues = getQuotationLineCatalogIssues([
+      createQuotationItem({
+        key: "line-1",
+        itemType: "product",
+        description: "Brake Pads",
+        productId: "",
+      }),
+      createQuotationItem({
+        key: "line-2",
+        itemType: "service",
+        description: "Oil Change",
+        serviceId: "",
+      }),
+    ]);
+
+    expect(formatQuotationLineCatalogIssueSummary(issues[0]!)).toBe(
+      'Line 1: "Brake Pads" needs a catalog product',
+    );
+    expect(formatQuotationLineCatalogIssueSummary(issues[1]!)).toBe(
+      'Line 2: "Oil Change" needs a catalog service',
+    );
+  });
+});
+
+describe("buildQuotationLineCatalogIssuesMessage", () => {
+  it("lists each unlinked line when more than one is missing", () => {
+    const issues = getQuotationLineCatalogIssues([
+      createQuotationItem({
+        key: "line-1",
+        itemType: "product",
+        description: "Brake Pads",
+        productId: "",
+      }),
+      createQuotationItem({
+        key: "line-2",
+        itemType: "service",
+        description: "Oil Change",
+        serviceId: "",
+      }),
+    ]);
+
+    const message = buildQuotationLineCatalogIssuesMessage(issues);
+    expect(message).toContain("Fix 2 line items");
+    expect(message).toContain("Line 1:");
+    expect(message).toContain("Brake Pads");
+    expect(message).toContain("Line 2:");
+    expect(message).toContain("Oil Change");
   });
 });
 

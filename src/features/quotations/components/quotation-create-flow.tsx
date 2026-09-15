@@ -43,6 +43,7 @@ import {
   getQuotationLineCatalogDraftLabel,
   getQuotationLineCatalogIssues,
   buildQuotationLineCatalogIssuesMessage,
+  formatQuotationLineCatalogIssueSummary,
   isQuotationLineMissingCatalogLink,
 } from '@/features/quotations/line-item-catalog';
 import {
@@ -194,6 +195,14 @@ export function QuotationCreateFlow({
           isQuotationLineMissingCatalogLink(item) && Boolean(item.description.trim()),
       ),
     [values.items],
+  );
+  const legacyCatalogIssues = useMemo(
+    () =>
+      catalogIssues.filter((issue) => {
+        const item = values.items.find((entry) => entry.key === issue.key);
+        return Boolean(item?.description.trim());
+      }),
+    [catalogIssues, values.items],
   );
 
   return (
@@ -718,8 +727,18 @@ export function QuotationCreateFlow({
 
                     {hasLegacyUnlinkedLines ? (
                       <div className="rounded-2xl border border-amber-200/80 bg-amber-50/80 px-4 py-3 text-sm text-amber-950">
-                        Some lines show a name but are not linked to the product or service catalog yet.
-                        Select a matching catalog item for each highlighted line, or use Create New Product/Service.
+                        <p className="font-medium">
+                          These lines have a name but are not linked to the product or service catalog yet.
+                        </p>
+                        <ul className="mt-2 list-disc space-y-1 pl-5">
+                          {legacyCatalogIssues.map((issue) => (
+                            <li key={issue.key}>{formatQuotationLineCatalogIssueSummary(issue)}</li>
+                          ))}
+                        </ul>
+                        <p className="mt-2 text-amber-900/90">
+                          Select a matching catalog item for each highlighted line, or use Create New
+                          Product/Service.
+                        </p>
                       </div>
                     ) : null}
 

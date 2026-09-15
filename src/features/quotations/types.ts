@@ -44,6 +44,8 @@ export type QuotationItemDetail = {
 };
 
 export type QuotationDetail = QuotationListItem & {
+  customerNameSnapshot: string | null;
+  linkedCustomerName: string | null;
   customerContactNumber: string | null;
   customerAddress: string | null;
   vehicleMake: string | null;

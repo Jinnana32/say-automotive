@@ -82,7 +82,20 @@ export function buildQuotationLineCatalogIssuesMessage(issues: QuotationLineCata
     return issues[0].message;
   }
 
-  return `Fix ${issues.length} line items that are not linked to the catalog before saving.`;
+  return [
+    `Fix ${issues.length} line items that are not linked to the catalog before saving:`,
+    ...issues.map((issue) => issue.message),
+  ].join(" ");
+}
+
+export function formatQuotationLineCatalogIssueSummary(issue: QuotationLineCatalogIssue) {
+  const typeLabel = issue.itemType === "product" ? "product" : "service";
+  const quotedLabel =
+    issue.label.startsWith("Line ") && issue.label === `Line ${issue.lineNumber}`
+      ? "this line"
+      : `"${issue.label}"`;
+
+  return `Line ${issue.lineNumber}: ${quotedLabel} needs a catalog ${typeLabel}`;
 }
 
 export function mergeQuotationCatalogIntoFormOptions(

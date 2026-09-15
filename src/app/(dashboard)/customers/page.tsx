@@ -23,14 +23,15 @@ export const dynamic = "force-dynamic";
 type CustomersPageProps = {
   searchParams: Promise<{
     search?: string;
-    status?: "active" | "inactive" | "";
+    status?: "active" | "inactive" | "all";
     page?: string;
     error?: string;
   }>;
 };
 
 export default async function CustomersPage({ searchParams }: CustomersPageProps) {
-  const { search = "", status = "active", page, error } = await searchParams;
+  const { search = "", status: rawStatus = "active", page, error } = await searchParams;
+  const status = rawStatus === "all" ? "" : rawStatus;
   const [customers, session] = await Promise.all([
     listCustomers(search, { status }),
     requireAuthenticatedStaff(),
@@ -55,7 +56,7 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
       <DataTableCard
         toolbar={
           <DataTableFilters
-            key={`${search}:${status}`}
+            key={`${search}:${rawStatus}`}
             className="lg:grid lg:grid-cols-[minmax(0,1fr)_200px]"
             search={{
               value: search,
@@ -65,11 +66,11 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
               {
                 type: "select",
                 name: "status",
-                value: status,
+                value: rawStatus,
                 options: [
                   { value: "active", label: "Active" },
                   { value: "inactive", label: "Inactive / merged" },
-                  { value: "", label: "All statuses" },
+                  { value: "all", label: "All statuses" },
                 ],
               },
             ]}
@@ -89,12 +90,31 @@ export default async function CustomersPage({ searchParams }: CustomersPageProps
         {pagination.totalItems === 0 ? (
           <EmptyState
             title="No customers found"
-            description="Add the first customer to start linking vehicles and workshop documents."
-            action={canManageCustomers ? (
-              <Button asChild>
-                <Link href="/customers/new">Create customer</Link>
-              </Button>
-            ) : null}
+            description={
+              search.trim()
+                ? "No customer record matches this search. If you saw this name on a quotation, open that quotation and click the customer name — quotations can keep a saved name even when the customer list search does not match."
+                : "Add the first customer to start linking vehicles and workshop documents."
+            }
+            action={
+              search.trim() ? (
+                <div className="flex flex-wrap justify-center gap-3">
+                  <Button asChild variant="outline">
+                    <Link href={`/quotations?search=${encodeURIComponent(search.trim())}`}>
+                      Search quotations instead
+                    </Link>
+                  </Button>
+                  {canManageCustomers ? (
+                    <Button asChild>
+                      <Link href="/customers/new">Create customer</Link>
+                    </Button>
+                  ) : null}
+                </div>
+              ) : canManageCustomers ? (
+                <Button asChild>
+                  <Link href="/customers/new">Create customer</Link>
+                </Button>
+              ) : null
+            }
           />
         ) : (
           <DataTableScroll minWidthClassName="min-w-[52rem]">

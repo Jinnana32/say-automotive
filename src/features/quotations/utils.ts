@@ -188,6 +188,24 @@ export function canDeleteQuotation(status: QuotationStatus) {
   return status !== "approved";
 }
 
+export function normalizeComparablePersonName(value: string | null | undefined) {
+  return (value ?? "").trim().replace(/\s+/g, " ").toLocaleLowerCase("en");
+}
+
+export function hasQuotationCustomerNameMismatch(params: {
+  customerNameSnapshot: string | null;
+  linkedCustomerName: string | null;
+}) {
+  const snapshotName = normalizeComparablePersonName(params.customerNameSnapshot);
+  const linkedName = normalizeComparablePersonName(params.linkedCustomerName);
+
+  if (!snapshotName || !linkedName) {
+    return false;
+  }
+
+  return snapshotName !== linkedName;
+}
+
 const REVISE_LOCKED_JOB_ORDER_STATUSES = new Set([
   "completed",
   "ready_for_billing",

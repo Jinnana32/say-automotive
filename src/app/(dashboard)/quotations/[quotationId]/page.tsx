@@ -30,7 +30,7 @@ import {
   formatQuotationStatus,
 } from '@/features/quotations/components/quotation-status-badge';
 import { getQuotationById } from '@/features/quotations/queries/quotation-queries';
-import { canDeleteQuotation, canReviseQuotation } from '@/features/quotations/utils';
+import { canDeleteQuotation, canReviseQuotation, hasQuotationCustomerNameMismatch } from '@/features/quotations/utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -65,6 +65,10 @@ export default async function QuotationDetailPage({
       Boolean(jobOrder?.invoiceId) && jobOrder?.invoiceStatus !== 'cancelled',
   });
   const canDelete = canDeleteQuotation(quotation.status) && !quotation.jobOrderId;
+  const customerNameMismatch = hasQuotationCustomerNameMismatch({
+    customerNameSnapshot: quotation.customerNameSnapshot,
+    linkedCustomerName: quotation.linkedCustomerName,
+  });
 
   return (
     <div className="space-y-6">
@@ -148,11 +152,42 @@ export default async function QuotationDetailPage({
         }
       />
 
+      {customerNameMismatch ? (
+        <div className="rounded-2xl border border-amber-200/80 bg-amber-50/80 px-4 py-3 text-sm text-amber-950">
+          <p className="font-medium">
+            Customer name on this quotation does not match the linked customer.
+          </p>
+          <p className="mt-1 text-amber-900/90">
+            Quotation shows <span className="font-medium">{quotation.customerNameSnapshot}</span>,
+            but the linked customer record is{' '}
+            <Link
+              href={`/customers/${quotation.customerId}`}
+              className="font-medium underline-offset-4 hover:underline"
+            >
+              {quotation.linkedCustomerName}
+            </Link>
+            . Searching Customers uses the linked record name. Revise this quotation to refresh
+            the saved name, or update the customer profile if the record itself is wrong.
+          </p>
+        </div>
+      ) : null}
+
       <DetailSummaryGrid className="sm:grid-cols-2 xl:grid-cols-3">
         <DetailSummaryItem
           label="Customer"
-          value={quotation.customerName}
-          hint={quotation.customerContactNumber ?? quotation.vehicleLabel}
+          value={
+            <Link
+              href={`/customers/${quotation.customerId}`}
+              className="underline-offset-4 hover:underline"
+            >
+              {quotation.customerName}
+            </Link>
+          }
+          hint={
+            customerNameMismatch
+              ? `Linked customer: ${quotation.linkedCustomerName}`
+              : quotation.customerContactNumber ?? quotation.vehicleLabel
+          }
         />
         <DetailSummaryItem
           label="Vehicle"

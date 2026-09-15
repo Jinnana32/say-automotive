@@ -76,7 +76,15 @@ export async function listCustomers(
   if (search) {
     const escapedSearch = escapeSearchTerm(search);
     query = query.or(
-      `display_name.ilike.%${escapedSearch}%,contact_number.ilike.%${escapedSearch}%,contact_number_secondary.ilike.%${escapedSearch}%,email.ilike.%${escapedSearch}%`,
+      [
+        `display_name.ilike.%${escapedSearch}%`,
+        `first_name.ilike.%${escapedSearch}%`,
+        `last_name.ilike.%${escapedSearch}%`,
+        `company_name.ilike.%${escapedSearch}%`,
+        `contact_number.ilike.%${escapedSearch}%`,
+        `contact_number_secondary.ilike.%${escapedSearch}%`,
+        `email.ilike.%${escapedSearch}%`,
+      ].join(","),
     );
   }
 
