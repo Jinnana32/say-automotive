@@ -199,12 +199,12 @@ describe("job order utils", () => {
     expect(groupJobOrderChecklistItems(items)).toEqual([
       {
         key: "service-labor",
-        label: "Services / Labor",
+        label: "Labor",
         items: [items[0], items[2]],
       },
       {
         key: "parts-products",
-        label: "Parts / Products",
+        label: "Parts",
         items: [items[1]],
       },
     ]);

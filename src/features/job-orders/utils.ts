@@ -373,14 +373,14 @@ export function groupJobOrderChecklistItems(items: JobOrderItemDetail[]) {
   return [
     {
       key: "service-labor",
-      label: "Services / Labor",
+      label: "Labor",
       items: items.filter(
         (item) => item.itemType === "service" || item.itemType === "labor",
       ),
     },
     {
       key: "parts-products",
-      label: "Parts / Products",
+      label: "Parts",
       items: items.filter((item) => item.itemType === "product"),
     },
   ] as const;

@@ -22,7 +22,7 @@ import { formatDocumentDate, formatDateTime } from "@/lib/dates";
 const JOB_ORDER_PAGE_CAPACITY = 18.8;
 const JOB_ORDER_CONTINUATION_CAPACITY = 19;
 
-type JobOrderWorkGroupLabel = "Services / Labor" | "Parts / Products";
+type JobOrderWorkGroupLabel = "Labor" | "Parts";
 
 type JobOrderWorkTableRow =
   | { kind: "group"; key: string; label: JobOrderWorkGroupLabel }
@@ -455,14 +455,14 @@ function buildJobOrderWorkRows(workLines: JobOrderPrintWorkLine[]) {
   }> = [
     {
       key: "services-labor",
-      label: "Services / Labor" as const,
+      label: "Labor" as const,
       items: workLines.filter(
         (item) => item.itemType === "service" || item.itemType === "labor",
       ),
     },
     {
       key: "parts-products",
-      label: "Parts / Products" as const,
+      label: "Parts" as const,
       items: workLines.filter((item) => item.itemType === "product"),
     },
   ].filter((group) => group.items.length > 0);

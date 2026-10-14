@@ -84,40 +84,42 @@ export default async function VehicleDetailPage({ params, searchParams }: Vehicl
         </div>
       ) : null}
 
-      <DetailSummaryGrid>
-        <DetailSummaryItem
-          label="Linked customer"
-          value={vehicle.customerName}
-          hint="Customer account currently attached to this vehicle."
-        />
-        <DetailSummaryItem
-          label="Plate / VIN"
-          value={vehicle.plateNumber ?? "No plate number"}
-          hint={vehicle.vin ?? "No VIN on file"}
-        />
-        <DetailSummaryItem
-          label="Vehicle profile"
-          value={`${vehicle.year ? `${vehicle.year} · ` : ""}${vehicle.transmission ?? "Transmission not set"}`}
-          hint={`${vehicle.fuelType ?? "Fuel type not set"} · Engine ${vehicle.engineSize ?? "Not set"}`}
-        />
-        <DetailSummaryItem
-          label="Variant / color"
-          value={vehicle.variant ?? "No variant on file"}
-          hint={vehicle.color ?? "No color on file"}
-        />
-        <DetailSummaryItem
-          label="Mileage"
-          value={vehicle.mileage !== null ? `${vehicle.mileage.toLocaleString()} km` : "Mileage not set"}
-          hint={`Created ${formatDate(vehicle.createdAt)}`}
-        />
-        <DetailSummaryItem
-          label="Status"
-          value={vehicle.status}
-          hint={`Last updated ${formatDateTime(vehicle.updatedAt)}`}
-        />
-      </DetailSummaryGrid>
-
       <RecordHistoryTabs
+        defaultTab="overview"
+        overview={
+          <DetailSummaryGrid>
+            <DetailSummaryItem
+              label="Linked customer"
+              value={vehicle.customerName}
+              hint="Customer account currently attached to this vehicle."
+            />
+            <DetailSummaryItem
+              label="Plate / VIN"
+              value={vehicle.plateNumber ?? "No plate number"}
+              hint={vehicle.vin ?? "No VIN on file"}
+            />
+            <DetailSummaryItem
+              label="Vehicle profile"
+              value={`${vehicle.year ? `${vehicle.year} · ` : ""}${vehicle.transmission ?? "Transmission not set"}`}
+              hint={`${vehicle.fuelType ?? "Fuel type not set"} · Engine ${vehicle.engineSize ?? "Not set"}`}
+            />
+            <DetailSummaryItem
+              label="Variant / color"
+              value={vehicle.variant ?? "No variant on file"}
+              hint={vehicle.color ?? "No color on file"}
+            />
+            <DetailSummaryItem
+              label="Mileage"
+              value={vehicle.mileage !== null ? `${vehicle.mileage.toLocaleString()} km` : "Mileage not set"}
+              hint={`Created ${formatDate(vehicle.createdAt)}`}
+            />
+            <DetailSummaryItem
+              label="Status"
+              value={vehicle.status}
+              hint={`Last updated ${formatDateTime(vehicle.updatedAt)}`}
+            />
+          </DetailSummaryGrid>
+        }
         serviceHistoryDescription="In-progress work stays at the top. Completed visits for this vehicle are newest first."
         documentsDescription="Quotations, job orders, invoices, and payments for this vehicle."
         serviceHistory={

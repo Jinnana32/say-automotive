@@ -14,6 +14,7 @@ import {
   groupJobOrderChecklistItems,
 } from "@/features/job-orders/utils";
 import { formatDateTime } from "@/lib/dates";
+import { formatWorkshopLineItemType } from "@/lib/line-item-type";
 import { cn } from "@/lib/utils";
 
 export function JobOrderChecklistPanel({
@@ -83,9 +84,9 @@ export function JobOrderChecklistPanel({
                         {group.label}
                       </h3>
                       <p className="text-xs text-muted-foreground">
-                        {group.label === "Parts / Products"
+                        {group.label === "Parts"
                           ? "Use this to track physical parts completion without changing stock movement rules."
-                          : "Use this to track labor and service completion on the floor."}
+                          : "Use this to track labor completion on the floor."}
                       </p>
                     </div>
                     <Badge variant="outline">
@@ -305,14 +306,7 @@ function buildChecklistMeta(item: JobOrderItemDetail) {
 }
 
 function formatItemTypeLabel(itemType: JobOrderItemDetail["itemType"]) {
-  switch (itemType) {
-    case "product":
-      return "Part";
-    case "service":
-      return "Service";
-    case "labor":
-      return "Labor";
-  }
+  return formatWorkshopLineItemType(itemType);
 }
 
 function formatQuantity(value: number) {

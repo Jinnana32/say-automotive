@@ -18,6 +18,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatCurrency } from '@/lib/currency';
+import { formatWorkshopLineItemType } from '@/lib/line-item-type';
 import { formatDate, formatDateTime } from '@/lib/dates';
 import { getJobOrderById } from '@/features/job-orders/queries/job-order-queries';
 import {
@@ -305,7 +306,7 @@ export default async function QuotationDetailPage({
               {quotation.items.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>{item.lineNumber}</TableCell>
-                  <TableCell className="capitalize">{item.itemType}</TableCell>
+                  <TableCell>{formatWorkshopLineItemType(item.itemType)}</TableCell>
                   <TableCell>{item.description}</TableCell>
                   <TableCell>
                     {formatQuantityWithUnit(item.quantity, item.unitLabel)}

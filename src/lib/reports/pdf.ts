@@ -12,35 +12,21 @@ const LOCAL_BROWSER_CANDIDATES = [
   "/usr/bin/chromium",
 ].filter((value): value is string => Boolean(value));
 
+const PDF_VIEWPORT = {
+  width: 1280,
+  height: 1810,
+  deviceScaleFactor: 1,
+  isMobile: false,
+  hasTouch: false,
+  isLandscape: false,
+};
+
 export async function renderInternalUrlToPdf(params: {
   url: string;
   cookieHeader?: string | null;
 }) {
-  const [{ default: puppeteer }, chromiumModule] = await Promise.all([
-    import("puppeteer-core"),
-    import("@sparticuz/chromium"),
-  ]);
-  const chromium = chromiumModule.default ?? chromiumModule;
-  const executablePath = await resolveBrowserExecutablePath(chromium);
-
-  chromium.setGraphicsMode = false;
-
-  const browser = await puppeteer.launch({
-    args: puppeteer.defaultArgs({
-      args: chromium.args,
-      headless: "shell",
-    }),
-    defaultViewport: {
-      width: 1280,
-      height: 1810,
-      deviceScaleFactor: 1,
-      isMobile: false,
-      hasTouch: false,
-      isLandscape: false,
-    },
-    executablePath,
-    headless: "shell",
-  });
+  const { default: puppeteer } = await import("puppeteer-core");
+  const browser = await puppeteer.launch(await resolvePdfBrowserLaunchOptions(puppeteer));
 
   try {
     const page = await browser.newPage();
@@ -72,13 +58,53 @@ export async function renderInternalUrlToPdf(params: {
   }
 }
 
-async function resolveBrowserExecutablePath(chromium: {
-  executablePath: () => Promise<string>;
-}) {
-  if (process.env.AWS_REGION || process.env.VERCEL) {
-    return chromium.executablePath();
+type PdfBrowserLauncher = {
+  defaultArgs: (options?: { args?: string[]; headless?: boolean | "shell" }) => string[];
+};
+
+function isServerlessPdfRuntime() {
+  return Boolean(process.env.AWS_REGION || process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+}
+
+async function resolvePdfBrowserLaunchOptions(puppeteer: PdfBrowserLauncher) {
+  const localExecutablePath = isServerlessPdfRuntime() ? null : await findLocalBrowserExecutablePath();
+
+  if (localExecutablePath) {
+    return {
+      args: ["--disable-dev-shm-usage"],
+      defaultViewport: PDF_VIEWPORT,
+      executablePath: localExecutablePath,
+      headless: true as const,
+    };
   }
 
+  if (!isServerlessPdfRuntime() && process.platform !== "linux") {
+    throw new Error(
+      "No local Chrome executable was found. Set PUPPETEER_EXECUTABLE_PATH or install Google Chrome to enable local PDF generation.",
+    );
+  }
+
+  const chromium = await loadServerlessChromium();
+
+  return {
+    args: puppeteer.defaultArgs({
+      args: chromium.args,
+      headless: "shell",
+    }),
+    defaultViewport: PDF_VIEWPORT,
+    executablePath: await chromium.executablePath(),
+    headless: "shell" as const,
+  };
+}
+
+async function loadServerlessChromium() {
+  const chromiumModule = await import("@sparticuz/chromium");
+  const chromium = chromiumModule.default ?? chromiumModule;
+  chromium.setGraphicsMode = false;
+  return chromium;
+}
+
+async function findLocalBrowserExecutablePath() {
   for (const candidate of LOCAL_BROWSER_CANDIDATES) {
     try {
       await access(candidate, fsConstants.X_OK);
@@ -88,11 +114,5 @@ async function resolveBrowserExecutablePath(chromium: {
     }
   }
 
-  if (process.platform !== "linux") {
-    throw new Error(
-      "No local Chrome executable was found. Set PUPPETEER_EXECUTABLE_PATH or install Google Chrome to enable local PDF generation.",
-    );
-  }
-
-  return chromium.executablePath();
+  return null;
 }

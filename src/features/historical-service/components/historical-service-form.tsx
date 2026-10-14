@@ -238,8 +238,8 @@ export function HistoricalServiceForm({
                     }
                     className={formSelectClassName(state.fieldErrors, `items.${index}.itemType`)}
                   >
-                    <option value="labor">Labor</option>
-                    <option value="service">Service</option>
+                    <option value="labor">Manual labor</option>
+                    <option value="service">Labor</option>
                   </select>
                 </div>
                 <div className="space-y-2">

@@ -28,6 +28,7 @@ import { RecordPaymentForm } from '@/features/invoices/components/record-payment
 import { ReleaseVehicleForm } from '@/features/invoices/components/release-vehicle-form';
 import { getInvoiceById } from '@/features/invoices/queries/invoice-queries';
 import { formatCurrency } from '@/lib/currency';
+import { formatWorkshopLineItemType } from '@/lib/line-item-type';
 import { formatDate, formatDateTime } from '@/lib/dates';
 import { requireAuthenticatedStaff } from '@/lib/auth/session';
 
@@ -195,9 +196,7 @@ export default async function InvoiceDetailPage({
                     <TableRow key={item.id}>
                       <TableCell>{item.lineNumber}</TableCell>
                       <TableCell>{item.description}</TableCell>
-                      <TableCell className="capitalize">
-                        {item.itemType}
-                      </TableCell>
+                      <TableCell>{formatWorkshopLineItemType(item.itemType)}</TableCell>
                       <TableCell>{item.quantity}</TableCell>
                       <TableCell>{formatCurrency(item.unitPrice)}</TableCell>
                       <TableCell>{formatCurrency(item.total)}</TableCell>

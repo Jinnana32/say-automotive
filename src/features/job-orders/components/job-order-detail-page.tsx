@@ -51,6 +51,7 @@ import { CreateInvoiceForm } from '@/features/invoices/components/create-invoice
 import { InvoiceStatusBadge } from '@/features/invoices/components/invoice-status-badge';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/lib/currency';
+import { formatWorkshopLineItemType } from '@/lib/line-item-type';
 import { formatDate, formatDateTime } from "@/lib/dates";
 
 export function JobOrderDetailPage({
@@ -152,103 +153,104 @@ export function JobOrderDetailPage({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard
-          title="Customer & vehicle"
-          icon={CarFront}
-          value={jobOrder.customerName}
-          badge={
-            jobOrder.quotationNumber ? (
-              <Badge variant="outline">Quoted</Badge>
-            ) : undefined
-          }
-          lines={[
-            jobOrder.vehicleLabel,
-            jobOrder.quotationId && jobOrder.quotationNumber ? (
-              <span key="quotation-link">
-                Source{' '}
-                <Link
-                  href={`/quotations/${jobOrder.quotationId}`}
-                  className="underline-offset-4 hover:text-foreground hover:underline"
-                >
-                  {jobOrder.quotationNumber}
-                </Link>
-              </span>
-            ) : (
-              'Manual flow'
-            ),
-          ]}
-        />
-        <SummaryCard
-          title="Job progress"
-          icon={ClipboardList}
-          value={
-            <span className="capitalize">
-              {formatJobOrderStatus(jobOrder.status)}
-            </span>
-          }
-          lines={jobProgressLines}
-        >
-          <JobOrderStatusWorkflow jobOrder={jobOrder} redirectTab={activeTab} />
-        </SummaryCard>
-        <SummaryCard
-          title="Invoice & payment"
-          icon={ReceiptText}
-          value={
-            jobOrder.invoiceId && jobOrder.invoiceNumber ? (
-              <Link
-                href={`/invoices/${jobOrder.invoiceId}`}
-                className="underline-offset-4 hover:underline"
-              >
-                {jobOrder.invoiceNumber}
-              </Link>
-            ) : (
-              'No invoice yet'
-            )
-          }
-          badge={
-            jobOrder.invoiceStatus ? (
-              <InvoiceStatusBadge status={jobOrder.invoiceStatus} />
-            ) : (
-              <Badge variant="neutral">Not billed</Badge>
-            )
-          }
-          lines={[
-            jobOrder.invoiceId
-              ? `Paid ${formatCurrency(jobOrder.invoicePaidAmount ?? 0)} of ${formatCurrency(jobOrder.invoiceTotalAmount ?? 0)}`
-              : jobOrder.requireInvoiceBeforeJobCompletion ||
-                  jobOrder.requireInvoiceBeforeVehicleRelease
-                ? 'Generate before the branch-required completion or release checkpoint.'
-                : 'Invoice generation is optional after the work is billable.',
-            jobOrder.invoiceId
-              ? `Balance ${formatCurrency(jobOrder.invoiceBalance ?? 0)}`
-              : jobOrder.requireInvoiceBeforeJobCompletion ||
-                  jobOrder.requireInvoiceBeforeVehicleRelease
-                ? 'The Job Progress card will reflect when an invoice is required before release.'
-                : 'Operational completion can continue without invoice.',
-          ]}
-        />
-        <SummaryCard
-          title="Assigned mechanics"
-          icon={Wrench}
-          value={`${jobOrder.mechanics.length} assigned`}
-          lines={
-            jobOrder.mechanics.length > 0
-              ? [
-                  jobOrder.mechanics
-                    .slice(0, 2)
-                    .map((mechanic) => mechanic.fullName)
-                    .join(', '),
-                ]
-              : ['No mechanics assigned yet']
-          }
-        />
-      </div>
-
       <JobOrderDetailTabs
         activeTab={activeTab}
         overview={
-          <div className="grid min-w-0 gap-5 xl:grid-cols-[0.9fr_1.1fr]">
+          <div className="space-y-5">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-4">
+              <SummaryCard
+                title="Customer & vehicle"
+                icon={CarFront}
+                value={jobOrder.customerName}
+                badge={
+                  jobOrder.quotationNumber ? (
+                    <Badge variant="outline">Quoted</Badge>
+                  ) : undefined
+                }
+                lines={[
+                  jobOrder.vehicleLabel,
+                  jobOrder.quotationId && jobOrder.quotationNumber ? (
+                    <span key="quotation-link">
+                      Source{' '}
+                      <Link
+                        href={`/quotations/${jobOrder.quotationId}`}
+                        className="underline-offset-4 hover:text-foreground hover:underline"
+                      >
+                        {jobOrder.quotationNumber}
+                      </Link>
+                    </span>
+                  ) : (
+                    'Manual flow'
+                  ),
+                ]}
+              />
+              <SummaryCard
+                title="Job progress"
+                icon={ClipboardList}
+                value={
+                  <span className="capitalize">
+                    {formatJobOrderStatus(jobOrder.status)}
+                  </span>
+                }
+                lines={jobProgressLines}
+              >
+                <JobOrderStatusWorkflow jobOrder={jobOrder} redirectTab="overview" />
+              </SummaryCard>
+              <SummaryCard
+                title="Invoice & payment"
+                icon={ReceiptText}
+                value={
+                  jobOrder.invoiceId && jobOrder.invoiceNumber ? (
+                    <Link
+                      href={`/invoices/${jobOrder.invoiceId}`}
+                      className="underline-offset-4 hover:underline"
+                    >
+                      {jobOrder.invoiceNumber}
+                    </Link>
+                  ) : (
+                    'No invoice yet'
+                  )
+                }
+                badge={
+                  jobOrder.invoiceStatus ? (
+                    <InvoiceStatusBadge status={jobOrder.invoiceStatus} />
+                  ) : (
+                    <Badge variant="neutral">Not billed</Badge>
+                  )
+                }
+                lines={[
+                  jobOrder.invoiceId
+                    ? `Paid ${formatCurrency(jobOrder.invoicePaidAmount ?? 0)} of ${formatCurrency(jobOrder.invoiceTotalAmount ?? 0)}`
+                    : jobOrder.requireInvoiceBeforeJobCompletion ||
+                        jobOrder.requireInvoiceBeforeVehicleRelease
+                      ? 'Generate before the branch-required completion or release checkpoint.'
+                      : 'Invoice generation is optional after the work is billable.',
+                  jobOrder.invoiceId
+                    ? `Balance ${formatCurrency(jobOrder.invoiceBalance ?? 0)}`
+                    : jobOrder.requireInvoiceBeforeJobCompletion ||
+                        jobOrder.requireInvoiceBeforeVehicleRelease
+                      ? 'Job progress shows when an invoice is required before release.'
+                      : 'Operational completion can continue without invoice.',
+                ]}
+              />
+              <SummaryCard
+                title="Assigned mechanics"
+                icon={Wrench}
+                value={`${jobOrder.mechanics.length} assigned`}
+                lines={
+                  jobOrder.mechanics.length > 0
+                    ? [
+                        jobOrder.mechanics
+                          .slice(0, 2)
+                          .map((mechanic) => mechanic.fullName)
+                          .join(', '),
+                      ]
+                    : ['No mechanics assigned yet']
+                }
+              />
+            </div>
+
+            <div className="grid min-w-0 gap-5 xl:grid-cols-[0.9fr_1.1fr]">
             <SectionCard
               title="Customer and vehicle"
               description="Reference details for the shop team before moving into notes or actions."
@@ -310,6 +312,7 @@ export function JobOrderDetailPage({
             ) : (
               <ReadOnlyOperationalNotes detail={jobOrder} />
             )}
+            </div>
           </div>
         }
         billing={
@@ -387,8 +390,8 @@ export function JobOrderDetailPage({
                     <p className="text-xs leading-5 text-muted-foreground">
                       {jobOrder.requireInvoiceBeforeJobCompletion ||
                       jobOrder.requireInvoiceBeforeVehicleRelease
-                        ? 'Once the invoice exists, continue the workflow from the status bar above.'
-                        : 'You can also continue the workflow from the status bar above and come back here later if billing is still needed.'}
+                        ? 'Once the invoice exists, continue the workflow from Job progress on Overview.'
+                        : 'You can also continue the workflow from Job progress on Overview and come back here later if billing is still needed.'}
                     </p>
                   </div>
                 ) : (
@@ -405,7 +408,7 @@ export function JobOrderDetailPage({
                       jobOrder.status === 'waiting_for_parts' ||
                       jobOrder.status === 'waiting_for_customer_approval'
                         ? 'Move the job order to Completed before generating an invoice.'
-                        : 'Use the Job Progress card to continue without invoice, or return here once the job reaches a billable stage.'}
+                        : 'Use Job progress on Overview to continue without an invoice, or return here once the job reaches a billable stage.'}
                     </p>
                   </div>
                 )}
@@ -462,9 +465,7 @@ export function JobOrderDetailPage({
                             ) : null}
                           </div>
                         </TableCell>
-                        <TableCell className="capitalize">
-                          {item.itemType}
-                        </TableCell>
+                        <TableCell>{formatWorkshopLineItemType(item.itemType)}</TableCell>
                         <TableCell>{formatCurrency(item.total)}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex flex-col items-end gap-2">

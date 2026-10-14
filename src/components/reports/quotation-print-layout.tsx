@@ -337,7 +337,7 @@ function QuotationTotalsPanel({
             label:
               breakdown.mode === "parts"
                 ? "Parts Total"
-                : "Labor / Services Total",
+                : "Labor Total",
             value: formatDocumentPrintCurrency(breakdown.visibleSubtotal),
           },
         ];
@@ -434,7 +434,7 @@ function buildCompactHeaderMeta(
 }
 
 type QuotationLineRow =
-  | { kind: "group"; key: string; label: "PARTS" | "LABOR / SERVICES" }
+  | { kind: "group"; key: string; label: "PARTS" | "LABOR" }
   | {
       kind: "item";
       key: string;
@@ -542,7 +542,7 @@ function buildQuotationPrintPages(params: {
 function takeRowsForCapacity(
   rows: QuotationLineRow[],
   startIndex: number,
-  activeGroup: "PARTS" | "LABOR / SERVICES" | null,
+  activeGroup: "PARTS" | "LABOR" | null,
   capacity: number,
 ) {
   const pageStartGroup = activeGroup;
@@ -613,7 +613,7 @@ function takeRowsForCapacity(
 function buildRemainingRowsForFinalPage(
   rows: QuotationLineRow[],
   startIndex: number,
-  activeGroup: "PARTS" | "LABOR / SERVICES" | null,
+  activeGroup: "PARTS" | "LABOR" | null,
 ) {
   const remainingRows: QuotationLineRow[] = [];
 
@@ -625,7 +625,7 @@ function buildRemainingRowsForFinalPage(
 }
 
 function buildCarryoverGroupRow(
-  label: "PARTS" | "LABOR / SERVICES",
+  label: "PARTS" | "LABOR",
   rowIndex: number,
 ): QuotationLineRow {
   return {
@@ -637,7 +637,7 @@ function buildCarryoverGroupRow(
 
 function resolveActiveGroup(
   rows: QuotationLineRow[],
-  initialGroup: "PARTS" | "LABOR / SERVICES" | null,
+  initialGroup: "PARTS" | "LABOR" | null,
 ) {
   let currentGroup = initialGroup;
 
@@ -653,7 +653,7 @@ function resolveActiveGroup(
 function estimateRemainingLineUnits(
   rows: QuotationLineRow[],
   startIndex: number,
-  activeGroup: "PARTS" | "LABOR / SERVICES" | null,
+  activeGroup: "PARTS" | "LABOR" | null,
 ) {
   return estimateLineRowsUnits(
     buildRemainingRowsForFinalPage(rows, startIndex, activeGroup),
@@ -762,7 +762,7 @@ function buildQuotationLineRows(
     rows.push({
       kind: "group",
       key: "labor-group",
-      label: "LABOR / SERVICES",
+      label: "LABOR",
     });
     rows.push(
       ...laborItems.map((item) => ({
@@ -770,7 +770,7 @@ function buildQuotationLineRows(
         key: item.id,
         displayLineNumber: displayLineNumber++,
         description: item.description,
-        subtext: item.itemType === "service" ? "Service" : "Labor",
+        subtext: "Labor",
         quantityLabel: formatQuantity(item.quantity, null),
         unitPrice: item.unitPrice,
         amount: item.total,
@@ -835,7 +835,7 @@ function getDocumentTitle(mode: QuotationPrintMode) {
     case "parts":
       return "Parts Quotation";
     case "labor":
-      return "Labor & Services Quotation";
+      return "Labor Quotation";
     default:
       return "Quotation";
   }
@@ -846,7 +846,7 @@ function getLineItemHeading(mode: QuotationPrintMode) {
     case "parts":
       return "PARTS QUOTATION";
     case "labor":
-      return "LABOR & SERVICES";
+      return "LABOR";
     default:
       return "QUOTED ITEMS";
   }
@@ -857,7 +857,7 @@ function getTotalsFooterLabel(mode: QuotationPrintMode) {
     case "parts":
       return "TOTAL PARTS";
     case "labor":
-      return "TOTAL LABOR & SERVICES";
+      return "TOTAL LABOR";
     default:
       return "TOTAL QUOTATION";
   }

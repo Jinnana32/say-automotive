@@ -487,21 +487,21 @@ export function QuotationForm({
                             errorId: fieldErrorId("items"),
                           })}
                         >
-                          <option value="product">Product</option>
-                          <option value="service">Service</option>
+                          <option value="product">Parts</option>
+                          <option value="service">Labor</option>
                           <option value="labor">Manual labor</option>
                         </select>
                       </div>
 
                       {item.itemType === "product" ? (
                         <div className="space-y-2 xl:col-span-2">
-                          <Label required>Product</Label>
+                          <Label required>Parts</Label>
                           <CatalogCombobox
                             id={`product-${item.key}`}
                             value={item.productId}
                             options={mapProductOptionsToCatalog(filteredProducts)}
-                            placeholder="Search products"
-                            emptyMessage="No matching products found."
+                            placeholder="Search parts"
+                            emptyMessage="No matching parts found."
                             draftLabel={catalogDraftLabel}
                             invalid={lineHasCatalogIssue}
                             inputClassName={fieldControlClassName(state.fieldErrors, "items")}
@@ -562,13 +562,13 @@ export function QuotationForm({
                         </div>
                       ) : item.itemType === "service" ? (
                         <div className="space-y-2 xl:col-span-2">
-                          <Label required>Service</Label>
+                          <Label required>Labor</Label>
                           <CatalogCombobox
                             id={`service-${item.key}`}
                             value={item.serviceId}
                             options={mapServiceOptionsToCatalog(filteredServices)}
-                            placeholder="Search services"
-                            emptyMessage="No matching services found."
+                            placeholder="Search labor"
+                            emptyMessage="No matching labor found."
                             draftLabel={catalogDraftLabel}
                             invalid={lineHasCatalogIssue}
                             inputClassName={fieldControlClassName(state.fieldErrors, "items")}

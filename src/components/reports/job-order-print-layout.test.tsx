@@ -187,8 +187,8 @@ describe("JobOrderPrintLayout", () => {
   it("renders grouped checklist-style work items with checkbox indicators", () => {
     render(<JobOrderPrintLayout document={documentFixture} />);
 
-    expect(screen.getByText("Services / Labor")).toBeInTheDocument();
-    expect(screen.getByText("Parts / Products")).toBeInTheDocument();
+    expect(screen.getByText("Labor")).toBeInTheDocument();
+    expect(screen.getByText("Parts")).toBeInTheDocument();
     expect(screen.queryByText("Type")).not.toBeInTheDocument();
     expect(screen.queryByText(/Checklist:/)).not.toBeInTheDocument();
     expect(screen.getAllByText("☐").length).toBeGreaterThan(0);

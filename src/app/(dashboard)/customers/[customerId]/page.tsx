@@ -55,46 +55,47 @@ export default async function CustomerDetailPage({ params }: CustomerDetailPageP
         }
       />
 
-      <DetailSummaryGrid>
-        <DetailSummaryItem
-          label="Customer type"
-          value={toTitleCase(customer.customerType.replace("_", " "))}
-          hint="Record classification for operational flows."
-        />
-        <DetailSummaryItem
-          label="Primary contact"
-          value={customer.contactNumber ?? "No contact number"}
-          hint={customer.email ?? "No email on file"}
-        />
-        <DetailSummaryItem
-          label="Secondary contact"
-          value={customer.contactNumberSecondary ?? "No secondary contact number"}
-          hint="Optional backup number for this customer."
-        />
-        <DetailSummaryItem
-          label="Fleet / company"
-          value={customer.companyName ?? "No company or fleet"}
-          hint={`${customer.vehicles.length} linked vehicle${customer.vehicles.length === 1 ? "" : "s"}`}
-        />
-        <DetailSummaryItem
-          label="Customer status"
-          value={toTitleCase(customer.status)}
-          hint={`Created ${formatDate(customer.createdAt)}`}
-        />
-        <DetailSummaryItem
-          label="Address"
-          value={customer.address ?? "No address on file"}
-          hint="Used for service records and invoicing."
-        />
-        <DetailSummaryItem
-          label="Notes"
-          value={customer.notes ?? "No notes"}
-          hint="Internal service reminders and preferences."
-        />
-      </DetailSummaryGrid>
-
       <RecordHistoryTabs
-        defaultTab="vehicles"
+        defaultTab="overview"
+        overview={
+          <DetailSummaryGrid>
+            <DetailSummaryItem
+              label="Customer type"
+              value={toTitleCase(customer.customerType.replace("_", " "))}
+              hint="Record classification for operational flows."
+            />
+            <DetailSummaryItem
+              label="Primary contact"
+              value={customer.contactNumber ?? "No contact number"}
+              hint={customer.email ?? "No email on file"}
+            />
+            <DetailSummaryItem
+              label="Secondary contact"
+              value={customer.contactNumberSecondary ?? "No secondary contact number"}
+              hint="Optional backup number for this customer."
+            />
+            <DetailSummaryItem
+              label="Fleet / company"
+              value={customer.companyName ?? "No company or fleet"}
+              hint={`${customer.vehicles.length} linked vehicle${customer.vehicles.length === 1 ? "" : "s"}`}
+            />
+            <DetailSummaryItem
+              label="Customer status"
+              value={toTitleCase(customer.status)}
+              hint={`Created ${formatDate(customer.createdAt)}`}
+            />
+            <DetailSummaryItem
+              label="Address"
+              value={customer.address ?? "No address on file"}
+              hint="Used for service records and invoicing."
+            />
+            <DetailSummaryItem
+              label="Notes"
+              value={customer.notes ?? "No notes"}
+              hint="Internal service reminders and preferences."
+            />
+          </DetailSummaryGrid>
+        }
         vehiclesDescription="Vehicles currently linked to this customer."
         vehicles={
           customer.vehicles.length === 0 ? (

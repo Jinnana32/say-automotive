@@ -17,6 +17,7 @@ import {
   formatPrintCurrencyNumber,
 } from "@/lib/currency";
 import { formatDocumentDate, formatDateTime } from "@/lib/dates";
+import { formatWorkshopLineItemType } from "@/lib/line-item-type";
 
 const INVOICE_PAGE_CAPACITY = 15;
 const INVOICE_CONTINUATION_CAPACITY = 15.6;
@@ -178,7 +179,7 @@ export function InvoicePrintLayout({
                             {item.description}
                           </td>
                           <td className="px-2 py-1.5 align-top uppercase text-slate-700">
-                            {item.itemType}
+                            {formatWorkshopLineItemType(item.itemType)}
                           </td>
                           <td className="px-2 py-1.5 text-right align-top">
                             {formatQuantity(item.quantity)}

@@ -176,8 +176,8 @@ export function JobOrderAdditionalItemForm({
           }}
         >
           <option value="">Select item type</option>
-          <option value="product">Product</option>
-          <option value="service">Service</option>
+          <option value="product">Parts</option>
+          <option value="service">Labor</option>
           <option value="labor">Manual labor</option>
         </NativeSelect>
         <FieldError errors={state.fieldErrors} name="itemType" id={fieldErrorId("itemType")} />
@@ -186,7 +186,7 @@ export function JobOrderAdditionalItemForm({
       {isProductType ? (
         <div className="space-y-2">
           <Label htmlFor="productId" required>
-            Product
+            Parts
           </Label>
           <CatalogCombobox
             id="productId"
@@ -194,8 +194,8 @@ export function JobOrderAdditionalItemForm({
             value={productId}
             loading={!catalogOptions}
             options={catalogOptions ? mapProductOptionsToCatalog(catalogOptions.products) : []}
-            placeholder="Search products"
-            emptyMessage="No matching products found."
+            placeholder="Search parts"
+            emptyMessage="No matching parts found."
             inputClassName={fieldControlClassName(state.fieldErrors, "productId")}
             inputProps={fieldAriaProps({
               errors: state.fieldErrors,
@@ -274,7 +274,7 @@ export function JobOrderAdditionalItemForm({
       ) : isServiceType ? (
         <div className="space-y-2">
           <Label htmlFor="serviceId" required>
-            Service
+            Labor
           </Label>
           <CatalogCombobox
             id="serviceId"
@@ -282,8 +282,8 @@ export function JobOrderAdditionalItemForm({
             value={serviceId}
             loading={!catalogOptions}
             options={catalogOptions ? mapServiceOptionsToCatalog(catalogOptions.services) : []}
-            placeholder="Search services"
-            emptyMessage="No matching services found."
+            placeholder="Search labor"
+            emptyMessage="No matching labor found."
             inputClassName={fieldControlClassName(state.fieldErrors, "serviceId")}
             inputProps={fieldAriaProps({
               errors: state.fieldErrors,
