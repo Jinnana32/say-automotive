@@ -39,6 +39,7 @@ export type CustomerDocumentHistoryItem =
       documentType: "quotation";
       documentLabel: string;
       documentHref: string;
+      vehicleId: string | null;
       vehicleLabel: string | null;
       occurredAt: string;
       amount: number;
@@ -50,6 +51,7 @@ export type CustomerDocumentHistoryItem =
       documentType: "job_order";
       documentLabel: string;
       documentHref: string;
+      vehicleId: string | null;
       vehicleLabel: string | null;
       occurredAt: string;
       amount: null;
@@ -61,6 +63,7 @@ export type CustomerDocumentHistoryItem =
       documentType: "invoice";
       documentLabel: string;
       documentHref: string;
+      vehicleId: string | null;
       vehicleLabel: string | null;
       occurredAt: string;
       amount: number;
@@ -72,6 +75,7 @@ export type CustomerDocumentHistoryItem =
       documentType: "payment";
       documentLabel: string;
       documentHref: string;
+      vehicleId: string | null;
       vehicleLabel: string | null;
       occurredAt: string;
       amount: number;

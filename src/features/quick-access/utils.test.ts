@@ -30,7 +30,10 @@ describe("quick access plate helpers", () => {
 
   it("detects whether a quick access query should be treated as a plate lookup", () => {
     expect(looksLikeQuickAccessPlateLookup("ABC-1234")).toBe(true);
+    expect(looksLikeQuickAccessPlateLookup("ABC 123")).toBe(true);
     expect(looksLikeQuickAccessPlateLookup("Juan Dela Cruz")).toBe(false);
+    expect(looksLikeQuickAccessPlateLookup("3rd dragon")).toBe(false);
+    expect(looksLikeQuickAccessPlateLookup("KIK 01")).toBe(false);
   });
 
   it("resolves a generic quick access query into plate or customer lookup input", () => {
@@ -42,6 +45,11 @@ describe("quick access plate helpers", () => {
     expect(resolveQuickAccessQuery("Dela Cruz")).toEqual({
       plateQuery: "",
       customerLastNameQuery: "Dela Cruz",
+    });
+
+    expect(resolveQuickAccessQuery("3rd dragon")).toEqual({
+      plateQuery: "",
+      customerLastNameQuery: "3rd dragon",
     });
   });
 

@@ -4,8 +4,10 @@ import {
   buildServiceHistoryItems,
   buildServiceHistorySummary,
   buildUsageQuantityMap,
+  listServiceHistoryTaskLabels,
   resolveServiceHistoryDate,
   resolveServiceHistoryPhase,
+  serviceHistoryEntryMatchesQuery,
 } from "@/features/service-history/utils";
 import type { ServiceHistoryEntry } from "@/features/service-history/types";
 
@@ -175,4 +177,82 @@ describe("service history utils", () => {
 
     expect(buildServiceHistorySummary(entry)).toBe("Adjusted and tightened the accessory belt");
   });
+
+  it("lists recorded service tasks before falling back to a work summary", () => {
+    const entry = buildHistoryEntry({
+      services: [
+        {
+          id: "service-1",
+          itemType: "service",
+          label: "Engine Oil & Filter Replacement",
+          quantity: 1,
+          amount: 1800,
+          isAdditional: false,
+          usageSource: "fallback",
+        },
+      ],
+      workPerformed: "Changed the oil",
+    });
+
+    expect(listServiceHistoryTaskLabels(entry)).toEqual(["Engine Oil & Filter Replacement"]);
+    expect(listServiceHistoryTaskLabels(buildHistoryEntry({ workPerformed: "Adjusted the belt" }))).toEqual([
+      "Adjusted the belt",
+    ]);
+  });
+
+  it("matches a history search against task names and job order numbers", () => {
+    const entry = buildHistoryEntry({
+      jobOrderNumber: "JO-0094",
+      services: [
+        {
+          id: "service-1",
+          itemType: "service",
+          label: "Spark Plugs Replacement",
+          quantity: 1,
+          amount: 900,
+          isAdditional: false,
+          usageSource: "fallback",
+        },
+      ],
+    });
+
+    expect(serviceHistoryEntryMatchesQuery(entry, "")).toBe(true);
+    expect(serviceHistoryEntryMatchesQuery(entry, "spark")).toBe(true);
+    expect(serviceHistoryEntryMatchesQuery(entry, "jo-0094")).toBe(true);
+    expect(serviceHistoryEntryMatchesQuery(entry, "battery")).toBe(false);
+  });
 });
+
+function buildHistoryEntry(overrides: Partial<ServiceHistoryEntry> = {}): ServiceHistoryEntry {
+  return {
+    id: "jo-1",
+    vehicleId: "veh-1",
+    vehicleLabel: "Toyota Vios",
+    customerId: "cust-1",
+    jobOrderId: "jo-1",
+    jobOrderNumber: "JO-0001",
+    status: "released",
+    phase: "history",
+    isHistorical: false,
+    serviceDate: "2026-05-08T00:00:00.000+08:00",
+    createdAt: "2026-05-08T00:00:00.000+08:00",
+    startedAt: null,
+    completedAt: null,
+    releasedAt: null,
+    customerConcern: null,
+    inspectionNotes: null,
+    diagnosis: null,
+    workPerformed: null,
+    mileageIn: null,
+    mileageOut: null,
+    services: [],
+    partsUsed: [],
+    rejectedExtras: [],
+    mechanics: [],
+    invoice: null,
+    quotation: null,
+    totalAmount: 0,
+    paymentMethod: null,
+    ...overrides,
+  };
+}

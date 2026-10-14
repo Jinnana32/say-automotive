@@ -59,6 +59,45 @@ export function buildServiceHistorySummary(entry: ServiceHistoryEntry) {
   );
 }
 
+export function listServiceHistoryTaskLabels(entry: ServiceHistoryEntry) {
+  const serviceLabels = entry.services.map((item) => item.label.trim()).filter(Boolean);
+
+  if (serviceLabels.length > 0) {
+    return serviceLabels;
+  }
+
+  const partLabels = entry.partsUsed.map((item) => item.label.trim()).filter(Boolean);
+
+  if (partLabels.length > 0) {
+    return partLabels;
+  }
+
+  const summary = buildServiceHistorySummary(entry);
+  return summary === "No work summary recorded." ? [] : [summary];
+}
+
+export function serviceHistoryEntryMatchesQuery(entry: ServiceHistoryEntry, query: string) {
+  const normalizedQuery = query.trim().toLowerCase();
+
+  if (!normalizedQuery) {
+    return true;
+  }
+
+  const searchableText = [
+    entry.jobOrderNumber,
+    entry.vehicleLabel,
+    entry.workPerformed,
+    entry.customerConcern,
+    entry.diagnosis,
+    ...entry.services.map((item) => item.label),
+    ...entry.partsUsed.map((item) => item.label),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  return searchableText.includes(normalizedQuery);
+}
+
 export function groupServiceHistoryByVehicle(entries: ServiceHistoryEntry[]) {
   return entries.reduce<Map<string, ServiceHistoryEntry[]>>((groups, entry) => {
     const currentEntries = groups.get(entry.vehicleId) ?? [];

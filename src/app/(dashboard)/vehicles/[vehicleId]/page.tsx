@@ -3,9 +3,13 @@ import { notFound } from "next/navigation";
 
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { DetailSummaryGrid, DetailSummaryItem } from "@/components/shared/detail-summary-grid";
+import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
-import { VehicleServiceHistory } from "@/features/service-history/components/vehicle-service-history";
+import { DocumentHistoryTable } from "@/features/customers/components/document-history-table";
+import { getCustomerById } from "@/features/customers/queries/customer-queries";
+import { RecordHistoryTabs } from "@/features/service-history/components/record-history-tabs";
+import { ServiceHistoryLedger } from "@/features/service-history/components/service-history-ledger";
 import { listServiceHistoryByVehicleIds } from "@/features/service-history/queries/service-history-queries";
 import { getVehicleById } from "@/features/vehicles/queries/vehicle-queries";
 import { requireAuthenticatedStaff } from "@/lib/auth/session";
@@ -35,9 +39,12 @@ export default async function VehicleDetailPage({ params, searchParams }: Vehicl
   const canManageVehicles = session.capabilities.includes("vehicles:write");
   const canRecordPastService = session.capabilities.includes("job_orders:write");
   const canViewServiceHistory = session.capabilities.includes("job_orders:read");
-  const serviceHistory = canViewServiceHistory
-    ? await listServiceHistoryByVehicleIds([vehicle.id])
-    : [];
+  const canViewCustomers = session.capabilities.includes("customers:read");
+  const [serviceHistory, customer] = await Promise.all([
+    canViewServiceHistory ? listServiceHistoryByVehicleIds([vehicle.id]) : Promise.resolve([]),
+    canViewCustomers ? getCustomerById(vehicle.customerId) : Promise.resolve(null),
+  ]);
+  const documents = (customer?.documentHistory ?? []).filter((entry) => entry.vehicleId === vehicle.id);
 
   return (
     <div className="space-y-6">
@@ -110,9 +117,26 @@ export default async function VehicleDetailPage({ params, searchParams }: Vehicl
         />
       </DetailSummaryGrid>
 
-      <VehicleServiceHistory
-        entries={serviceHistory}
-        canViewServiceHistory={canViewServiceHistory}
+      <RecordHistoryTabs
+        serviceHistoryDescription="In-progress work stays at the top. Completed visits for this vehicle are newest first."
+        documentsDescription="Quotations, job orders, invoices, and payments for this vehicle."
+        serviceHistory={
+          canViewServiceHistory ? (
+            <ServiceHistoryLedger entries={serviceHistory} />
+          ) : (
+            <EmptyState
+              title="Service history is unavailable"
+              description="This staff role does not have access to job order history for this vehicle."
+            />
+          )
+        }
+        documents={
+          <DocumentHistoryTable
+            entries={documents}
+            showVehicleColumn={false}
+            emptyDescription="Quotations, job orders, invoices, and payments for this vehicle will appear here."
+          />
+        }
       />
     </div>
   );

@@ -4,12 +4,9 @@ export function normalizeQuickAccessPlate(value: string) {
 
 export function looksLikeQuickAccessPlateLookup(value: string) {
   const normalized = normalizeQuickAccessPlate(value);
+  const digitCount = (normalized.match(/\d/g) ?? []).length;
 
-  if (!normalized) {
-    return false;
-  }
-
-  return /\d/.test(normalized);
+  return /[A-Z]/.test(normalized) && digitCount > 2;
 }
 
 export function resolveQuickAccessQuery(value: string) {

@@ -6,6 +6,7 @@ import { Eye, History } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -19,11 +20,14 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { IconActionGroup, IconActionLink } from "@/components/shared/icon-action";
 import { SectionCard } from "@/components/shared/section-card";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { InvoiceStatusBadge } from "@/features/invoices/components/invoice-status-badge";
+import type { InvoiceStatus } from "@/features/invoices/types";
 import { QuotationStatusBadge } from "@/features/quotations/components/quotation-status-badge";
-import { MobileServiceHistoryAccordion } from "@/features/service-history/components/mobile-service-history-accordion";
+import { ServiceHistoryLedger } from "@/features/service-history/components/service-history-ledger";
 import type { QuickAccessCustomerRecord } from "@/features/quick-access/types";
+import type { ServiceHistoryEntry } from "@/features/service-history/types";
 import { formatCurrency } from "@/lib/currency";
-import { formatDateTime } from "@/lib/dates";
+import { formatDate, formatDateTime } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 
 export function QuickAccessResultsWorkspace({
@@ -128,72 +132,88 @@ function QuickAccessRecordPanel({
   canRecordPastService: boolean;
 }) {
   const highlightedVehicle =
-    record.vehicles.find((vehicle) => vehicle.id === record.highlightedVehicleId) ?? null;
+    record.vehicles.find((vehicle) => vehicle.id === record.highlightedVehicleId) ??
+    (record.vehicles.length === 1 ? record.vehicles[0] : null);
   const isVehicleLookup = record.match.source === "plate" && highlightedVehicle !== null;
   const visibleServiceHistory = isVehicleLookup
     ? record.serviceHistory.filter((entry) => entry.vehicleId === highlightedVehicle?.id)
     : record.serviceHistory;
 
+  const showVehiclesTab = !isVehicleLookup && record.vehicles.length > 1;
+  const showDocumentsTab = canViewQuotations || canViewServiceHistory;
+  const defaultTab = canViewServiceHistory
+    ? "service-history"
+    : showDocumentsTab
+      ? "documents"
+      : "vehicles";
+
   return (
     <div className="space-y-6">
-      {isVehicleLookup && highlightedVehicle ? (
-        <SectionCard
-          title={`${highlightedVehicle.make} ${highlightedVehicle.model}`}
-          description={searchSummary}
-          action={
-            <div className="flex flex-wrap gap-2">
-              {canCreateQuotations ? (
-                <Button asChild size="sm">
-                  <Link
-                    href={getQuickAccessQuotationHref(
-                      record.customer.id,
-                      record.highlightedVehicleId ?? undefined,
-                    )}
-                  >
-                    New quotation
-                  </Link>
-                </Button>
-              ) : null}
+      <SectionCard
+        title={
+          isVehicleLookup && highlightedVehicle
+            ? `${highlightedVehicle.make} ${highlightedVehicle.model}`
+            : record.customer.displayName
+        }
+        description={searchSummary}
+        action={
+          <div className="flex flex-wrap gap-2">
+            {canCreateQuotations ? (
+              <Button asChild size="sm">
+                <Link
+                  href={getQuickAccessQuotationHref(
+                    record.customer.id,
+                    highlightedVehicle?.id,
+                  )}
+                >
+                  New quotation
+                </Link>
+              </Button>
+            ) : null}
+            {highlightedVehicle ? (
               <Button asChild size="sm" variant="outline">
                 <Link href={`/vehicles/${highlightedVehicle.id}`}>Open vehicle</Link>
               </Button>
-              <Button asChild size="sm" variant="ghost">
-                <Link href={`/customers/${record.customer.id}`}>Open customer</Link>
-              </Button>
-            </div>
-          }
-        >
-          <div className="space-y-5">
-            <div className="flex flex-wrap items-center gap-2">
-              <StatusBadge tone={highlightedVehicle.status === "active" ? "success" : "neutral"}>
-                {highlightedVehicle.status}
-              </StatusBadge>
-              <Badge variant="secondary">{record.match.label}</Badge>
-              {highlightedVehicle.plateNumber ? (
-                <Badge variant="outline">Plate {highlightedVehicle.plateNumber}</Badge>
-              ) : null}
-            </div>
+            ) : null}
+            <Button asChild size="sm" variant="ghost">
+              <Link href={`/customers/${record.customer.id}`}>Open customer</Link>
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge
+              tone={
+                (isVehicleLookup && highlightedVehicle
+                  ? highlightedVehicle.status
+                  : record.customer.status) === "active"
+                  ? "success"
+                  : "neutral"
+              }
+            >
+              {isVehicleLookup && highlightedVehicle ? highlightedVehicle.status : record.customer.status}
+            </StatusBadge>
+            <Badge variant="secondary">{record.match.label}</Badge>
+            {highlightedVehicle?.plateNumber ? (
+              <Badge variant="outline">Plate {highlightedVehicle.plateNumber}</Badge>
+            ) : null}
+            {!isVehicleLookup && record.customer.customerCode ? (
+              <Badge variant="outline">{record.customer.customerCode}</Badge>
+            ) : null}
+          </div>
 
-            <DetailSummaryGrid className="md:grid-cols-2 xl:grid-cols-3">
+          {highlightedVehicle ? (
+            <DetailSummaryGrid className="md:grid-cols-2 xl:grid-cols-4">
               <DetailSummaryItem
-                label="Vehicle"
-                value={`${highlightedVehicle.make} ${highlightedVehicle.model}`}
-                hint={highlightedVehicle.variant ?? "No variant on file"}
-              />
-              <DetailSummaryItem
-                label="Linked customer"
+                label="Customer"
                 value={record.customer.displayName}
                 hint={`${formatQuickAccessContact(record.customer)} · ${record.customer.email ?? "No email on file"}`}
               />
               <DetailSummaryItem
-                label="Plate number"
+                label="Plate / VIN"
                 value={highlightedVehicle.plateNumber ?? "No plate number"}
                 hint={highlightedVehicle.vin ?? "No VIN on file"}
-              />
-              <DetailSummaryItem
-                label="Specs"
-                value={`${highlightedVehicle.year ? `${highlightedVehicle.year} · ` : ""}${highlightedVehicle.transmission ?? "Transmission not set"}`}
-                hint={`${highlightedVehicle.fuelType ?? "Fuel type not set"} · Engine ${highlightedVehicle.engineSize ?? "Not set"}`}
               />
               <DetailSummaryItem
                 label="Mileage"
@@ -201,39 +221,13 @@ function QuickAccessRecordPanel({
                 hint={`${highlightedVehicle.color ?? "No color"} · ${highlightedVehicle.variant ?? "No variant"}`}
               />
               <DetailSummaryItem
-                label="Recent quotations"
-                value={
-                  canViewQuotations
-                    ? `${record.recentQuotations.length} recent quotation${record.recentQuotations.length === 1 ? "" : "s"}`
-                    : "Quotation access not enabled"
-                }
-                hint={
-                  canViewQuotations
-                    ? "Most recent customer quotations are listed below."
-                    : "This staff role cannot review quotation history from quick access."
-                }
+                label="Specs"
+                value={`${highlightedVehicle.year ? `${highlightedVehicle.year} · ` : ""}${highlightedVehicle.transmission ?? "Transmission not set"}`}
+                hint={`${highlightedVehicle.fuelType ?? "Fuel type not set"} · Engine ${highlightedVehicle.engineSize ?? "Not set"}`}
               />
             </DetailSummaryGrid>
-          </div>
-        </SectionCard>
-      ) : null}
-
-      {isVehicleLookup ? (
-        <SectionCard
-          title="Customer profile"
-          description="This is the linked customer record for the matched vehicle."
-        >
-          <div className="space-y-5">
-            <div className="flex flex-wrap items-center gap-2">
-              <StatusBadge tone={record.customer.status === "active" ? "success" : "neutral"}>
-                {record.customer.status}
-              </StatusBadge>
-              {record.customer.customerCode ? (
-                <Badge variant="outline">{record.customer.customerCode}</Badge>
-              ) : null}
-            </div>
-
-            <DetailSummaryGrid className="md:grid-cols-2 xl:grid-cols-3">
+          ) : (
+            <DetailSummaryGrid className="md:grid-cols-2 xl:grid-cols-4">
               <DetailSummaryItem
                 label="Customer type"
                 value={toTitleCase(record.customer.customerType.replaceAll("_", " "))}
@@ -245,157 +239,143 @@ function QuickAccessRecordPanel({
                 hint={record.customer.email ?? "No email on file"}
               />
               <DetailSummaryItem
-                label="Secondary contact"
-                value={record.customer.contactNumberSecondary ?? "No secondary contact number"}
-                hint="Optional backup number for this customer."
-              />
-              <DetailSummaryItem
                 label="Address"
                 value={record.customer.address ?? "No address on file"}
                 hint={record.customer.notes ?? "No customer notes on file"}
               />
               <DetailSummaryItem
-                label="Customer profile"
-                value={record.customer.firstName || record.customer.lastName
-                  ? `${record.customer.firstName ?? ""} ${record.customer.lastName ?? ""}`.trim()
-                  : record.customer.displayName}
-                hint={`Created ${formatDateTime(record.customer.createdAt)}`}
-              />
-              <DetailSummaryItem
-                label="Vehicles on file"
-                value={`${record.vehicles.length} vehicle${record.vehicles.length === 1 ? "" : "s"}`}
-                hint="Review the vehicle table below."
-              />
-            </DetailSummaryGrid>
-          </div>
-        </SectionCard>
-      ) : (
-        <SectionCard
-          title={record.customer.displayName}
-          description={searchSummary}
-          action={
-            <div className="flex flex-wrap gap-2">
-              {canCreateQuotations ? (
-                <Button asChild size="sm">
-                  <Link
-                    href={getQuickAccessQuotationHref(
-                      record.customer.id,
-                      record.highlightedVehicleId ?? undefined,
-                    )}
-                  >
-                    New quotation
-                  </Link>
-                </Button>
-              ) : null}
-              <Button asChild size="sm" variant="outline">
-                <Link href={`/customers/${record.customer.id}`}>Open customer</Link>
-              </Button>
-              <Button asChild size="sm" variant="ghost">
-                <Link href={`/vehicles?customerId=${record.customer.id}`}>View all vehicles</Link>
-              </Button>
-            </div>
-          }
-        >
-          <div className="space-y-5">
-            <div className="flex flex-wrap items-center gap-2">
-              <StatusBadge tone={record.customer.status === "active" ? "success" : "neutral"}>
-                {record.customer.status}
-              </StatusBadge>
-              <Badge variant="secondary">{record.match.label}</Badge>
-              {record.customer.customerCode ? (
-                <Badge variant="outline">{record.customer.customerCode}</Badge>
-              ) : null}
-              {highlightedVehicle?.plateNumber ? (
-                <Badge variant="outline">Plate {highlightedVehicle.plateNumber}</Badge>
-              ) : null}
-            </div>
-
-            <DetailSummaryGrid className="md:grid-cols-2 xl:grid-cols-3">
-              <DetailSummaryItem
-                label="Customer type"
-                value={toTitleCase(record.customer.customerType.replaceAll("_", " "))}
-                hint={record.customer.companyName ?? record.customer.displayName}
-              />
-              <DetailSummaryItem
-                label="Primary contact"
-                value={record.customer.contactNumber ?? "No contact number"}
-                hint={record.customer.email ?? "No email on file"}
-              />
-              <DetailSummaryItem
-                label="Secondary contact"
-                value={record.customer.contactNumberSecondary ?? "No secondary contact number"}
-                hint="Optional backup number for this customer."
-              />
-              <DetailSummaryItem
-                label="Address"
-                value={record.customer.address ?? "No address on file"}
-                hint={record.customer.notes ?? "No customer notes on file"}
-              />
-              <DetailSummaryItem
-                label="Customer profile"
-                value={record.customer.firstName || record.customer.lastName
-                  ? `${record.customer.firstName ?? ""} ${record.customer.lastName ?? ""}`.trim()
-                  : record.customer.displayName}
-                hint={`Created ${formatDateTime(record.customer.createdAt)}`}
-              />
-              <DetailSummaryItem
                 label="Vehicles on file"
                 value={`${record.vehicles.length} vehicle${record.vehicles.length === 1 ? "" : "s"}`}
                 hint={
-                  highlightedVehicle
-                    ? `Matched vehicle: ${highlightedVehicle.make} ${highlightedVehicle.model}`
-                    : "Review the vehicle table below."
-                }
-              />
-              <DetailSummaryItem
-                label="Recent quotations"
-                value={
-                  canViewQuotations
-                    ? `${record.recentQuotations.length} recent quotation${record.recentQuotations.length === 1 ? "" : "s"}`
-                    : "Quotation access not enabled"
-                }
-                hint={
-                  canViewQuotations
-                    ? "Most recent customer quotations are listed below."
-                    : "This staff role cannot review quotation history from quick access."
+                  showVehiclesTab
+                    ? "Open the Vehicles tab to pick one."
+                    : "No vehicles linked to this customer yet."
                 }
               />
             </DetailSummaryGrid>
-          </div>
-        </SectionCard>
-      )}
-
-      <SectionCard
-        title="Vehicles on file"
-        description="Review all linked vehicles without leaving quick access."
-      >
-        <QuickAccessVehiclesTable
-          vehicles={record.vehicles}
-          highlightedVehicleId={record.highlightedVehicleId}
-          canRecordPastService={canRecordPastService}
-        />
+          )}
+        </div>
       </SectionCard>
 
-      {canViewServiceHistory ? (
-        <SectionCard
-          title="Service history"
-          description={
-            isVehicleLookup
-              ? "Collapsed service records for the matched vehicle."
-              : "Collapsed service records across this customer's vehicles."
-          }
-        >
-          <MobileServiceHistoryAccordion
-            entries={visibleServiceHistory}
-            showVehicleLabel={!isVehicleLookup}
-          />
-        </SectionCard>
-      ) : null}
+      {canViewServiceHistory || showDocumentsTab || showVehiclesTab ? (
+        <Tabs defaultValue={defaultTab}>
+          <TabsList>
+            {canViewServiceHistory ? (
+              <TabsTrigger value="service-history">Service history</TabsTrigger>
+            ) : null}
+            {showDocumentsTab ? <TabsTrigger value="documents">Documents</TabsTrigger> : null}
+            {showVehiclesTab ? <TabsTrigger value="vehicles">Vehicles</TabsTrigger> : null}
+          </TabsList>
 
+          {canViewServiceHistory ? (
+            <TabsContent value="service-history" className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                {isVehicleLookup
+                  ? "In-progress work stays at the top. Completed visits for this vehicle are newest first."
+                  : "In-progress work stays at the top. Completed visits across this customer's vehicles are newest first."}
+              </p>
+              <ServiceHistoryLedger
+                entries={visibleServiceHistory}
+                showVehicleLabel={!isVehicleLookup && record.vehicles.length > 1}
+              />
+            </TabsContent>
+          ) : null}
+
+          {showDocumentsTab ? (
+            <TabsContent value="documents">
+              <QuickAccessDocuments
+                record={record}
+                serviceHistory={visibleServiceHistory}
+                canViewQuotations={canViewQuotations}
+                canViewServiceHistory={canViewServiceHistory}
+              />
+            </TabsContent>
+          ) : null}
+
+          {showVehiclesTab ? (
+            <TabsContent value="vehicles">
+              <SectionCard
+                title="Vehicles on file"
+                description="Pick a vehicle without leaving quick access."
+              >
+                <QuickAccessVehiclesTable
+                  vehicles={record.vehicles}
+                  highlightedVehicleId={record.highlightedVehicleId}
+                  canRecordPastService={canRecordPastService}
+                />
+              </SectionCard>
+            </TabsContent>
+          ) : null}
+        </Tabs>
+      ) : null}
+    </div>
+  );
+}
+
+function QuickAccessDocuments({
+  record,
+  serviceHistory,
+  canViewQuotations,
+  canViewServiceHistory,
+}: {
+  record: QuickAccessCustomerRecord;
+  serviceHistory: ServiceHistoryEntry[];
+  canViewQuotations: boolean;
+  canViewServiceHistory: boolean;
+}) {
+  const invoices = useMemo(() => {
+    const uniqueInvoices = new Map<
+      string,
+      {
+        id: string;
+        invoiceNumber: string;
+        status: InvoiceStatus;
+        totalAmount: number;
+        vehicleLabel: string;
+        serviceDate: string;
+        jobOrderId: string;
+        jobOrderNumber: string;
+      }
+    >();
+
+    for (const entry of serviceHistory) {
+      if (!entry.invoice || uniqueInvoices.has(entry.invoice.id)) {
+        continue;
+      }
+
+      uniqueInvoices.set(entry.invoice.id, {
+        id: entry.invoice.id,
+        invoiceNumber: entry.invoice.invoiceNumber,
+        status: entry.invoice.status,
+        totalAmount: entry.invoice.totalAmount,
+        vehicleLabel: entry.vehicleLabel,
+        serviceDate: entry.serviceDate,
+        jobOrderId: entry.jobOrderId,
+        jobOrderNumber: entry.jobOrderNumber,
+      });
+    }
+
+    return [...uniqueInvoices.values()];
+  }, [serviceHistory]);
+
+  const hasQuotations = canViewQuotations && record.recentQuotations.length > 0;
+  const hasInvoices = canViewServiceHistory && invoices.length > 0;
+
+  if (!hasQuotations && !hasInvoices) {
+    return (
+      <EmptyState
+        title="No documents yet"
+        description="Quotations and invoices for this record will show up here."
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-6">
       {canViewQuotations ? (
         <SectionCard
-          title="Recent quotations"
-          description="Use recent estimate history to understand the customer before continuing intake."
+          title="Quotations"
+          description="Recent estimates for this customer."
         >
           {record.recentQuotations.length === 0 ? (
             <EmptyState
@@ -403,7 +383,7 @@ function QuickAccessRecordPanel({
               description="This customer does not have quotation history on file yet."
             />
           ) : (
-            <div className="overflow-hidden rounded-2xl border border-border/70">
+            <div className="overflow-x-auto rounded-2xl border border-border/70">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -441,6 +421,64 @@ function QuickAccessRecordPanel({
                         <IconActionLink
                           href={`/quotations/${quotation.id}`}
                           label={`Open quotation ${quotation.quotationNumber}`}
+                          icon={Eye}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </SectionCard>
+      ) : null}
+
+      {canViewServiceHistory ? (
+        <SectionCard
+          title="Invoices"
+          description="Billing documents linked to these service visits."
+        >
+          {invoices.length === 0 ? (
+            <EmptyState
+              title="No invoices yet"
+              description="Invoices appear here once a service visit is billed."
+            />
+          ) : (
+            <div className="overflow-x-auto rounded-2xl border border-border/70">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Invoice</TableHead>
+                    <TableHead>Vehicle</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Job order</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {invoices.map((invoice) => (
+                    <TableRow key={invoice.id}>
+                      <TableCell>{formatDate(invoice.serviceDate)}</TableCell>
+                      <TableCell className="font-medium text-foreground">{invoice.invoiceNumber}</TableCell>
+                      <TableCell>{invoice.vehicleLabel}</TableCell>
+                      <TableCell>
+                        <InvoiceStatusBadge status={invoice.status} />
+                      </TableCell>
+                      <TableCell>{formatCurrency(invoice.totalAmount)}</TableCell>
+                      <TableCell>
+                        <Link
+                          href={`/job-orders/${invoice.jobOrderId}`}
+                          className="underline-offset-4 hover:underline"
+                        >
+                          {invoice.jobOrderNumber}
+                        </Link>
+                      </TableCell>
+                      <TableCell className="w-14 text-right">
+                        <IconActionLink
+                          href={`/invoices/${invoice.id}`}
+                          label={`Open invoice ${invoice.invoiceNumber}`}
                           icon={Eye}
                         />
                       </TableCell>
