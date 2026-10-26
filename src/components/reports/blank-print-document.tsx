@@ -19,6 +19,7 @@ export function BlankPrintDocument({
   bottomPaddingClassName,
   bodyClassName,
   compactHeader = false,
+  stackedHeader = false,
 }: {
   businessName: string;
   businessLogoUrl?: string | null;
@@ -35,6 +36,7 @@ export function BlankPrintDocument({
   bottomPaddingClassName?: string;
   bodyClassName?: string;
   compactHeader?: boolean;
+  stackedHeader?: boolean;
 }) {
   return (
     <PrintDocumentPage
@@ -44,6 +46,7 @@ export function BlankPrintDocument({
       topPaddingClassName={topPaddingClassName}
       bottomPaddingClassName={bottomPaddingClassName}
       compactHeader={compactHeader}
+      stackedHeader={stackedHeader}
       businessProfile={{
         businessName,
         businessLogoUrl,

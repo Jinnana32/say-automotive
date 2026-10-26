@@ -18,10 +18,10 @@ export function PrintPage({
   children,
   className,
   innerClassName,
-  bodyClassName = "pb-[8mm]",
-  horizontalPaddingClassName = "px-[12mm]",
-  topPaddingClassName = "pt-[12mm]",
-  bottomPaddingClassName = "pb-[14mm]",
+  bodyClassName = "pb-[6mm]",
+  horizontalPaddingClassName = "px-[8mm]",
+  topPaddingClassName = "pt-[6mm]",
+  bottomPaddingClassName = "pb-[6mm]",
 }: {
   header: ReactNode;
   footer: ReactNode;

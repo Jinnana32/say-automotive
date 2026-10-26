@@ -18,6 +18,7 @@ export function PrintDocumentPage({
   documentTitle,
   documentMeta,
   compactHeader = false,
+  stackedHeader = false,
   children,
   className,
   innerClassName,
@@ -30,6 +31,7 @@ export function PrintDocumentPage({
   documentTitle: string;
   documentMeta?: string | null;
   compactHeader?: boolean;
+  stackedHeader?: boolean;
   children: ReactNode;
   className?: string;
   innerClassName?: string;
@@ -53,6 +55,7 @@ export function PrintDocumentPage({
           documentMeta={documentMeta}
           logoSrc={businessProfile.businessLogoUrl}
           compact={compactHeader}
+          stacked={stackedHeader}
         />
       }
       footer={

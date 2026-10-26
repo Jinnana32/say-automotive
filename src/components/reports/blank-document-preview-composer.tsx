@@ -77,8 +77,8 @@ export function BlankDocumentPreviewComposer({
         </CardContent>
       </Card>
 
-      <div className="report-preview-shell px-4 py-5 sm:px-6 print:px-0 print:py-0">
-        <PrintPageStack>
+      <div className="report-preview-shell px-4 py-8 sm:px-6 sm:py-10 print:px-0 print:py-0">
+        <PrintPageStack className="scroll-mt-28">
           <BlankPrintDocument
             businessName={businessName}
             businessLogoUrl={businessLogoUrl}
@@ -87,12 +87,11 @@ export function BlankDocumentPreviewComposer({
             businessEmail={businessEmail}
             businessAddress={businessAddress}
             documentTitle={resolvedDocumentTitle}
-            documentMeta={`Internal blank document preview • ${branchName}`}
-            compactHeader
-            horizontalPaddingClassName="px-[14mm]"
-            topPaddingClassName="pt-[12mm]"
-            bottomPaddingClassName="pb-[16mm]"
-            bodyClassName="pb-[6mm]"
+            documentMeta={branchName}
+            horizontalPaddingClassName="px-[10mm]"
+            topPaddingClassName="pt-[8mm]"
+            bottomPaddingClassName="pb-[8mm]"
+            bodyClassName="pb-[4mm]"
           >
             <div className="min-h-[160mm] pt-5 print:min-h-0">
               <div className="whitespace-pre-wrap break-words text-[12px] leading-[1.65] text-slate-800">
