@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { Printer } from "lucide-react";
 
-import { BlankPrintDocument } from "@/components/reports/blank-print-document";
-import { PrintPageStack } from "@/components/reports/print-document-layout";
+import { BlankPrintDocumentPages } from "@/components/reports/blank-print-document-pages";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -77,29 +76,18 @@ export function BlankDocumentPreviewComposer({
         </CardContent>
       </Card>
 
-      <div className="report-preview-shell px-4 py-8 sm:px-6 sm:py-10 print:px-0 print:py-0">
-        <PrintPageStack className="scroll-mt-28">
-          <BlankPrintDocument
-            businessName={businessName}
-            businessLogoUrl={businessLogoUrl}
-            businessVatRegistrationNo={businessVatRegistrationNo}
-            businessContact={businessContact}
-            businessEmail={businessEmail}
-            businessAddress={businessAddress}
-            documentTitle={resolvedDocumentTitle}
-            documentMeta={branchName}
-            horizontalPaddingClassName="px-[10mm]"
-            topPaddingClassName="pt-[8mm]"
-            bottomPaddingClassName="pb-[8mm]"
-            bodyClassName="pb-[4mm]"
-          >
-            <div className="min-h-[160mm] pt-5 print:min-h-0">
-              <div className="whitespace-pre-wrap break-words text-[12px] leading-[1.65] text-slate-800">
-                {resolvedBodyContent}
-              </div>
-            </div>
-          </BlankPrintDocument>
-        </PrintPageStack>
+      <div className="report-preview-shell relative px-4 py-8 sm:px-6 sm:py-10 print:px-0 print:py-0">
+        <BlankPrintDocumentPages
+          businessName={businessName}
+          businessLogoUrl={businessLogoUrl}
+          businessVatRegistrationNo={businessVatRegistrationNo}
+          businessContact={businessContact}
+          businessEmail={businessEmail}
+          businessAddress={businessAddress}
+          documentTitle={resolvedDocumentTitle}
+          documentMeta={branchName}
+          bodyContent={resolvedBodyContent}
+        />
       </div>
     </div>
   );

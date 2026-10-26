@@ -36,8 +36,20 @@ describe("BlankDocumentPreviewComposer", () => {
     expect(
       screen.getByRole("heading", { name: "Customer Notice" }),
     ).toBeInTheDocument();
-    expect(container.querySelector(".whitespace-pre-wrap")?.textContent).toContain("Line one");
-    expect(container.querySelector(".whitespace-pre-wrap")?.textContent).toContain("Line two");
+    const previewBodies = container.querySelectorAll(
+      ".print-page .whitespace-pre-wrap",
+    );
+    expect(previewBodies.length).toBeGreaterThanOrEqual(1);
+    expect(
+      Array.from(previewBodies)
+        .map((node) => node.textContent)
+        .join("\n"),
+    ).toContain("Line one");
+    expect(
+      Array.from(previewBodies)
+        .map((node) => node.textContent)
+        .join("\n"),
+    ).toContain("Line two");
     expect(screen.getByRole("button", { name: "Print" })).toBeInTheDocument();
   });
 });

@@ -214,17 +214,19 @@
 
   .print-page,
   .report-print-page {
-    /* Fill the printable page box so the footer stays on the bottom edge. */
+    /* One explicit A4 page box — content must paginate in the app, not by browser split. */
     width: 100% !important;
     max-width: none !important;
-    height: 100% !important;
+    height: calc(var(--print-page-height) - 20mm) !important;
     min-height: calc(var(--print-page-height) - 20mm) !important;
-    max-height: none !important;
+    max-height: calc(var(--print-page-height) - 20mm) !important;
     margin: 0 !important;
     overflow: hidden !important;
     box-shadow: none !important;
     break-after: page;
     page-break-after: always;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .print-page-inner {
