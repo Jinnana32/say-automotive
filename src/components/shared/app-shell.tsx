@@ -114,7 +114,7 @@ export function AppShell({
         />
       ) : null}
       <div
-        className={`flex min-h-screen w-full min-w-0 flex-col pl-0 ${isDesktopSidebarCollapsed ? DESKTOP_CONTENT_COLLAPSED_CLASS : DESKTOP_CONTENT_EXPANDED_CLASS}`}
+        className={`flex min-h-screen w-full min-w-0 flex-col pl-0 print:pl-0 ${isDesktopSidebarCollapsed ? DESKTOP_CONTENT_COLLAPSED_CLASS : DESKTOP_CONTENT_EXPANDED_CLASS}`}
       >
         <div className="no-print w-full min-w-0">
           <AppTopbar
@@ -125,8 +125,10 @@ export function AppShell({
             onOpenNavigation={() => setIsMobileSidebarOpen(true)}
           />
         </div>
-        <main className="w-full min-w-0 px-3 py-5 sm:px-6 lg:px-8">
-          <PageContainer>{children}</PageContainer>
+        <main className="w-full min-w-0 px-3 py-5 sm:px-6 lg:px-8 print:p-0">
+          <PageContainer className="print:mx-0 print:max-w-none print:space-y-0">
+            {children}
+          </PageContainer>
         </main>
       </div>
     </div>

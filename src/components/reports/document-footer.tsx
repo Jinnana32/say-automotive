@@ -42,7 +42,7 @@ export function DocumentFooter(_props: {
             icon={<GlobeIcon />}
             value={PRINT_FOOTER_DETAILS.websiteFacebook}
             lineIcons={[<GlobeIcon key="website" />, <FacebookIcon key="facebook" />]}
-            textClassName="whitespace-nowrap text-[8.7px]"
+            textClassName="break-words text-[8.7px]"
           />
         </div>
       </div>
