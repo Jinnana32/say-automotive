@@ -20,17 +20,11 @@ export function DocumentHeader({
         compact ? "pb-2.5" : "pb-3.5"
       }`}
     >
-      <div
-        className={`grid gap-2.5 ${
-          compact
-            ? "sm:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)]"
-            : "sm:grid-cols-[minmax(0,1fr)_minmax(0,0.84fr)]"
-        } sm:items-center`}
-      >
+      <div className="grid grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] items-center gap-2.5">
         <div className="flex min-w-0 items-center">
           <div
-            className={`flex max-w-full shrink-0 items-center justify-start ${
-              compact ? "w-[208px]" : "w-[244px]"
+            className={`flex w-full max-w-full items-center justify-start ${
+              compact ? "max-w-[180px]" : "max-w-[210px]"
             }`}
           >
             <BrandLogo
@@ -40,18 +34,18 @@ export function DocumentHeader({
               height={176}
               priority
               unoptimized
-              className={`h-auto w-auto object-left ${
+              className={`h-auto w-auto max-w-full object-left ${
                 compact
-                  ? "max-h-[76px] max-w-[208px]"
-                  : "max-h-[98px] max-w-[244px]"
+                  ? "max-h-[64px] max-w-[180px]"
+                  : "max-h-[84px] max-w-[210px]"
               }`}
             />
           </div>
         </div>
-        <div className="min-w-0 sm:text-right">
+        <div className="min-w-0 text-right">
           <h1
-            className={`break-words font-display font-semibold uppercase tracking-[0.16em] text-brand-navy ${
-              compact ? "text-[19px] sm:text-[21px]" : "text-[23px] sm:text-[26px]"
+            className={`break-words font-display font-semibold uppercase leading-[1.05] tracking-[0.08em] text-brand-navy ${
+              compact ? "text-[17px] sm:text-[19px]" : "text-[20px] sm:text-[22px]"
             }`}
           >
             {documentTitle}

@@ -88,10 +88,14 @@ export function BlankDocumentPreviewComposer({
             businessAddress={businessAddress}
             documentTitle={resolvedDocumentTitle}
             documentMeta={`Internal blank document preview • ${branchName}`}
-            bodyClassName="pb-[12mm]"
+            compactHeader
+            horizontalPaddingClassName="px-[14mm]"
+            topPaddingClassName="pt-[12mm]"
+            bottomPaddingClassName="pb-[16mm]"
+            bodyClassName="pb-[6mm]"
           >
-            <div className="min-h-[180mm] pt-6 print:min-h-0">
-              <div className="whitespace-pre-wrap break-words text-[12px] leading-[1.68] text-slate-800">
+            <div className="min-h-[160mm] pt-5 print:min-h-0">
+              <div className="whitespace-pre-wrap break-words text-[12px] leading-[1.65] text-slate-800">
                 {resolvedBodyContent}
               </div>
             </div>

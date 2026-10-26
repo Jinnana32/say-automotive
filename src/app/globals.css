@@ -167,7 +167,7 @@
 .print-footer,
 .print-document-footer {
   flex: 0 0 auto;
-  margin-top: 8mm;
+  margin-top: 5mm;
   width: 100%;
 }
 
@@ -217,6 +217,21 @@
     box-shadow: none !important;
     break-after: page;
     page-break-after: always;
+  }
+
+  .print-header,
+  .print-document-header,
+  .print-body,
+  .print-document-body,
+  .print-footer,
+  .print-document-footer {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .print-footer,
+  .print-document-footer {
+    margin-top: 4mm;
   }
 
   .print-page:last-child,

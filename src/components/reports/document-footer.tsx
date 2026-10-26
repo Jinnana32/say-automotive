@@ -19,7 +19,7 @@ export function DocumentFooter(_props: {
   return (
     <footer className="pt-2">
       <div className="border-t-2 border-brand-red bg-white pt-2">
-        <div className="grid grid-cols-[minmax(0,1.32fr)_minmax(0,0.72fr)_minmax(0,1.02fr)_minmax(0,1.12fr)] text-[9.6px] font-medium leading-[1.24] text-slate-700">
+        <div className="grid grid-cols-[minmax(0,1.28fr)_minmax(0,0.78fr)_minmax(0,1fr)_minmax(0,1.08fr)] gap-x-1 text-[9px] font-medium leading-[1.2] text-slate-700">
           <FooterSection
             heading="Business / Address"
             icon={<MapPinIcon />}
