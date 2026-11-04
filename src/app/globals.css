@@ -41,12 +41,15 @@
     --font-display: var(--font-barlow-condensed), "Segoe UI", sans-serif;
     --print-page-width: 210mm;
     --print-page-height: 297mm;
+    /* Shorter than full paper so Safari/printer hard-margins cannot orphan the footer. */
+    --print-page-print-height: 280mm;
   }
 
   html[data-print-paper="short-bond"],
   [data-print-paper="short-bond"] {
     --print-page-width: 215.9mm;
     --print-page-height: 279.4mm;
+    --print-page-print-height: 265mm;
   }
 
   * {
@@ -231,21 +234,19 @@
 
   .print-page,
   .report-print-page {
-    /* Exactly one sheet: header at top, body fills, footer pinned to bottom. */
+    /* One sheet that fits inside Safari/printer margins — not full theoretical A4 height. */
     display: flex !important;
     flex-direction: column !important;
     width: 100% !important;
     max-width: none !important;
-    height: var(--print-page-height) !important;
-    min-height: var(--print-page-height) !important;
-    max-height: var(--print-page-height) !important;
+    height: var(--print-page-print-height) !important;
+    min-height: var(--print-page-print-height) !important;
+    max-height: var(--print-page-print-height) !important;
     margin: 0 !important;
     overflow: hidden !important;
     box-shadow: none !important;
     break-after: page;
     page-break-after: always;
-    break-inside: avoid;
-    page-break-inside: avoid;
   }
 
   html[data-print-paper="short-bond"] .print-page,

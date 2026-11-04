@@ -15,9 +15,9 @@ describe("print paper size helpers", () => {
     expect(resolvePrintPaperSize(null)).toBe("a4");
   });
 
-  it("scales pagination capacity for short bond", () => {
-    expect(scalePrintCapacity(10, "a4")).toBe(10);
-    expect(scalePrintCapacity(10, "short-bond")).toBe(9);
+  it("scales pagination capacity below full page height for print safety", () => {
+    expect(scalePrintCapacity(10, "a4")).toBeCloseTo(9.2);
+    expect(scalePrintCapacity(10, "short-bond")).toBeCloseTo(8.4);
   });
 
   it("adds and removes the paper query param from hrefs", () => {

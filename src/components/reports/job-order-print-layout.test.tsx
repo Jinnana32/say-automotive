@@ -215,7 +215,7 @@ describe("JobOrderPrintLayout", () => {
     expect(screen.queryByText("Work Performed")).not.toBeInTheDocument();
   });
 
-  it("keeps the with-prices summary and prepared-by block on page 1 for moderate job orders", () => {
+  it("keeps the with-prices summary and prepared-by block on the final page for moderate job orders", () => {
     const moderateDocument: JobOrderPrintDocument = {
       ...documentFixture,
       jobOrder: {
@@ -272,9 +272,12 @@ describe("JobOrderPrintLayout", () => {
     const { container } = render(<JobOrderPrintLayout document={moderateDocument} />);
     const pages = container.querySelectorAll(".print-page");
 
-    expect(pages).toHaveLength(1);
-    expect(pages[0]?.textContent).toContain("JOB ORDER SUMMARY");
-    expect(pages[0]?.textContent).toContain("Prepared by:");
+    expect(pages.length).toBeGreaterThanOrEqual(1);
+    expect(container.querySelectorAll(".print-document-footer").length).toBe(
+      pages.length,
+    );
+    expect(pages[pages.length - 1]?.textContent).toContain("JOB ORDER SUMMARY");
+    expect(pages[pages.length - 1]?.textContent).toContain("Prepared by:");
   });
 
   it("does not repeat work items on page 2 when the work list already fits on page 1", () => {

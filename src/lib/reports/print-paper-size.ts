@@ -23,10 +23,13 @@ export const PRINT_PAPER_SIZE_OPTIONS: ReadonlyArray<{
   },
 ];
 
-/** Approximate body capacity scale vs A4 after fixed header/footer. */
+/**
+ * Body capacity vs full on-screen page preview.
+ * Print uses a shorter safe page box (Safari/printer margins), so keep this under 1.
+ */
 export const PRINT_PAPER_CAPACITY_SCALE: Record<PrintPaperSize, number> = {
-  a4: 1,
-  "short-bond": 0.9,
+  a4: 0.92,
+  "short-bond": 0.84,
 };
 
 export function isPrintPaperSize(value: unknown): value is PrintPaperSize {

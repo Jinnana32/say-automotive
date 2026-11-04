@@ -80,8 +80,8 @@ export function BlankPrintDocumentPages({
         className="pointer-events-none absolute -left-[99999px] top-0 w-[var(--print-page-width)] opacity-0"
         data-print-paper={paperSize}
       >
-        {/* Match the active paper height so measured splits fit the printed page box. */}
-        <div className="[&_.print-page]:h-[var(--print-page-height)] [&_.print-page]:min-h-[var(--print-page-height)] [&_.print-page]:max-h-[var(--print-page-height)]">
+        {/* Match the printable safe height so measured splits fit Safari/printer page boxes. */}
+        <div className="[&_.print-page]:h-[var(--print-page-print-height)] [&_.print-page]:min-h-[var(--print-page-print-height)] [&_.print-page]:max-h-[var(--print-page-print-height)]">
           <BlankPrintDocument
             businessName={businessName}
             businessLogoUrl={businessLogoUrl}
