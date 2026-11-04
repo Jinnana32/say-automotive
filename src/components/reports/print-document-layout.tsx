@@ -5,11 +5,29 @@ import { cn } from "@/lib/utils";
 export function PrintPageStack({
   children,
   className,
+  runningHeader,
+  runningFooter,
 }: {
   children: ReactNode;
   className?: string;
+  runningHeader?: ReactNode;
+  runningFooter?: ReactNode;
 }) {
-  return <div className={cn("print-page-stack", className)}>{children}</div>;
+  return (
+    <div className={cn("print-page-stack", className)}>
+      {runningHeader ? (
+        <div className="print-running-header print-running-chrome" aria-hidden>
+          {runningHeader}
+        </div>
+      ) : null}
+      {children}
+      {runningFooter ? (
+        <div className="print-running-footer print-running-chrome" aria-hidden>
+          {runningFooter}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 export function PrintPage({

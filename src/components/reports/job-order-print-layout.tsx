@@ -1,5 +1,5 @@
 import { PrintDocumentPage } from "@/components/reports/print-document-page";
-import { PrintPageStack } from "@/components/reports/print-document-layout";
+import { PrintDocumentShell } from "@/components/reports/print-document-shell";
 import { ReportSectionHeading } from "@/components/reports/report-section-heading";
 import { ReportSignatureBlock } from "@/components/reports/report-signature-block";
 import { ReportTotals } from "@/components/reports/report-totals";
@@ -68,8 +68,19 @@ export function JobOrderPrintLayout({
     ),
   });
 
+  const documentMeta = buildJobOrderHeaderMeta(
+    jobOrder.jobOrderNumber,
+    jobOrder.createdAt,
+    jobOrder.status,
+  );
+
   return (
-    <PrintPageStack className="job-order-print-document leading-[1.32]">
+    <PrintDocumentShell
+      className="job-order-print-document leading-[1.32]"
+      businessProfile={businessProfile}
+      documentTitle="Job Order"
+      documentMeta={documentMeta}
+    >
       {pages.map((page, index) => (
         <PrintDocumentPage
           key={page.key}
@@ -80,11 +91,7 @@ export function JobOrderPrintLayout({
           compactHeader={index > 0}
           businessProfile={businessProfile}
           documentTitle="Job Order"
-          documentMeta={buildJobOrderHeaderMeta(
-            jobOrder.jobOrderNumber,
-            jobOrder.createdAt,
-            jobOrder.status,
-          )}
+          documentMeta={documentMeta}
         >
           {page.includeIntro ? (
             <>
@@ -257,7 +264,7 @@ export function JobOrderPrintLayout({
           ) : null}
         </PrintDocumentPage>
       ))}
-    </PrintPageStack>
+    </PrintDocumentShell>
   );
 }
 

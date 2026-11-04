@@ -3,7 +3,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 
 import { BlankPrintDocument } from "@/components/reports/blank-print-document";
-import { PrintPageStack } from "@/components/reports/print-document-layout";
+import { PrintDocumentShell } from "@/components/reports/print-document-shell";
 import { paginatePlainText } from "@/lib/reports/paginate-plain-text";
 import {
   DEFAULT_PRINT_PAPER_SIZE,
@@ -40,30 +40,27 @@ export function BlankPrintDocumentPages({
   paperSize?: PrintPaperSize;
   className?: string;
 }) {
-  const measurePageRef = useRef<HTMLDivElement>(null);
+  const measureSlotRef = useRef<HTMLDivElement>(null);
   const measureTextRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<string[]>([bodyContent]);
 
+  const businessProfile = {
+    businessName,
+    businessLogoUrl,
+    businessVatRegistrationNo,
+    businessContact,
+    businessEmail,
+    businessAddress,
+  };
+
   useLayoutEffect(() => {
-    const pageRoot = measurePageRef.current;
+    const bodySlot = measureSlotRef.current;
     const textNode = measureTextRef.current;
-    if (!pageRoot || !textNode) {
+    if (!bodySlot || !textNode) {
       return;
     }
 
-    const bodySlot = pageRoot.querySelector<HTMLElement>("[data-blank-measure-body]");
-    if (!bodySlot) {
-      return;
-    }
-
-    const slotStyle = window.getComputedStyle(bodySlot);
-    const paddingY =
-      (Number.parseFloat(slotStyle.paddingTop) || 0) +
-      (Number.parseFloat(slotStyle.paddingBottom) || 0);
-    const maxHeight = Math.max(
-      0,
-      bodySlot.clientHeight - paddingY - HEIGHT_BUFFER_PX,
-    );
+    const maxHeight = Math.max(0, bodySlot.clientHeight - HEIGHT_BUFFER_PX);
     const measureHeight = (chunk: string) => {
       textNode.textContent = chunk;
       return textNode.scrollHeight;
@@ -75,35 +72,25 @@ export function BlankPrintDocumentPages({
   return (
     <>
       <div
-        ref={measurePageRef}
         aria-hidden
         className="pointer-events-none absolute -left-[99999px] top-0 w-[var(--print-page-width)] opacity-0"
         data-print-paper={paperSize}
       >
-        {/* Match the printable safe height so measured splits fit Safari/printer page boxes. */}
-        <div className="[&_.print-page]:h-[var(--print-page-print-height)] [&_.print-page]:min-h-[var(--print-page-print-height)] [&_.print-page]:max-h-[var(--print-page-print-height)]">
-          <BlankPrintDocument
-            businessName={businessName}
-            businessLogoUrl={businessLogoUrl}
-            businessVatRegistrationNo={businessVatRegistrationNo}
-            businessContact={businessContact}
-            businessEmail={businessEmail}
-            businessAddress={businessAddress}
-            documentTitle={documentTitle}
-            documentMeta={documentMeta}
-            horizontalPaddingClassName="px-[10mm]"
-            topPaddingClassName="pt-[8mm]"
-            bottomPaddingClassName="pb-[8mm]"
-            bodyClassName="pb-[4mm]"
-          >
-            <div data-blank-measure-body className="flex min-h-0 flex-1 flex-col pt-5">
-              <div ref={measureTextRef} className={BODY_TEXT_CLASS} />
-            </div>
-          </BlankPrintDocument>
+        {/* Printable body under @page margins + fixed runners. */}
+        <div
+          ref={measureSlotRef}
+          className="h-[calc(var(--print-page-height)-2*var(--print-page-margin)-var(--print-runner-header-space)-var(--print-runner-footer-space))] w-full px-[10mm] pt-5"
+        >
+          <div ref={measureTextRef} className={BODY_TEXT_CLASS} />
         </div>
       </div>
 
-      <PrintPageStack className={cn("scroll-mt-28", className)}>
+      <PrintDocumentShell
+        className={cn("scroll-mt-28", className)}
+        businessProfile={businessProfile}
+        documentTitle={documentTitle}
+        documentMeta={documentMeta}
+      >
         {pages.map((pageContent, index) => (
           <BlankPrintDocument
             key={`blank-page-${index + 1}-${paperSize}`}
@@ -135,7 +122,7 @@ export function BlankPrintDocumentPages({
             </div>
           </BlankPrintDocument>
         ))}
-      </PrintPageStack>
+      </PrintDocumentShell>
     </>
   );
 }

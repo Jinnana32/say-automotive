@@ -1,5 +1,5 @@
 import { PrintDocumentPage } from "@/components/reports/print-document-page";
-import { PrintPageStack } from "@/components/reports/print-document-layout";
+import { PrintDocumentShell } from "@/components/reports/print-document-shell";
 import { ReportSectionHeading } from "@/components/reports/report-section-heading";
 import { ReportSignatureBlock } from "@/components/reports/report-signature-block";
 import { ReportTotals } from "@/components/reports/report-totals";
@@ -51,9 +51,19 @@ export function InvoicePrintLayout({
     0,
   );
   const pages = buildInvoicePrintPages(invoice, paperSize);
+  const documentMeta = buildInvoiceHeaderMeta(
+    invoice.invoiceNumber,
+    invoice.invoiceDate,
+    invoice.status,
+  );
 
   return (
-    <PrintPageStack className="leading-[1.35]">
+    <PrintDocumentShell
+      className="leading-[1.35]"
+      businessProfile={businessProfile}
+      documentTitle="Invoice"
+      documentMeta={documentMeta}
+    >
       {pages.map((page, index) => (
         <PrintDocumentPage
           key={page.key}
@@ -61,11 +71,7 @@ export function InvoicePrintLayout({
           compactHeader={index > 0}
           businessProfile={businessProfile}
           documentTitle="Invoice"
-          documentMeta={buildInvoiceHeaderMeta(
-            invoice.invoiceNumber,
-            invoice.invoiceDate,
-            invoice.status,
-          )}
+          documentMeta={documentMeta}
         >
           {page.includeIntro ? (
             <>
@@ -321,7 +327,7 @@ export function InvoicePrintLayout({
           ) : null}
         </PrintDocumentPage>
       ))}
-    </PrintPageStack>
+    </PrintDocumentShell>
   );
 }
 

@@ -1,5 +1,5 @@
 import { PrintDocumentPage } from "@/components/reports/print-document-page";
-import { PrintPageStack } from "@/components/reports/print-document-layout";
+import { PrintDocumentShell } from "@/components/reports/print-document-shell";
 import { buildQuotationPrintBreakdown } from "@/features/quotations/report-utils";
 import type {
   QuotationItemDetail,
@@ -48,8 +48,19 @@ export function QuotationPrintLayout({
     paperSize,
   });
 
+  const documentTitle = getDocumentTitle(mode);
+  const documentMeta = buildCompactHeaderMeta(
+    quotation.quotationNumber,
+    quotation.createdAt,
+  );
+
   return (
-    <PrintPageStack className="quotation-print-document leading-[1.42]">
+    <PrintDocumentShell
+      className="quotation-print-document leading-[1.42]"
+      businessProfile={businessProfile}
+      documentTitle={documentTitle}
+      documentMeta={documentMeta}
+    >
       {pages.map((page, index) => (
         <PrintDocumentPage
           key={page.key}
@@ -57,11 +68,8 @@ export function QuotationPrintLayout({
           bodyClassName="pb-[4mm]"
           compactHeader={index > 0}
           businessProfile={businessProfile}
-          documentTitle={getDocumentTitle(mode)}
-          documentMeta={buildCompactHeaderMeta(
-            quotation.quotationNumber,
-            quotation.createdAt,
-          )}
+          documentTitle={documentTitle}
+          documentMeta={documentMeta}
         >
           {page.includeIntro ? (
             <>
@@ -166,7 +174,7 @@ export function QuotationPrintLayout({
           ) : null}
         </PrintDocumentPage>
       ))}
-    </PrintPageStack>
+    </PrintDocumentShell>
   );
 }
 

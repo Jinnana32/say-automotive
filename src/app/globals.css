@@ -41,15 +41,18 @@
     --font-display: var(--font-barlow-condensed), "Segoe UI", sans-serif;
     --print-page-width: 210mm;
     --print-page-height: 297mm;
-    /* Shorter than full paper so Safari/printer hard-margins cannot orphan the footer. */
-    --print-page-print-height: 280mm;
+    --print-page-margin: 12mm;
+    --print-runner-header-space: 28mm;
+    --print-runner-footer-space: 24mm;
   }
 
   html[data-print-paper="short-bond"],
   [data-print-paper="short-bond"] {
     --print-page-width: 215.9mm;
     --print-page-height: 279.4mm;
-    --print-page-print-height: 265mm;
+    --print-page-margin: 12mm;
+    --print-runner-header-space: 26mm;
+    --print-runner-footer-space: 22mm;
   }
 
   * {
@@ -97,13 +100,17 @@
 
 @page {
   size: A4 portrait;
-  /* Insets come from each .print-page's padding so one page box == one sheet. */
-  margin: 0;
+  margin: 12mm;
 }
 
 @page short-bond {
   size: letter portrait;
-  margin: 0;
+  margin: 12mm;
+}
+
+/* Fixed print runners — hidden on screen; painted on every printed sheet. */
+.print-running-chrome {
+  display: none;
 }
 
 .report-preview-shell {
@@ -232,19 +239,40 @@
     gap: 0 !important;
   }
 
+  .print-running-header {
+    display: block !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    background: #fff;
+  }
+
+  .print-running-footer {
+    display: block !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    background: #fff;
+  }
+
   .print-page,
   .report-print-page {
-    /* One sheet that fits inside Safari/printer margins — not full theoretical A4 height. */
-    display: flex !important;
-    flex-direction: column !important;
+    /* Content-sized pages — fixed runners own header/footer so Safari cannot orphan them. */
+    display: block !important;
     width: 100% !important;
     max-width: none !important;
-    height: var(--print-page-print-height) !important;
-    min-height: var(--print-page-print-height) !important;
-    max-height: var(--print-page-print-height) !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
     margin: 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     box-shadow: none !important;
+    padding-top: var(--print-runner-header-space) !important;
+    padding-bottom: var(--print-runner-footer-space) !important;
     break-after: page;
     page-break-after: always;
   }
@@ -255,35 +283,26 @@
   }
 
   .print-page-inner {
-    flex: 1 1 auto;
-    min-height: 0;
-    height: 100%;
-    max-height: 100%;
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
   }
 
   .print-header,
   .print-document-header,
-  .print-body,
-  .print-document-body,
   .print-footer,
   .print-document-footer {
-    max-width: 100%;
-    overflow-wrap: anywhere;
+    /* In-flow chrome is for screen preview only. */
+    display: none !important;
   }
 
   .print-body,
   .print-document-body {
-    overflow: hidden !important;
-  }
-
-  .print-footer,
-  .print-document-footer {
-    margin-top: auto !important;
-  }
-
-  .job-order-print-page .print-document-footer,
-  .quotation-print-page .print-document-footer {
-    margin-top: auto !important;
+    display: block !important;
+    overflow: visible !important;
+    max-width: 100%;
+    overflow-wrap: anywhere;
   }
 
   .print-page:last-child,

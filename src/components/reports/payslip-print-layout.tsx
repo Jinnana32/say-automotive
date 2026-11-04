@@ -1,5 +1,5 @@
 import { PrintDocumentPage } from "@/components/reports/print-document-page";
-import { PrintPageStack } from "@/components/reports/print-document-layout";
+import { PrintDocumentShell } from "@/components/reports/print-document-shell";
 import { ReportSectionHeading } from "@/components/reports/report-section-heading";
 import { STATUTORY_DEDUCTION_LABEL_LIST } from "@/features/payroll/statutory-deductions";
 import type { PayslipPrintDocument } from "@/features/payroll/types";
@@ -19,12 +19,19 @@ export function PayslipPrintLayout({
 }) {
   const { period, item, employeeIds, businessProfile, generatedAt } = document;
 
+  const documentMeta = `${item.fullName} · ${period.label}`;
+
   return (
-    <PrintPageStack className="leading-[1.35]">
+    <PrintDocumentShell
+      className="leading-[1.35]"
+      businessProfile={businessProfile}
+      documentTitle="Payslip"
+      documentMeta={documentMeta}
+    >
       <PrintDocumentPage
         businessProfile={businessProfile}
         documentTitle="Payslip"
-        documentMeta={`${item.fullName} · ${period.label}`}
+        documentMeta={documentMeta}
         className="leading-[1.35]"
         bodyClassName="pb-[8mm]"
       >
@@ -111,7 +118,7 @@ export function PayslipPrintLayout({
           </section>
         ) : null}
       </PrintDocumentPage>
-    </PrintPageStack>
+    </PrintDocumentShell>
   );
 }
 

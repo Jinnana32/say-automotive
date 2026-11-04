@@ -1,5 +1,5 @@
 import { PrintDocumentPage } from "@/components/reports/print-document-page";
-import { PrintPageStack } from "@/components/reports/print-document-layout";
+import { PrintDocumentShell } from "@/components/reports/print-document-shell";
 import { ReportSectionHeading } from "@/components/reports/report-section-heading";
 import { ReportSignatureBlock } from "@/components/reports/report-signature-block";
 import { ReportTotals } from "@/components/reports/report-totals";
@@ -34,7 +34,12 @@ export function PayrollPrintLayout({
   const pages = buildPayrollPages(items, paperSize);
 
   return (
-    <PrintPageStack className="leading-[1.35]">
+    <PrintDocumentShell
+      className="leading-[1.35]"
+      businessProfile={businessProfile}
+      documentTitle="Payroll Summary"
+      documentMeta={buildDocumentMeta(period, 1, pages.length)}
+    >
       {pages.map((page, index) => (
         <PrintDocumentPage
           key={page.key}
@@ -163,7 +168,7 @@ export function PayrollPrintLayout({
           ) : null}
         </PrintDocumentPage>
       ))}
-    </PrintPageStack>
+    </PrintDocumentShell>
   );
 }
 

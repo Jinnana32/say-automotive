@@ -1,5 +1,5 @@
 import { PrintDocumentPage } from "@/components/reports/print-document-page";
-import { PrintPageStack } from "@/components/reports/print-document-layout";
+import { PrintDocumentShell } from "@/components/reports/print-document-shell";
 import type { ReportsPrintDocument } from "@/features/reports/types";
 import { formatPrintCurrency } from "@/lib/currency";
 import { formatDateTime } from "@/lib/dates";
@@ -276,8 +276,19 @@ export function ReportsPrintLayout({
     },
   ];
 
+  const documentMeta = buildReportsHeaderMeta(
+    reports.filters.preset,
+    reports.filters.periodLabel,
+    generatedAt,
+  );
+
   return (
-    <PrintPageStack className="leading-[1.35]">
+    <PrintDocumentShell
+      className="leading-[1.35]"
+      businessProfile={businessProfile}
+      documentTitle="Business Reports"
+      documentMeta={documentMeta}
+    >
       {pages.map((page, index) => (
         <PrintDocumentPage
           key={page.key}
@@ -285,16 +296,12 @@ export function ReportsPrintLayout({
           compactHeader={index > 0}
           businessProfile={businessProfile}
           documentTitle="Business Reports"
-          documentMeta={buildReportsHeaderMeta(
-            reports.filters.preset,
-            reports.filters.periodLabel,
-            generatedAt,
-          )}
+          documentMeta={documentMeta}
         >
           {page.children}
         </PrintDocumentPage>
       ))}
-    </PrintPageStack>
+    </PrintDocumentShell>
   );
 }
 
