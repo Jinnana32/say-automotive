@@ -2,6 +2,10 @@ import type { NextRequest } from "next/server";
 
 import { getJobOrderPrintDocument } from "@/features/job-orders/queries/job-order-print-queries";
 import { renderInternalUrlToPdf } from "@/lib/reports/pdf";
+import {
+  applyPrintPaperSearchParam,
+  readPrintPaperSizeFromSearchParams,
+} from "@/lib/reports/print-paper-size";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,6 +30,10 @@ export async function GET(request: NextRequest, context: JobOrderPdfRouteContext
     if (hidePrices) {
       printUrl.searchParams.set("hidePrices", "1");
     }
+    applyPrintPaperSearchParam(
+      printUrl,
+      readPrintPaperSizeFromSearchParams(request.nextUrl.searchParams),
+    );
     const pdfBuffer = await renderInternalUrlToPdf({
       url: printUrl.toString(),
       cookieHeader: request.headers.get("cookie"),

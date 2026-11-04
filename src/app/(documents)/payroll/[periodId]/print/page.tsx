@@ -5,6 +5,7 @@ import { ReportAutoPrint } from "@/components/reports/report-auto-print";
 import { ReportPage } from "@/components/reports/report-page";
 import { ReportToolbar } from "@/components/reports/report-toolbar";
 import { getPayrollPrintDocument } from "@/features/payroll/queries/payroll-print-queries";
+import { resolvePrintPaperSize } from "@/lib/reports/print-paper-size";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,7 @@ type PayrollPrintPageProps = {
   }>;
   searchParams?: Promise<{
     autoprint?: string;
+    paper?: string;
   }>;
 };
 
@@ -25,6 +27,7 @@ export default async function PayrollPrintPage({
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const document = await getPayrollPrintDocument(periodId);
   const autoPrint = resolvedSearchParams?.autoprint === "1";
+  const paperSize = resolvePrintPaperSize(resolvedSearchParams?.paper);
 
   if (!document) {
     notFound();
@@ -33,10 +36,16 @@ export default async function PayrollPrintPage({
   return (
     <ReportPage
       wrapInPrintPage={false}
-      toolbar={<ReportToolbar downloadHref={`/api/payroll/${document.period.id}/pdf`} />}
+      paperSize={paperSize}
+      toolbar={
+        <ReportToolbar
+          paperSize={paperSize}
+          downloadHref={`/api/payroll/${document.period.id}/pdf`}
+        />
+      }
     >
       <ReportAutoPrint enabled={autoPrint} />
-      <PayrollPrintLayout document={document} />
+      <PayrollPrintLayout document={document} paperSize={paperSize} />
     </ReportPage>
   );
 }

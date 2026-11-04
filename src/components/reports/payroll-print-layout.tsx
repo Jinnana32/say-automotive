@@ -13,18 +13,25 @@ import {
 } from "@/features/payroll/utils";
 import { formatPrintCurrency, formatPrintCurrencyNumber } from "@/lib/currency";
 import { formatDateTime, formatDocumentDate } from "@/lib/dates";
+import {
+  DEFAULT_PRINT_PAPER_SIZE,
+  type PrintPaperSize,
+  scalePrintCapacity,
+} from "@/lib/reports/print-paper-size";
 
-/* Tuned for --print-page-print-height (270mm) so pages don't overflow and orphan the footer. */
+/* Leave headroom under a full A4 page box so content + footer never overflow a sheet. */
 const FIRST_PAGE_ROW_COUNT = 8;
-const FOLLOWING_PAGE_ROW_COUNT = 10;
+const FOLLOWING_PAGE_ROW_COUNT = 11;
 
 export function PayrollPrintLayout({
   document,
+  paperSize = DEFAULT_PRINT_PAPER_SIZE,
 }: {
   document: PayrollPrintDocument;
+  paperSize?: PrintPaperSize;
 }) {
   const { period, summary, settings, items, businessProfile, generatedAt } = document;
-  const pages = buildPayrollPages(items);
+  const pages = buildPayrollPages(items, paperSize);
 
   return (
     <PrintPageStack className="leading-[1.35]">
@@ -235,9 +242,20 @@ function buildDocumentMeta(
   return `Period: ${period.label} • Payout: ${formatDocumentDate(period.payoutDate)} • Page ${pageNumber} of ${pageCount}`;
 }
 
-function buildPayrollPages(items: PayrollPeriodItemSummary[]) {
-  const firstRows = items.slice(0, FIRST_PAGE_ROW_COUNT);
-  const remainingRows = items.slice(FIRST_PAGE_ROW_COUNT);
+function buildPayrollPages(
+  items: PayrollPeriodItemSummary[],
+  paperSize: PrintPaperSize,
+) {
+  const firstPageRowCount = Math.max(
+    5,
+    Math.floor(scalePrintCapacity(FIRST_PAGE_ROW_COUNT, paperSize)),
+  );
+  const followingPageRowCount = Math.max(
+    6,
+    Math.floor(scalePrintCapacity(FOLLOWING_PAGE_ROW_COUNT, paperSize)),
+  );
+  const firstRows = items.slice(0, firstPageRowCount);
+  const remainingRows = items.slice(firstPageRowCount);
   const pages: Array<{
     key: string;
     rows: PayrollPeriodItemSummary[];
@@ -253,9 +271,13 @@ function buildPayrollPages(items: PayrollPeriodItemSummary[]) {
   ];
 
   let pageIndex = 2;
-  for (let startIndex = 0; startIndex < remainingRows.length; startIndex += FOLLOWING_PAGE_ROW_COUNT) {
-    const rows = remainingRows.slice(startIndex, startIndex + FOLLOWING_PAGE_ROW_COUNT);
-    const isLastPage = startIndex + FOLLOWING_PAGE_ROW_COUNT >= remainingRows.length;
+  for (
+    let startIndex = 0;
+    startIndex < remainingRows.length;
+    startIndex += followingPageRowCount
+  ) {
+    const rows = remainingRows.slice(startIndex, startIndex + followingPageRowCount);
+    const isLastPage = startIndex + followingPageRowCount >= remainingRows.length;
 
     pages.push({
       key: `page-${pageIndex}`,

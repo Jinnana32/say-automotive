@@ -5,6 +5,10 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { BlankPrintDocument } from "@/components/reports/blank-print-document";
 import { PrintPageStack } from "@/components/reports/print-document-layout";
 import { paginatePlainText } from "@/lib/reports/paginate-plain-text";
+import {
+  DEFAULT_PRINT_PAPER_SIZE,
+  type PrintPaperSize,
+} from "@/lib/reports/print-paper-size";
 import { cn } from "@/lib/utils";
 
 const BODY_TEXT_CLASS =
@@ -21,6 +25,7 @@ export function BlankPrintDocumentPages({
   documentTitle,
   documentMeta,
   bodyContent,
+  paperSize = DEFAULT_PRINT_PAPER_SIZE,
   className,
 }: {
   businessName: string;
@@ -32,6 +37,7 @@ export function BlankPrintDocumentPages({
   documentTitle: string;
   documentMeta?: string | null;
   bodyContent: string;
+  paperSize?: PrintPaperSize;
   className?: string;
 }) {
   const measurePageRef = useRef<HTMLDivElement>(null);
@@ -64,17 +70,18 @@ export function BlankPrintDocumentPages({
     };
 
     setPages(paginatePlainText(bodyContent, measureHeight, maxHeight));
-  }, [bodyContent, documentTitle, documentMeta]);
+  }, [bodyContent, documentTitle, documentMeta, paperSize]);
 
   return (
     <>
       <div
         ref={measurePageRef}
         aria-hidden
-        className="pointer-events-none absolute -left-[99999px] top-0 w-[210mm] opacity-0"
+        className="pointer-events-none absolute -left-[99999px] top-0 w-[var(--print-page-width)] opacity-0"
+        data-print-paper={paperSize}
       >
-        {/* Match --print-page-print-height so measured splits fit the printed page box. */}
-        <div className="[&_.print-page]:h-[270mm] [&_.print-page]:min-h-[270mm] [&_.print-page]:max-h-[270mm]">
+        {/* Match the active paper height so measured splits fit the printed page box. */}
+        <div className="[&_.print-page]:h-[var(--print-page-height)] [&_.print-page]:min-h-[var(--print-page-height)] [&_.print-page]:max-h-[var(--print-page-height)]">
           <BlankPrintDocument
             businessName={businessName}
             businessLogoUrl={businessLogoUrl}
@@ -99,7 +106,7 @@ export function BlankPrintDocumentPages({
       <PrintPageStack className={cn("scroll-mt-28", className)}>
         {pages.map((pageContent, index) => (
           <BlankPrintDocument
-            key={`blank-page-${index + 1}`}
+            key={`blank-page-${index + 1}-${paperSize}`}
             businessName={businessName}
             businessLogoUrl={businessLogoUrl}
             businessVatRegistrationNo={businessVatRegistrationNo}

@@ -3,6 +3,10 @@ import type { NextRequest } from "next/server";
 import { resolveQuotationPrintMode } from "@/features/quotations/report-utils";
 import { getQuotationPrintDocument } from "@/features/quotations/queries/quotation-print-queries";
 import { renderInternalUrlToPdf } from "@/lib/reports/pdf";
+import {
+  applyPrintPaperSearchParam,
+  readPrintPaperSizeFromSearchParams,
+} from "@/lib/reports/print-paper-size";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -27,6 +31,10 @@ export async function GET(request: NextRequest, context: QuotationPdfRouteContex
     if (mode !== "full") {
       printUrl.searchParams.set("mode", mode);
     }
+    applyPrintPaperSearchParam(
+      printUrl,
+      readPrintPaperSizeFromSearchParams(request.nextUrl.searchParams),
+    );
     const pdfBuffer = await renderInternalUrlToPdf({
       url: printUrl.toString(),
       cookieHeader: request.headers.get("cookie"),

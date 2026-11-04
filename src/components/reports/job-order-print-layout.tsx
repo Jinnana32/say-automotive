@@ -18,10 +18,15 @@ import {
   formatDocumentPrintCurrencyNumber,
 } from "@/lib/currency";
 import { formatDocumentDate, formatDateTime } from "@/lib/dates";
+import {
+  DEFAULT_PRINT_PAPER_SIZE,
+  type PrintPaperSize,
+  scalePrintCapacity,
+} from "@/lib/reports/print-paper-size";
 
-/* Tuned for --print-page-print-height (270mm) so a page never overflows and orphans the footer. */
-const JOB_ORDER_PAGE_CAPACITY = 17.2;
-const JOB_ORDER_CONTINUATION_CAPACITY = 17.5;
+/* Leave headroom under a full A4 page box so content + footer never overflow a sheet. */
+const JOB_ORDER_PAGE_CAPACITY = 17.6;
+const JOB_ORDER_CONTINUATION_CAPACITY = 17.9;
 
 type JobOrderWorkGroupLabel = "Labor" | "Parts";
 
@@ -40,9 +45,11 @@ type JobOrderPrintPageModel = {
 export function JobOrderPrintLayout({
   document,
   hidePrices = false,
+  paperSize = DEFAULT_PRINT_PAPER_SIZE,
 }: {
   document: JobOrderPrintDocument;
   hidePrices?: boolean;
+  paperSize?: PrintPaperSize;
 }) {
   const { jobOrder, businessProfile } = document;
   const breakdown = buildJobOrderPrintBreakdown(jobOrder);
@@ -54,6 +61,11 @@ export function JobOrderPrintLayout({
     mechanicCount: jobOrder.mechanics.length,
     hidePrices,
     optionalNarrativeCount: optionalNarratives.length,
+    pageCapacity: scalePrintCapacity(JOB_ORDER_PAGE_CAPACITY, paperSize),
+    continuationCapacity: scalePrintCapacity(
+      JOB_ORDER_CONTINUATION_CAPACITY,
+      paperSize,
+    ),
   });
 
   return (
@@ -484,6 +496,8 @@ function buildJobOrderPrintPages(params: {
   mechanicCount: number;
   hidePrices: boolean;
   optionalNarrativeCount: number;
+  pageCapacity: number;
+  continuationCapacity: number;
 }): JobOrderPrintPageModel[] {
   const {
     workRows,
@@ -491,6 +505,8 @@ function buildJobOrderPrintPages(params: {
     mechanicCount,
     hidePrices,
     optionalNarrativeCount,
+    pageCapacity,
+    continuationCapacity,
   } = params;
   const introUnits = getJobOrderIntroUnits(optionalNarrativeCount);
   const mechanicsUnits =
@@ -502,7 +518,7 @@ function buildJobOrderPrintPages(params: {
   const totalPartUsageUnits = estimatePartUsageRowsUnits(partUsageRows);
 
   if (
-    introUnits + totalWorkUnits + totalPartUsageUnits + closingBaseUnits <= JOB_ORDER_PAGE_CAPACITY
+    introUnits + totalWorkUnits + totalPartUsageUnits + closingBaseUnits <= pageCapacity
   ) {
     return [
       {
@@ -520,7 +536,7 @@ function buildJobOrderPrintPages(params: {
     workRows,
     0,
     null,
-    Math.max(3.5, JOB_ORDER_PAGE_CAPACITY - introUnits),
+    Math.max(3.5, pageCapacity - introUnits),
   );
 
   const firstPageWorkUnits = estimateJobOrderWorkRowsUnits(firstPage.rows);
@@ -530,7 +546,7 @@ function buildJobOrderPrintPages(params: {
   if (firstPage.nextIndex === workRows.length && partUsageRows.length > 0) {
     const firstPageRemainingCapacity = Math.max(
       0,
-      JOB_ORDER_PAGE_CAPACITY - introUnits - firstPageWorkUnits,
+      pageCapacity - introUnits - firstPageWorkUnits,
     );
     const firstPagePartChunk = takePartUsageRowsForCapacity(
       partUsageRows,
@@ -556,7 +572,7 @@ function buildJobOrderPrintPages(params: {
 
   const finalPartUsageCapacity = Math.max(
     2.4,
-    JOB_ORDER_PAGE_CAPACITY - closingBaseUnits,
+    pageCapacity - closingBaseUnits,
   );
   const finalPartUsageStartIndex = findTrailingPartUsageStartIndex(
     partUsageRows.slice(firstPagePartUsageIndex),
@@ -568,7 +584,7 @@ function buildJobOrderPrintPages(params: {
 
   const finalWorkCapacity = Math.max(
     0,
-    JOB_ORDER_PAGE_CAPACITY -
+    pageCapacity -
       closingBaseUnits -
       estimatePartUsageRowsUnits(finalPartUsageRows),
   );
@@ -581,7 +597,7 @@ function buildJobOrderPrintPages(params: {
       workRows,
       workIndex,
       activeGroup,
-      JOB_ORDER_CONTINUATION_CAPACITY,
+      continuationCapacity,
     );
 
     pages.push({
@@ -604,7 +620,7 @@ function buildJobOrderPrintPages(params: {
     const partChunk = takePartUsageRowsForCapacity(
       overflowPartUsageRows,
       partUsageIndex,
-      JOB_ORDER_CONTINUATION_CAPACITY,
+      continuationCapacity,
     );
 
     pages.push({

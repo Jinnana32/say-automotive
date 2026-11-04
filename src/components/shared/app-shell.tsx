@@ -114,7 +114,7 @@ export function AppShell({
         />
       ) : null}
       <div
-        className={`flex min-h-screen w-full min-w-0 flex-col pl-0 print:pl-0 ${isDesktopSidebarCollapsed ? DESKTOP_CONTENT_COLLAPSED_CLASS : DESKTOP_CONTENT_EXPANDED_CLASS}`}
+        className={`flex min-h-screen w-full min-w-0 flex-col pl-0 print:block print:min-h-0 print:pl-0 ${isDesktopSidebarCollapsed ? DESKTOP_CONTENT_COLLAPSED_CLASS : DESKTOP_CONTENT_EXPANDED_CLASS}`}
       >
         <div className="no-print w-full min-w-0">
           <AppTopbar

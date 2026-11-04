@@ -2,6 +2,10 @@ import type { NextRequest } from "next/server";
 
 import { getInvoicePrintDocument } from "@/features/invoices/queries/invoice-print-queries";
 import { renderInternalUrlToPdf } from "@/lib/reports/pdf";
+import {
+  applyPrintPaperSearchParam,
+  readPrintPaperSizeFromSearchParams,
+} from "@/lib/reports/print-paper-size";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -22,6 +26,10 @@ export async function GET(request: NextRequest, context: InvoicePdfRouteContext)
 
   try {
     const printUrl = new URL(`/invoices/${invoiceId}/print`, request.nextUrl.origin);
+    applyPrintPaperSearchParam(
+      printUrl,
+      readPrintPaperSizeFromSearchParams(request.nextUrl.searchParams),
+    );
     const pdfBuffer = await renderInternalUrlToPdf({
       url: printUrl.toString(),
       cookieHeader: request.headers.get("cookie"),

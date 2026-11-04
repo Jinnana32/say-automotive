@@ -11,13 +11,20 @@ import {
   formatDocumentPrintCurrencyNumber,
 } from "@/lib/currency";
 import { formatDocumentDate } from "@/lib/dates";
+import {
+  DEFAULT_PRINT_PAPER_SIZE,
+  type PrintPaperSize,
+  scalePrintCapacity,
+} from "@/lib/reports/print-paper-size";
 
 export function QuotationPrintLayout({
   document,
   mode = "full",
+  paperSize = DEFAULT_PRINT_PAPER_SIZE,
 }: {
   document: QuotationPrintDocument;
   mode?: QuotationPrintMode;
+  paperSize?: PrintPaperSize;
 }) {
   const {
     quotation,
@@ -38,6 +45,7 @@ export function QuotationPrintLayout({
     mode,
     hasNatureOfRepair: Boolean(natureOfRepair),
     hasInspectionNotes: Boolean(inspectionNotes),
+    paperSize,
   });
 
   return (
@@ -460,9 +468,11 @@ function buildQuotationPrintPages(params: {
   mode: QuotationPrintMode;
   hasNatureOfRepair: boolean;
   hasInspectionNotes: boolean;
+  paperSize: PrintPaperSize;
 }): QuotationPrintPageModel[] {
-  const { lineItems, mode, hasNatureOfRepair, hasInspectionNotes } = params;
-  const pageCapacity = getQuotationPageCapacity(mode);
+  const { lineItems, mode, hasNatureOfRepair, hasInspectionNotes, paperSize } =
+    params;
+  const pageCapacity = getQuotationPageCapacity(mode, paperSize);
   const introUnits = getQuotationIntroUnits({
     hasNatureOfRepair,
     hasInspectionNotes,
@@ -686,16 +696,23 @@ function estimateLineRowUnits(row: QuotationLineRow) {
   return units;
 }
 
-function getQuotationPageCapacity(mode: QuotationPrintMode) {
-  // Tuned for --print-page-print-height (270mm) so pages don't overflow and orphan the footer.
-  switch (mode) {
-    case "parts":
-      return 16.5;
-    case "labor":
-      return 16.2;
-    default:
-      return 16.1;
-  }
+function getQuotationPageCapacity(
+  mode: QuotationPrintMode,
+  paperSize: PrintPaperSize,
+) {
+  // Leave headroom under a full page box so content + footer never overflow a sheet.
+  const baseCapacity = (() => {
+    switch (mode) {
+      case "parts":
+        return 17.2;
+      case "labor":
+        return 16.9;
+      default:
+        return 16.8;
+    }
+  })();
+
+  return scalePrintCapacity(baseCapacity, paperSize);
 }
 
 function getQuotationIntroUnits(params: {

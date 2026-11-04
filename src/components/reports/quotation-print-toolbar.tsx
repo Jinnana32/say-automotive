@@ -1,10 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense } from "react";
 import { Download, Printer } from "lucide-react";
 
+import { PrintPaperSizeControls } from "@/components/reports/print-paper-size-controls";
+import { usePrintPaperSizeNavigation } from "@/components/reports/use-print-paper-size-navigation";
 import { Button } from "@/components/ui/button";
 import type { QuotationPrintMode } from "@/features/quotations/types";
+import {
+  DEFAULT_PRINT_PAPER_SIZE,
+  type PrintPaperSize,
+  withPrintPaperSearchParam,
+} from "@/lib/reports/print-paper-size";
 
 const MODE_OPTIONS: ReadonlyArray<{
   value: QuotationPrintMode;
@@ -18,14 +26,22 @@ const MODE_OPTIONS: ReadonlyArray<{
 export function QuotationPrintToolbar({
   quotationId,
   mode,
+  paperSize = DEFAULT_PRINT_PAPER_SIZE,
 }: {
   quotationId: string;
   mode: QuotationPrintMode;
+  paperSize?: PrintPaperSize;
 }) {
-  const downloadHref = buildQuotationPdfHref(quotationId, mode);
+  const downloadHref = withPrintPaperSearchParam(
+    buildQuotationPdfHref(quotationId, mode),
+    paperSize,
+  );
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-3 rounded-full border border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
+    <div className="flex flex-nowrap items-center justify-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white/95 px-3 py-2.5 shadow-sm backdrop-blur sm:gap-3 sm:px-4 sm:py-3">
+      <Suspense fallback={null}>
+        <QuotationToolbarPaperSize paperSize={paperSize} />
+      </Suspense>
       <Button
         type="button"
         variant="outlineBlue"
@@ -33,7 +49,7 @@ export function QuotationPrintToolbar({
         onClick={() => window.print()}
       >
         <Printer className="size-4" />
-        Print Current View
+        Print
       </Button>
       {MODE_OPTIONS.map((option) => (
         <Button
@@ -43,19 +59,29 @@ export function QuotationPrintToolbar({
           size="sm"
           variant={mode === option.value ? "bluePrimary" : "outline"}
         >
-          <Link href={buildQuotationPrintHref(quotationId, option.value)}>
-            {`Print ${option.label}`}
+          <Link
+            href={withPrintPaperSearchParam(
+              buildQuotationPrintHref(quotationId, option.value),
+              paperSize,
+            )}
+          >
+            {option.label}
           </Link>
         </Button>
       ))}
       <Button asChild type="button" variant="bluePrimary" size="sm">
         <a href={downloadHref}>
           <Download className="size-4" />
-          Download PDF
+          PDF
         </a>
       </Button>
     </div>
   );
+}
+
+function QuotationToolbarPaperSize({ paperSize }: { paperSize: PrintPaperSize }) {
+  const setPaperSize = usePrintPaperSizeNavigation();
+  return <PrintPaperSizeControls value={paperSize} onChange={setPaperSize} />;
 }
 
 function buildQuotationPrintHref(

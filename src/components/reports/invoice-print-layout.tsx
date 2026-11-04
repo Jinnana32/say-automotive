@@ -18,10 +18,15 @@ import {
 } from "@/lib/currency";
 import { formatDocumentDate, formatDateTime } from "@/lib/dates";
 import { formatWorkshopLineItemType } from "@/lib/line-item-type";
+import {
+  DEFAULT_PRINT_PAPER_SIZE,
+  type PrintPaperSize,
+  scalePrintCapacity,
+} from "@/lib/reports/print-paper-size";
 
-/* Tuned for --print-page-print-height (270mm) so a page never overflows and orphans the footer. */
-const INVOICE_PAGE_CAPACITY = 13.8;
-const INVOICE_CONTINUATION_CAPACITY = 14.2;
+/* Leave headroom under a full A4 page box so content + footer never overflow a sheet. */
+const INVOICE_PAGE_CAPACITY = 14.2;
+const INVOICE_CONTINUATION_CAPACITY = 14.6;
 
 type InvoicePrintPageModel = {
   key: string;
@@ -33,8 +38,10 @@ type InvoicePrintPageModel = {
 
 export function InvoicePrintLayout({
   document,
+  paperSize = DEFAULT_PRINT_PAPER_SIZE,
 }: {
   document: InvoicePrintDocument;
+  paperSize?: PrintPaperSize;
 }) {
   const { invoice, businessProfile } = document;
   const sourceLabel =
@@ -43,7 +50,7 @@ export function InvoicePrintLayout({
     (sum, payment) => sum + payment.amount,
     0,
   );
-  const pages = buildInvoicePrintPages(invoice);
+  const pages = buildInvoicePrintPages(invoice, paperSize);
 
   return (
     <PrintPageStack className="leading-[1.35]">
@@ -349,14 +356,22 @@ function buildInvoiceHeaderMeta(
   return `Invoice #: ${invoiceNumber} • Date: ${formatDocumentDate(invoiceDate)} • Status: ${formatInvoiceStatus(status)}`;
 }
 
-function buildInvoicePrintPages(invoice: InvoicePrintDocument["invoice"]): InvoicePrintPageModel[] {
+function buildInvoicePrintPages(
+  invoice: InvoicePrintDocument["invoice"],
+  paperSize: PrintPaperSize,
+): InvoicePrintPageModel[] {
+  const pageCapacity = scalePrintCapacity(INVOICE_PAGE_CAPACITY, paperSize);
+  const continuationCapacity = scalePrintCapacity(
+    INVOICE_CONTINUATION_CAPACITY,
+    paperSize,
+  );
   const introUnits = 6.2 + (invoice.status === "cancelled" ? 1.8 : 0);
   const closingUnits = 4.2;
   const totalItemUnits = estimateInvoiceItemUnits(invoice.items);
   const totalPaymentUnits = estimatePaymentUnits(invoice.payments);
 
   if (
-    introUnits + totalItemUnits + totalPaymentUnits + closingUnits <= INVOICE_PAGE_CAPACITY
+    introUnits + totalItemUnits + totalPaymentUnits + closingUnits <= pageCapacity
   ) {
     return [
       {
@@ -371,19 +386,19 @@ function buildInvoicePrintPages(invoice: InvoicePrintDocument["invoice"]): Invoi
 
   const finalPaymentsStartIndex = findTrailingPaymentStartIndex(
     invoice.payments,
-    Math.max(2.2, INVOICE_PAGE_CAPACITY - closingUnits),
+    Math.max(2.2, pageCapacity - closingUnits),
   );
   const overflowPayments = invoice.payments.slice(0, finalPaymentsStartIndex);
   const finalPayments = invoice.payments.slice(finalPaymentsStartIndex);
   const finalItemCapacity = Math.max(
     0,
-    INVOICE_PAGE_CAPACITY - closingUnits - estimatePaymentUnits(finalPayments),
+    pageCapacity - closingUnits - estimatePaymentUnits(finalPayments),
   );
   const pages: InvoicePrintPageModel[] = [];
   const firstItemChunk = takeInvoiceItemsForCapacity(
     invoice.items,
     0,
-    Math.max(3.8, INVOICE_PAGE_CAPACITY - introUnits),
+    Math.max(3.8, pageCapacity - introUnits),
   );
 
   pages.push({
@@ -404,7 +419,7 @@ function buildInvoicePrintPages(invoice: InvoicePrintDocument["invoice"]): Invoi
     const nextItems = takeInvoiceItemsForCapacity(
       invoice.items,
       itemIndex,
-      INVOICE_CONTINUATION_CAPACITY,
+      continuationCapacity,
     );
 
     pages.push({
@@ -426,7 +441,7 @@ function buildInvoicePrintPages(invoice: InvoicePrintDocument["invoice"]): Invoi
     const paymentChunk = takePaymentsForCapacity(
       overflowPayments,
       paymentIndex,
-      INVOICE_CONTINUATION_CAPACITY,
+      continuationCapacity,
     );
 
     pages.push({

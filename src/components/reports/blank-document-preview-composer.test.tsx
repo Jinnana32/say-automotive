@@ -51,5 +51,7 @@ describe("BlankDocumentPreviewComposer", () => {
         .join("\n"),
     ).toContain("Line two");
     expect(screen.getByRole("button", { name: "Print" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "A4" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Short bond" })).toBeInTheDocument();
   });
 });
