@@ -687,13 +687,14 @@ function estimateLineRowUnits(row: QuotationLineRow) {
 }
 
 function getQuotationPageCapacity(mode: QuotationPrintMode) {
+  // Tuned for --print-page-print-height (270mm) so pages don't overflow and orphan the footer.
   switch (mode) {
     case "parts":
-      return 18.1;
+      return 16.5;
     case "labor":
-      return 17.8;
+      return 16.2;
     default:
-      return 17.65;
+      return 16.1;
   }
 }
 

@@ -73,8 +73,8 @@ export function BlankPrintDocumentPages({
         aria-hidden
         className="pointer-events-none absolute -left-[99999px] top-0 w-[210mm] opacity-0"
       >
-        {/* Match the printable page box (A4 minus @page margins) so splits fit print. */}
-        <div className="[&_.print-page]:h-[calc(297mm-20mm)] [&_.print-page]:min-h-[calc(297mm-20mm)] [&_.print-page]:max-h-[calc(297mm-20mm)]">
+        {/* Match --print-page-print-height so measured splits fit the printed page box. */}
+        <div className="[&_.print-page]:h-[270mm] [&_.print-page]:min-h-[270mm] [&_.print-page]:max-h-[270mm]">
           <BlankPrintDocument
             businessName={businessName}
             businessLogoUrl={businessLogoUrl}

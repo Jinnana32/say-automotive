@@ -148,7 +148,7 @@ describe("QuotationPrintLayout", () => {
     expect(notesBody?.textContent).toContain("Brake Fluid Flush");
   });
 
-  it("keeps the closing sections on page 1 for medium quotations when they still fit", () => {
+  it("keeps closing sections on the final page with a footer on every page for medium quotations", () => {
     const mediumDocument: QuotationPrintDocument = {
       ...documentFixture,
       quotation: {
@@ -223,10 +223,15 @@ describe("QuotationPrintLayout", () => {
       <QuotationPrintLayout document={mediumDocument} mode="full" />,
     );
 
-    expect(container.querySelectorAll(".print-page")).toHaveLength(1);
+    const pages = container.querySelectorAll(".print-page");
+    expect(pages.length).toBeGreaterThanOrEqual(1);
+    expect(container.querySelectorAll(".print-document-footer").length).toBe(
+      pages.length,
+    );
     expect(screen.getByText("TERMS & CONDITIONS")).toBeInTheDocument();
     expect(screen.getByText("QUOTATION SUMMARY")).toBeInTheDocument();
     expect(screen.getByText("APPROVAL")).toBeInTheDocument();
+    expect(pages[pages.length - 1]?.textContent).toContain("APPROVAL");
   });
 
   it("splits long quotations into explicit print pages with a footer on every page", () => {

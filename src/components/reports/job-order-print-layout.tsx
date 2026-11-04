@@ -19,8 +19,9 @@ import {
 } from "@/lib/currency";
 import { formatDocumentDate, formatDateTime } from "@/lib/dates";
 
-const JOB_ORDER_PAGE_CAPACITY = 18.8;
-const JOB_ORDER_CONTINUATION_CAPACITY = 19;
+/* Tuned for --print-page-print-height (270mm) so a page never overflows and orphans the footer. */
+const JOB_ORDER_PAGE_CAPACITY = 17.2;
+const JOB_ORDER_CONTINUATION_CAPACITY = 17.5;
 
 type JobOrderWorkGroupLabel = "Labor" | "Parts";
 

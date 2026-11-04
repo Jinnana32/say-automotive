@@ -14,8 +14,9 @@ import {
 import { formatPrintCurrency, formatPrintCurrencyNumber } from "@/lib/currency";
 import { formatDateTime, formatDocumentDate } from "@/lib/dates";
 
-const FIRST_PAGE_ROW_COUNT = 9;
-const FOLLOWING_PAGE_ROW_COUNT = 12;
+/* Tuned for --print-page-print-height (270mm) so pages don't overflow and orphan the footer. */
+const FIRST_PAGE_ROW_COUNT = 8;
+const FOLLOWING_PAGE_ROW_COUNT = 10;
 
 export function PayrollPrintLayout({
   document,

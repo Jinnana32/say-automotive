@@ -19,8 +19,9 @@ import {
 import { formatDocumentDate, formatDateTime } from "@/lib/dates";
 import { formatWorkshopLineItemType } from "@/lib/line-item-type";
 
-const INVOICE_PAGE_CAPACITY = 15;
-const INVOICE_CONTINUATION_CAPACITY = 15.6;
+/* Tuned for --print-page-print-height (270mm) so a page never overflows and orphans the footer. */
+const INVOICE_PAGE_CAPACITY = 13.8;
+const INVOICE_CONTINUATION_CAPACITY = 14.2;
 
 type InvoicePrintPageModel = {
   key: string;
