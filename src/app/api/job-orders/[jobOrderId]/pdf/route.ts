@@ -30,13 +30,12 @@ export async function GET(request: NextRequest, context: JobOrderPdfRouteContext
     if (hidePrices) {
       printUrl.searchParams.set("hidePrices", "1");
     }
-    applyPrintPaperSearchParam(
-      printUrl,
-      readPrintPaperSizeFromSearchParams(request.nextUrl.searchParams),
-    );
+    const paperSize = readPrintPaperSizeFromSearchParams(request.nextUrl.searchParams);
+    applyPrintPaperSearchParam(printUrl, paperSize);
     const pdfBuffer = await renderInternalUrlToPdf({
       url: printUrl.toString(),
       cookieHeader: request.headers.get("cookie"),
+      paperSize,
     });
     const filename = `SAY-JobOrder-${document.jobOrder.jobOrderNumber}${hidePrices ? "-NoPrices" : ""}.pdf`;
 

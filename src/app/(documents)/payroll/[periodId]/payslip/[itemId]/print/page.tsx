@@ -5,7 +5,10 @@ import { ReportAutoPrint } from "@/components/reports/report-auto-print";
 import { ReportPage } from "@/components/reports/report-page";
 import { ReportToolbar } from "@/components/reports/report-toolbar";
 import { getPayslipPrintDocument } from "@/features/payroll/queries/payroll-print-queries";
-import { resolvePrintPaperSize } from "@/lib/reports/print-paper-size";
+import {
+  resolvePrintPaperSize,
+  withPrintPaperSearchParam,
+} from "@/lib/reports/print-paper-size";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +37,11 @@ export default async function PayslipPrintPage({
     notFound();
   }
 
+  const pdfHref = withPrintPaperSearchParam(
+    `/api/payroll/${document.period.id}/payslip/${document.item.id}/pdf`,
+    paperSize,
+  );
+
   return (
     <ReportPage
       wrapInPrintPage={false}
@@ -45,7 +53,7 @@ export default async function PayslipPrintPage({
         />
       }
     >
-      <ReportAutoPrint enabled={autoPrint} />
+      <ReportAutoPrint enabled={autoPrint} pdfHref={pdfHref} />
       <PayslipPrintLayout document={document} />
     </ReportPage>
   );

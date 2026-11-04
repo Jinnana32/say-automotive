@@ -79,7 +79,7 @@ export function BlankPrintDocumentPages({
         {/* Printable body under @page margins + fixed runners. */}
         <div
           ref={measureSlotRef}
-          className="h-[calc(var(--print-page-height)-2*var(--print-page-margin)-var(--print-runner-header-space)-var(--print-runner-footer-space))] w-full px-[10mm] pt-5"
+          className="h-[calc(var(--print-page-height)-var(--print-runner-header-space)-var(--print-runner-footer-space))] w-full px-[10mm] pt-5"
         >
           <div ref={measureTextRef} className={BODY_TEXT_CLASS} />
         </div>

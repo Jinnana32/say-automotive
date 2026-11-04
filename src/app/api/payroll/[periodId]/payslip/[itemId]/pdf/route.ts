@@ -30,13 +30,12 @@ export async function GET(request: NextRequest, context: PayslipPdfRouteContext)
       `/payroll/${periodId}/payslip/${itemId}/print`,
       request.nextUrl.origin,
     );
-    applyPrintPaperSearchParam(
-      printUrl,
-      readPrintPaperSizeFromSearchParams(request.nextUrl.searchParams),
-    );
+    const paperSize = readPrintPaperSizeFromSearchParams(request.nextUrl.searchParams);
+    applyPrintPaperSearchParam(printUrl, paperSize);
     const pdfBuffer = await renderInternalUrlToPdf({
       url: printUrl.toString(),
       cookieHeader: request.headers.get("cookie"),
+      paperSize,
     });
     const filename = `SAY-Payslip-${toFilenameSegment(document.item.fullName)}-${toFilenameSegment(document.period.label)}.pdf`;
 

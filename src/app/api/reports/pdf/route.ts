@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 
 import { getReportsPrintDocument } from "@/features/reports/queries/report-print-queries";
 import { renderInternalUrlToPdf } from "@/lib/reports/pdf";
+import { readPrintPaperSizeFromSearchParams } from "@/lib/reports/print-paper-size";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,9 +18,11 @@ export async function GET(request: NextRequest) {
 
   try {
     const printUrl = new URL(`/reports/print?${request.nextUrl.searchParams.toString()}`, request.nextUrl.origin);
+    const paperSize = readPrintPaperSizeFromSearchParams(request.nextUrl.searchParams);
     const pdfBuffer = await renderInternalUrlToPdf({
       url: printUrl.toString(),
       cookieHeader: request.headers.get("cookie"),
+      paperSize,
     });
     const filename = `SAY-Reports-${document.reports.filters.from}-to-${document.reports.filters.to}.pdf`;
 

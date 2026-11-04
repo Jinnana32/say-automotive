@@ -41,7 +41,8 @@
     --font-display: var(--font-barlow-condensed), "Segoe UI", sans-serif;
     --print-page-width: 210mm;
     --print-page-height: 297mm;
-    --print-page-margin: 12mm;
+    /* Inset lives in content/runners — @page margin stays 0 so Letter does not lose 24mm. */
+    --print-page-margin: 0mm;
     --print-runner-header-space: 28mm;
     --print-runner-footer-space: 24mm;
   }
@@ -50,7 +51,7 @@
   [data-print-paper="short-bond"] {
     --print-page-width: 215.9mm;
     --print-page-height: 279.4mm;
-    --print-page-margin: 12mm;
+    --print-page-margin: 0mm;
     --print-runner-header-space: 26mm;
     --print-runner-footer-space: 22mm;
   }
@@ -100,12 +101,12 @@
 
 @page {
   size: A4 portrait;
-  margin: 12mm;
+  margin: 0;
 }
 
 @page short-bond {
   size: letter portrait;
-  margin: 12mm;
+  margin: 0;
 }
 
 /* Fixed print runners — hidden on screen; painted on every printed sheet. */
@@ -239,6 +240,13 @@
     gap: 0 !important;
   }
 
+  .print-running-chrome {
+    break-after: avoid;
+    page-break-after: avoid;
+    break-before: avoid;
+    page-break-before: avoid;
+  }
+
   .print-running-header {
     display: block !important;
     position: fixed;
@@ -278,7 +286,9 @@
   }
 
   html[data-print-paper="short-bond"] .print-page,
-  html[data-print-paper="short-bond"] .report-print-page {
+  html[data-print-paper="short-bond"] .report-print-page,
+  [data-print-paper="short-bond"] .print-page,
+  [data-print-paper="short-bond"] .report-print-page {
     page: short-bond;
   }
 
@@ -305,8 +315,9 @@
     overflow-wrap: anywhere;
   }
 
-  .print-page:last-child,
-  .report-print-page:last-child {
+  /* Runner chrome sits after pages in the DOM, so :last-child never matched a page. */
+  .print-page-stack > .print-page:last-of-type,
+  .report-print-stack > .report-print-page:last-of-type {
     break-after: auto;
     page-break-after: auto;
   }

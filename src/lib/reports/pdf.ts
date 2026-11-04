@@ -1,6 +1,11 @@
 import { access } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
 
+import {
+  DEFAULT_PRINT_PAPER_SIZE,
+  type PrintPaperSize,
+} from "@/lib/reports/print-paper-size";
+
 const LOCAL_BROWSER_CANDIDATES = [
   process.env.PUPPETEER_EXECUTABLE_PATH,
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
@@ -24,7 +29,9 @@ const PDF_VIEWPORT = {
 export async function renderInternalUrlToPdf(params: {
   url: string;
   cookieHeader?: string | null;
+  paperSize?: PrintPaperSize;
 }) {
+  const paperSize = params.paperSize ?? DEFAULT_PRINT_PAPER_SIZE;
   const { default: puppeteer } = await import("puppeteer-core");
   const browser = await puppeteer.launch(await resolvePdfBrowserLaunchOptions(puppeteer));
 
@@ -42,8 +49,19 @@ export async function renderInternalUrlToPdf(params: {
     });
     await page.emulateMediaType("print");
 
+    // preferCSSPageSize uses CSS @page; the default stylesheet is always A4, and
+    // named `page: short-bond` only applies after client sync sets html[data-print-paper].
+    // Force both so Letter is not silently ignored for short-bond PDFs.
+    const cssPageSize = paperSize === "short-bond" ? "letter" : "A4";
+    await page.evaluate((paper) => {
+      document.documentElement.dataset.printPaper = paper;
+    }, paperSize);
+    await page.addStyleTag({
+      content: `@page { size: ${cssPageSize} portrait; margin: 0; }`,
+    });
+
     return await page.pdf({
-      format: "A4",
+      format: paperSize === "short-bond" ? "Letter" : "A4",
       printBackground: true,
       preferCSSPageSize: true,
       margin: {
@@ -110,7 +128,7 @@ async function findLocalBrowserExecutablePath() {
       await access(candidate, fsConstants.X_OK);
       return candidate;
     } catch {
-      continue;
+      // try next candidate
     }
   }
 

@@ -25,11 +25,12 @@ export const PRINT_PAPER_SIZE_OPTIONS: ReadonlyArray<{
 
 /**
  * Body capacity vs full on-screen page preview.
- * A4 stays near full; short bond is shorter so paginate a bit earlier.
+ * A4 stays near full; short bond (Letter) is ~6% shorter and loses more relative
+ * headroom once runner chrome is applied, so pack earlier to avoid a spilled sheet.
  */
 export const PRINT_PAPER_CAPACITY_SCALE: Record<PrintPaperSize, number> = {
   a4: 1,
-  "short-bond": 0.9,
+  "short-bond": 0.82,
 };
 
 export function isPrintPaperSize(value: unknown): value is PrintPaperSize {

@@ -26,13 +26,12 @@ export async function GET(request: NextRequest, context: PaymentPdfRouteContext)
 
   try {
     const printUrl = new URL(`/payments/${paymentId}/print`, request.nextUrl.origin);
-    applyPrintPaperSearchParam(
-      printUrl,
-      readPrintPaperSizeFromSearchParams(request.nextUrl.searchParams),
-    );
+    const paperSize = readPrintPaperSizeFromSearchParams(request.nextUrl.searchParams);
+    applyPrintPaperSearchParam(printUrl, paperSize);
     const pdfBuffer = await renderInternalUrlToPdf({
       url: printUrl.toString(),
       cookieHeader: request.headers.get("cookie"),
+      paperSize,
     });
     const safeDate = document.payment.paidAt.slice(0, 10);
     const filename = `SAY-Payment-${document.payment.invoiceNumber}-${safeDate}.pdf`;

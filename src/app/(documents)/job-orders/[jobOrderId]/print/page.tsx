@@ -5,7 +5,10 @@ import { JobOrderPrintLayout } from "@/components/reports/job-order-print-layout
 import { ReportPage } from "@/components/reports/report-page";
 import { ReportToolbar } from "@/components/reports/report-toolbar";
 import { getJobOrderPrintDocument } from "@/features/job-orders/queries/job-order-print-queries";
-import { resolvePrintPaperSize } from "@/lib/reports/print-paper-size";
+import {
+  resolvePrintPaperSize,
+  withPrintPaperSearchParam,
+} from "@/lib/reports/print-paper-size";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +38,11 @@ export default async function JobOrderPrintPage({
     notFound();
   }
 
+  const pdfHref = withPrintPaperSearchParam(
+    `/api/job-orders/${document.jobOrder.id}/pdf${hidePrices ? "?hidePrices=1" : ""}`,
+    paperSize,
+  );
+
   return (
     <ReportPage
       wrapInPrintPage={false}
@@ -48,7 +56,7 @@ export default async function JobOrderPrintPage({
         />
       }
     >
-      <ReportAutoPrint enabled={autoPrint} />
+      <ReportAutoPrint enabled={autoPrint} pdfHref={pdfHref} />
       <JobOrderPrintLayout
         document={document}
         hidePrices={hidePrices}

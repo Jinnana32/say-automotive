@@ -31,13 +31,12 @@ export async function GET(request: NextRequest, context: QuotationPdfRouteContex
     if (mode !== "full") {
       printUrl.searchParams.set("mode", mode);
     }
-    applyPrintPaperSearchParam(
-      printUrl,
-      readPrintPaperSizeFromSearchParams(request.nextUrl.searchParams),
-    );
+    const paperSize = readPrintPaperSizeFromSearchParams(request.nextUrl.searchParams);
+    applyPrintPaperSearchParam(printUrl, paperSize);
     const pdfBuffer = await renderInternalUrlToPdf({
       url: printUrl.toString(),
       cookieHeader: request.headers.get("cookie"),
+      paperSize,
     });
     const filename = `SAY-Quotation-${document.quotation.quotationNumber}${mode === "full" ? "" : `-${mode}`}.pdf`;
 

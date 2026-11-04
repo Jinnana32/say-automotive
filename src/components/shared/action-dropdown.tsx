@@ -21,20 +21,30 @@ export function ActionDropdown({
   variant = "outline",
   size = "sm",
   className,
+  disabled = false,
 }: {
   label: string;
   items: ActionDropdownItem[];
   variant?: ButtonProps["variant"];
   size?: ButtonProps["size"];
   className?: string;
+  disabled?: boolean;
 }) {
   return (
-    <details className={cn("group relative", className)}>
+    <details
+      className={cn("group relative", disabled && "pointer-events-none opacity-60", className)}
+      onToggle={(event) => {
+        if (disabled) {
+          event.currentTarget.open = false;
+        }
+      }}
+    >
       <summary
         className={cn(
           buttonVariants({ variant, size }),
           "list-none cursor-pointer [&::-webkit-details-marker]:hidden",
         )}
+        aria-disabled={disabled}
       >
         {label}
         <ChevronDown className="size-4 transition-transform group-open:rotate-180" />
