@@ -1,5 +1,6 @@
 import { access } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
+import { join } from "node:path";
 
 import {
   DEFAULT_PRINT_PAPER_SIZE,
@@ -85,7 +86,9 @@ function isServerlessPdfRuntime() {
 }
 
 async function resolvePdfBrowserLaunchOptions(puppeteer: PdfBrowserLauncher) {
-  const localExecutablePath = isServerlessPdfRuntime() ? null : await findLocalBrowserExecutablePath();
+  // Prefer a real local Chrome whenever it exists (dev Mac/Linux). Do not skip it
+  // just because AWS_REGION/VERCEL is set in the environment for other SDKs.
+  const localExecutablePath = await findLocalBrowserExecutablePath();
 
   if (localExecutablePath) {
     return {
@@ -103,6 +106,7 @@ async function resolvePdfBrowserLaunchOptions(puppeteer: PdfBrowserLauncher) {
   }
 
   const chromium = await loadServerlessChromium();
+  const executablePath = await resolveServerlessChromiumExecutablePath(chromium);
 
   return {
     args: puppeteer.defaultArgs({
@@ -110,16 +114,42 @@ async function resolvePdfBrowserLaunchOptions(puppeteer: PdfBrowserLauncher) {
       headless: "shell",
     }),
     defaultViewport: PDF_VIEWPORT,
-    executablePath: await chromium.executablePath(),
+    executablePath,
     headless: "shell" as const,
   };
 }
 
-async function loadServerlessChromium() {
+type ServerlessChromium = {
+  args: string[];
+  executablePath: (input?: string) => Promise<string>;
+  setGraphicsMode: boolean;
+};
+
+async function loadServerlessChromium(): Promise<ServerlessChromium> {
   const chromiumModule = await import("@sparticuz/chromium");
-  const chromium = chromiumModule.default ?? chromiumModule;
+  const chromium = (chromiumModule.default ?? chromiumModule) as ServerlessChromium;
   chromium.setGraphicsMode = false;
   return chromium;
+}
+
+async function resolveServerlessChromiumExecutablePath(chromium: ServerlessChromium) {
+  const binPath = join(process.cwd(), "node_modules", "@sparticuz", "chromium", "bin");
+
+  try {
+    await access(binPath, fsConstants.R_OK);
+    return await chromium.executablePath(binPath);
+  } catch {
+    // Fall through to package-default resolution (works when file tracing kept bin/).
+  }
+
+  try {
+    return await chromium.executablePath();
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Serverless Chromium binaries are missing from the deploy bundle (${detail}). Ensure @sparticuz/chromium/bin is included via outputFileTracingIncludes.`,
+    );
+  }
 }
 
 async function findLocalBrowserExecutablePath() {
