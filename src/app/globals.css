@@ -312,7 +312,18 @@
     display: block !important;
     overflow: visible !important;
     max-width: 100%;
-    overflow-wrap: anywhere;
+    /* break-word keeps long descriptions wrapping; anywhere was splitting Qty
+       cells character-by-character and blowing row height into spilled pages. */
+    overflow-wrap: break-word;
+  }
+
+  .print-body table td.print-cell-numeric,
+  .print-document-body table td.print-cell-numeric,
+  .print-body table th.print-cell-numeric,
+  .print-document-body table th.print-cell-numeric {
+    overflow-wrap: normal;
+    word-break: normal;
+    white-space: nowrap;
   }
 
   /* Runner chrome sits after pages in the DOM, so :last-child never matched a page. */

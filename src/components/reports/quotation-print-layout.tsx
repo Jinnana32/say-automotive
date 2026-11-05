@@ -45,6 +45,8 @@ export function QuotationPrintLayout({
     mode,
     hasNatureOfRepair: Boolean(natureOfRepair),
     hasInspectionNotes: Boolean(inspectionNotes),
+    natureOfRepairLength: natureOfRepair?.length ?? 0,
+    inspectionNotesLength: inspectionNotes?.length ?? 0,
     paperSize,
   });
 
@@ -197,17 +199,19 @@ function QuotationLineItemsSection({
         <table className="w-full border-collapse text-[11px]">
           <thead className="bg-brand-navy text-white">
             <tr>
-              <th className="w-10 px-3 py-2 text-left font-semibold">#</th>
+              <th className="print-cell-numeric w-10 px-3 py-2 text-left font-semibold">
+                #
+              </th>
               <th className="px-3 py-2 text-left font-semibold">
                 Description
               </th>
-              <th className="w-20 px-3 py-2 text-left font-semibold">
+              <th className="print-cell-numeric w-14 px-3 py-2 text-left font-semibold">
                 Qty
               </th>
-              <th className="w-28 px-3 py-2 text-right font-semibold">
+              <th className="print-cell-numeric w-28 px-3 py-2 text-right font-semibold">
                 Unit Price
               </th>
-              <th className="w-28 px-3 py-2 text-right font-semibold">
+              <th className="print-cell-numeric w-28 px-3 py-2 text-right font-semibold">
                 Amount
               </th>
             </tr>
@@ -231,7 +235,7 @@ function QuotationLineItemsSection({
                   key={row.key}
                   className="report-row-avoid border-t border-slate-200"
                 >
-                  <td className="px-3 py-2.5 align-top text-slate-700">
+                  <td className="print-cell-numeric px-3 py-2.5 align-top text-slate-700">
                     {row.displayLineNumber}
                   </td>
                   <td className="px-3 py-2.5 align-top">
@@ -244,13 +248,13 @@ function QuotationLineItemsSection({
                       </p>
                     ) : null}
                   </td>
-                  <td className="px-3 py-2.5 align-top text-slate-700">
+                  <td className="print-cell-numeric px-3 py-2.5 align-top text-slate-700">
                     {row.quantityLabel}
                   </td>
-                  <td className="px-3 py-2.5 text-right align-top text-slate-800">
+                  <td className="print-cell-numeric px-3 py-2.5 text-right align-top text-slate-800">
                     {formatDocumentPrintCurrencyNumber(row.unitPrice)}
                   </td>
-                  <td className="px-3 py-2.5 text-right align-top font-semibold text-slate-950">
+                  <td className="print-cell-numeric px-3 py-2.5 text-right align-top font-semibold text-slate-950">
                     {formatDocumentPrintCurrencyNumber(row.amount)}
                   </td>
                 </tr>
@@ -476,14 +480,25 @@ function buildQuotationPrintPages(params: {
   mode: QuotationPrintMode;
   hasNatureOfRepair: boolean;
   hasInspectionNotes: boolean;
+  natureOfRepairLength?: number;
+  inspectionNotesLength?: number;
   paperSize: PrintPaperSize;
 }): QuotationPrintPageModel[] {
-  const { lineItems, mode, hasNatureOfRepair, hasInspectionNotes, paperSize } =
-    params;
+  const {
+    lineItems,
+    mode,
+    hasNatureOfRepair,
+    hasInspectionNotes,
+    natureOfRepairLength = 0,
+    inspectionNotesLength = 0,
+    paperSize,
+  } = params;
   const pageCapacity = getQuotationPageCapacity(mode, paperSize);
   const introUnits = getQuotationIntroUnits({
     hasNatureOfRepair,
     hasInspectionNotes,
+    natureOfRepairLength,
+    inspectionNotesLength,
   });
   const closingUnits = getQuotationClosingUnits(mode);
   const totalUnits = estimateLineRowsUnits(lineItems);
@@ -554,7 +569,7 @@ function buildQuotationPrintPages(params: {
     includeClosing: true,
   });
 
-  return pages;
+  return consolidateTrailingQuotationPages(pages, pageCapacity, closingUnits);
 }
 
 function takeRowsForCapacity(
@@ -708,15 +723,16 @@ function getQuotationPageCapacity(
   mode: QuotationPrintMode,
   paperSize: PrintPaperSize,
 ) {
-  // Leave headroom under a full page box so content + footer never overflow a sheet.
+  // Headroom for runner chrome without over-splitting short quotes onto an
+  // extra page. Qty is numeric-only now, so we can pack closer to the sheet.
   const baseCapacity = (() => {
     switch (mode) {
       case "parts":
-        return 17.2;
+        return 15.6;
       case "labor":
-        return 16.9;
+        return 15.3;
       default:
-        return 16.8;
+        return 15.2;
     }
   })();
 
@@ -726,18 +742,90 @@ function getQuotationPageCapacity(
 function getQuotationIntroUnits(params: {
   hasNatureOfRepair: boolean;
   hasInspectionNotes: boolean;
+  natureOfRepairLength?: number;
+  inspectionNotesLength?: number;
 }) {
-  let units = 4.25;
+  let units = 4.4;
 
   if (params.hasNatureOfRepair) {
     units += 0.85;
+    if ((params.natureOfRepairLength ?? 0) > 120) {
+      units += 0.35;
+    }
+    if ((params.natureOfRepairLength ?? 0) > 220) {
+      units += 0.35;
+    }
   }
 
   if (params.hasInspectionNotes) {
     units += 0.85;
+    if ((params.inspectionNotesLength ?? 0) > 120) {
+      units += 0.3;
+    }
   }
 
   return units;
+}
+
+/**
+ * If the last continuation page + final closing page both fit on one sheet,
+ * merge them so packing does not leave an unnecessary trailing page.
+ */
+function consolidateTrailingQuotationPages(
+  pages: QuotationPrintPageModel[],
+  pageCapacity: number,
+  closingUnits: number,
+) {
+  const merged = [...pages];
+
+  while (merged.length >= 3) {
+    const previous = merged[merged.length - 2];
+    const last = merged[merged.length - 1];
+    if (!previous || !last?.includeClosing || previous.includeIntro) {
+      break;
+    }
+
+    const combinedRows = collapseCarryoverGroupRows([
+      ...previous.lineRows,
+      ...last.lineRows,
+    ]);
+    const combinedUnits =
+      estimateLineRowsUnits(combinedRows) +
+      (last.includeClosing ? closingUnits : 0);
+
+    if (combinedUnits > pageCapacity) {
+      break;
+    }
+
+    merged.splice(merged.length - 2, 2, {
+      key: previous.key,
+      lineRows: combinedRows,
+      includeIntro: false,
+      includeNatureOfRepair: false,
+      includeInspectionNotes: false,
+      includeClosing: true,
+    });
+  }
+
+  return merged;
+}
+
+function collapseCarryoverGroupRows(rows: QuotationLineRow[]) {
+  const collapsed: QuotationLineRow[] = [];
+
+  for (const row of rows) {
+    const previous = collapsed.at(-1);
+    if (
+      row.kind === "group" &&
+      previous?.kind === "group" &&
+      previous.label === row.label
+    ) {
+      continue;
+    }
+    collapsed.push(row);
+  }
+
+  return collapsed;
 }
 
 function getQuotationClosingUnits(mode: QuotationPrintMode) {
@@ -807,11 +895,10 @@ function buildQuotationLineRows(
   return rows;
 }
 
-function formatQuantity(quantity: number, unitLabel: string | null) {
-  const numeric = Number.isInteger(quantity)
-    ? String(quantity)
-    : String(quantity);
-  return unitLabel ? `${numeric} ${unitLabel}` : numeric;
+function formatQuantity(quantity: number, _unitLabel: string | null) {
+  // Keep Qty numeric-only. Unit text belongs in the description subtext so the
+  // narrow Qty column cannot wrap into multi-line cells that overfill a sheet.
+  return Number.isInteger(quantity) ? String(quantity) : String(quantity);
 }
 
 function buildDefaultQuotationTerms(validUntil: string | null) {

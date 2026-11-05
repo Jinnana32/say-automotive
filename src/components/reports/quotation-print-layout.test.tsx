@@ -272,6 +272,50 @@ describe("QuotationPrintLayout", () => {
     ).toBeGreaterThan(1);
   });
 
+  it("keeps a typical mixed parts/labor quotation on two A4 pages", () => {
+    const typicalDocument: QuotationPrintDocument = {
+      ...documentFixture,
+      quotation: {
+        ...documentFixture.quotation,
+        natureOfRepair:
+          "EGR/Intake manifold cleaning, Fuel Injector Cleaner, Cam Shaft Oil Seal, Valve Cover Gasket, Brake Fluid Flush, Transmission Oil, Clutch Fluid Flush, Air Filter",
+        items: [
+          ...Array.from({ length: 6 }, (_, index) => ({
+            id: `part-${index + 1}`,
+            lineNumber: index + 1,
+            itemType: "product" as const,
+            productId: `product-${index + 1}`,
+            serviceId: null,
+            description: `Part line ${index + 1}`,
+            quantity: 1,
+            unitLabel: "pc",
+            unitPrice: 500,
+            total: 500,
+          })),
+          ...Array.from({ length: 7 }, (_, index) => ({
+            id: `labor-${index + 1}`,
+            lineNumber: index + 7,
+            itemType: "service" as const,
+            productId: null,
+            serviceId: `service-${index + 1}`,
+            description: `Labor operation ${index + 1}`,
+            quantity: 1,
+            unitLabel: null,
+            unitPrice: 900,
+            total: 900,
+          })),
+        ],
+      },
+    };
+
+    const { container } = render(
+      <QuotationPrintLayout document={typicalDocument} mode="full" paperSize="a4" />,
+    );
+
+    expect(container.querySelectorAll(".print-page")).toHaveLength(2);
+    expect(screen.getByText("APPROVAL")).toBeInTheDocument();
+  });
+
   it("uses conservative pagination for labor mode so the closing section stays on a footer-safe page", () => {
     const laborDocument: QuotationPrintDocument = {
       ...documentFixture,
