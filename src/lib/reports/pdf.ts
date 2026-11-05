@@ -4,6 +4,8 @@ import { join } from "node:path";
 
 import {
   DEFAULT_PRINT_PAPER_SIZE,
+  PDF_PRINTER_SAFE_MARGIN_MM,
+  PRINT_PAPER_DIMENSIONS_MM,
   type PrintPaperSize,
 } from "@/lib/reports/print-paper-size";
 
@@ -50,26 +52,71 @@ export async function renderInternalUrlToPdf(params: {
     });
     await page.emulateMediaType("print");
 
-    // preferCSSPageSize uses CSS @page; the default stylesheet is always A4, and
-    // named `page: short-bond` only applies after client sync sets html[data-print-paper].
-    // Force both so Letter is not silently ignored for short-bond PDFs.
+    // Force paper + pdf render mode so each packed preview page maps to one sheet
+    // (in-flow chrome, flex-pinned footer) instead of fixed runners spilling blanks.
+    // Shrink the CSS page box to the printer-safe content area so Puppeteer margins
+    // don't clip the footer that used to sit on the physical unprintable edge.
+    const paper = PRINT_PAPER_DIMENSIONS_MM[paperSize];
+    const contentWidthMm =
+      paper.width - PDF_PRINTER_SAFE_MARGIN_MM.left - PDF_PRINTER_SAFE_MARGIN_MM.right;
+    const contentHeightMm =
+      paper.height - PDF_PRINTER_SAFE_MARGIN_MM.top - PDF_PRINTER_SAFE_MARGIN_MM.bottom;
     const cssPageSize = paperSize === "short-bond" ? "letter" : "A4";
-    await page.evaluate((paper) => {
-      document.documentElement.dataset.printPaper = paper;
-    }, paperSize);
+
+    await page.evaluate(
+      (payload) => {
+        const root = document.documentElement;
+        root.dataset.printPaper = payload.paperSize;
+        root.dataset.printRender = "pdf";
+        root.style.setProperty("--print-page-width", `${payload.contentWidthMm}mm`);
+        root.style.setProperty("--print-page-height", `${payload.contentHeightMm}mm`);
+
+        document.querySelectorAll(".print-running-chrome, .no-print").forEach((node) => {
+          node.remove();
+        });
+
+        // Tighten header top padding — outer PDF margins already provide top inset.
+        document
+          .querySelectorAll(".print-document-header, .print-header")
+          .forEach((node) => {
+            if (node instanceof HTMLElement) {
+              node.style.paddingTop = "4mm";
+            }
+          });
+
+        const pages = document.querySelectorAll(
+          ".print-page-stack > .print-page, .report-print-stack > .report-print-page",
+        );
+        const lastPage = pages[pages.length - 1];
+        if (lastPage instanceof HTMLElement) {
+          lastPage.style.breakAfter = "avoid";
+          lastPage.style.pageBreakAfter = "avoid";
+        }
+      },
+      {
+        paperSize,
+        contentWidthMm,
+        contentHeightMm,
+      },
+    );
     await page.addStyleTag({
       content: `@page { size: ${cssPageSize} portrait; margin: 0; }`,
     });
+    // Let layout settle after DOM/CSS swaps before snapshotting pages.
+    await page.evaluate(() => new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    }));
 
     return await page.pdf({
       format: paperSize === "short-bond" ? "Letter" : "A4",
       printBackground: true,
-      preferCSSPageSize: true,
+      // Use explicit format; CSS @page named pages were contributing blank sheets.
+      preferCSSPageSize: false,
       margin: {
-        top: "0",
-        right: "0",
-        bottom: "0",
-        left: "0",
+        top: `${PDF_PRINTER_SAFE_MARGIN_MM.top}mm`,
+        right: `${PDF_PRINTER_SAFE_MARGIN_MM.right}mm`,
+        bottom: `${PDF_PRINTER_SAFE_MARGIN_MM.bottom}mm`,
+        left: `${PDF_PRINTER_SAFE_MARGIN_MM.left}mm`,
       },
     });
   } finally {

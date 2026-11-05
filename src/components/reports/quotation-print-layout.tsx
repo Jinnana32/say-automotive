@@ -723,16 +723,15 @@ function getQuotationPageCapacity(
   mode: QuotationPrintMode,
   paperSize: PrintPaperSize,
 ) {
-  // Headroom for runner chrome without over-splitting short quotes onto an
-  // extra page. Qty is numeric-only now, so we can pack closer to the sheet.
+  // Pack close to the preview page box; PDF render mode mirrors that box 1:1.
   const baseCapacity = (() => {
     switch (mode) {
       case "parts":
-        return 15.6;
+        return 16.2;
       case "labor":
-        return 15.3;
+        return 15.9;
       default:
-        return 15.2;
+        return 15.8;
     }
   })();
 

@@ -272,7 +272,7 @@ describe("QuotationPrintLayout", () => {
     ).toBeGreaterThan(1);
   });
 
-  it("keeps a typical mixed parts/labor quotation on two A4 pages", () => {
+  it("keeps a typical mixed parts/labor quotation on two pages for A4 and short bond", () => {
     const typicalDocument: QuotationPrintDocument = {
       ...documentFixture,
       quotation: {
@@ -308,12 +308,19 @@ describe("QuotationPrintLayout", () => {
       },
     };
 
-    const { container } = render(
-      <QuotationPrintLayout document={typicalDocument} mode="full" paperSize="a4" />,
-    );
+    for (const paperSize of ["a4", "short-bond"] as const) {
+      const { container, unmount } = render(
+        <QuotationPrintLayout
+          document={typicalDocument}
+          mode="full"
+          paperSize={paperSize}
+        />,
+      );
 
-    expect(container.querySelectorAll(".print-page")).toHaveLength(2);
-    expect(screen.getByText("APPROVAL")).toBeInTheDocument();
+      expect(container.querySelectorAll(".print-page")).toHaveLength(2);
+      expect(screen.getByText("APPROVAL")).toBeInTheDocument();
+      unmount();
+    }
   });
 
   it("uses conservative pagination for labor mode so the closing section stays on a footer-safe page", () => {

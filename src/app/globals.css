@@ -353,4 +353,72 @@
     break-inside: avoid;
     page-break-inside: avoid;
   }
+
+  /*
+   * Puppeteer PDF render mode: match on-screen preview page boxes (in-flow chrome,
+   * fixed page height, flex-pinned footer). Avoid exact full-page height + break-after
+   * which Chrome turns into a trailing blank sheet.
+   */
+  html[data-print-render="pdf"] .print-running-chrome {
+    display: none !important;
+    position: static !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+  }
+
+  html[data-print-render="pdf"] .print-header,
+  html[data-print-render="pdf"] .print-document-header,
+  html[data-print-render="pdf"] .print-footer,
+  html[data-print-render="pdf"] .print-document-footer {
+    display: block !important;
+  }
+
+  html[data-print-render="pdf"] .print-page,
+  html[data-print-render="pdf"] .report-print-page {
+    display: flex !important;
+    flex-direction: column !important;
+    height: calc(var(--print-page-height) - 1px) !important;
+    min-height: calc(var(--print-page-height) - 1px) !important;
+    max-height: calc(var(--print-page-height) - 1px) !important;
+    overflow: hidden !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    break-after: page !important;
+    page-break-after: always !important;
+  }
+
+  html[data-print-render="pdf"] .print-page-stack > .print-page:last-of-type,
+  html[data-print-render="pdf"] .report-print-stack > .report-print-page:last-of-type {
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+
+  html[data-print-render="pdf"] .print-page-inner {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+
+  html[data-print-render="pdf"] .print-body,
+  html[data-print-render="pdf"] .print-document-body {
+    display: block !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html[data-print-render="pdf"] .print-footer,
+  html[data-print-render="pdf"] .print-document-footer {
+    flex: 0 0 auto !important;
+    margin-top: auto !important;
+  }
+
+  html[data-print-render="pdf"] .print-header,
+  html[data-print-render="pdf"] .print-document-header {
+    flex: 0 0 auto !important;
+  }
 }

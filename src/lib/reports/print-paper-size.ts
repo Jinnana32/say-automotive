@@ -25,13 +25,33 @@ export const PRINT_PAPER_SIZE_OPTIONS: ReadonlyArray<{
 
 /**
  * Body capacity vs full on-screen page preview.
- * A4 stays near full; short bond (Letter) is ~6% shorter and loses more relative
- * headroom once runner chrome is applied, so pack earlier to avoid a spilled sheet.
+ * Letter is ~6% shorter than A4; keep scale near that ratio so short bond does not
+ * over-split into empty-looking pages after Qty stayed numeric-only.
  */
 export const PRINT_PAPER_CAPACITY_SCALE: Record<PrintPaperSize, number> = {
   a4: 1,
-  "short-bond": 0.82,
+  "short-bond": 0.94,
 };
+
+/** Physical paper size in mm (CSS @page / preview cards). */
+export const PRINT_PAPER_DIMENSIONS_MM: Record<
+  PrintPaperSize,
+  { width: number; height: number }
+> = {
+  a4: { width: 210, height: 297 },
+  "short-bond": { width: 215.9, height: 279.4 },
+};
+
+/**
+ * Inset used when generating PDFs so footers stay above typical printer
+ * non-printable edges (full-bleed PDFs look fine on screen, then clip on paper).
+ */
+export const PDF_PRINTER_SAFE_MARGIN_MM = {
+  top: 10,
+  right: 8,
+  bottom: 12,
+  left: 8,
+} as const;
 
 export function isPrintPaperSize(value: unknown): value is PrintPaperSize {
   return value === "a4" || value === "short-bond";
