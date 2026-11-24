@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { PrintDocumentPage } from "@/components/reports/print-document-page";
 import { PrintDocumentShell } from "@/components/reports/print-document-shell";
 import { ReportSectionHeading } from "@/components/reports/report-section-heading";
@@ -25,8 +27,9 @@ import {
 } from "@/lib/reports/print-paper-size";
 
 /* Leave headroom under a full A4 page box so content + footer never overflow a sheet. */
-const INVOICE_PAGE_CAPACITY = 14.2;
-const INVOICE_CONTINUATION_CAPACITY = 14.6;
+// Slightly lower after +2px print type so A4/short-bond still pack without overflow.
+const INVOICE_PAGE_CAPACITY = 13.6;
+const INVOICE_CONTINUATION_CAPACITY = 14.0;
 
 type InvoicePrintPageModel = {
   key: string;
@@ -92,7 +95,11 @@ export function InvoicePrintLayout({
                 />
                 <MetadataColumn
                   items={[
-                    { label: "Date", value: formatDocumentDate(invoice.invoiceDate) },
+                    {
+                      label: "Date",
+                      value: formatDocumentDate(invoice.invoiceDate),
+                      emphasizeValue: true,
+                    },
                     { label: "Status", value: formatInvoiceStatus(invoice.status) },
                     { label: "Address", value: invoice.customerAddress || "—" },
                     { label: "Car Model & Year", value: formatVehicleModel(invoice) },
@@ -103,10 +110,10 @@ export function InvoicePrintLayout({
               {invoice.status === "cancelled" ? (
                 <section className="report-section-keep mt-4">
                   <div className="rounded-[1.25rem] border border-brand-red bg-brand-red/10 px-4 py-3">
-                    <p className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-brand-red">
+                    <p className="text-[12.5px] font-semibold uppercase tracking-[0.22em] text-brand-red">
                       Cancelled Invoice
                     </p>
-                    <div className="mt-2 grid gap-2 text-[10.5px] text-slate-800 sm:grid-cols-2">
+                    <div className="mt-2 grid gap-2 text-[12.5px] text-slate-800 sm:grid-cols-2">
                       <p>
                         <span className="font-semibold">Cancelled at:</span>{" "}
                         {invoice.cancelledAt
@@ -156,7 +163,7 @@ export function InvoicePrintLayout({
             <section className="mt-4">
               <ReportSectionHeading title="BILLING ITEMS" />
               <div className="overflow-hidden border border-brand-border">
-                <table className="w-full border-collapse text-[11px]">
+                <table className="w-full border-collapse text-[13px]">
                   <thead className="bg-brand-navy text-white">
                     <tr>
                       <th className="w-12 px-2 py-1.5 text-left font-semibold">
@@ -226,7 +233,7 @@ export function InvoicePrintLayout({
             <section className="mt-4">
               <ReportSectionHeading title="PAYMENTS" />
               <div className="overflow-hidden border border-brand-border">
-                <table className="w-full border-collapse text-[11px]">
+                <table className="w-full border-collapse text-[13px]">
                   <thead className="bg-brand-navy text-white">
                     <tr>
                       <th className="w-24 px-2 py-1.5 text-left font-semibold">
@@ -336,7 +343,8 @@ function MetadataColumn({
 }: {
   items: Array<{
     label: string;
-    value: string;
+    value: ReactNode;
+    emphasizeValue?: boolean;
   }>;
 }) {
   return (
@@ -347,7 +355,15 @@ function MetadataColumn({
           className="grid grid-cols-[110px_minmax(0,1fr)] gap-2"
         >
           <p className="font-semibold text-slate-800">{item.label}</p>
-          <p className="min-w-0">{item.value}</p>
+          <p
+            className={
+              item.emphasizeValue
+                ? "min-w-0 font-bold text-slate-900"
+                : "min-w-0"
+            }
+          >
+            {item.value}
+          </p>
         </div>
       ))}
     </div>
@@ -359,7 +375,15 @@ function buildInvoiceHeaderMeta(
   invoiceDate: string,
   status: InvoicePrintDocument["invoice"]["status"],
 ) {
-  return `Invoice #: ${invoiceNumber} • Date: ${formatDocumentDate(invoiceDate)} • Status: ${formatInvoiceStatus(status)}`;
+  return (
+    <>
+      Invoice #: {invoiceNumber} • Date:{" "}
+      <span className="font-bold text-slate-900">
+        {formatDocumentDate(invoiceDate)}
+      </span>{" "}
+      • Status: {formatInvoiceStatus(status)}
+    </>
+  );
 }
 
 function buildInvoicePrintPages(
@@ -573,14 +597,14 @@ function estimateInvoiceItemUnits(rows: InvoiceItemDetail[]) {
 }
 
 function estimateInvoiceItemRowUnits(row: InvoiceItemDetail) {
-  let units = 1.3;
+  let units = 1.4;
 
   if (row.description.length > 54) {
-    units += 0.25;
+    units += 0.28;
   }
 
   if (row.description.length > 94) {
-    units += 0.25;
+    units += 0.28;
   }
 
   return units;

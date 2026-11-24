@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { DocumentHeader } from "@/components/reports/document-header";
 import { DEFAULT_BRAND_LOGO_TIGHT_SRC } from "@/components/shared/brand-assets";
 
@@ -9,7 +11,7 @@ export function ReportHeader({
 }: {
   businessName: string;
   documentTitle: string;
-  documentMeta?: string | null;
+  documentMeta?: ReactNode;
   logoSrc?: string;
 }) {
   return (

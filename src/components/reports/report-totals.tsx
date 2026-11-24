@@ -14,7 +14,7 @@ export function ReportTotals({
   className?: string;
 }) {
   return (
-    <div className={cn("w-full max-w-[250px] text-[12px]", className)}>
+    <div className={cn("w-full max-w-[250px] text-[14px]", className)}>
       <table className="w-full border-collapse">
         <tbody>
           {lines.map((line) => (
@@ -25,7 +25,7 @@ export function ReportTotals({
               <td
                 className={cn(
                   "py-1 text-right font-semibold text-slate-700",
-                  line.emphasized ? "text-[14px] text-brand-navy" : "",
+                  line.emphasized ? "text-[16px] text-brand-navy" : "",
                 )}
               >
                 {line.value}

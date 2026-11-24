@@ -205,9 +205,14 @@ export default async function QuotationDetailPage({
           hint={
             quotation.approvedAt
               ? `Approved ${formatDateTime(quotation.approvedAt)}`
-              : `Created ${formatDate(quotation.createdAt)}`
+              : `Created ${formatDateTime(quotation.createdAt)}`
           }
           badge={<QuotationStatusBadge status={quotation.status} />}
+        />
+        <DetailSummaryItem
+          label="Quotation date"
+          value={formatDate(quotation.quotationDate)}
+          hint={`Record created ${formatDateTime(quotation.createdAt)}`}
         />
         <DetailSummaryItem
           label="Prepared by"

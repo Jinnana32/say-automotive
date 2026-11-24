@@ -19,7 +19,7 @@ export function DocumentFooter(_props: {
   return (
     <footer className="pt-2">
       <div className="border-t-2 border-brand-red bg-white pt-2">
-        <div className="grid grid-cols-[minmax(0,1.28fr)_minmax(0,0.78fr)_minmax(0,1fr)_minmax(0,1.08fr)] gap-x-1 text-[9px] font-medium leading-[1.2] text-slate-700">
+        <div className="grid grid-cols-[minmax(0,1.28fr)_minmax(0,0.78fr)_minmax(0,1fr)_minmax(0,1.08fr)] gap-x-1 text-[11px] font-medium leading-[1.2] text-slate-700">
           <FooterSection
             heading="Business / Address"
             icon={<MapPinIcon />}
@@ -35,14 +35,14 @@ export function DocumentFooter(_props: {
             heading="Email"
             icon={<MailIcon />}
             value={PRINT_FOOTER_DETAILS.email}
-            textClassName="break-all text-[9px]"
+            textClassName="break-all text-[11px]"
           />
           <FooterSection
             heading="Online"
             icon={<GlobeIcon />}
             value={PRINT_FOOTER_DETAILS.websiteFacebook}
             lineIcons={[<GlobeIcon key="website" />, <FacebookIcon key="facebook" />]}
-            textClassName="break-words text-[8.7px]"
+            textClassName="break-words text-[10.7px]"
           />
         </div>
       </div>
@@ -87,7 +87,7 @@ function FooterSection({
             <p
               className={
                 emphasizeFirstLine && index === 0
-                  ? "font-display text-[10.4px] font-semibold uppercase tracking-[0.06em] text-brand-navy"
+                  ? "font-display text-[12.4px] font-semibold uppercase tracking-[0.06em] text-brand-navy"
                   : textClassName ?? "break-words"
               }
             >

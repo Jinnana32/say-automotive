@@ -18,7 +18,7 @@ export function PrintDocumentShell({
 }: {
   businessProfile: PrintDocumentBusinessProfile;
   documentTitle: string;
-  documentMeta?: string | null;
+  documentMeta?: ReactNode;
   children: ReactNode;
   className?: string;
 }) {

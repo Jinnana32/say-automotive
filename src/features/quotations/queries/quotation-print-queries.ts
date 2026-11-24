@@ -67,8 +67,9 @@ export const getQuotationPrintDocument = cache(
       businessEmail: businessSettings?.business_email ?? null,
       businessAddress: businessSettings?.business_address ?? null,
     };
-    const validUntil = DateTime.fromISO(quotation.createdAt, { zone: "utc" })
-      .setZone("Asia/Manila")
+    const validUntil = DateTime.fromISO(quotation.quotationDate, {
+      zone: "Asia/Manila",
+    })
       .plus({ days: 14 })
       .toISO();
 

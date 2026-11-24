@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { PrintDocumentPage } from "@/components/reports/print-document-page";
 import { PrintDocumentShell } from "@/components/reports/print-document-shell";
 import { ReportSectionHeading } from "@/components/reports/report-section-heading";
@@ -112,7 +114,11 @@ export function JobOrderPrintLayout({
                 />
                 <MetadataColumn
                   items={[
-                    { label: "Date", value: formatDocumentDate(jobOrder.createdAt) },
+                    {
+                      label: "Date",
+                      value: formatDocumentDate(jobOrder.createdAt),
+                      emphasizeValue: true,
+                    },
                     {
                       label: "Status",
                       value: toTitleCaseWords(formatJobOrderStatus(jobOrder.status)),
@@ -179,7 +185,7 @@ export function JobOrderPrintLayout({
                     <div>
                       <ReportSectionHeading title="MECHANICS" />
                       <div className="overflow-hidden border border-brand-border">
-                        <table className="w-full border-collapse text-[11px]">
+                        <table className="w-full border-collapse text-[13px]">
                           <thead className="bg-brand-navy text-white">
                             <tr>
                               <th className="px-2 py-1 text-left font-semibold">
@@ -279,7 +285,7 @@ function WorkItemsSection({
     <section className="report-section-keep mt-3">
       <ReportSectionHeading title="WORK ITEMS" />
       <div className="overflow-hidden border border-brand-border">
-        <table className="w-full border-collapse text-[11px]">
+        <table className="w-full border-collapse text-[13px]">
           <thead className="bg-brand-navy text-white">
             <tr>
               <th className="w-10 px-2 py-1 text-center font-semibold">Done</th>
@@ -304,7 +310,7 @@ function WorkItemsSection({
                   <tr key={row.key} className="border-t border-slate-200 bg-brand-soft/40">
                     <td
                       colSpan={hidePrices ? 3 : 5}
-                      className="px-2 py-1 text-left text-[9.75px] font-semibold uppercase tracking-[0.12em] text-brand-navy"
+                      className="px-2 py-1 text-left text-[11.75px] font-semibold uppercase tracking-[0.12em] text-brand-navy"
                     >
                       {row.label}
                     </td>
@@ -318,7 +324,7 @@ function WorkItemsSection({
                       <p className="leading-[1.24]">{row.item.description}</p>
                       {row.item.isAdditional ||
                       (row.item.checklistCompleted && row.item.checklistCheckedAt) ? (
-                        <div className="mt-0.5 space-y-0.5 text-[9.75px] leading-[1.25] text-slate-500">
+                        <div className="mt-0.5 space-y-0.5 text-[11.75px] leading-[1.25] text-slate-500">
                           {row.item.isAdditional ? <p>Additional item</p> : null}
                           {row.item.checklistCompleted && row.item.checklistCheckedAt ? (
                             <p>
@@ -373,7 +379,7 @@ function PartUsageSection({
     <section className="report-section-keep mt-2.5">
       <ReportSectionHeading title="PARTS USAGE" />
       <div className="overflow-hidden border border-brand-border">
-        <table className="w-full border-collapse text-[11px]">
+        <table className="w-full border-collapse text-[13px]">
           <thead className="bg-brand-navy text-white">
             <tr>
               <th className="px-2 py-1 text-left font-semibold">Part</th>
@@ -415,7 +421,8 @@ function MetadataColumn({
 }: {
   items: Array<{
     label: string;
-    value: string;
+    value: ReactNode;
+    emphasizeValue?: boolean;
   }>;
 }) {
   return (
@@ -426,7 +433,15 @@ function MetadataColumn({
           className="grid grid-cols-[110px_minmax(0,1fr)] gap-2"
         >
           <p className="font-semibold text-slate-800">{item.label}</p>
-          <p className="min-w-0">{item.value}</p>
+          <p
+            className={
+              item.emphasizeValue
+                ? "min-w-0 font-bold text-slate-900"
+                : "min-w-0"
+            }
+          >
+            {item.value}
+          </p>
         </div>
       ))}
     </div>
@@ -452,7 +467,7 @@ function ChecklistGlyph({ completed }: { completed: boolean }) {
   return (
     <span
       aria-label={completed ? "Completed" : "Open"}
-      className="inline-flex min-w-[14px] items-center justify-center text-[12px] leading-none"
+      className="inline-flex min-w-[14px] items-center justify-center text-[14px] leading-none"
     >
       {completed ? "☑" : "☐"}
     </span>
@@ -464,7 +479,15 @@ function buildJobOrderHeaderMeta(
   createdAt: string,
   status: JobOrderPrintDocument["jobOrder"]["status"],
 ) {
-  return `Job Order #: ${jobOrderNumber} • Date: ${formatDocumentDate(createdAt)} • Status: ${toTitleCaseWords(formatJobOrderStatus(status))}`;
+  return (
+    <>
+      Job Order #: {jobOrderNumber} • Date:{" "}
+      <span className="font-bold text-slate-900">
+        {formatDocumentDate(createdAt)}
+      </span>{" "}
+      • Status: {toTitleCaseWords(formatJobOrderStatus(status))}
+    </>
+  );
 }
 
 function buildJobOrderWorkRows(workLines: JobOrderPrintWorkLine[]) {

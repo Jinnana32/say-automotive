@@ -55,7 +55,7 @@ export function PayrollPrintLayout({
               <div className="space-y-3">
                 <div>
                   <ReportSectionHeading title="PAYROLL PERIOD" />
-                  <div className="grid gap-x-5 gap-y-2 text-[10.75px] sm:grid-cols-2">
+                  <div className="grid gap-x-5 gap-y-2 text-[12.75px] sm:grid-cols-2">
                     <MetadataRow label="Label" value={period.label} />
                     <MetadataRow label="Status" value={formatPayrollPeriodStatusLabel(period.status)} />
                     <MetadataRow
@@ -73,7 +73,7 @@ export function PayrollPrintLayout({
 
                 <div>
                   <ReportSectionHeading title="CUT NOTES" />
-                  <div className="rounded-sm border border-brand-border bg-brand-soft/20 px-3 py-2 text-[10.5px] text-slate-700">
+                  <div className="rounded-sm border border-brand-border bg-brand-soft/20 px-3 py-2 text-[12.5px] text-slate-700">
                     <p>
                       Late days still count as paid days, with deductions based on missed time.
                       Half days count as 0.5 paid day, and holiday premium applies only when the
@@ -106,7 +106,7 @@ export function PayrollPrintLayout({
           <section className="mt-4">
             <ReportSectionHeading title={page.includeOverview ? "PAYROLL ROWS" : "PAYROLL ROWS CONTINUED"} />
             <div className="overflow-hidden border border-brand-border">
-              <table className="w-full border-collapse text-[10px]">
+              <table className="w-full border-collapse text-[12px]">
                 <thead className="bg-brand-navy text-white">
                   <tr>
                     <th className="w-[19%] px-2.5 py-2 text-left font-semibold">Staff member</th>
@@ -132,7 +132,7 @@ export function PayrollPrintLayout({
               <div className="space-y-3">
                 <div>
                   <ReportSectionHeading title="PAYROLL REVIEW" />
-                  <div className="rounded-sm border border-brand-border bg-white px-3 py-2 text-[10.5px] text-slate-700">
+                  <div className="rounded-sm border border-brand-border bg-white px-3 py-2 text-[12.5px] text-slate-700">
                     <p>
                       Warning rows should be reviewed before release. Manual additions and
                       deductions shown here are already included in the net payout.
@@ -186,7 +186,7 @@ function PayrollRow({ item }: { item: PayrollPeriodItemSummary }) {
         <p className="text-slate-600">
           {item.payBasis ? formatPayBasisLabel(item.payBasis) : "Not configured"}
         </p>
-        {warningSummary ? <p className="mt-1 text-[9.5px] text-brand-red">{warningSummary}</p> : null}
+        {warningSummary ? <p className="mt-1 text-[11.5px] text-brand-red">{warningSummary}</p> : null}
       </td>
       <td className="px-2.5 py-2.5 text-slate-700">
         <p>{item.paidDayUnits.toFixed(2)} paid days</p>
@@ -197,22 +197,22 @@ function PayrollRow({ item }: { item: PayrollPeriodItemSummary }) {
       </td>
       <td className="px-2.5 py-2.5 text-right text-slate-700">
         <p>{formatPrintCurrency(item.basePay)}</p>
-        <p className="text-[9.5px]">
+        <p className="text-[11.5px]">
           Day {formatPrintCurrencyNumber(item.dailyRateUsed)}
         </p>
         {item.allowancePay > 0 ? (
-          <p className="text-[9.5px]">Allowance {formatPrintCurrency(item.allowancePay)}</p>
+          <p className="text-[11.5px]">Allowance {formatPrintCurrency(item.allowancePay)}</p>
         ) : null}
       </td>
       <td className="px-2.5 py-2.5 text-right text-slate-700">
         <p>{formatPrintCurrency(item.holidayPremiumPay + item.overtimePay)}</p>
-        <p className="text-[9.5px]">Holiday {formatPrintCurrency(item.holidayPremiumPay)}</p>
-        <p className="text-[9.5px]">OT {formatPrintCurrency(item.overtimePay)}</p>
+        <p className="text-[11.5px]">Holiday {formatPrintCurrency(item.holidayPremiumPay)}</p>
+        <p className="text-[11.5px]">OT {formatPrintCurrency(item.overtimePay)}</p>
       </td>
       <td className="px-2.5 py-2.5 text-right text-slate-700">
         <p>Late -{formatPrintCurrency(item.lateDeductionAmount)}</p>
-        <p className="text-[9.5px]">Add {formatPrintCurrency(item.manualAdditionsTotal)}</p>
-        <p className="text-[9.5px]">Less {formatPrintCurrency(item.manualDeductionsTotal)}</p>
+        <p className="text-[11.5px]">Add {formatPrintCurrency(item.manualAdditionsTotal)}</p>
+        <p className="text-[11.5px]">Less {formatPrintCurrency(item.manualDeductionsTotal)}</p>
       </td>
       <td className="px-2.5 py-2.5 text-right font-semibold text-slate-950">
         {formatPrintCurrency(item.netPay)}

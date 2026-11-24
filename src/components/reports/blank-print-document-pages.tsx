@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const BODY_TEXT_CLASS =
-  "whitespace-pre-wrap break-words text-[12px] leading-[1.65] text-slate-800";
+  "whitespace-pre-wrap break-words text-[14px] leading-[1.65] text-slate-800";
 const HEIGHT_BUFFER_PX = 8;
 
 export function BlankPrintDocumentPages({

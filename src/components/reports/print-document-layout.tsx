@@ -54,7 +54,7 @@ export function PrintPage({
   return (
     <article
       className={cn(
-        "print-page print-document-frame bg-white text-[11px] text-slate-900",
+        "print-page print-document-frame bg-white text-[13px] text-slate-900",
         className,
       )}
     >

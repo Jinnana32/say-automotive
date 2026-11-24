@@ -10,8 +10,10 @@ import {
   parseCreateInvoiceFromJobOrderFormData,
   parseRecordInvoicePaymentFormData,
   parseReleaseJobOrderVehicleFormData,
+  parseUpdateInvoiceDateFormData,
   recordInvoicePaymentSchema,
   releaseJobOrderVehicleSchema,
+  updateInvoiceDateSchema,
 } from "@/features/invoices/schemas/invoice-forms";
 import { toNumeric } from "@/features/invoices/utils";
 import { getAuthorizedSupabaseServerClient } from "@/lib/auth/session";
@@ -117,6 +119,36 @@ export async function cancelInvoiceAction(
   redirect(`/invoices/${values.invoiceId}`);
 }
 
+export async function updateInvoiceDateAction(
+  _prevState: FormActionState = INITIAL_FORM_ACTION_STATE,
+  formData: FormData,
+): Promise<FormActionState> {
+  const parsed = updateInvoiceDateSchema.safeParse(parseUpdateInvoiceDateFormData(formData));
+
+  if (!parsed.success) {
+    return toFormActionState(parsed.error);
+  }
+
+  const values = parsed.data;
+  const { supabase } = await getAuthorizedSupabaseServerClient("invoices:write");
+  const { error } = await supabase
+    .from("invoices")
+    .update({ invoice_date: values.invoiceDate })
+    .eq("id", values.invoiceId);
+
+  if (error) {
+    return {
+      status: "error",
+      message: error.message,
+    };
+  }
+
+  revalidateBillingPaths({
+    invoiceId: values.invoiceId,
+  });
+  redirect(`/invoices/${values.invoiceId}`);
+}
+
 export async function releaseJobOrderVehicleAction(
   _prevState: FormActionState = INITIAL_FORM_ACTION_STATE,
   formData: FormData,
@@ -163,5 +195,6 @@ function revalidateBillingPaths(params: {
 
   if (params.invoiceId) {
     revalidatePath(`/invoices/${params.invoiceId}`);
+    revalidatePath(`/invoices/${params.invoiceId}/print`);
   }
 }

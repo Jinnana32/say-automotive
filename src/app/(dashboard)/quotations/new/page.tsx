@@ -6,6 +6,7 @@ import {
   resolveQuotationCreateFlowSelection,
 } from "@/features/quotations/utils";
 import { formatMoneyInputValue } from "@/lib/currency";
+import { getBusinessNow } from "@/lib/dates";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,7 @@ export default async function NewQuotationPage({
         initialValues={{
           customerId: selection.customerId,
           vehicleId: selection.vehicleId,
+          quotationDate: getBusinessNow().toISODate() ?? "",
           natureOfRepair: "",
           inspectionNotes: "",
           status: "draft",

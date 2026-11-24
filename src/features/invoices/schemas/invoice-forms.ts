@@ -31,9 +31,24 @@ export const releaseJobOrderVehicleSchema = z.object({
   jobOrderId: z.string().uuid("Job order is required."),
 });
 
+export const updateInvoiceDateSchema = z.object({
+  invoiceId: z.string().uuid("Invoice is required."),
+  invoiceDate: z
+    .string()
+    .trim()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Invoice date is required."),
+});
+
 export function parseCreateInvoiceFromJobOrderFormData(formData: FormData) {
   return {
     jobOrderId: readString(formData, "jobOrderId"),
+  };
+}
+
+export function parseUpdateInvoiceDateFormData(formData: FormData) {
+  return {
+    invoiceId: readString(formData, "invoiceId"),
+    invoiceDate: readString(formData, "invoiceDate"),
   };
 }
 

@@ -127,6 +127,18 @@ export async function reviseQuotationAction(
     };
   }
 
+  const { error: dateError } = await supabase
+    .from("quotations")
+    .update({ quotation_date: values.quotationDate })
+    .eq("id", values.quotationId);
+
+  if (dateError) {
+    return {
+      status: "error",
+      message: dateError.message,
+    };
+  }
+
   const { data: jobOrder } = await supabase
     .from("job_orders")
     .select("id")
@@ -306,6 +318,7 @@ async function saveQuotation(formData: FormData): Promise<FormActionState> {
     p_tax: tax,
     p_total_amount: totalAmount,
     p_items: rpcItems,
+    p_quotation_date: values.quotationDate,
     p_created_by: context.userId,
   });
 
@@ -336,6 +349,7 @@ function revalidateQuotationPaths(quotationId: string) {
   revalidatePath(`/quotations/${quotationId}`);
   revalidatePath(`/quotations/${quotationId}/edit`);
   revalidatePath(`/quotations/${quotationId}/revise`);
+  revalidatePath(`/quotations/${quotationId}/print`);
   revalidatePath("/dashboard");
 }
 

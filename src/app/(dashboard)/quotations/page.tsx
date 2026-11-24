@@ -140,7 +140,7 @@ export default async function QuotationsPage({ searchParams }: QuotationsPagePro
                     </TableCell>
                     <TableCell>
                       <TableCellLink href={`/quotations/${quotation.id}`} className="text-foreground">
-                        {formatDate(quotation.createdAt)}
+                        {formatDate(quotation.quotationDate)}
                       </TableCellLink>
                     </TableCell>
                     <TableCell className="w-14 text-right">

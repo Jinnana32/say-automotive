@@ -39,7 +39,7 @@ export function PayslipPrintLayout({
           <div className="space-y-3">
             <div>
               <ReportSectionHeading title="EMPLOYEE" />
-              <div className="grid gap-x-5 gap-y-2 text-[10.75px] sm:grid-cols-2">
+              <div className="grid gap-x-5 gap-y-2 text-[12.75px] sm:grid-cols-2">
                 <MetadataRow label="Name" value={item.fullName} />
                 <MetadataRow label="Role" value={item.role.replaceAll("_", " ")} />
                 <MetadataRow
@@ -59,7 +59,7 @@ export function PayslipPrintLayout({
 
             <div>
               <ReportSectionHeading title="PAYROLL PERIOD" />
-              <div className="grid gap-x-5 gap-y-2 text-[10.75px] sm:grid-cols-2">
+              <div className="grid gap-x-5 gap-y-2 text-[12.75px] sm:grid-cols-2">
                 <MetadataRow label="Label" value={period.label} />
                 <MetadataRow
                   label="Coverage"
@@ -77,7 +77,7 @@ export function PayslipPrintLayout({
 
         <section className="report-section-keep mt-5">
           <ReportSectionHeading title="ATTENDANCE SUMMARY" />
-          <div className="grid gap-x-5 gap-y-2 text-[10.75px] sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-x-5 gap-y-2 text-[12.75px] sm:grid-cols-2 lg:grid-cols-3">
             <MetadataRow
               label="Paid days"
               value={formatPayrollDayUnits(item.paidDayUnits)}
@@ -95,7 +95,7 @@ export function PayslipPrintLayout({
         {item.adjustments.length > 0 ? (
           <section className="report-section-keep mt-5">
             <ReportSectionHeading title="MANUAL ADJUSTMENTS" />
-            <table className="w-full border-collapse text-[10.75px]">
+            <table className="w-full border-collapse text-[12.75px]">
               <thead>
                 <tr className="border-b border-slate-200 text-left text-slate-600">
                   <th className="px-2.5 py-2 font-semibold">Type</th>
@@ -160,7 +160,7 @@ function PayslipSummary({
   ];
 
   return (
-    <div className="w-full max-w-[250px] text-[12px]">
+    <div className="w-full max-w-[250px] text-[14px]">
       <PayslipSummaryGroup title="Earnings" lines={[...earnings, ...additions]} />
       <PayslipSummaryGroup title="Deductions" lines={deductionLines} />
       <div className="mt-1 border-t border-brand-border pt-1">
@@ -179,7 +179,7 @@ function PayslipSummaryGroup({
 }) {
   return (
     <div className="border-b border-brand-border/70 py-1 last:border-b-0">
-      <p className="pb-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+      <p className="pb-0.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
         {title}
       </p>
       {lines.map((line) => (
@@ -206,7 +206,7 @@ function PayslipSummaryLine({
       <p
         className={
           emphasized
-            ? "text-[14px] font-semibold text-brand-navy"
+            ? "text-[16px] font-semibold text-brand-navy"
             : "font-semibold text-slate-700"
         }
       >
@@ -219,7 +219,7 @@ function PayslipSummaryLine({
 function MetadataRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[9.5px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+      <p className="text-[11.5px] font-semibold uppercase tracking-[0.12em] text-slate-500">
         {label}
       </p>
       <p className="mt-0.5 font-medium text-slate-950">{value}</p>

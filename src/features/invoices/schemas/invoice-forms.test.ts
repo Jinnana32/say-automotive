@@ -5,6 +5,7 @@ import {
   createInvoiceFromJobOrderSchema,
   recordInvoicePaymentSchema,
   releaseJobOrderVehicleSchema,
+  updateInvoiceDateSchema,
 } from "@/features/invoices/schemas/invoice-forms";
 
 describe("invoice forms", () => {
@@ -57,5 +58,19 @@ describe("invoice forms", () => {
     });
 
     expect(parsed.success).toBe(false);
+  });
+
+  it("requires a valid invoice date when updating the document date", () => {
+    const invalid = updateInvoiceDateSchema.safeParse({
+      invoiceId: "34c25057-b0f8-4da0-9a27-c1792efa2ebd",
+      invoiceDate: "05/20/2026",
+    });
+    const valid = updateInvoiceDateSchema.safeParse({
+      invoiceId: "34c25057-b0f8-4da0-9a27-c1792efa2ebd",
+      invoiceDate: "2026-05-20",
+    });
+
+    expect(invalid.success).toBe(false);
+    expect(valid.success).toBe(true);
   });
 });

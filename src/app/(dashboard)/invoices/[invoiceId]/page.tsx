@@ -24,12 +24,14 @@ import {
   PaymentMethodBadge,
 } from '@/features/invoices/components/invoice-status-badge';
 import { CancelInvoiceDialog } from '@/features/invoices/components/cancel-invoice-dialog';
+import { InvoiceDateForm } from '@/features/invoices/components/invoice-date-form';
 import { RecordPaymentForm } from '@/features/invoices/components/record-payment-form';
 import { ReleaseVehicleForm } from '@/features/invoices/components/release-vehicle-form';
 import { getInvoiceById } from '@/features/invoices/queries/invoice-queries';
 import { formatCurrency } from '@/lib/currency';
 import { formatWorkshopLineItemType } from '@/lib/line-item-type';
 import { formatDate, formatDateTime } from '@/lib/dates';
+import { hasCapability } from '@/lib/auth/permissions';
 import { requireAuthenticatedStaff } from '@/lib/auth/session';
 
 export const dynamic = 'force-dynamic';
@@ -119,7 +121,16 @@ export default async function InvoiceDetailPage({
         />
         <DetailSummaryItem
           label="Invoice date"
-          value={formatDate(invoice.invoiceDate)}
+          value={
+            hasCapability(viewer.role, 'invoices:write') ? (
+              <InvoiceDateForm
+                invoiceId={invoice.id}
+                invoiceDate={invoice.invoiceDate}
+              />
+            ) : (
+              formatDate(invoice.invoiceDate)
+            )
+          }
           hint={`Created ${formatDateTime(invoice.createdAt)}`}
         />
         <DetailSummaryItem

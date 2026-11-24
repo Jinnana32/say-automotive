@@ -29,7 +29,7 @@ export function PrintDocumentPage({
 }: {
   businessProfile: PrintDocumentBusinessProfile;
   documentTitle: string;
-  documentMeta?: string | null;
+  documentMeta?: ReactNode;
   compactHeader?: boolean;
   stackedHeader?: boolean;
   children: ReactNode;

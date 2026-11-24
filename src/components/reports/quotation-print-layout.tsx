@@ -53,7 +53,7 @@ export function QuotationPrintLayout({
   const documentTitle = getDocumentTitle(mode);
   const documentMeta = buildCompactHeaderMeta(
     quotation.quotationNumber,
-    quotation.createdAt,
+    quotation.quotationDate,
   );
 
   return (
@@ -110,10 +110,10 @@ export function QuotationPrintLayout({
               {page.includeNatureOfRepair && natureOfRepair ? (
                 <section className="report-section-keep mt-3.5">
                   <div className="border border-brand-border">
-                    <div className="bg-brand-navy px-4 py-2 text-[10.25px] font-semibold tracking-[0.22em] text-white">
+                    <div className="bg-brand-navy px-4 py-2 text-[12.25px] font-semibold tracking-[0.22em] text-white">
                       NATURE OF REPAIR
                     </div>
-                    <div className="px-4 py-3 text-[10.75px] leading-[1.42] text-slate-800">
+                    <div className="px-4 py-3 text-[12.75px] leading-[1.42] text-slate-800">
                       {natureOfRepair}
                     </div>
                   </div>
@@ -123,10 +123,10 @@ export function QuotationPrintLayout({
               {page.includeInspectionNotes && inspectionNotes ? (
                 <section className="report-section-keep mt-3.5">
                   <div className="border border-brand-border">
-                    <div className="bg-brand-navy px-4 py-2 text-[10.25px] font-semibold tracking-[0.22em] text-white">
+                    <div className="bg-brand-navy px-4 py-2 text-[12.25px] font-semibold tracking-[0.22em] text-white">
                       INSPECTION NOTES
                     </div>
-                    <div className="whitespace-pre-wrap px-4 py-3 text-[10.75px] leading-[1.42] text-slate-800">
+                    <div className="whitespace-pre-wrap px-4 py-3 text-[12.75px] leading-[1.42] text-slate-800">
                       {inspectionNotes}
                     </div>
                   </div>
@@ -147,12 +147,12 @@ export function QuotationPrintLayout({
               </section>
 
               <section className="report-section-keep">
-                <p className="text-[10.5px] font-semibold uppercase tracking-[0.26em] text-brand-navy">
+                <p className="text-[12.5px] font-semibold uppercase tracking-[0.26em] text-brand-navy">
                   APPROVAL
                 </p>
                 <div className="mt-1.5 h-0.5 w-12 bg-brand-red" />
                 <div className="grid items-start gap-x-4 gap-y-2 pt-[7px] sm:grid-cols-[1.1fr_1.2fr_0.9fr]">
-                  <div className="text-[10.1px] leading-[1.34] text-slate-700">
+                  <div className="text-[12.1px] leading-[1.34] text-slate-700">
                     <p>
                       I have read and agree to the terms and conditions stated above and
                       authorize SAY Auto Care to proceed with the listed services.
@@ -190,13 +190,13 @@ function QuotationLineItemsSection({
   return (
     <section className="mt-3.5">
       <div className="mb-1.5 flex items-center gap-2.5">
-        <span className="bg-brand-navy px-3 py-[5px] text-[10.25px] font-semibold tracking-[0.22em] text-white">
+        <span className="bg-brand-navy px-3 py-[5px] text-[12.25px] font-semibold tracking-[0.22em] text-white">
           {getLineItemHeading(mode)}
         </span>
         <span className="h-[2px] flex-1 bg-brand-border" />
       </div>
       <div className="overflow-hidden border border-brand-border">
-        <table className="w-full border-collapse text-[11px]">
+        <table className="w-full border-collapse text-[13px]">
           <thead className="bg-brand-navy text-white">
             <tr>
               <th className="print-cell-numeric w-10 px-3 py-2 text-left font-semibold">
@@ -225,7 +225,7 @@ function QuotationLineItemsSection({
                 >
                   <td
                     colSpan={5}
-                    className="border-t border-slate-200 px-3 py-[5px] text-[9.75px] font-semibold uppercase tracking-[0.22em] text-brand-navy"
+                    className="border-t border-slate-200 px-3 py-[5px] text-[11.75px] font-semibold uppercase tracking-[0.22em] text-brand-navy"
                   >
                     {row.label}
                   </td>
@@ -243,7 +243,7 @@ function QuotationLineItemsSection({
                       {row.description}
                     </p>
                     {row.subtext ? (
-                      <p className="mt-0.5 text-[9.25px] leading-[1.25] text-slate-600">
+                      <p className="mt-0.5 text-[11.25px] leading-[1.25] text-slate-600">
                         {row.subtext}
                       </p>
                     ) : null}
@@ -277,7 +277,7 @@ function QuotationInfoPanel({
   return (
     <section className="report-section-keep">
       <div className="flex items-center gap-2.5">
-        <span className="bg-brand-navy px-3 py-[5px] text-[10.25px] font-semibold tracking-[0.22em] text-white">
+        <span className="bg-brand-navy px-3 py-[5px] text-[12.25px] font-semibold tracking-[0.22em] text-white">
           {title}
         </span>
         <span className="h-px flex-1 bg-brand-border" />
@@ -286,7 +286,7 @@ function QuotationInfoPanel({
         {rows.map((row) => (
           <div
             key={row.label}
-            className="grid grid-cols-[108px_minmax(0,1fr)] gap-3 text-[10.5px]"
+            className="grid grid-cols-[108px_minmax(0,1fr)] gap-3 text-[12.5px]"
           >
             <p className="font-semibold text-slate-800">{row.label}</p>
             <p className="min-w-0 break-words text-slate-900">
@@ -302,11 +302,11 @@ function QuotationInfoPanel({
 function QuotationTermsSection({ terms }: { terms: string[] }) {
   return (
     <section className="report-section-keep">
-      <p className="text-[10.5px] font-semibold uppercase tracking-[0.26em] text-brand-navy">
+      <p className="text-[12.5px] font-semibold uppercase tracking-[0.26em] text-brand-navy">
         TERMS &amp; CONDITIONS
       </p>
       <div className="mt-1.5 h-px bg-brand-border" />
-      <ul className="mt-[5px] list-disc space-y-[2px] pl-4 text-[9.95px] leading-[1.28] text-slate-700">
+      <ul className="mt-[5px] list-disc space-y-[2px] pl-4 text-[11.95px] leading-[1.28] text-slate-700">
         {terms.map((term) => (
           <li key={term}>{term}</li>
         ))}
@@ -365,13 +365,13 @@ function QuotationTotalsPanel({
   return (
     <section className="flex h-full flex-col justify-between overflow-hidden border border-brand-border bg-brand-soft/35">
       <div className="flex-1 px-3.5 pt-3">
-        <p className="text-[10.5px] font-semibold uppercase tracking-[0.26em] text-brand-navy">
+        <p className="text-[12.5px] font-semibold uppercase tracking-[0.26em] text-brand-navy">
           {breakdown.mode === "full"
             ? "QUOTATION SUMMARY"
             : "PRINT MODE SUMMARY"}
         </p>
         <div className="mt-1.5 h-px bg-brand-border" />
-        <table className="mt-2 w-full border-collapse text-[10.6px]">
+        <table className="mt-2 w-full border-collapse text-[12.6px]">
           <tbody>
             {totalLines.map((line) => (
               <tr
@@ -392,10 +392,10 @@ function QuotationTotalsPanel({
 
       <div className="shrink-0 border-t-2 border-brand-red bg-brand-navy px-3.5 py-2.25 text-white">
         <div className="flex items-end justify-between gap-4">
-          <span className="text-[10.5px] font-semibold uppercase tracking-[0.26em]">
+          <span className="text-[12.5px] font-semibold uppercase tracking-[0.26em]">
             {getTotalsFooterLabel(breakdown.mode)}
           </span>
-          <span className="text-[20px] font-semibold leading-none">
+          <span className="text-[22px] font-semibold leading-none">
             {formatDocumentPrintCurrency(breakdown.visibleTotal)}
           </span>
         </div>
@@ -413,8 +413,8 @@ function SignatureLine({
 }) {
   return (
     <div className="grid grid-cols-[118px_minmax(0,150px)] items-center gap-2">
-      <p className="text-[10.25px] font-semibold text-slate-700">{label}:</p>
-      <div className="border-b border-slate-500 pb-px text-[10.75px] leading-tight text-slate-950">
+      <p className="text-[12.25px] font-semibold text-slate-700">{label}:</p>
+      <div className="border-b border-slate-500 pb-px text-[12.75px] leading-tight text-slate-950">
         {value?.trim() || "\u00A0"}
       </div>
     </div>
@@ -434,14 +434,14 @@ function PreparedBySignatureBlock({
 
   return (
     <div className="flex flex-col gap-1">
-      <p className="text-[10.25px] font-semibold text-slate-700">
+      <p className="text-[12.25px] font-semibold text-slate-700">
         Prepared By:
       </p>
-      <div className="w-[150px] border-b border-slate-500 pb-px text-[10.75px] leading-tight text-slate-950">
+      <div className="w-[150px] border-b border-slate-500 pb-px text-[12.75px] leading-tight text-slate-950">
         {"\u00A0"}
       </div>
-      <p className="text-[10.75px] leading-tight text-slate-950">{name}</p>
-      <p className="text-[10.25px] leading-tight text-slate-600">{subtitle}</p>
+      <p className="text-[12.75px] leading-tight text-slate-950">{name}</p>
+      <p className="text-[12.25px] leading-tight text-slate-600">{subtitle}</p>
     </div>
   );
 }
@@ -450,7 +450,14 @@ function buildCompactHeaderMeta(
   quotationNumber: string,
   quotationDate: string,
 ) {
-  return `Quotation #: ${quotationNumber} - Date: ${formatDocumentDate(quotationDate)}`;
+  return (
+    <>
+      Quotation #: {quotationNumber} - Date:{" "}
+      <span className="font-bold text-slate-900">
+        {formatDocumentDate(quotationDate)}
+      </span>
+    </>
+  );
 }
 
 type QuotationLineRow =
@@ -699,21 +706,21 @@ function estimateLineRowsUnits(rows: QuotationLineRow[]) {
 
 function estimateLineRowUnits(row: QuotationLineRow) {
   if (row.kind === "group") {
-    return 0.65;
+    return 0.7;
   }
 
-  let units = 1.12;
+  let units = 1.2;
 
   if (row.subtext) {
-    units += 0.18;
+    units += 0.2;
   }
 
   if (row.description.length > 52) {
-    units += 0.22;
+    units += 0.24;
   }
 
   if (row.description.length > 92) {
-    units += 0.18;
+    units += 0.2;
   }
 
   return units;
@@ -724,14 +731,15 @@ function getQuotationPageCapacity(
   paperSize: PrintPaperSize,
 ) {
   // Pack close to the preview page box; PDF render mode mirrors that box 1:1.
+  // Slightly lower after +2px print type so A4/short-bond still pack without overflow.
   const baseCapacity = (() => {
     switch (mode) {
       case "parts":
-        return 16.2;
+        return 15.4;
       case "labor":
-        return 15.9;
+        return 15.1;
       default:
-        return 15.8;
+        return 15.0;
     }
   })();
 

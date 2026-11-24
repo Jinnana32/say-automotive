@@ -8,6 +8,7 @@ describe("quotationFormSchema", () => {
     const result = quotationFormSchema.safeParse({
       customerId: crypto.randomUUID(),
       vehicleId: crypto.randomUUID(),
+      quotationDate: "2026-11-24",
       natureOfRepair: "",
       inspectionNotes: "",
       status: "draft",
@@ -30,6 +31,7 @@ describe("quotationFormSchema", () => {
     const result = quotationFormSchema.safeParse({
       customerId: crypto.randomUUID(),
       vehicleId: crypto.randomUUID(),
+      quotationDate: "2026-11-24",
       natureOfRepair: "Change oil and filters",
       inspectionNotes: "",
       status: "pending_approval",
@@ -59,6 +61,7 @@ describe("quotationFormSchema", () => {
     const result = quotationFormSchema.safeParse({
       customerId: crypto.randomUUID(),
       vehicleId: crypto.randomUUID(),
+      quotationDate: "2026-11-24",
       natureOfRepair: "",
       inspectionNotes: "",
       status: "draft",
@@ -82,6 +85,7 @@ describe("quotationFormSchema", () => {
     const result = quotationFormSchema.safeParse({
       customerId: crypto.randomUUID(),
       vehicleId: crypto.randomUUID(),
+      quotationDate: "2026-11-24",
       natureOfRepair: "",
       inspectionNotes: "",
       status: "draft",
@@ -104,6 +108,7 @@ describe("quotationFormSchema", () => {
     const result = quotationFormSchema.safeParse({
       customerId: crypto.randomUUID(),
       vehicleId: crypto.randomUUID(),
+      quotationDate: "2026-11-24",
       natureOfRepair: "",
       inspectionNotes: "",
       status: "draft",

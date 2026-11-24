@@ -1616,6 +1616,7 @@ export type Database = {
           discount: number;
           tax: number;
           total_amount: number;
+          quotation_date: string;
           customer_name_snapshot: string | null;
           customer_contact_snapshot: string | null;
           customer_address_snapshot: string | null;
@@ -1645,6 +1646,7 @@ export type Database = {
           discount?: number;
           tax?: number;
           total_amount?: number;
+          quotation_date?: string;
           customer_name_snapshot?: string | null;
           customer_contact_snapshot?: string | null;
           customer_address_snapshot?: string | null;
@@ -2270,6 +2272,7 @@ export type Database = {
           p_tax: number;
           p_total_amount: number;
           p_items: Json;
+          p_quotation_date?: string;
           p_created_by?: string | null;
         };
         Returns: string;

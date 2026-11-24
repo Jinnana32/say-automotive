@@ -46,6 +46,10 @@ export const quotationFormSchema = z
     quotationId: z.string().uuid().optional(),
     customerId: z.string().uuid("Customer is required."),
     vehicleId: z.string().uuid("Vehicle is required."),
+    quotationDate: z
+      .string()
+      .trim()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Quotation date is required."),
     natureOfRepair: z.string().trim(),
     inspectionNotes: z.string().trim(),
     status: z.enum(["draft", "pending_approval"]),
@@ -77,6 +81,7 @@ export function parseQuotationFormData(formData: FormData): QuotationFormValues 
     quotationId: readString(formData, "quotationId") || undefined,
     customerId: readString(formData, "customerId"),
     vehicleId: readString(formData, "vehicleId"),
+    quotationDate: readString(formData, "quotationDate"),
     natureOfRepair: readString(formData, "natureOfRepair"),
     inspectionNotes: readString(formData, "inspectionNotes"),
     status: readString(formData, "status") as QuotationFormValues["status"],

@@ -624,6 +624,7 @@ export function QuotationCreateFlow({
         >
           <input type="hidden" name="customerId" value={values.customerId} />
           <input type="hidden" name="vehicleId" value={values.vehicleId} />
+          <input type="hidden" name="quotationDate" value={values.quotationDate} />
           <input
             type="hidden"
             name="natureOfRepair"
@@ -690,6 +691,23 @@ export function QuotationCreateFlow({
                       <FieldError
                         errors={quotationState.fieldErrors}
                         name="inspectionNotes"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="quotationDate" required>
+                        Quotation date
+                      </Label>
+                      <Input
+                        id="quotationDate"
+                        type="date"
+                        value={values.quotationDate}
+                        onChange={(event) =>
+                          updateFormValue('quotationDate', event.target.value)
+                        }
+                      />
+                      <FieldError
+                        errors={quotationState.fieldErrors}
+                        name="quotationDate"
                       />
                     </div>
                     <div className="space-y-2">
@@ -1106,6 +1124,23 @@ export function QuotationCreateFlow({
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="reviewQuotationDate" required>
+                        Quotation date
+                      </Label>
+                      <Input
+                        id="reviewQuotationDate"
+                        type="date"
+                        value={values.quotationDate}
+                        onChange={(event) =>
+                          updateFormValue('quotationDate', event.target.value)
+                        }
+                      />
+                      <FieldError
+                        errors={quotationState.fieldErrors}
+                        name="quotationDate"
+                      />
+                    </div>
                     <div className="space-y-2">
                       <Label htmlFor="reviewStatus" required>
                         Quotation status

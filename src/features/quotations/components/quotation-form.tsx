@@ -85,6 +85,7 @@ export function QuotationForm({
   const isRevise = mode === "revise";
   const [customerId, setCustomerId] = useState(initialValues.customerId);
   const [vehicleId, setVehicleId] = useState(initialValues.vehicleId);
+  const [quotationDate, setQuotationDate] = useState(initialValues.quotationDate);
   const [status, setStatus] = useState(initialValues.status);
   const [natureOfRepair, setNatureOfRepair] = useState(initialValues.natureOfRepair);
   const [inspectionNotes, setInspectionNotes] = useState(initialValues.inspectionNotes);
@@ -344,8 +345,32 @@ export function QuotationForm({
                 )}
               </div>
 
-              {!isRevise ? (
-                <div className="grid gap-6 md:grid-cols-2">
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="quotationDate" required>
+                    Quotation date
+                  </Label>
+                  <Input
+                    id="quotationDate"
+                    name="quotationDate"
+                    type="date"
+                    value={quotationDate}
+                    onChange={(event) => setQuotationDate(event.target.value)}
+                    className={fieldControlClassName(state.fieldErrors, "quotationDate")}
+                    {...fieldAriaProps({
+                      errors: state.fieldErrors,
+                      name: "quotationDate",
+                      required: true,
+                      errorId: fieldErrorId("quotationDate"),
+                    })}
+                  />
+                  <FieldError
+                    errors={state.fieldErrors}
+                    name="quotationDate"
+                    id={fieldErrorId("quotationDate")}
+                  />
+                </div>
+                {!isRevise ? (
                   <div className="space-y-2">
                     <Label htmlFor="status" required>
                       Quotation status
@@ -368,8 +393,8 @@ export function QuotationForm({
                     </select>
                     <FieldError errors={state.fieldErrors} name="status" id={fieldErrorId("status")} />
                   </div>
-                </div>
-              ) : null}
+                ) : null}
+              </div>
 
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
