@@ -20,8 +20,11 @@ import {
 } from '@/components/ui/table';
 import { formatCurrency } from '@/lib/currency';
 import { listProducts } from '@/features/products/queries/product-queries';
+import { ProductCsvImportDialog } from '@/features/products/components/product-csv-import-dialog';
 import { ProductImage } from '@/features/products/components/product-image';
 import { paginateItems } from '@/lib/pagination';
+import { hasCapability } from '@/lib/auth/permissions';
+import { requireAuthenticatedStaff } from '@/lib/auth/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,8 +39,12 @@ export default async function ProductsPage({
   searchParams,
 }: ProductsPageProps) {
   const { search = '', page } = await searchParams;
-  const products = await listProducts(search);
+  const [viewer, products] = await Promise.all([
+    requireAuthenticatedStaff(),
+    listProducts(search),
+  ]);
   const pagination = paginateItems(products, page);
+  const canWriteProducts = hasCapability(viewer.role, 'products:write');
 
   return (
     <div className="space-y-6">
@@ -45,9 +52,14 @@ export default async function ProductsPage({
         title="Products"
         description="Catalog records used by inventory, job orders, and POS."
         actions={
-          <Button asChild>
-            <Link href="/products/new">New product</Link>
-          </Button>
+          canWriteProducts ? (
+            <>
+              <ProductCsvImportDialog />
+              <Button asChild>
+                <Link href="/products/new">New product</Link>
+              </Button>
+            </>
+          ) : null
         }
       />
 
